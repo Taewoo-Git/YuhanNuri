@@ -2,18 +2,17 @@ const port = 3000;
 
 const express = require('express');
 const app = express();
-
+const dotenv=require('dotenv');
 const cheerio = require('cheerio-httpcli');
-
+dotenv.config(); 
 const server = app.listen(port, () => {
     console.log('Listening on port ' + port + '\n');
 });
 
 app.use(express.static(__dirname + '/public'));
 
-const bodyParser = require('body-parser');
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended : false}));
+app.use(express.json());
+app.use(express.urlencoded({extended : false}));
 
 var database = require(__dirname + '/public/res/js/mariadb_config.js')();
 var connection = database.init();
@@ -33,7 +32,7 @@ app.post('/', function(req, res) {
 
 	cheerio.fetch(url, param, function(error, $, response) {
 		if(error) {
-			console.log(err);
+			console.log(error);
 			return;
 		}
 		else {
@@ -60,7 +59,7 @@ app.post('/', function(req, res) {
 						stuHomeNum: tempInfo[4],
 						stuPhoneNum: tempInfo[5],
 						stuEmail: tempInfo[6],
-						stuAddr: tempInfo[7]
+						stuAddr: tempInfo[7],
 					}
 					
 					console.log(userInfo);

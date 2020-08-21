@@ -11,7 +11,10 @@
   "dependencies": {
     "cheerio-httpcli": "^0.8.1",
     "dotenv": "^8.2.0",
+    "ejs": "^3.1.5",
     "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "moment": "^2.27.0",
     "mysql2": "^2.1.0"
   },
   "devDependencies": {

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Chat</title>
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+		
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <style>
+            body,html{
+                height: 100%;
+                margin: 0;
+                background: #7F7FD5;
+                background: -webkit-linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5);
+                background: linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5);
+            }
+            .chat{
+                margin-top: auto;
+                margin-bottom: auto;
+            }
+            .card{
+                height: 500px;
+                border-radius: 15px !important;
+                background-color: rgba(0,0,0,0.4) !important;
+            }
+            .msg_card_body{
+                overflow-y: auto;
+            }
+            .card-header{
+                border-radius: 15px 15px 0 0 !important;
+                border-bottom: 0 !important;
+            }
+            .card-footer{
+                border-radius: 0 0 15px 15px !important;
+                border-top: 0 !important;
+            }
+            .container{
+                align-content: center;
+            }
+            .type_msg{
+                background-color: rgba(0,0,0,0.3) !important;
+                border:0 !important;
+                color:white !important;
+                height: 50px !important;
+                overflow-y: auto;
+				padding-bottom: 10px;
+            }
+            .type_msg:focus{
+                box-shadow:none !important;
+                outline:0px !important;
+            }
+            .attach_btn{
+                border-radius: 15px 0 0 15px !important;
+                background-color: rgba(0,0,0,0.3) !important;
+                border:0 !important;
+                color: white !important;
+                cursor: pointer;
+            }
+            .send_btn{
+                border-radius: 0 15px 15px 0 !important;
+                background-color: rgba(0,0,0,0.3) !important;
+                border:0 !important;
+                color: white !important;
+                cursor: pointer;
+            }
+            .room_info{
+                margin-top: auto;
+                margin-bottom: auto;
+                margin-left: 15px;
+            }
+            .room_info span{
+                font-size: 20px;
+                color: white;
+            }
+            .room_info p{
+                font-size: 10px;
+                color: rgba(255,255,255,0.6);
+            }
+            .msg_cotainer{
+                margin-top: auto;
+                margin-bottom: auto;
+                margin-left: 10px;
+                border-radius: 25px;
+                background-color: #82ccdd;
+                padding: 10px;
+                position: relative;
+				min-width: 70px;
+				text-align: center;
+            }
+            .msg_cotainer_send{
+                margin-top: auto;
+                margin-bottom: auto;
+                margin-right: 10px;
+                border-radius: 25px;
+                background-color: #78e08f;
+                padding: 10px;
+                position: relative;
+				min-width: 70px;
+				text-align: center;
+            }
+            .msg_time{
+                position: absolute;
+                left: 15px;
+                bottom: -15px;
+                color: rgba(255,255,255,0.5);
+                font-size: 10px;
+            }
+            .msg_time_send{
+                position: absolute;
+                right: 15px;
+                bottom: -15px;
+                color: rgba(255,255,255,0.5);
+                font-size: 10px;
+            }
+            .msg_name{
+                position: absolute;
+                left: 10px;
+                top: -23px;
+                color: rgb(255,255,255);
+                font-size: 15px;
+                font-weight: bold;
+            }
+            .msg_name_send{
+                position: absolute;
+                right: 15px;
+                top: -23px;
+                color: rgb(255,255,255);
+                font-size: 15px;
+                font-weight: bold;
+            }
+            .msg_head{
+                position: relative;
+            }
+        </style>
+    </head>
+	<body>
+		<div class="container-fluid h-100">
+            <div class="row justify-content-center h-100">
+                <div class="col-md-8 col-xl-6 chat">
+                    <div class="card">
+                        <div class="card-header msg_head">
+							<div class="d-flex bd-highlight">
+								<div class="room_info">
+									<span>Chatting room</span>
+								</div>
+							</div>
+						</div>
+						<div id="bodyChat" class="card-body msg_card_body">
+						</div>
+						<div class="card-footer">
+							<div class="input-group">
+								<div class="input-group-append">
+									<span class="input-group-text attach_btn"><i class="fas fa-paperclip"></i></span>
+								</div>
+								<input type="text" id="msgForm" class="form-control type_msg" placeholder="Type your message...">
+								<div id="btnSend" class="input-group-append">
+									<span class="input-group-text send_btn"><i class="fas fa-location-arrow"></i></span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<script src="/socket.io/socket.io.js"></script>
+		<script>
+			$(function() {
+				let myname = "<%= username %>";
+				
+				let socket = io();
+				socket.emit("login", myname);
+				
+				$('#btnSend').click(function(e) {
+					socket.emit("msg", $("#msgForm").val());
+					$("#bodyChat").append(
+						"<div class='d-flex justify-content-end mb-5 mt-2'>" +
+							"<div class='msg_cotainer_send'>" +
+								"<span class='msg_name_send'>Me</span>" +
+								$('#msgForm').val() +
+								"<span class='msg_time_send'>" +
+									new Date().getHours() + ":" + ("00" + new Date().getMinutes()).slice(-2) +
+								"</span>" +
+							"</div>" +
+						"</div>"
+					);
+					$("#bodyChat").scrollTop($("#bodyChat")[0].scrollHeight);
+					$('#msgForm').val("");
+				});
+
+				$("#msgForm").keydown(function(key) {
+					if (key.keyCode == 13) {
+						socket.emit("msg", $("#msgForm").val());
+						$("#bodyChat").append(
+							"<div class='d-flex justify-content-end mb-5 mt-2'>" +
+								"<div class='msg_cotainer_send'>" +
+									"<span class='msg_name_send'>Me</span>" +
+									$('#msgForm').val() +
+									"<span class='msg_time_send'>" +
+										new Date().getHours() + ":" + ("00" + new Date().getMinutes()).slice(-2) +
+									"</span>" +
+								"</div>" +
+							"</div>"
+						);
+						$("#bodyChat").scrollTop($("#bodyChat")[0].scrollHeight);
+						$('#msgForm').val("");
+					}
+				});
+				
+				socket.on("msg", function(data) {
+					$("#bodyChat").append(
+						"<div class='d-flex justify-content-start mb-5 mt-2'>" +
+							"<div class='msg_cotainer'>" +
+								"<span class='msg_name'>" + data.name + "</span>" +
+								data.msg +
+								"<span class='msg_time'>" +
+									new Date().getHours() + ":" + ("00" + new Date().getMinutes()).slice(-2) +
+								"</span>" +
+							"</div>" +
+						"</div>"
+					);
+					$("#bodyChat").scrollTop($("#bodyChat")[0].scrollHeight);
+				});
+			});
+		</script>
+	</body>
+</html>

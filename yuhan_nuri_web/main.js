@@ -7,6 +7,7 @@ const session = require('express-session');
 const dotenv = require('dotenv');
 
 const userRouter = require('./routes/user');
+const chatRouter = require('./routes/chat');
 
 dotenv.config();
 
@@ -22,47 +23,30 @@ app.use(express.urlencoded({ extended: false }));
 app.use(session({ secret: process.env.COOKIE_SECRET, resave: false, saveUninitialized: false}));
 
 app.use('/user', userRouter);
+app.use('/chat', chatRouter);
 
 const server = app.listen(port, () => {
     console.log('Listening on port ' + port + '\n');
 });
 
-const io = require('socket.io')(server, {
-    cookie: false
-});
+const io = require(__dirname + '/public/res/js/socket.js')(server); // socket.js파일에 server를 미들웨어로 사용
 
 app.get('/', function (req, res) {
-	res.render('login');
+	let isInfo = req.session.userInfo; // 기존 세션의 존재 여부를 판단하여 view 처리.
+	if(isInfo) {
+		res.render('main', {
+			username: isInfo.stuName
+		});
+	}
+	else res.render('login');
 });
 
-app.get('/main', function (req, res) { //Mr.애매모호
+app.get('/main', function (req, res) {
     console.log('Session', req.session);
     res.render('main', {
-        username: req.session.userInfo.stuName,
+        username: req.session.userInfo.stuName
     });
 });
 
-app.get('/chat', function (req, res) {
-	res.render('chat', {
-        username: req.session.userInfo.stuName,
-    });
-});
 
-io.on('connection', function(socket) {
-	socket.on('login', function(username) {
-		socket.name = username;
-		console.info("User Chat Login :", socket.name);
-	});
-	
-	socket.on('msg', function(msg) {
-		let data = {
-			name: socket.name,
-			msg: msg
-		}
-		socket.broadcast.emit('msg', data);
-	});
-	
-	//console.info(socket);
-});
 
-//유저에 관련된 정보들은 routes/user.js에 넣어 놓았습니다!

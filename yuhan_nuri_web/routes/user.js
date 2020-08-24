@@ -41,7 +41,7 @@ router.post('/', function (req, res) { //POST /user
 		
 		req.session.userInfo = userInfo; // 사용자 정보를 세션으로 저장
 		res.render('main', {
-			username: userInfo.stuName,
+			username: userInfo.stuName
 		});
 	})
 	.catch(function(err) {

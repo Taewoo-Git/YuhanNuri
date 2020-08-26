@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 
 void main() {
   try {
@@ -47,6 +49,8 @@ class _DummyState extends State<Notification> {
 
 class _NotificationState extends State<Notification> {
   FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin;
+  final Completer<WebViewController> _controller =
+      Completer<WebViewController>(); //webviewController 정의
 
   void initState() {
     super.initState();
@@ -93,20 +97,72 @@ class _NotificationState extends State<Notification> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        body: Center(
-          child: SafeArea(
-            child: WebView(
-              initialUrl: 'https://yuhannuri.run.goorm.io',
-              javascriptMode: JavascriptMode.unrestricted,
+          body: Center(
+            child: SafeArea(
+              child: WebView(
+                initialUrl: 'https://yuhannuri.run.goorm.io',
+                javascriptMode: JavascriptMode.unrestricted,
+                onWebViewCreated: (WebViewController webviewController) {
+                  _controller.complete(webviewController); //webviewController 생성
+                },
+              ),
             ),
           ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: _showNotification,
-          tooltip: 'Increment',
-          child: Icon(Icons.access_alarms),
-        ),
-      ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: _showNotification,
+            tooltip: 'Increment',
+            child: Icon(Icons.access_alarms),
+          ),
+          bottomNavigationBar: FutureBuilder<WebViewController>(
+            future: _controller.future,
+            builder: (BuildContext context,
+                AsyncSnapshot<WebViewController> controller) {
+              if (controller.hasData) {
+                return CurvedNavigationBar(
+                  backgroundColor: Colors.blueAccent,
+                  items: <Widget>[
+                    Icon(Icons.add, size: 25),
+                    Icon(Icons.list, size: 25),
+                    Icon(Icons.person, size: 25),
+                    Icon(Icons.chat_bubble, size: 25),
+                  ],
+                  animationDuration:
+                      const Duration(milliseconds: 300), //trainsition 설정
+                  onTap: (index) {
+                    switch (index) { //icon의 순서에 따라 index에 해당하는 url을 요청
+                      case 0:
+                        controller.data
+                            .loadUrl('https://yuhannuri.run.goorm.io');
+                        break;
+                      case 1:
+                        controller.data.loadUrl('https://youtube.com');
+                        break;
+                      default:
+                        break;
+                    }
+                  },
+                  animationCurve: Curves.easeOut, //transition-animation 설정
+                  height: 55.0, //높이
+                );
+              }
+              return CurvedNavigationBar( //가지고 있는 데이터가 없을 경우 네비게이션 바를 그대로 줌
+                backgroundColor: Colors.blueAccent,
+                items: <Widget>[
+                  Icon(Icons.add, size: 25),
+                  Icon(Icons.list, size: 25),
+                  Icon(Icons.person, size: 25),
+                  Icon(Icons.chat_bubble, size: 25),
+                ],
+                animationDuration:
+                    const Duration(milliseconds: 300), //trainsition 설정
+                onTap: (index) {
+                  print(index);
+                },
+                animationCurve: Curves.easeOut, //transition-animation 설정
+                height: 55.0, //높이
+              );
+            },
+          )),
     );
   }
 }

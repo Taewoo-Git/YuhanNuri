@@ -96,6 +96,7 @@ class _NotificationState extends State<Notification> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
           body: Center(
             child: SafeArea(

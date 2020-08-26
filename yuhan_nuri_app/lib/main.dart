@@ -27,7 +27,6 @@ class MyApp extends StatelessWidget {
 
 class Notification extends StatefulWidget {
   Notification({Key key, this.title}) : super(key: key);
-
   final String title;
 
   @override
@@ -94,13 +93,10 @@ class _NotificationState extends State<Notification> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-        ),
         body: Center(
           child: SafeArea(
             child: WebView(
-              initialUrl: 'http://yuhannuri.run.goorm.io',
+              initialUrl: 'https://yuhannuri.run.goorm.io',
               javascriptMode: JavascriptMode.unrestricted,
             ),
           ),

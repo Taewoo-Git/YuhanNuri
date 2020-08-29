@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 
 void main() {
   try {
@@ -104,7 +105,16 @@ class _NotificationState extends State<Notification> {
                 initialUrl: 'https://yuhannuri.run.goorm.io',
                 javascriptMode: JavascriptMode.unrestricted,
                 onWebViewCreated: (WebViewController webviewController) {
-                  _controller.complete(webviewController); //webviewController 생성
+                  _controller
+                      .complete(webviewController); //webviewController 생성
+                  KeyboardVisibility.onChange.listen((bool visible) async {
+                    if (visible) {
+                      int viewHeight = int.parse(
+                          await webviewController.evaluateJavascript(
+                              "parseInt(document.activeElement.getBoundingClientRect().y)"));
+                      webviewController.scrollTo(0, viewHeight);
+                    }
+                  });
                 },
               ),
             ),
@@ -130,7 +140,8 @@ class _NotificationState extends State<Notification> {
                   animationDuration:
                       const Duration(milliseconds: 300), //trainsition 설정
                   onTap: (index) {
-                    switch (index) { //icon의 순서에 따라 index에 해당하는 url을 요청
+                    switch (index) {
+                      //icon의 순서에 따라 index에 해당하는 url을 요청
                       case 0:
                         controller.data
                             .loadUrl('https://yuhannuri.run.goorm.io');
@@ -146,7 +157,8 @@ class _NotificationState extends State<Notification> {
                   height: 55.0, //높이
                 );
               }
-              return CurvedNavigationBar( //가지고 있는 데이터가 없을 경우 네비게이션 바를 그대로 줌
+              return CurvedNavigationBar(
+                //가지고 있는 데이터가 없을 경우 네비게이션 바를 그대로 줌
                 backgroundColor: Colors.blueAccent,
                 items: <Widget>[
                   Icon(Icons.add, size: 25),

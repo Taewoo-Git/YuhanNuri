@@ -2,16 +2,19 @@ const express = require('express');
 const router = express.Router();
 
 const cheerio = require('cheerio-httpcli');
-const moment = require('moment');
 
 const db = require('../public/res/js/database.js')();
 const connection = db.init();
-
 db.open(connection);
+
+const moment = require('moment');
+require('moment-timezone'); 
+moment.tz.setDefault("Asia/Seoul");
 
 router.post('/', function (req, res) { //POST /user
     const userId = req.body.userId; // 사용자 아이디
     const password = req.body.password; // 사용자 패스워드
+	const autoLogin = req.body.autoLogin; // 자동 로그인 여부
 	
     let tempInfo = []; // 임시 배열
 	let userInfo = null; // 사용자 정보
@@ -36,16 +39,24 @@ router.post('/', function (req, res) { //POST /user
 			stuMajor: tempInfo[3],
 			stuAddr: tempInfo[7],
 			stuEmail: tempInfo[6],
-			stuPhoneNum: tempInfo[5],
+			stuPhoneNum: tempInfo[5]
 		};
 		
+		if(autoLogin) {
+			let expiryDate = new Date(Date.now() + 10 * 60 * 1000); // 만료기간 10분, 60 * 60 * 1000 * 24 * 30 == 30일
+			
+			res.cookie('AutoLogin', userInfo.stuCode, { // 자동 로그인 체크시 암호화된 학번으로 쿠키 생성
+				expires: expiryDate,
+				httpOnly: true,
+				signed: true
+			});
+		}
+		
 		req.session.userInfo = userInfo; // 사용자 정보를 세션으로 저장
-		res.render('main', {
-			username: userInfo.stuName
-		});
+		res.redirect('/');
 	})
 	.catch(function(err) {
-		//console.error(err);
+		console.error(err);
 		res.redirect('/');
 	})
 	.finally(function() {
@@ -71,9 +82,32 @@ router.post('/', function (req, res) { //POST /user
 	});
 });
 
-router.get('/logout', function (req, res) { //GET /user/logout
+router.get('/logout', function(req, res) { //GET /user/logout
     req.session.destroy();
+	res.clearCookie('AutoLoginUser');
     res.redirect('/');
+});
+
+router.get('/auto', function(req, res) { //GET /user/auto
+	// 자동 로그인 쿠키가 살아있을 경우 해당 경로로 넘어와 세션 생성 후 main으로 이동
+	let userInfoSelect = 'SELECT * FROM User WHERE stuno = ?';
+	connection.execute(userInfoSelect, [req.signedCookies.AutoLogin], (err, result) => {
+		if(err) console.error(err);
+		else {
+			let userInfo = {
+				stuCode: result[0].stuno,
+				stuName: result[0].stuname,
+				stuBirth: result[0].birth,
+				stuMajor: result[0].major,
+				stuAddr: result[0].addr,
+				stuEmail: result[0].email,
+				stuPhoneNum: result[0].phonenum
+			};
+
+			req.session.userInfo = userInfo;
+			res.redirect('/');
+		}
+	});
 });
 
 router.get('/reservation', function (req, res) { //GET /user/reservation
@@ -81,11 +115,12 @@ router.get('/reservation', function (req, res) { //GET /user/reservation
 });
 
 router.post('/reservation', function (req, res) { //POST /user/reservation
-    let reservation_date = req.body.reservation_data;
-    let reservation_time = req.body.reservation_time;
+    let reservation_date = req.body.reserv_date;
+    let reservation_time = req.body.reserv_time;
 
-	let inputReservationInfo_sql = "INSERT INTO Reservation VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	let inputReservationInfo_sql = "INSERT INTO Reservation VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
 	let nowMoment = moment().format("YYYYMMDD");
+	
 	
 	let getMaxPkSql = "SELECT MAX(no) as RESULT FROM Reservation WHERE no LIKE ?";
 		
@@ -95,6 +130,7 @@ router.post('/reservation', function (req, res) { //POST /user/reservation
 		
 		if(err) console.error(err);
 		else rows[0].RESULT !== null ? rowcount = 1 : rowcount = 0;
+		console.info(rowcount);
 		
 		if(!rowcount) newSerialNum = nowMoment.concat("0001");
 		else {
@@ -110,13 +146,13 @@ router.post('/reservation', function (req, res) { //POST /user/reservation
 			newSerialNum = nowMoment.concat(num);
 		}
 	
+		console.info(newSerialNum);
 		connection.execute(inputReservationInfo_sql, [
 			newSerialNum, 
 			"11111",
 			req.session.userInfo.stuCode,
 			"emp100001", 
 			reservation_date,
-			reservation_time,
 			reservation_time,
 			0,
 			0
@@ -128,5 +164,40 @@ router.post('/reservation', function (req, res) { //POST /user/reservation
 	
 	res.redirect('/main');
 });
+
+router.post("/postTest", function(req, res){ //POST /user/postTest
+	// 예약 승인이 되었을때의 기준 (status = 1)
+	let getReservationByDateSql = "SELECT starttime, COUNT(starttime) AS CNT FROM Reservation WHERE date = ? AND status = 1 GROUP BY starttime";
+	console.info(req.body.sendAjax);
+	
+	connection.execute(getReservationByDateSql, [req.body.sendAjax], (error, rows, fields) => {
+  		if (error) throw error;
+		
+		console.info(rows);
+		res.json({ok: true, rtntime: rows});
+	});
+});
+
+router.get("/admin",function(req,res){ //GET /user/admin
+	const getReservationData = "SELECT * FROM Reservation WHERE status = 0";
+	
+	connection.execute(getReservationData, (err,rows) => {
+		if(err) console.error(err);
+		
+		console.info('admionrows', rows);
+		res.render('admin', {getReservation: rows});
+	});
+});
+
+router.post("/accessReservation", function(req,res) {
+	const getAccessReservationData = "UPDATE Reservation SET status=1 WHERE no = ?";
+	let data = req.body.sendAjax;
+	
+	connection.execute(getAccessReservationData, [data], (err,rows) => {
+		if(err) console.error(err);
+		
+		res.json({getReservation: rows});
+	});
+})
 
 module.exports = router;

@@ -46,4 +46,5 @@
             android:value="2" />
         <receiver android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
     </application>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 </manifest>

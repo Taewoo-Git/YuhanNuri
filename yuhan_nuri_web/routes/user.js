@@ -11,6 +11,9 @@ const moment = require('moment');
 require('moment-timezone'); 
 moment.tz.setDefault("Asia/Seoul");
 
+
+
+	
 router.post('/', function (req, res) { //POST /user
     const userId = req.body.userId; // 사용자 아이디
     const password = req.body.password; // 사용자 패스워드
@@ -21,6 +24,7 @@ router.post('/', function (req, res) { //POST /user
 
     let url = 'http://portal.yuhan.ac.kr/user/loginProcess.face?userId=' + userId + '&password=' + password; // 로그인 세션 URL
 	
+
 	cheerio.set('browser', 'chrome'); // 브라우저 설정
 	cheerio.fetch(url)
 	.then(function(result) {
@@ -31,7 +35,7 @@ router.post('/', function (req, res) { //POST /user
 		result.$('td').each(function(index, element) {
 			tempInfo.push(result.$(this).text().trim()); // 사용자 정보 임시 저장
 		});
-		
+
 		userInfo = {
 			stuCode: tempInfo[0],
 			stuName: tempInfo[1],
@@ -41,17 +45,17 @@ router.post('/', function (req, res) { //POST /user
 			stuEmail: tempInfo[6],
 			stuPhoneNum: tempInfo[5]
 		};
-		
+
 		if(autoLogin) {
 			let expiryDate = new Date(Date.now() + 10 * 60 * 1000); // 만료기간 10분, 60 * 60 * 1000 * 24 * 30 == 30일
-			
+
 			res.cookie('AutoLogin', userInfo.stuCode, { // 자동 로그인 체크시 암호화된 학번으로 쿠키 생성
 				expires: expiryDate,
 				httpOnly: true,
 				signed: true
 			});
 		}
-		
+
 		req.session.userInfo = userInfo; // 사용자 정보를 세션으로 저장
 		res.redirect('/');
 	})
@@ -76,21 +80,24 @@ router.post('/', function (req, res) { //POST /user
 				}
 			});
 		}
-		
+
 		cheerio.reset(); // cheerio 초기화 → 로그인 세션 중복 해결
 		console.info(req.session);
 	});
+	
+
+	
 });
 
 router.get('/logout', function(req, res) { //GET /user/logout
     req.session.destroy();
-	res.clearCookie('AutoLoginUser');
+	res.clearCookie('AutoLogin');
     res.redirect('/');
 });
 
 router.get('/auto', function(req, res) { //GET /user/auto
 	// 자동 로그인 쿠키가 살아있을 경우 해당 경로로 넘어와 세션 생성 후 main으로 이동
-	let userInfoSelect = 'SELECT * FROM User WHERE stuno = ?';
+	let userInfoSelect = 'SELECT * FROM User WHERE stuno = ?';	
 	connection.execute(userInfoSelect, [req.signedCookies.AutoLogin], (err, result) => {
 		if(err) console.error(err);
 		else {
@@ -165,20 +172,18 @@ router.post('/reservation', function (req, res) { //POST /user/reservation
 	res.redirect('/main');
 });
 
-router.post("/postTest", function(req, res){ //POST /user/postTest
+router.post("/getPossibleTime", function(req, res){ //POST /user/postTest
 	// 예약 승인이 되었을때의 기준 (status = 1)
 	let getReservationByDateSql = "SELECT starttime, COUNT(starttime) AS CNT FROM Reservation WHERE date = ? AND status = 1 GROUP BY starttime";
 	console.info(req.body.sendAjax);
 	
 	connection.execute(getReservationByDateSql, [req.body.sendAjax], (error, rows, fields) => {
   		if (error) throw error;
-		
-		console.info(rows);
-		res.json({ok: true, rtntime: rows});
+		else res.json({ok: true, rtntime: rows});
 	});
 });
 
-router.get("/admin",function(req,res){ //GET /user/admin
+router.get("/admin",function(req,res){ //GET /user/admin //나중에 분리 할 께요! - 성준
 	const getReservationData = "SELECT * FROM Reservation WHERE status = 0";
 	
 	connection.execute(getReservationData, (err,rows) => {
@@ -189,12 +194,15 @@ router.get("/admin",function(req,res){ //GET /user/admin
 	});
 });
 
-router.post("/accessReservation", function(req,res) {
+router.post("/accessReservation", function(req,res,next) {
 	const getAccessReservationData = "UPDATE Reservation SET status=1 WHERE no = ?";
 	let data = req.body.sendAjax;
 	
 	connection.execute(getAccessReservationData, [data], (err,rows) => {
-		if(err) console.error(err);
+		if(err) {
+			console.error(err);
+			next(err);
+		}
 		
 		res.json({getReservation: rows});
 	});

@@ -1,22 +1,27 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:http/http.dart' as http;
+import 'package:toast/toast.dart';
+
+String userID = "";
+String userPassword = "";
+bool isAutoLogin = false;
+
+String myCookie = "";
 
 void main() {
   try {
-    if (Platform.isAndroid || Platform.isIOS) runApp(MyApp2());
+    if (Platform.isAndroid || Platform.isIOS) runApp(LoginApp());
   } catch (e) {
     runApp(DummyApp());
   }
 }
-
-String userID = '';
-String userPassword = '';
-bool autoLogin = false;
 
 class DummyApp extends StatelessWidget {
   @override
@@ -25,7 +30,7 @@ class DummyApp extends StatelessWidget {
   }
 }
 
-class MyApp extends StatelessWidget {
+class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Notification(title: 'YuhanNuri');
@@ -54,8 +59,9 @@ class _DummyState extends State<Notification> {
 
 class _NotificationState extends State<Notification> {
   FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin;
+  WebViewController _webviewController; //webviewController 정의
   final Completer<WebViewController> _controller =
-      Completer<WebViewController>(); //webviewController 정의
+      Completer<WebViewController>();
 
   void initState() {
     super.initState();
@@ -109,14 +115,22 @@ class _NotificationState extends State<Notification> {
                 initialUrl: 'https://yuhannuri.run.goorm.io',
                 javascriptMode: JavascriptMode.unrestricted,
                 onWebViewCreated: (WebViewController webviewController) {
+                  _webviewController = webviewController;
                   _controller
-                      .complete(webviewController); //webviewController 생성
+                      .complete(_webviewController); //webviewController 생성
+
+                  print("CCCCCCCCCCCCCookie : " + myCookie);
+                },
+                onPageFinished: (_) {
+                  _webviewController
+                      .evaluateJavascript('document.cookie = $myCookie;');
+
                   KeyboardVisibility.onChange.listen((bool visible) async {
                     if (visible) {
                       int viewHeight = int.parse(
-                          await webviewController.evaluateJavascript(
+                          await _webviewController.evaluateJavascript(
                               "parseInt(document.activeElement.getBoundingClientRect().y)"));
-                      webviewController.scrollTo(0, viewHeight);
+                      _webviewController.scrollTo(0, viewHeight);
                     }
                   });
                 },
@@ -151,7 +165,7 @@ class _NotificationState extends State<Notification> {
                             .loadUrl('https://yuhannuri.run.goorm.io');
                         break;
                       case 1:
-                        controller.data.loadUrl('https://youtube.com');
+                        controller.data.loadUrl('https://google.com');
                         break;
                       default:
                         break;
@@ -185,24 +199,25 @@ class _NotificationState extends State<Notification> {
 }
 
 //Flutter Login Layout Class
-class MyApp2 extends StatelessWidget {
+class LoginApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'YuhanNuri',
-      home: MyHomePage(title: 'Login Page'),
+      home: Login(title: 'YuhanNuri Login'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({this.title});
+class Login extends StatefulWidget {
+  Login({this.title});
   final String title;
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _LoginState createState() => _LoginState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _LoginState extends State<Login> {
   Widget _buildLayoutContainer(BuildContext context) {
     return SingleChildScrollView(
       child: _buildFormWrapper(context),
@@ -217,7 +232,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _buildLoginLayout(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(top: 100, left: 20, right: 20), //상,좌,우 여백
+      padding: EdgeInsets.only(top: 150, left: 20, right: 20), //상, 좌, 우 여백
       child: Column(
         children: <Widget>[
           _userIDTextField(context),
@@ -230,7 +245,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           _buildSubmitButton(context),
           SizedBox(
-            height: 20,
+            height: 10,
           ),
           _autoLoginCheckBox(context),
         ],
@@ -242,7 +257,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return TextFormField(
         onChanged: (value) => userID = value,
         decoration: InputDecoration(
-          labelText: 'ID',
+          labelText: 'Enter ID',
           filled: true,
           fillColor: Colors.white,
         ));
@@ -253,7 +268,7 @@ class _MyHomePageState extends State<MyHomePage> {
       onChanged: (value) => userPassword = value,
       obscureText: true, //Text 암호화 표시
       decoration: InputDecoration(
-        labelText: 'Password',
+        labelText: 'Enter Password',
         filled: true,
         fillColor: Colors.white,
       ),
@@ -262,13 +277,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _autoLoginCheckBox(BuildContext context) {
     return CheckboxListTile(
+      controlAffinity: ListTileControlAffinity.leading,
       title: Text('자동 로그인'),
-      value: autoLogin,
+      value: isAutoLogin,
       onChanged: (bool newValue) {
         setState(() {
-          autoLogin = newValue;
+          isAutoLogin = newValue;
         });
       },
+      contentPadding: const EdgeInsets.only(left: 0.00),
     );
   }
 
@@ -281,12 +298,42 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         onPressed: () {
           //로그인 버튼 눌렀을 때 실행 될 내용
-          print(
-              'userID : $userID , userPassword : $userPassword , autoLogin : $autoLogin');
-          runApp(MyApp()); //Webview Class 실행
+          portalLogin(userID, userPassword, isAutoLogin);
         },
       ),
     );
+  }
+
+  portalLogin(String userID, String userPassword, bool isAutoLogin) async {
+    print(
+        'userID: $userID, userPassword: $userPassword, autoLogin: $isAutoLogin');
+
+    http.Response res = await http.Client().post(
+      Uri.parse('https://yuhannuri.run.goorm.io/user/mobile'),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'Accept': 'application/json; charset=utf-8',
+      },
+      body: {
+        'userId': userID.trim(),
+        'password': userPassword.trim(),
+        'isAutoLogin': isAutoLogin.toString(),
+      },
+    );
+
+    if (res.statusCode == 200) {
+      Map<String, dynamic> stuInfo = jsonDecode(res.body);
+      if (stuInfo == null) {
+        Toast.show('아이디와 패스워드를 확인하세요.', context,
+            duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
+      } else {
+        print(stuInfo);
+        myCookie = res.headers['set-cookie'];
+        runApp(MainApp());
+      }
+    } else {
+      throw Exception();
+    }
   }
 
   @override

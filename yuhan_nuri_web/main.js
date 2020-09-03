@@ -36,14 +36,14 @@ const io = require(__dirname + '/public/res/js/socket.js')(server); // socket.js
 
 app.get('/', function (req, res) {
 	let isInfo = req.session.userInfo; // 기존 세션의 존재 여부를 판단하여 view 처리.
-	console.info(req.signedCookies.AutoLogin);
+	console.info("isAutoLogin: " + req.signedCookies.isAutoLogin);
 	
 	if(isInfo) {
 		res.render('main', {
 			username: isInfo.stuName
 		});
 	}
-	else if(req.signedCookies.AutoLogin != undefined) res.redirect('/user/auto');
+	else if(req.signedCookies.isAutoLogin != undefined) res.redirect('/user/auto');
 	else res.render('login');
 });
 

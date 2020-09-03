@@ -8,11 +8,15 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 
 void main() {
   try {
-    if (Platform.isAndroid || Platform.isIOS) runApp(MyApp());
+    if (Platform.isAndroid || Platform.isIOS) runApp(MyApp2());
   } catch (e) {
     runApp(DummyApp());
   }
 }
+
+String userID = '';
+String userPassword = '';
+bool autoLogin = false;
 
 class DummyApp extends StatelessWidget {
   @override
@@ -176,6 +180,119 @@ class _NotificationState extends State<Notification> {
               );
             },
           )),
+    );
+  }
+}
+
+//Flutter Login Layout Class
+class MyApp2 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'YuhanNuri',
+      home: MyHomePage(title: 'Login Page'),
+    );
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  MyHomePage({this.title});
+  final String title;
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  Widget _buildLayoutContainer(BuildContext context) {
+    return SingleChildScrollView(
+      child: _buildFormWrapper(context),
+    );
+  }
+
+  Widget _buildFormWrapper(BuildContext context) {
+    return Form(
+      child: _buildLoginLayout(context),
+    );
+  }
+
+  Widget _buildLoginLayout(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.only(top: 100, left: 20, right: 20), //상,좌,우 여백
+      child: Column(
+        children: <Widget>[
+          _userIDTextField(context),
+          SizedBox(
+            height: 20,
+          ), // 위젯들 사이의 여백
+          _userPasswordTextField(context),
+          SizedBox(
+            height: 20,
+          ),
+          _buildSubmitButton(context),
+          SizedBox(
+            height: 20,
+          ),
+          _autoLoginCheckBox(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _userIDTextField(BuildContext context) {
+    return TextFormField(
+        onChanged: (value) => userID = value,
+        decoration: InputDecoration(
+          labelText: 'ID',
+          filled: true,
+          fillColor: Colors.white,
+        ));
+  }
+
+  Widget _userPasswordTextField(BuildContext context) {
+    return TextFormField(
+      onChanged: (value) => userPassword = value,
+      obscureText: true, //Text 암호화 표시
+      decoration: InputDecoration(
+        labelText: 'Password',
+        filled: true,
+        fillColor: Colors.white,
+      ),
+    );
+  }
+
+  Widget _autoLoginCheckBox(BuildContext context) {
+    return CheckboxListTile(
+      title: Text('자동 로그인'),
+      value: autoLogin,
+      onChanged: (bool newValue) {
+        setState(() {
+          autoLogin = newValue;
+        });
+      },
+    );
+  }
+
+  Widget _buildSubmitButton(BuildContext context) {
+    return ButtonTheme(
+      minWidth: double.infinity,
+      child: RaisedButton(
+        child: Text(
+          "Login",
+        ),
+        onPressed: () {
+          //로그인 버튼 눌렀을 때 실행 될 내용
+          print(
+              'userID : $userID , userPassword : $userPassword , autoLogin : $autoLogin');
+          runApp(MyApp()); //Webview Class 실행
+        },
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _buildLayoutContainer(context),
     );
   }
 }

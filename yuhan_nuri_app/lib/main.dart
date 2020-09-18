@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
@@ -14,6 +15,11 @@ String userPassword = "";
 bool isAutoLogin = false;
 
 String myCookie = "";
+
+SharedPreferences _prefs;
+String saveCookie = "";
+String saveTime = "";
+bool isSaveAutoLogin = false;
 
 void main() {
   try {
@@ -230,6 +236,11 @@ class _LoginState extends State<Login> {
     );
   }
 
+  void initState() {
+    super.initState();
+    autoLogin();
+  }
+
   Widget _buildLoginLayout(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(top: 150, left: 20, right: 20), //상, 좌, 우 여백
@@ -329,6 +340,11 @@ class _LoginState extends State<Login> {
       } else {
         print(stuInfo);
         myCookie = res.headers['set-cookie'];
+        if (isAutoLogin && !isSaveAutoLogin) {
+          setTime();
+          setisSaveAutoLogin();
+        }
+        setCookie(myCookie);
         runApp(MainApp());
       }
     } else {
@@ -341,5 +357,57 @@ class _LoginState extends State<Login> {
     return Scaffold(
       body: _buildLayoutContainer(context),
     );
+  }
+}
+
+void setCookie(String myCookie) async {
+  _prefs = await SharedPreferences.getInstance();
+  await _prefs.setString('saveCookie', myCookie);
+}
+
+Future<String> getCookie() async {
+  _prefs = await SharedPreferences.getInstance();
+  return _prefs.getString('saveCookie') ?? "No Cookie";
+}
+
+void setTime() async {
+  _prefs = await SharedPreferences.getInstance();
+  await _prefs.setString(
+      'saveTime', DateTime.now().add(Duration(days: 30)).toIso8601String());
+}
+
+Future<String> getTime() async {
+  _prefs = await SharedPreferences.getInstance();
+  return _prefs.getString('saveTime') ?? "No Date";
+}
+
+void setisSaveAutoLogin() async {
+  _prefs = await SharedPreferences.getInstance();
+  await _prefs.setBool('saveisAutoLogin', true);
+}
+
+Future<bool> getisSaveAutoLogin() async {
+  _prefs = await SharedPreferences.getInstance();
+  return _prefs.getBool('saveisAutoLogin') ?? false;
+}
+
+void autoLogin() async {
+  saveCookie = await getCookie();
+  saveTime = await getTime();
+  isSaveAutoLogin = await getisSaveAutoLogin();
+  if (saveTime != "No Date") {
+    DateTime dateTime = DateTime.parse(saveTime);
+    Duration timeDifference = DateTime.now().difference(dateTime);
+    print(timeDifference);
+    if (timeDifference.inSeconds >= 0) {
+      // 자동로그인 처음 시작한지 30일 지났을 때 관련 데이터 삭제
+      _prefs.clear();
+      // 이후에 처리할 내용
+      print("직접 로그인 Case 1 한달 기간 만료");
+    } else {
+      print("자동 로그인");
+    }
+  } else {
+    print("직접 로그인 Case 2 isSaveAutoLogin false 값");
   }
 }

@@ -38,6 +38,8 @@ dev_dependencies:
   flutter_keyboard_visibility: ^3.2.2
   http: ^0.12.2
   toast: ^0.1.5
+  splashscreen: ^1.2.0
+  introduction_screen: ^1.0.7
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

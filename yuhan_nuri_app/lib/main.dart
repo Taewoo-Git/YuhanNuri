@@ -1,20 +1,21 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:webview_flutter/webview_flutter.dart';
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-import 'package:http/http.dart' as http;
-import 'package:toast/toast.dart';
+import "dart:async";
+import "dart:convert";
+import "dart:io";
+import "package:flutter/material.dart";
+import "package:flutter_local_notifications/flutter_local_notifications.dart";
+import "package:shared_preferences/shared_preferences.dart";
+import "package:webview_flutter/webview_flutter.dart";
+import "package:curved_navigation_bar/curved_navigation_bar.dart";
+import "package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart";
+import "package:http/http.dart" as http;
+import "package:toast/toast.dart";
 
 String userID = "";
 String userPassword = "";
 bool isAutoLogin = false;
 
 String myCookie = "";
+Map<String, String> myHeader;
 
 SharedPreferences _prefs;
 String saveCookie = "";
@@ -32,14 +33,14 @@ void main() {
 class DummyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: Scaffold(body: Text('')));
+    return MaterialApp(home: Scaffold(body: Text("")));
   }
 }
 
 class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Notification(title: 'YuhanNuri');
+    return Notification(title: "YuhanNuri");
   }
 }
 
@@ -73,7 +74,7 @@ class _NotificationState extends State<Notification> {
     super.initState();
 
     var initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher'); //안드로이드 초기 세팅값
+        AndroidInitializationSettings("@mipmap/ic_launcher"); //안드로이드 초기 세팅값
     var initializationSettingsIOS = IOSInitializationSettings(
       requestSoundPermission: false,
       requestBadgePermission: false,
@@ -91,7 +92,7 @@ class _NotificationState extends State<Notification> {
   Future _showNotification() async {
     //Detail에는 icon이나 push 알람이 일어났을 때의 알람소리등의 디테일 부분을 설정
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-        '앱 아이디?', '앱 이름', '앱의 주소',
+        "앱 아이디?", "앱 이름", "앱의 주소",
         importance: Importance.Max, priority: Priority.High);
 
     var iosPlatformChannelSpecifics = IOSNotificationDetails();
@@ -102,11 +103,11 @@ class _NotificationState extends State<Notification> {
 
     await _flutterLocalNotificationsPlugin.schedule(
       0, //해당 notification의 id를 나타내며 이 id값을 통해 Notication을 취소한다.
-      'Notification 제목',
-      'Notification 내용',
+      "Notification 제목",
+      "Notification 내용",
       scheduledNotificationDateTime,
       platformChannelSpecifics,
-      payload: 'Notification Test',
+      payload: "Notification Test",
     );
   }
 
@@ -118,19 +119,19 @@ class _NotificationState extends State<Notification> {
           body: Center(
             child: SafeArea(
               child: WebView(
-                initialUrl: 'https://yuhannuri.run.goorm.io',
+                //initialUrl: "https://yuhannuri.run.goorm.io",
                 javascriptMode: JavascriptMode.unrestricted,
                 onWebViewCreated: (WebViewController webviewController) {
+                  myHeader = {"Cookie": myCookie};
                   _webviewController = webviewController;
+                  CookieManager cookieManager = CookieManager();
+                  cookieManager.clearCookies();
+                  _webviewController.loadUrl("https://yuhannuri.run.goorm.io",
+                      headers: myHeader);
                   _controller
                       .complete(_webviewController); //webviewController 생성
-
-                  print("CCCCCCCCCCCCCookie : " + myCookie);
                 },
                 onPageFinished: (_) {
-                  _webviewController
-                      .evaluateJavascript('document.cookie = $myCookie;');
-
                   KeyboardVisibility.onChange.listen((bool visible) async {
                     if (visible) {
                       int viewHeight = int.parse(
@@ -145,7 +146,7 @@ class _NotificationState extends State<Notification> {
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: _showNotification,
-            tooltip: 'Increment',
+            tooltip: "Increment",
             child: Icon(Icons.access_alarms),
           ),
           bottomNavigationBar: FutureBuilder<WebViewController>(
@@ -167,11 +168,12 @@ class _NotificationState extends State<Notification> {
                     switch (index) {
                       //icon의 순서에 따라 index에 해당하는 url을 요청
                       case 0:
-                        controller.data
-                            .loadUrl('https://yuhannuri.run.goorm.io');
+                        controller.data.loadUrl(
+                            "https://yuhannuri.run.goorm.io",
+                            headers: myHeader);
                         break;
                       case 1:
-                        controller.data.loadUrl('https://google.com');
+                        controller.data.loadUrl("https://google.com");
                         break;
                       default:
                         break;
@@ -210,8 +212,8 @@ class LoginApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'YuhanNuri',
-      home: Login(title: 'YuhanNuri Login'),
+      title: "YuhanNuri",
+      home: Login(title: "YuhanNuri Login"),
     );
   }
 }
@@ -268,7 +270,7 @@ class _LoginState extends State<Login> {
     return TextFormField(
         onChanged: (value) => userID = value,
         decoration: InputDecoration(
-          labelText: 'Enter ID',
+          labelText: "Enter ID",
           filled: true,
           fillColor: Colors.white,
         ));
@@ -279,7 +281,7 @@ class _LoginState extends State<Login> {
       onChanged: (value) => userPassword = value,
       obscureText: true, //Text 암호화 표시
       decoration: InputDecoration(
-        labelText: 'Enter Password',
+        labelText: "Enter Password",
         filled: true,
         fillColor: Colors.white,
       ),
@@ -289,7 +291,7 @@ class _LoginState extends State<Login> {
   Widget _autoLoginCheckBox(BuildContext context) {
     return CheckboxListTile(
       controlAffinity: ListTileControlAffinity.leading,
-      title: Text('자동 로그인'),
+      title: Text("자동 로그인"),
       value: isAutoLogin,
       onChanged: (bool newValue) {
         setState(() {
@@ -317,34 +319,34 @@ class _LoginState extends State<Login> {
 
   portalLogin(String userID, String userPassword, bool isAutoLogin) async {
     print(
-        'userID: $userID, userPassword: $userPassword, autoLogin: $isAutoLogin');
+        "userID: $userID, userPassword: $userPassword, autoLogin: $isAutoLogin");
 
     http.Response res = await http.Client().post(
-      Uri.parse('https://yuhannuri.run.goorm.io/user/mobile'),
+      Uri.parse("https://yuhannuri.run.goorm.io/user/mobile"),
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        'Accept': 'application/json; charset=utf-8',
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "Accept": "application/json; charset=utf-8",
       },
       body: {
-        'userId': userID.trim(),
-        'password': userPassword.trim(),
-        'isAutoLogin': isAutoLogin.toString(),
+        "userId": userID.trim(),
+        "password": userPassword.trim(),
+        "isAutoLogin": isAutoLogin.toString(),
       },
     );
 
     if (res.statusCode == 200) {
       Map<String, dynamic> stuInfo = jsonDecode(res.body);
       if (stuInfo == null) {
-        Toast.show('아이디와 패스워드를 확인하세요.', context,
+        Toast.show("아이디와 패스워드를 확인하세요.", context,
             duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
       } else {
-        print(stuInfo);
-        myCookie = res.headers['set-cookie'];
+        myCookie =
+            Cookie.fromSetCookieValue(res.headers["set-cookie"]).toString();
         if (isAutoLogin && !isSaveAutoLogin) {
+          setCookie(myCookie);
           setTime();
-          setisSaveAutoLogin();
+          setIsSaveAutoLogin();
         }
-        setCookie(myCookie);
         runApp(MainApp());
       }
     } else {
@@ -362,52 +364,48 @@ class _LoginState extends State<Login> {
 
 void setCookie(String myCookie) async {
   _prefs = await SharedPreferences.getInstance();
-  await _prefs.setString('saveCookie', myCookie);
+  await _prefs.setString("saveCookie", myCookie);
 }
 
 Future<String> getCookie() async {
   _prefs = await SharedPreferences.getInstance();
-  return _prefs.getString('saveCookie') ?? "No Cookie";
+  return _prefs.getString("saveCookie") ?? "No Cookie";
 }
 
 void setTime() async {
   _prefs = await SharedPreferences.getInstance();
   await _prefs.setString(
-      'saveTime', DateTime.now().add(Duration(days: 30)).toIso8601String());
+      "saveTime", DateTime.now().add(Duration(minutes: 1)).toIso8601String());
 }
 
 Future<String> getTime() async {
   _prefs = await SharedPreferences.getInstance();
-  return _prefs.getString('saveTime') ?? "No Date";
+  return _prefs.getString("saveTime") ?? "No Date";
 }
 
-void setisSaveAutoLogin() async {
+void setIsSaveAutoLogin() async {
   _prefs = await SharedPreferences.getInstance();
-  await _prefs.setBool('saveisAutoLogin', true);
+  await _prefs.setBool("saveisAutoLogin", true);
 }
 
-Future<bool> getisSaveAutoLogin() async {
+Future<bool> getIsSaveAutoLogin() async {
   _prefs = await SharedPreferences.getInstance();
-  return _prefs.getBool('saveisAutoLogin') ?? false;
+  return _prefs.getBool("saveisAutoLogin") ?? false;
 }
 
 void autoLogin() async {
   saveCookie = await getCookie();
   saveTime = await getTime();
-  isSaveAutoLogin = await getisSaveAutoLogin();
+  isSaveAutoLogin = await getIsSaveAutoLogin();
   if (saveTime != "No Date") {
     DateTime dateTime = DateTime.parse(saveTime);
     Duration timeDifference = DateTime.now().difference(dateTime);
-    print(timeDifference);
     if (timeDifference.inSeconds >= 0) {
-      // 자동로그인 처음 시작한지 30일 지났을 때 관련 데이터 삭제
+      //자동로그인 처음 시작한지 30일 지났을 때 관련 데이터 삭제
       _prefs.clear();
-      // 이후에 처리할 내용
-      print("직접 로그인 Case 1 한달 기간 만료");
     } else {
-      print("자동 로그인");
+      myCookie = saveCookie;
+      runApp(MainApp());
     }
-  } else {
-    print("직접 로그인 Case 2 isSaveAutoLogin false 값");
   }
 }

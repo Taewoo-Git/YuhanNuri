@@ -5,7 +5,7 @@ const cheerio = require('cheerio-httpcli');
 
 const db = require('../public/res/js/database.js')();
 const connection = db.init();
-db.open(connection);
+db.open(connection,'user');
 
 const moment = require('moment');
 require('moment-timezone'); 
@@ -37,7 +37,7 @@ router.post('/', function (req, res) { //POST /user
 				empname : adminInfo.empname
 			});
 			*/
-			res.redirect('/user/admin');
+			res.redirect('/admin');
 		}
 		else {
 			// 학생 계정일 경우 아래와 같이 정상 로그인 로직 수행 - 윤권
@@ -109,25 +109,17 @@ router.post('/mobile', function(req, res) { //POST /user/mobile
 				signed: true
 			});
 		}
-		/*else {
-			res.cookie('isMobileLogin', userInfo.stuCode, {
-				expires: expiryDate,
-				// httpOnly: true,
-				signed: true
-			});
-		}*/
 		res.json(userInfo);
 	}, function(error) {
 		res.json(null)
 		console.error(error);
 	});
-	console.info(req.signedCookies.isAutoLogin);
-	console.info(req.session);
 });
 
 router.get('/reservation', function (req, res) { //GET /user/reservation
     res.render('reservation');
 });
+
 
 router.post('/reservation', function (req, res) { //POST /user/reservation
     let reservation_date = req.body.reserv_date;
@@ -176,7 +168,16 @@ router.post('/reservation', function (req, res) { //POST /user/reservation
 		});
 	});
 	
-	res.redirect('/main');
+	res.redirect('/user/privacy');
+});
+
+router.get('/privacy', function (req, res) { //GET /user/privacy
+    res.render('privacy');
+});
+
+router.post('/privacy', function (req, res) { //POST /user/privacy
+	console.info(req.body);
+	res.redirect('/');
 });
 
 router.post("/getPossibleTime", function(req, res){ //POST /user/postTest
@@ -190,31 +191,9 @@ router.post("/getPossibleTime", function(req, res){ //POST /user/postTest
 	});
 });
 
-router.get("/admin",function(req,res){ //GET /user/admin //나중에 분리 할 께요! - 성준
-	const getReservationData = "SELECT * FROM Reservation WHERE status = 0";
-	
-	
-	connection.execute(getReservationData, (err,rows) => {
-		if(err) console.error(err);
-		
-		console.info('admionrows', rows);
-		res.render('admin', {getReservation: rows});
-	});
-});
 
-router.post("/accessReservation", function(req,res,next) {
-	const getAccessReservationData = "UPDATE Reservation SET status=1, empno = ? WHERE no = ?";
-	let data = req.body.sendAjax;
-	let empno = req.session.adminInfo.empno;
-	connection.execute(getAccessReservationData, [empno, data], (err,rows) => {
-		if(err) {
-			console.error(err);
-			next(err);
-		}
-		
-		res.json({getReservation: rows});
-	});
-});
+
+
 
 let getUserInfo = function(userId, password) {
 	return new Promise(function (resolve, reject) {

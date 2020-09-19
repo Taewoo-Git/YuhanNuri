@@ -8,6 +8,8 @@ const dotenv = require('dotenv');
 
 const userRouter = require('./routes/user');
 const chatRouter = require('./routes/chat');
+const adminRouter = require('./routes/admin');
+
 
 const cookieParser = require('cookie-parser');
 
@@ -27,6 +29,7 @@ app.use(cookieParser('vaCzbAVeMy9pT7Uw'));
 
 app.use('/user', userRouter);
 app.use('/chat', chatRouter);
+app.use('/admin',adminRouter);
 
 const server = app.listen(port, () => {
     console.log('Listening on port ' + port + '\n');
@@ -36,7 +39,7 @@ const io = require(__dirname + '/public/res/js/socket.js')(server); // socket.js
 
 app.get('/', function (req, res) {
 	let isInfo = req.session.userInfo; // 기존 세션의 존재 여부를 판단하여 view 처리.
-	console.info("isAutoLogin: " + req.signedCookies.isAutoLogin);
+	//console.info("isAutoLogin: " + req.signedCookies.isAutoLogin);
 	
 	if(isInfo) {
 		res.render('main', {

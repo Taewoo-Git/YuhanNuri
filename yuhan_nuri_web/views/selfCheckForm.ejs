@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<!-- Required meta tags -->
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<!-- CoreUI CSS -->
+		<link
+			rel="stylesheet"
+			href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css"
+			crossorigin="anonymous"
+		/>
+		<title>유한누리 관리자 | 자가진단</title>
+		<script src="https://code.jquery.com/jquery-latest.min.js"></script>
+		<style>
+        .toggle_wrap {
+            float: right;
+            margin-right: 1.25rem;
+            margin-top: 0.25rem;
+            font-size: 15px;
+        }
+
+        .font-size-15 {
+            font-size: 15px;
+        }
+
+        .fixed_btn_position {
+            top: 20%;
+            left: 90%;
+        }
+
+        .toggle_normal_wrap {
+            float: right;
+            margin-top: 0.25rem;
+            font-size: 15px;
+        }
+    </style>
+	</head>
+	<body class="c-app">
+		<div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
+			<div class="c-sidebar-brand d-lg-down-none">
+				<svg class="c-sidebar-brand-full" width="118" height="46" alt="CoreUI Logo">
+					<use xlink:href="assets/brand/coreui.svg#full"></use>
+				</svg>
+				<svg class="c-sidebar-brand-minimized" width="46" height="46" alt="CoreUI Logo">
+					<use xlink:href="assets/brand/coreui.svg#signet"></use>
+				</svg>
+			</div>
+			<ul class="c-sidebar-nav">
+				
+				<li class="c-sidebar-nav-title">예약</li>
+				<li class="c-sidebar-nav-item">
+					<a class="c-sidebar-nav-link" href="colors.html">
+						<svg class="c-sidebar-nav-icon">
+							<use
+								xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-drop1"
+							></use>
+						</svg>
+						예약 리스트</a
+					>
+				</li>
+				<!--현재 href가 하드코딩이 되어 있지만 추후 동적으로도 고민해보아요 -성준 -->
+				<li class="c-sidebar-nav-title">심리 자가진단</li>
+				<li class="c-sidebar-nav-item ">
+					<a class="c-sidebar-nav-link " href="./0">
+						<svg class="c-sidebar-nav-icon">
+							<use
+								xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-puzzle"
+							></use>
+						</svg>
+						우울</a>
+				</li>
+				<li class="c-sidebar-nav-item ">
+					<a class="c-sidebar-nav-link " href="./1">
+						<svg class="c-sidebar-nav-icon">
+							<use
+								xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-cursor"
+							></use>
+						</svg>
+						불안</a>
+				</li>
+				<li class="c-sidebar-nav-item">
+					<a class="c-sidebar-nav-link" href="charts.html">
+						<svg class="c-sidebar-nav-icon">
+							<use
+								xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-chart-pie"
+							></use>
+						</svg>
+						자살</a>
+				</li>
+				<li class="c-sidebar-nav-item">
+					<a class="c-sidebar-nav-link" href="charts.html">
+						<svg class="c-sidebar-nav-icon">
+							<use
+								xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-chart-pie"
+							></use>
+						</svg>
+						인터넷 중독</a>
+				</li>
+			</ul>
+			<button
+				class="c-sidebar-minimizer c-class-toggler"
+				type="button"
+				data-target="_parent"
+				data-class="c-sidebar-minimized"
+			></button>
+		</div>
+		<div class="c-wrapper c-fixed-components">
+			<header class="c-header c-header-light c-header-fixed c-header-with-subheader">
+				<button
+					class="c-header-toggler c-class-toggler d-lg-none mfe-auto"
+					type="button"
+					data-target="#sidebar"
+					data-class="c-sidebar-show"
+				>
+					<svg class="c-icon c-icon-lg">
+						<use
+							xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-menu"
+						></use>
+					</svg></button
+				><a class="c-header-brand d-lg-none" href="#">
+					<svg width="118" height="46" alt="CoreUI Logo">
+						<use xlink:href="assets/brand/coreui.svg#full"></use></svg
+				></a>
+				<button
+					class="c-header-toggler c-class-toggler mfs-3 d-md-down-none"
+					type="button"
+					data-target="#sidebar"
+					data-class="c-sidebar-lg-show"
+					responsive="true"
+				>
+					<svg class="c-icon c-icon-lg">
+						<use
+							xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-menu"
+						></use>
+					</svg>
+				</button>
+				<ul class="c-header-nav d-md-down-none">
+					<li class="c-header-nav-item px-3">
+						<a class="c-header-nav-link" href="#">Dashboard</a>
+					</li>
+					<li class="c-header-nav-item px-3">
+						<a class="c-header-nav-link" href="#">Users</a>
+					</li>
+					<li class="c-header-nav-item px-3">
+						<a class="c-header-nav-link" href="#">Settings</a>
+					</li>
+				</ul>
+				<ul class="c-header-nav ml-auto mr-4">
+					<li class="c-header-nav-item d-md-down-none mx-2">
+						<a class="c-header-nav-link" href="#">
+							<svg class="c-icon">
+								<use
+									xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-bell"
+								></use></svg
+						></a>
+					</li>
+					<li class="c-header-nav-item d-md-down-none mx-2">
+						<a class="c-header-nav-link" href="#">
+							<svg class="c-icon">
+								<use
+									xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-list-rich"
+								></use></svg
+						></a>
+					</li>
+					<li class="c-header-nav-item d-md-down-none mx-2">
+						<a class="c-header-nav-link" href="#">
+							<svg class="c-icon">
+								<use
+									xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-envelope-open"
+								></use></svg
+						></a>
+					</li>
+					<li class="c-header-nav-item dropdown">
+						<a
+							class="c-header-nav-link"
+							data-toggle="dropdown"
+							href="#"
+							role="button"
+							aria-haspopup="true"
+							aria-expanded="false"
+						>
+							<div class="c-avatar">
+								<img
+									class="c-avatar-img"
+									src="assets/img/avatars/6.jpg"
+									alt="user@gmail.com"
+								/>
+							</div>
+						</a>
+						<div class="dropdown-menu dropdown-menu-right pt-0">
+							<div class="dropdown-header bg-light py-2">
+								<strong>Account</strong>
+							</div>
+							<a class="dropdown-item" href="#">
+								<svg class="c-icon mr-2">
+									<use
+										xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-bell"
+									></use>
+								</svg>
+								Updates<span class="badge badge-info ml-auto">42</span></a
+							><a class="dropdown-item" href="#">
+								<svg class="c-icon mr-2">
+									<use
+										xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-envelope-open"
+									></use>
+								</svg>
+								Messages<span class="badge badge-success ml-auto">42</span></a
+							><a class="dropdown-item" href="#">
+								<svg class="c-icon mr-2">
+									<use
+										xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-task"
+									></use>
+								</svg>
+								Tasks<span class="badge badge-danger ml-auto">42</span></a
+							><a class="dropdown-item" href="#">
+								<svg class="c-icon mr-2">
+									<use
+										xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-comment-square"
+									></use>
+								</svg>
+								Comments<span class="badge badge-warning ml-auto">42</span></a
+							>
+							<div class="dropdown-header bg-light py-2">
+								<strong>Settings</strong>
+							</div>
+							<a class="dropdown-item" href="#">
+								<svg class="c-icon mr-2">
+									<use
+										xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-user"
+									></use>
+								</svg>
+								Profile</a
+							><a class="dropdown-item" href="#">
+								<svg class="c-icon mr-2">
+									<use
+										xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-settings"
+									></use>
+								</svg>
+								Settings</a
+							><a class="dropdown-item" href="#">
+								<svg class="c-icon mr-2">
+									<use
+										xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-credit-card"
+									></use>
+								</svg>
+								Payments<span class="badge badge-secondary ml-auto">42</span></a
+							><a class="dropdown-item" href="#">
+								<svg class="c-icon mr-2">
+									<use
+										xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-file"
+									></use>
+								</svg>
+								Projects<span class="badge badge-primary ml-auto">42</span></a
+							>
+							<div class="dropdown-divider"></div>
+							<a class="dropdown-item" href="#">
+								<svg class="c-icon mr-2">
+									<use
+										xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-lock-locked"
+									></use>
+								</svg>
+								Lock Account</a
+							><a class="dropdown-item" href="/user/logout">
+								<svg class="c-icon mr-2">
+									<use
+										xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-account-logout"
+									></use>
+								</svg>
+								Logout</a
+							>
+						</div>
+					</li>
+				</ul>
+				<div class="c-subheader px-3">
+					<!-- Breadcrumb-->
+					<ol class="breadcrumb border-0 m-0">
+						<li class="breadcrumb-item"><a href="/admin">Home</a></li>
+						<li class="breadcrumb-item"><a href="#">심리 자가진단</a></li>
+						<li class="breadcrumb-item active"><%= state%></li>
+						<!-- Breadcrumb Menu-->
+					</ol>
+				</div>
+			</header>
+			<div class="c-body">
+				<main class="c-main">
+					<div class="container-fluid">
+						<div class="row fade-in">
+							<div class="col-8 mx-auto pt-3" id="sortable">
+								<div class="card">
+									<div class="card-body" id="card_id_0">
+										<div class="input-group mb-3">
+											<div class="input-group-prepend">
+												<span class="input-group-text" id="question"
+													>질문</span
+												>
+											</div>
+											<input
+												type="text"
+												class="form-control"
+												placeholder="Question"
+												aria-label="question"
+												oninput="updateQuestion(card_id_0,this)"
+											/>
+											<button
+												type="button"
+												class="btn btn-secondary add_event_btn ml-2"
+												onclick="deleteCard(card_id_0,this)"
+											>
+												질문삭제
+											</button>
+										</div>
+										<div class="form-check">
+											<input
+												class="form-check-input"
+												type="checkbox"
+												value=""
+											/>
+											<label class="form-check-label">
+												<input
+													type="text"
+													class="form-control"
+													placeholder="답"
+													aria-label=""
+													size="50"
+													id="check_0_0"
+													oninput="updateAsk(card_id_0,this)"
+												/>
+											</label>
+											<button
+												type="button"
+												class="btn btn-ghost-danger"
+												onclick="deleteAsk(card_id_0,this)"
+											>
+												X
+											</button>
+										</div>
+									</div>
+									<div class="form-check mb-3">
+										<label class="form-check-label">
+											<button
+												type="button"
+												value="add_check"
+												class="add_event_btn_0 btn btn-secondary"
+												onclick="addCheck(card_id_0)"
+											>
+												추가
+											</button>
+										</label>
+										<div class="toggle_wrap">
+											<pre class="float-left font-size-15">필수 </pre>
+											<label
+												class="float-right c-switch c-switch-3d c-switch-primary addbtn-side-vertical-match"
+											>
+												<input
+													type="checkbox"
+													class="c-switch-input"
+													onchange="isRequired(card_id_0,this)"
+												/>
+												<span class="c-switch-slider"></span>
+											</label>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="btn-group-vertical position-fixed fixed_btn_position">
+						<button
+							type="button"
+							value="add_check_card"
+							class="add_event_btn_ btn btn-secondary add_event_btn"
+						>
+							Check
+						</button>
+						<button
+							type="button"
+							value="add_radio_card"
+							class="add_event_btn_ btn btn-secondary add_event_btn"
+						>
+							Radio
+						</button>
+						<button
+							type="button"
+							value="add_nomal_card"
+							class="add_event_btn_ btn btn-secondary"
+						>
+							Normal
+						</button>
+						<button type="button" value="add_grid_card" class="add_event_btn_ btn btn-secondary">Grid</button>
+						<button type="submit" class="add_event_btn_ btn btn-secondary" value="save">
+							Save
+						</button>
+					</div>
+					<script>
+						let sendObject = [
+							//ajax로 보내는 object
+							{
+								id: 'card_id_0', //프론트에서 찾기 쉽게 사용하는 용도라 백엔드에서는 다르게 받기로
+								type: 'check',
+								question: '',
+								askList: [
+									{
+										id: 'check_0_0',
+										ask: '',
+									},
+								],
+								required: false,
+							},
+						];
+
+						let i = 0;
+						let cur_i = 0;
+
+						$('.add_event_btn_').click(function (e) {
+							switch (e.target.value) {
+								case 'add_check_card':
+									$('.col-8').append(`
+                        <div class="card">
+                        <div class="card-body" id=card_id_${++i}>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="question">질문</span>
+                                </div>
+                                <input type="text" class="form-control" placeholder="Question" aria-label="question" 
+                                 oninput="updateQuestion(card_id_${i},this)">
+                                <button type="button" class="btn btn-secondary ml-2" onclick="deleteCard(card_id_${i},this)">질문삭제</button>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="defaultCheck1">
+                                <label class="form-check-label" for="defaultCheck1">
+                                    <input type="text" class="form-control" placeholder="답" aria-label="" size=50 
+                                     id="check_${i}_0" oninput="updateAsk(card_id_${i},this)">
+                                </label>
+                                <button type="button" class="btn btn-ghost-danger"
+                                    onclick="deleteAsk(card_id_${i},this)">X</button>
+                            </div>
+                        </div>
+                        <div class="form-check mb-3 add_check_btn">
+                            <label class="form-check-label">
+                                <button type="button" value="add_check" class="add_event_btn_${i} btn btn-secondary"  onclick=addCheck(card_id_${i})>추가</button>
+                            </label>
+                            <div class="toggle_wrap">
+                                <pre class="float-left font-size-15">필수 </pre>
+                                <label class="float-right c-switch c-switch-3d c-switch-primary addbtn-side-vertical-match">
+                                    <input type="checkbox" class="c-switch-input" onchange="isRequired(card_id_${i},this)">
+                                    <span class="c-switch-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>`);
+									sendObject.push({
+										id: `card_id_${i}`,
+										type: 'check',
+										question: '',
+										askList: [{ id: `check_${i}_0`, ask: '' }],
+										required: false,
+									});
+									cur_i = i;
+									break;
+								case 'add_radio_card':
+									j = 0;
+									$('.col-8').append(`
+                        <div class="card">
+                        <div class="card-body" id=card_id_${++i}>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="question">질문</span>
+                                </div>
+                                <input type="text" class="form-control" placeholder="Question" aria-label="question" 
+                                 oninput="updateQuestion(card_id_${i},this)">
+                                <button type="button" class="btn btn-secondary ml-2" onclick="deleteCard(card_id_${i},this)">질문삭제</button>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="radio_${i}" id="exampleRadios_${i}" value="option1">
+                                <label class="form-check-label" for="exampleRadios1">
+                                    <input type="text" class="form-control" placeholder="답" aria-label="" size=50 
+                                     id="radio_${i}_0" oninput="updateAsk(card_id_${i}, this)">
+                                </label>
+                                <button type="button" class="btn btn-ghost-danger"
+                                    onclick="deleteAsk(card_id_${i},this)">X</button>
+                            </div>
+                        </div>
+                        <div class="form-check mb-3">
+                            <label class="form-check-label">
+                                <button type="button" value="add_check" class="add_event_btn_${i} btn btn-secondary" onclick=addRadio(card_id_${i})>추가</button>
+                            </label>
+                            <div class="toggle_wrap">
+                                <pre class="float-left font-size-15">필수 </pre>
+                                <label class="float-right c-switch c-switch-3d c-switch-primary addbtn-side-vertical-match">
+                                    <input type="checkbox" class="c-switch-input" onchange="isRequired(card_id_${i},this)">
+                                    <span class="c-switch-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>`);
+									sendObject.push({
+										id: `card_id_${i}`,
+										type: 'radio',
+										question: '',
+										askList: [{ id: `radio_${i}_0`, ask: '' }],
+										required: false,
+									});
+									cur_i = i;
+									break;
+								case 'add_nomal_card':
+									$('.col-8').append(`
+                    <div class="card">
+                    <div class="card-body" id=card_id_${++i}>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="question">질문</span>
+                            </div>
+                            <input type="text" class="form-control" placeholder="Question" aria-label="question" 
+                             oninput="updateQuestion(card_id_${i},this)">
+                            <button type="button" class="btn btn-secondary add_event_btn" onclick="deleteCard(card_id_${i},this)">질문삭제</button>
+                        </div>
+                        <div class="toggle_normal_wrap">
+                            <pre class="float-left font-size-15">필수 </pre>
+                            <label class="float-right c-switch c-switch-3d c-switch-primary addbtn-side-vertical-match">
+                                <input type="checkbox" class="c-switch-input" onchange="isRequired(card_id_${i},this)">
+                                <span class="c-switch-slider"></span>
+                            </label>
+                        </div>
+                    </div>`);
+									sendObject.push({
+										id: `card_id_${i}`,
+										type: 'normal',
+										question: '',
+										required: false,
+									});
+									cur_i = i;
+									break;
+									case "add_grid_card":
+                                $(".col-8").append(`
+                                    <div class="card">
+                                    <div class="card-body" id=card_id_${++i}>
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text" id="question">질문</span>
+                                            </div>
+                                            <input type="text" class="form-control" placeholder="Question" aria-label="question" 
+                                             oninput="updateQuestion(card_id_${i},this)">
+                                            <button type="button" class="btn btn-secondary" onclick="deleteCard(card_id_${i},this)">질문삭제</button>
+                                        </div>
+                                        
+                                        <div class="form-check">
+                                            <h5>행</h5>
+                                            <label class="form-check-label" for="exampleRadios1">
+                                                <input type="text" class="form-control" placeholder="답" aria-label="" size=50 
+                                                 id="grid_${i}_0" oninput="updateAsk(card_id_${i},this)">
+                                            </label>
+                                            <button type="button" class="btn btn-ghost-danger"
+                                                onclick="deleteAsk(card_id_${i},this)">X</button>
+                                        </div>
+                                    </div>
+                                    <div class="form-check mb-3">
+                                        <label class="form-check-label">
+                                            <button type="button" value="add_check" class="add_event_btn_${i} btn btn-secondary" onclick=addGrid(card_id_${i})>추가</button>
+                                        </label>
+                                        <div class="toggle_wrap">
+                                            <pre class="float-left font-size-15">필수 </pre>
+                                            <label class="float-right c-switch c-switch-3d c-switch-primary addbtn-side-vertical-match">
+                                                <input type="checkbox" class="c-switch-input" onchange="isRequired(card_id_${i},this)">
+                                                <span class="c-switch-slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>`);
+                                sendObject.push({ id: `card_id_${i}`, type: 'grid', question: '', askList: [{ id: `grid_${i}_0`, ask: '', }], required: false });
+                                cur_i = i;
+                                break;
+								case 'save':
+									$.ajax({
+										type: 'POST',
+										dataType: 'json',
+										url: '../saveForm',
+										async: true,
+										data: { sendAjax: JSON.stringify(sendObject) },
+										success: function (data) {
+											console.log('success', data);
+											if (data.state === 'ok') {
+												console.log('state', '저장이 완료 되었습니다!');
+											}
+										},
+									});
+									console.info(sendObject);
+									break;
+								default:
+									console.error('error!');
+									break;
+							}
+						});
+						function deleteCard(parent, me) {
+							--i;
+							if (i + 1 == cur_i) {
+								// 1 2 3에서 2번 카드를 지우면 3이 되어 이후 추가이벤트로 인해 생겨있던 카드 3과 생겨질 카드3에서 중복 발생하여 중복 제거하기 위함
+								i = cur_i;
+							}
+							const findParentIndex = sendObject.findIndex((v) => v.id === parent.id);
+							sendObject.splice(findParentIndex, 1);
+							$(me).parentsUntil('.col-8').remove();
+						}
+
+						function deleteAsk(parent, me) {
+							const findParentIndex = sendObject.findIndex((v) => v.id === parent.id);
+							const findMeIndex = sendObject[findParentIndex].askList.findIndex(
+								(v) => v.id === me.id
+							);
+							sendObject[findParentIndex].askList.splice(findMeIndex, 1);
+							$(me).parent().remove();
+						}
+						function addCheck(e) {
+							const findParentIndex = sendObject.findIndex((v) => v.id === e.id);
+							const findParentIdTail =
+								sendObject[findParentIndex].id[
+									sendObject[findParentIndex].id.length - 1
+								];
+							const findAskListLength = sendObject[findParentIndex].askList.length;
+							sendObject
+								.find((v) => v.id === e.id)
+								.askList.push({
+									id: `check_${findParentIdTail}_${findAskListLength}`,
+									ask: '',
+								});
+							$(e).append(`
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox">
+                    <label class="form-check-label">
+                        <input type="text" class="form-control" placeholder="답" aria-label="" size=50 
+                         id="check_${findParentIdTail}_${findAskListLength}" oninput="updateAsk(card_id_${findParentIdTail},this)">
+                    </label>
+                    <button type="button" class="btn btn-ghost-danger"
+                                    onclick="deleteAsk(card_id_${findParentIdTail},this)">X</button>
+                </div>
+            `);
+						}
+						function addRadio(e) {
+							const findParentIndex = sendObject.findIndex((v) => v.id === e.id);
+							const findParentIdTail =
+								sendObject[findParentIndex].id[
+									sendObject[findParentIndex].id.length - 1
+								];
+							const findAskListLength = sendObject[findParentIndex].askList.length;
+							sendObject
+								.find((v) => v.id === e.id)
+								.askList.push({
+									id: `radio_${findParentIdTail}_${findAskListLength}`,
+									ask: '',
+								});
+							$(e).append(`
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="radio_${findParentIdTail}" id="exampleRadios_${findParentIdTail}">
+                    <label class="form-check-label" for="exampleRadios1">
+                        <input type="text" class="form-control" placeholder="답" aria-label="" size=50 
+                        id="radio_${findParentIdTail}_${findAskListLength}" oninput="updateAsk(card_id_${findParentIdTail},this)">
+                    </label>
+                    <button type="button" class="btn btn-ghost-danger"
+                                    onclick="deleteAsk(card_id_${findParentIdTail},this)">X</button>
+                </div>
+            `);
+						}
+						function addGrid(e) {
+                        const findParentIndex = sendObject.findIndex(v => v.id === e.id);
+                        const findParentIdTail = sendObject[findParentIndex].id[sendObject[findParentIndex].id.length - 1];
+                        const findAskListLength = sendObject[findParentIndex].askList.length;
+                        sendObject.find(v => v.id === e.id).askList.push({ id: `grid_${findParentIdTail}_${findAskListLength}`, ask: '', });
+                        $(e).append(`
+                            <div class="form-check">
+                                <label class="form-check-label" for="exampleRadios1">
+                                    <input type="text" class="form-control" placeholder="답" aria-label="" size=50 
+                                    id="grid_${findParentIdTail}_${findAskListLength}" oninput="updateAsk(card_id_${findParentIdTail},this)">
+                                </label>
+                                <button type="button" class="btn btn-ghost-danger"
+                                    onclick="deleteAsk(card_id_${findParentIdTail},this)">X</button>
+                            </div>
+                        `);
+                    }
+
+						function updateQuestion(parent, me) {
+							const findParentIndex = sendObject.findIndex((v) => v.id === parent.id);
+							sendObject[findParentIndex].question = me.value;
+						}
+						function updateAsk(parent, me) {
+							const findParentIndex = sendObject.findIndex((v) => v.id === parent.id);
+							const findMeIndex = sendObject[findParentIndex].askList.findIndex(
+								(v) => v.id === me.id
+							);
+							sendObject[findParentIndex].askList[findMeIndex].ask = me.value;
+						}
+
+						function isRequired(parent, me) {
+							const findParentIndex = sendObject.findIndex((v) => v.id === parent.id);
+							if (me.checked) {
+								sendObject[findParentIndex].required = true;
+							} else {
+								sendObject[findParentIndex].required = false;
+							}
+						}
+					</script>
+					<script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
+				</main>
+				<footer class="c-footer">
+					<div><a href="https://coreui.io">CoreUI</a> &copy; 2020 creativeLabs.</div>
+					<div class="ml-auto">
+						Powered by&nbsp;<a href="https://coreui.io/">CoreUI</a>
+					</div>
+				</footer>
+			</div>
+		</div>
+	<script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
+	</body>
+</html>

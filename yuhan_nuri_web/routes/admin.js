@@ -49,7 +49,7 @@ router.get("/form/:type", function(req,res,next){
 		if(rows.length == 0){ //rows [] 
 			next(err);
 		}else{
-			res.render('selfCheckForm',{state:rows[0].typename});
+			res.render('selfcheckForm',{state:rows[0].typename});
 		}
 	});
 	

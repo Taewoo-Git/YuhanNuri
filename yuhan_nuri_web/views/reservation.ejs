@@ -20,14 +20,20 @@
         <style>
 			.top-bar{
 				padding: 0;
+				background-color: #006961;
 			}
+			.top-backward{
+                font-size: 130%;
+                color: white;
+            }
 			.top-title{
 				position: absolute;
-				top: 3%;
+				top: 2.5%;
 				left: 50%;
 				transform: translateX(-50%);
 				font-weight: bold;
 				font-size: 150%;
+				color: white;
 			}
             .col-title{
                 text-align: center;
@@ -79,8 +85,8 @@
         </style>
 	</head>
 	<body>
-		<div class="top-bar shadow p-3 mb-5 bg-white rounded">
-            <button class="btn" id="btn-back"><i class="fa fa-arrow-left" aria-hidden="true"></i></button>
+		<div class="top-bar shadow p-3 mb-5 rounded">
+            <button class="btn" id="btn-back"><i class="fa fa-arrow-left top-backward" aria-hidden="true"></i></button>
 			<label class="top-title">상담 예약</label>
         </div>
 		

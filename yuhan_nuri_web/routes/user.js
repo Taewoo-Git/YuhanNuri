@@ -120,7 +120,6 @@ router.get('/reservation', function (req, res) { //GET /user/reservation
     res.render('reservation');
 });
 
-
 router.post('/reservation', function (req, res) { //POST /user/reservation
     let reservation_date = req.body.reserv_date;
     let reservation_time = req.body.reserv_time;
@@ -180,6 +179,24 @@ router.post('/privacy', function (req, res) { //POST /user/privacy
 	res.redirect('/');
 });
 
+router.get('/selfcheck', function (req, res) { //GET /user/privacy
+    let questionSelect = 'SELECT *, (SELECT GROUP_CONCAT(content) FROM FormAnswer WHERE cardno=c.cardno) AS answer '
+						+ 'FROM FormTypeContent c WHERE typeno=?';
+	
+	connection.execute(questionSelect, [0], (err, result) => {
+		if(err) console.error(err);
+		else {
+			res.render('selfcheck', {
+				result: result
+			});
+		}
+	});
+});
+
+/*router.post('/selfcheck', function (req, res) { //POST /user/privacy
+	
+});*/
+
 router.post("/getPossibleTime", function(req, res){ //POST /user/postTest
 	// 예약 승인이 되었을때의 기준 (status = 1)
 	let getReservationByDateSql = "SELECT starttime, COUNT(starttime) AS CNT FROM Reservation WHERE date = ? AND status = 1 GROUP BY starttime";
@@ -190,10 +207,6 @@ router.post("/getPossibleTime", function(req, res){ //POST /user/postTest
 		else res.json({ok: true, rtntime: rows});
 	});
 });
-
-
-
-
 
 let getUserInfo = function(userId, password) {
 	return new Promise(function (resolve, reject) {

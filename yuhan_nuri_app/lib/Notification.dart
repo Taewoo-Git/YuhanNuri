@@ -1,16 +1,9 @@
-import 'dart:io';
-import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-
-
-
 class CustomNotification {
-
   FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin;
-  
 
-  CustomNotification(){
+  CustomNotification() {
     var initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher'); //안드로이드 초기 세팅값
     var initializationSettingsIOS = IOSInitializationSettings(
@@ -23,15 +16,12 @@ class CustomNotification {
 
     _flutterLocalNotificationsPlugin =
         FlutterLocalNotificationsPlugin(); //실제 일어날 Notification플러그인 객체 생성
-    _flutterLocalNotificationsPlugin
-        .initialize(initializationSettings);
+    _flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
-  getFlugin(){
-
+  getFlugin() {
     return _flutterLocalNotificationsPlugin;
   }
-
 
   void showNotification() async {
     //Detail에는 icon이나 push 알람이 일어났을 때의 알람소리등의 디테일 부분을 설정
@@ -54,6 +44,4 @@ class CustomNotification {
       payload: 'Notification Test',
     );
   }
-
-
 }

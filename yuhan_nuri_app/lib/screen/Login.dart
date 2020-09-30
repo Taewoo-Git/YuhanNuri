@@ -1,15 +1,11 @@
-
 import 'dart:async';
 import 'dart:convert';
-
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:toast/toast.dart';
 import 'package:yuhan_nuri_app/screen/YuhanNuri.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-
 
 String userID = "";
 String userPassword = "";
@@ -28,24 +24,19 @@ class LoginApp extends StatelessWidget {
 }
 
 class Login extends StatefulWidget {
-
   Login({this.title});
   final String title;
   @override
   _LoginState createState() => _LoginState();
 }
 
-class _LoginState extends State<Login>{
-
+class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       body: _buildLayoutContainer(context),
     );
-    
   }
-
 
   Widget _buildLayoutContainer(BuildContext context) {
     return SingleChildScrollView(
@@ -82,7 +73,6 @@ class _LoginState extends State<Login>{
     );
   }
 
-
   Widget _userIDTextField(BuildContext context) {
     return TextFormField(
         onChanged: (value) => userID = value,
@@ -105,7 +95,7 @@ class _LoginState extends State<Login>{
     );
   }
 
-  Widget _autoLoginCheckBox(BuildContext context){
+  Widget _autoLoginCheckBox(BuildContext context) {
     return CheckboxListTile(
       controlAffinity: ListTileControlAffinity.leading,
       title: Text('자동 로그인'),
@@ -134,35 +124,36 @@ class _LoginState extends State<Login>{
     );
   }
 
-  Future<bool> checkHavingCookie() async{
+  Future<bool> checkHavingCookie() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    String cookieParam = (prefs.getString('cookie') ?? "has not cookie" );
+    String cookieParam = (prefs.getString('cookie') ?? "NoCookie");
     String str = (prefs.getString('expires') ?? DateTime.now().toString());
     DateTime resetDay = DateTime.parse(str);
 
     //prefs.remove('expires');
-    print("resetDay : " + resetDay.toString() + "################################");
-    print("now : " + DateTime.now().toString() + "################################");
+    print("Reset Day : " + resetDay.toString());
+    print("Now : " + DateTime.now().toString());
 
     //만료날짜가 지금보다 이후이면
-    if(resetDay.isAfter(DateTime.now())){
-      print("초기화 날짜가 안됐음@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-    }
-    else{ 
+    if (resetDay.isAfter(DateTime.now())) {
+      print("날짜 초기화 필요!");
+    } else {
       //지금이 초기화 지정 날짜이후이면 쿠키 만료일자와 쿠키 값 지움
       prefs.remove('expires');
       prefs.remove('cookie');
-      cookieParam = "has not cookie";
-      
+      cookieParam = "NoCookie";
     }
 
     //만료일자가 지나지 않았음, cookie string 확인
-    if(cookieParam != "has not cookie"){
+    if (cookieParam != "NoCookie") {
       //cookie에 정상적인 값이 있으면 바로 webView가있는 페이지로 이동, YuhanNuri.dart
-      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (BuildContext context) => YuhanNuri(cookie: cookieParam,)));
-    }else{
-      print("HAVE NOT COOKIE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+      Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (BuildContext context) => YuhanNuri(
+                cookie: cookieParam,
+              )));
+    } else {
+      print("쿠키 없음!!!");
     }
 
     return true;
@@ -189,26 +180,25 @@ class _LoginState extends State<Login>{
     if (res.statusCode == 200) {
       //응답의 헤더에서 cookie값 가져와서 저장
       Cookie cookie = Cookie.fromSetCookieValue(res.headers['set-cookie']);
-      if(isAutoLogin){
+      if (isAutoLogin) {
         //만료일자(30일 후)세팅, 쿠키값 저장, 만료일자 저장
         DateTime dateTime = cookie.expires.add(new Duration(days: 30));
         prefs.setString('cookie', cookie.toString());
         prefs.setString('expires', dateTime.toString());
       }
-      
+
       Map<String, dynamic> stuInfo = jsonDecode(res.body);
       if (stuInfo == null) {
         Toast.show('아이디와 패스워드를 확인하세요.', context,
             duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
       } else {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (BuildContext context) => YuhanNuri(cookie: cookie.toString(),))); 
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (BuildContext context) => YuhanNuri(
+                  cookie: cookie.toString(),
+                )));
       }
     } else {
       throw Exception();
     }
   }
-
-
- 
-
 }

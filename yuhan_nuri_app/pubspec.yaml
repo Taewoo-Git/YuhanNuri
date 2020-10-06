@@ -40,6 +40,9 @@ dev_dependencies:
   shared_preferences: ^0.5.10
   splashscreen: ^1.2.0
   introduction_screen: ^1.0.7
+  flutter_inappwebview: ^4.0.0+4
+  progress_dialog: ^1.2.4
+  
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

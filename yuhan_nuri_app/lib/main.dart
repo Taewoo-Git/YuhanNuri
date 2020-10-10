@@ -4,7 +4,7 @@ import 'package:yuhan_nuri_app/screen/Splash.dart';
 
 void main() {
   try {
-    //처음 loading화면 실행, Splash.dart
+    // 처음 loading화면 실행, Splash.dart
     if (Platform.isAndroid || Platform.isIOS) runApp(SplashApp());
   } catch (e) {
     runApp(DummyApp());

@@ -31,7 +31,7 @@ class YuhanNuriState extends State<YuhanNuri> {
   InAppWebViewController _webViewController;
   DateTime currentBackPressTime;
   Map<String, String> header; // 전달받은 Cookie객체를 string과 합쳐서 header만듦
-  GlobalKey globalKey = new GlobalKey();
+  GlobalKey globalKey = new GlobalKey(); //네비게이션 바 외부에서 접근가능하게 해줄 Key변수
   var urlhistory = List();
   var currentindex;
   YuhanNuriState(String cookieParam) {
@@ -89,7 +89,6 @@ class YuhanNuriState extends State<YuhanNuri> {
               bottomNavigationBar: CurvedNavigationBar(
                 key: globalKey,
                 index: 0,
-                // currentindex: 3,
                 backgroundColor: Colors.blueAccent,
                 items: <Widget>[
                   Icon(Icons.add, size: 25),

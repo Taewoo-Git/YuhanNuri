@@ -7,7 +7,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:toast/toast.dart';
 
 class YuhanNuri extends StatefulWidget {
-  final String cookie;
+  final String cookie; //asd
 
   YuhanNuri({Key key, this.title, this.cookie}) : super(key: key);
   final String title;

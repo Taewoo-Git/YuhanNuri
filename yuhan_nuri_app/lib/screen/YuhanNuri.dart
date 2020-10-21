@@ -65,8 +65,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                   KeyboardVisibility.onChange.listen((bool visible) async {
                     if (visible) {
                       if (await _webViewController.getUrl() !=
-                          "https://yuhannuri.run.goorm.io/user/chat") {
-                        print('asdfsf');
+                          "https://yuhannuri.run.goorm.io/chat") {
                         await _webViewController.evaluateJavascript(
                             source:
                                 'document.activeElement.scrollIntoView( {block: "center"})');
@@ -77,6 +76,9 @@ class YuhanNuriState extends State<YuhanNuri> {
                                     "parseInt(document.activeElement.getBoundingClientRect().y)"));
                         _webViewController.scrollTo(x: 0, y: viewHeight);
                       }
+                    } else {
+                      await _webViewController.evaluateJavascript(
+                          source: 'document.activeElement.blur()');
                     }
                   });
                 },

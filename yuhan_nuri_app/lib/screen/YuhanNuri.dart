@@ -7,8 +7,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:toast/toast.dart';
 
 class YuhanNuri extends StatefulWidget {
-  final String cookie; //asd
-
+  final String cookie;
   YuhanNuri({Key key, this.title, this.cookie}) : super(key: key);
   final String title;
 
@@ -32,13 +31,17 @@ class YuhanNuriState extends State<YuhanNuri> {
   InAppWebViewController _webViewController;
   DateTime currentBackPressTime;
   Map<String, String> header; // 전달받은 Cookie객체를 string과 합쳐서 header만듦
-
+  GlobalKey globalKey = new GlobalKey();
+  var urlhistory = List();
+  var currentindex;
   YuhanNuriState(String cookieParam) {
     header = {'Cookie': '$cookieParam'};
   }
 
   void initState() {
     super.initState();
+    currentindex = 1;
+    urlhistory.add(0);
   }
 
   @override
@@ -84,6 +87,9 @@ class YuhanNuriState extends State<YuhanNuri> {
                 },
               ))),
               bottomNavigationBar: CurvedNavigationBar(
+                key: globalKey,
+                index: 0,
+                // currentindex: 3,
                 backgroundColor: Colors.blueAccent,
                 items: <Widget>[
                   Icon(Icons.add, size: 25),
@@ -93,23 +99,34 @@ class YuhanNuriState extends State<YuhanNuri> {
                 ],
                 animationDuration:
                     const Duration(milliseconds: 300), // trainsition 설정
-                onTap: (index) {
-                  switch (index) {
-                    // icon의 순서에 따라 index에 해당하는 url을 요청
+                onTap: (int index) {
+                  int navigationIndex = index;
+                  switch (navigationIndex) {
                     case 0:
+                      urlhistory.add(0);
+                      currentindex++;
                       _webViewController.loadUrl(
                           url: 'https://yuhannuri.run.goorm.io');
+                      print(currentindex);
                       break;
                     case 1:
-                      // controller.data.loadUrl(url:'https://google.com');
+                      urlhistory.add(1);
+                      currentindex++;
                       _webViewController.loadUrl(url: 'https://google.com');
+                      print(currentindex);
                       break;
                     case 2:
+                      urlhistory.add(2);
+                      currentindex++;
                       _webViewController.loadUrl(url: 'https://youtube.com');
+                      print(currentindex);
                       break;
                     case 3:
+                      urlhistory.add(3);
+                      currentindex++;
                       _webViewController.loadUrl(
                           url: 'https://waveon.run.goorm.io');
+                      print(currentindex);
                       break;
                     default:
                       break;
@@ -138,7 +155,10 @@ class YuhanNuriState extends State<YuhanNuri> {
               var future = _webViewController.canGoBack();
               future.then((value) {
                 if (value) {
-                  _webViewController.goBack();
+                  final CurvedNavigationBarState navBarState =
+                      globalKey.currentState;
+                  currentindex = currentindex - 2;
+                  navBarState.setPage(urlhistory[currentindex]);
                 }
               });
               return null;

@@ -32,16 +32,14 @@ class YuhanNuriState extends State<YuhanNuri> {
   DateTime currentBackPressTime;
   Map<String, String> header; // 전달받은 Cookie객체를 string과 합쳐서 header만듦
   GlobalKey globalKey = new GlobalKey(); //네비게이션 바 외부에서 접근가능하게 해줄 Key변수
-  var urlhistory = List();
-  var currentindex;
+  // var urlhistory = List();
+  // var currentindex;
   YuhanNuriState(String cookieParam) {
     header = {'Cookie': '$cookieParam'};
   }
 
   void initState() {
     super.initState();
-    currentindex = 1;
-    urlhistory.add(0);
   }
 
   @override
@@ -102,30 +100,18 @@ class YuhanNuriState extends State<YuhanNuri> {
                   int navigationIndex = index;
                   switch (navigationIndex) {
                     case 0:
-                      urlhistory.add(0);
-                      currentindex++;
                       _webViewController.loadUrl(
                           url: 'https://yuhannuri.run.goorm.io');
-                      print(currentindex);
                       break;
                     case 1:
-                      urlhistory.add(1);
-                      currentindex++;
                       _webViewController.loadUrl(url: 'https://google.com');
-                      print(currentindex);
                       break;
                     case 2:
-                      urlhistory.add(2);
-                      currentindex++;
                       _webViewController.loadUrl(url: 'https://youtube.com');
-                      print(currentindex);
                       break;
                     case 3:
-                      urlhistory.add(3);
-                      currentindex++;
                       _webViewController.loadUrl(
                           url: 'https://waveon.run.goorm.io');
-                      print(currentindex);
                       break;
                     default:
                       break;
@@ -151,13 +137,13 @@ class YuhanNuriState extends State<YuhanNuri> {
                 }
                 return Future.value(true); // if문이 거짓일때는 바로 종료
               }
+
               var future = _webViewController.canGoBack();
               future.then((value) {
                 if (value) {
                   final CurvedNavigationBarState navBarState =
                       globalKey.currentState;
-                  currentindex = currentindex - 2;
-                  navBarState.setPage(urlhistory[currentindex]);
+                  navBarState.setPage(0);
                 }
               });
               return null;

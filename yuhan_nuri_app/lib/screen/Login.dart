@@ -36,8 +36,8 @@ class _LoginState extends State<Login> {
   ProgressDialog progressDialog;
 
   @override
+  // ignore: must_call_super
   void initState() {
-    // TODO: implement initState
     setProgressDialog();
   }
 

@@ -344,16 +344,6 @@ packages:
     source: hosted
     version: "1.2.0"
   uuid:
-<<<<<<< HEAD
-    dependency: transitive
-    description:
-      name: uuid
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.2.2"
-  vector_math:
-=======
->>>>>>> 6db988a73ad8c7b077fd268fa5bdef2c32e8872b
     dependency: transitive
     description:
       name: uuid

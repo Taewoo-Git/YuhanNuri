@@ -20,11 +20,8 @@ class IntroduceScreen extends StatefulWidget {
 class IntroduceScreenState extends State<IntroduceScreen> {
   final introKey = GlobalKey<IntroductionScreenState>();
 
-  //인트로 확인했을 때 실행
+  // 인트로 확인했을 때 실행
   void _onIntroEnd(context) {
-    // Navigator.of(context).push(
-    //   MaterialPageRoute(builder: (_) => LoginApp()),
-    // );
     runApp(LoginApp());
   }
 
@@ -32,59 +29,52 @@ class IntroduceScreenState extends State<IntroduceScreen> {
   Widget build(BuildContext context) {
     const bodyStyle = TextStyle(fontSize: 19.0);
     const pageDecoration = const PageDecoration(
-      titleTextStyle: TextStyle(fontSize: 28.0, fontWeight: FontWeight.w700),
+      titleTextStyle: TextStyle(
+          fontSize: 28.0,
+          fontWeight: FontWeight.w700,
+          height: 5,
+          textBaseline: TextBaseline.alphabetic),
       bodyTextStyle: bodyStyle,
       descriptionPadding: EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 16.0),
       pageColor: Colors.white,
       imagePadding: EdgeInsets.zero,
     );
 
-    //각각 페이지들을 배열처럼 저장
+    // 각각 페이지들을 배열처럼 저장
     return IntroductionScreen(
       key: introKey,
       pages: [
         PageViewModel(
-          title: "안내,소개 페이지 1",
+          title: "안내 및 소개 페이지 1",
           //image: _buildImage('img name'),
-          body: "body ",
+          body: "테스트 ",
           decoration: pageDecoration,
         ),
         PageViewModel(
-          title: "안내,소개 페이지 2",
-          body: "body ",
-          decoration: pageDecoration,
-        ),
-        PageViewModel(
-          title: "안내,소개 페이지 3",
-          body: "body ",
-          decoration: pageDecoration,
-        ),
-        PageViewModel(
-          title: "안내,소개 페이지 4",
-          body: "Body",
+          title: "안내 및 소개 페이지 2",
+          body: "테스트",
           footer: RaisedButton(
             onPressed: () {
               introKey.currentState?.animateScroll(0);
             },
             child: const Text(
               'Button',
-              style: TextStyle(color: Colors.pink),
+              style: TextStyle(color: Colors.black),
             ),
-            color: Colors.lightBlue,
+            color: Colors.amber,
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8.0)),
           ),
           decoration: pageDecoration,
         ),
         PageViewModel(
-          title: "안내,소개 페이지 Last",
+          title: "안내 및 소개 페이지 3",
           bodyWidget: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: const [
-              Text("Click", style: bodyStyle),
+              Text("테스트", style: bodyStyle),
             ],
           ),
-          //image
           decoration: pageDecoration,
         ),
       ],

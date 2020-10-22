@@ -1,16 +1,13 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
-// import 'package:webview_flutter/webview_flutter.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-import 'package:yuhan_nuri_app/Notification.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:toast/toast.dart';
 
 class YuhanNuri extends StatefulWidget {
   final String cookie;
-
   YuhanNuri({Key key, this.title, this.cookie}) : super(key: key);
   final String title;
 
@@ -31,27 +28,18 @@ class _DummyState extends State<YuhanNuri> {
 }
 
 class YuhanNuriState extends State<YuhanNuri> {
-  //FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin;
-  //WebViewController _webviewController; //webviewController 정의
   InAppWebViewController _webViewController;
-
-  // final Completer<InAppWebViewController> _controller =
-  //     Completer<InAppWebViewController>();
-
   DateTime currentBackPressTime;
-
-  CustomNotification _notification;
-
-  Map<String, String> header; //전달받은 Cookie객체를 string과 합쳐서 header만듦
-
+  Map<String, String> header; // 전달받은 Cookie객체를 string과 합쳐서 header만듦
+  GlobalKey globalKey = new GlobalKey(); //네비게이션 바 외부에서 접근가능하게 해줄 Key변수
+  // var urlhistory = List();
+  // var currentindex;
   YuhanNuriState(String cookieParam) {
-    // header = {'Cookie': '$cookieParam'};
     header = {'Cookie': '$cookieParam'};
   }
 
   void initState() {
     super.initState();
-    _notification = new CustomNotification();
   }
 
   @override
@@ -63,15 +51,13 @@ class YuhanNuriState extends State<YuhanNuri> {
               body: Center(
                   child: SafeArea(
                       child: InAppWebView(
-                // initialUrl: 'https://yuhannuri.run.goorm.io',
-                // initialHeaders: header,
                 initialOptions: InAppWebViewGroupOptions(
                     crossPlatform: InAppWebViewOptions(
                   debuggingEnabled: true,
                 )),
                 onWebViewCreated: (InAppWebViewController controller) {
                   _webViewController = controller;
-                  //url로드전에 cookie 지워주지 않으면 cookie 안먹는 경우 있음
+                  // url로드전에 cookie 지워주지 않으면 cookie 안먹는 경우 있음
                   CookieManager cm = new CookieManager();
                   cm.deleteAllCookies();
                   _webViewController.loadUrl(
@@ -80,8 +66,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                   KeyboardVisibility.onChange.listen((bool visible) async {
                     if (visible) {
                       if (await _webViewController.getUrl() !=
-                          "https://yuhannuri.run.goorm.io/user/chat") {
-                        print('asdfsf');
+                          "https://yuhannuri.run.goorm.io/chat") {
                         await _webViewController.evaluateJavascript(
                             source:
                                 'document.activeElement.scrollIntoView( {block: "center"})');
@@ -92,11 +77,16 @@ class YuhanNuriState extends State<YuhanNuri> {
                                     "parseInt(document.activeElement.getBoundingClientRect().y)"));
                         _webViewController.scrollTo(x: 0, y: viewHeight);
                       }
+                    } else {
+                      await _webViewController.evaluateJavascript(
+                          source: 'document.activeElement.blur()');
                     }
                   });
                 },
               ))),
               bottomNavigationBar: CurvedNavigationBar(
+                key: globalKey,
+                index: 0,
                 backgroundColor: Colors.blueAccent,
                 items: <Widget>[
                   Icon(Icons.add, size: 25),
@@ -105,17 +95,23 @@ class YuhanNuriState extends State<YuhanNuri> {
                   Icon(Icons.chat_bubble, size: 25),
                 ],
                 animationDuration:
-                    const Duration(milliseconds: 300), //trainsition 설정
-                onTap: (index) {
-                  switch (index) {
-                    //icon의 순서에 따라 index에 해당하는 url을 요청
+                    const Duration(milliseconds: 300), // trainsition 설정
+                onTap: (int index) {
+                  int navigationIndex = index;
+                  switch (navigationIndex) {
                     case 0:
-                      // controller.data.loadUrl(url: 'https://yuhannuri.run.goorm.io', headers: header);
-                      _webViewController.loadUrl(url: 'https://google.com');
+                      _webViewController.loadUrl(
+                          url: 'https://yuhannuri.run.goorm.io');
                       break;
                     case 1:
-                      // controller.data.loadUrl(url:'https://google.com');
+                      _webViewController.loadUrl(url: 'https://google.com');
+                      break;
+                    case 2:
                       _webViewController.loadUrl(url: 'https://youtube.com');
+                      break;
+                    case 3:
+                      _webViewController.loadUrl(
+                          url: 'https://waveon.run.goorm.io');
                       break;
                     default:
                       break;
@@ -137,14 +133,17 @@ class YuhanNuriState extends State<YuhanNuri> {
                   currentBackPressTime = now;
                   Toast.show('뒤로가기 버튼을 한번 더 클릭하면 종료합니다.', context,
                       duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
-                  return Future.value(false); //종료 안함.
+                  return Future.value(false); // 종료 안함.
                 }
                 return Future.value(true); // if문이 거짓일때는 바로 종료
               }
+
               var future = _webViewController.canGoBack();
               future.then((value) {
                 if (value) {
-                  _webViewController.goBack();
+                  final CurvedNavigationBarState navBarState =
+                      globalKey.currentState;
+                  navBarState.setPage(0);
                 }
               });
               return null;

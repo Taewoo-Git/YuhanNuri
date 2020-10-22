@@ -37,7 +37,31 @@
     </style>
 	</head>
 	<body class="c-app">
-		<div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
+		<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		  <div class="modal-dialog" role="document">
+			<div class="modal-content">
+			  <div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLabel">항목 추가</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				  <span aria-hidden="true">&times;</span>
+				</button>
+			  </div>
+			  <div class="modal-body">
+				<form>
+				  <div class="form-group">
+					<label for="type-name" class="col-form-label">항목 이름:</label>
+					<input type="text" class="form-control" id="type-name" placeholder="항목이름을 작성해주세요.">
+				  </div>
+				</form>
+			  </div>
+			  <div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+				<button type="button" class="btn btn-primary" id="add_type_button">추가하기</button>
+			  </div>
+			</div>
+		  </div>
+		</div>
+		<div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show c-sidebar-unfoldable" id="sidebar">
 			<div class="c-sidebar-brand d-lg-down-none">
 				<svg class="c-sidebar-brand-full" width="118" height="46" alt="CoreUI Logo">
 					<use xlink:href="assets/brand/coreui.svg#full"></use>
@@ -59,44 +83,36 @@
 						예약 리스트</a
 					>
 				</li>
-				<!--현재 href가 하드코딩이 되어 있지만 추후 동적으로도 고민해보아요 -성준 -->
-				<li class="c-sidebar-nav-title">심리 자가진단</li>
-				<li class="c-sidebar-nav-item ">
-					<a class="c-sidebar-nav-link " href="./0">
-						<svg class="c-sidebar-nav-icon">
-							<use
-								xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-puzzle"
-							></use>
-						</svg>
-						우울</a>
-				</li>
-				<li class="c-sidebar-nav-item ">
-					<a class="c-sidebar-nav-link " href="./1">
-						<svg class="c-sidebar-nav-icon">
-							<use
-								xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-cursor"
-							></use>
-						</svg>
-						불안</a>
-				</li>
-				<li class="c-sidebar-nav-item">
-					<a class="c-sidebar-nav-link" href="charts.html">
-						<svg class="c-sidebar-nav-icon">
-							<use
-								xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-chart-pie"
-							></use>
-						</svg>
-						자살</a>
-				</li>
-				<li class="c-sidebar-nav-item">
-					<a class="c-sidebar-nav-link" href="charts.html">
-						<svg class="c-sidebar-nav-icon">
-							<use
-								xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-chart-pie"
-							></use>
-						</svg>
-						인터넷 중독</a>
-				</li>
+				<li class="c-sidebar-nav-title">상담 항목</li>
+				<li class="c-sidebar-nav-item c-sidebar-nav-dropdown"><a
+                    class="c-sidebar-nav-link c-sidebar-nav-dropdown-toggle" href="#">
+                    <svg class="c-sidebar-nav-icon">
+                        <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-star"></use>
+                    </svg> 자가진단</a>
+                <ul class="c-sidebar-nav-dropdown-items">
+					<% types.forEach(function(v,i){%>
+						<li class="c-sidebar-nav-item">
+							<a class="c-sidebar-nav-link" href="./<%=i%>" target="_top">
+								<svg class="c-sidebar-nav-icon">
+									<use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-account-logout"></use>
+								</svg> <%=v.typename%>
+								<!--해당 사이드 바에 비중이 커지는 것 같아 수정 및 삭제는 설정 페이지에서 같이 작업하겠습니다. - 성준 -->
+							</a>
+						</li>
+					<%});%>
+					<li class="c-sidebar-nav-item">
+						<a class="c-sidebar-nav-link">
+							<svg class="c-sidebar-nav-icon">
+								<use
+									xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-chart-pie"
+								></use>
+							</svg>
+							<button type="button" class="btn btn-outline-light" data-toggle="modal" data-target="#exampleModal">
+								+
+							</button></a>
+					</li>
+                </ul>
+            	</li>
 			</ul>
 			<button
 				class="c-sidebar-minimizer c-class-toggler"
@@ -277,7 +293,7 @@
 					<ol class="breadcrumb border-0 m-0">
 						<li class="breadcrumb-item"><a href="/admin">Home</a></li>
 						<li class="breadcrumb-item"><a href="#">심리 자가진단</a></li>
-						<li class="breadcrumb-item active"><%= state%></li>
+						<li class="breadcrumb-item active"><%= type%></li>
 						<!-- Breadcrumb Menu-->
 					</ol>
 				</div>
@@ -286,82 +302,108 @@
 				<main class="c-main">
 					<div class="container-fluid">
 						<div class="row fade-in">
-							<div class="col-8 mx-auto pt-3" id="sortable">
+							<div class="col-8 mx-auto pt-3">
+								<%
+									result.forEach(function(v,i){
+								%>
+								<%if(v.answertype==='check'){%>
 								<div class="card">
-									<div class="card-body" id="card_id_0">
+									<div class="card-body" id="card_id_<%=i%>">
 										<div class="input-group mb-3">
 											<div class="input-group-prepend">
-												<span class="input-group-text" id="question"
-													>질문</span
-												>
+												<span class="input-group-text" id="question">질문</span>
 											</div>
-											<input
-												type="text"
-												class="form-control"
-												placeholder="Question"
-												aria-label="question"
-												oninput="updateQuestion(card_id_0,this)"
-											/>
-											<button
-												type="button"
-												class="btn btn-secondary add_event_btn ml-2"
-												onclick="deleteCard(card_id_0,this)"
-											>
-												질문삭제
-											</button>
+											<input type="text" class="form-control" placeholder="Question" aria-label="question" 
+											 oninput="updateQuestion(card_id_<%= i%>,this)" value="<%= v.question%>">
+											<button type="button" class="btn btn-secondary ml-2" onclick="deleteCard(card_id_<%= i%>,this)">질문삭제</button>
 										</div>
+									<%v.answer.split(',').forEach(function(b,j){%>
 										<div class="form-check">
-											<input
-												class="form-check-input"
-												type="checkbox"
-												value=""
-											/>
+											<input class="form-check-input" type="checkbox">
 											<label class="form-check-label">
-												<input
-													type="text"
-													class="form-control"
-													placeholder="답"
-													aria-label=""
-													size="50"
-													id="check_0_0"
-													oninput="updateAsk(card_id_0,this)"
-												/>
+												<input type="text" class="form-control" placeholder="답" aria-label="" size=50 
+												 id="check_<%= i%>_<%=j%>" oninput="updateAsk(card_id_<%=i%>,this)" value="<%=b%>">
 											</label>
-											<button
-												type="button"
-												class="btn btn-ghost-danger"
-												onclick="deleteAsk(card_id_0,this)"
-											>
-												X
-											</button>
+											<button type="button" class="btn btn-ghost-danger"
+															onclick="deleteAsk(card_id_<%=i%>,this)">X</button>
 										</div>
+									<%}) %>
+								</div>
+							<div class="form-check mb-3 add_check_btn">
+								<label class="form-check-label">
+									<button type="button" value="add_check" class="add_event_btn_${i} btn btn-secondary"  onclick=addCheck(card_id_${i})>추가</button>
+								</label>
+								<div class="toggle_wrap">
+									<pre class="float-left font-size-15">필수 </pre>
+									<label class="float-right c-switch c-switch-3d c-switch-primary addbtn-side-vertical-match">
+										<input type="checkbox" class="c-switch-input" onchange="isRequired(card_id_<%= i%>,this)">
+										<span class="c-switch-slider"></span>
+									</label>
+								</div>
+							</div>
+						</div>
+								<%}%>
+								<%if(v.answertype==='radio'){%>
+								<div class="card">
+									<div class="card-body" id="card_id_<%=i%>">
+										<div class="input-group mb-3">
+											<div class="input-group-prepend">
+												<span class="input-group-text" id="question">질문</span>
+											</div>
+											<input type="text" class="form-control" placeholder="Question" aria-label="question" 
+											 oninput="updateQuestion(card_id_<%=i%>,this)" value="<%=v.question%>">
+											<button type="button" class="btn btn-secondary ml-2" onclick="deleteCard(card_id_<%=i%>,this)">질문삭제</button>
+										</div>
+										<%v.answer.split(',').forEach(function(b,j){%>
+										<div class="form-check">
+											<input class="form-check-input" type="radio" name="radio_<%=i%>" id="exampleRadios_<%=i%>" value="option1">
+											<label class="form-check-label" for="exampleRadios1">
+												<input type="text" class="form-control" placeholder="답" aria-label="" size=50 
+												 id="radio_<%=i%>_<%=j%>" oninput="updateAsk(card_id_<%=i%>, this)" value="<%= b%> ">
+											</label>
+											<button type="button" class="btn btn-ghost-danger"
+												onclick="deleteAsk(card_id_<%=i%>,this)">X</button>
+										</div>
+										<%}) %>
 									</div>
 									<div class="form-check mb-3">
 										<label class="form-check-label">
-											<button
-												type="button"
-												value="add_check"
-												class="add_event_btn_0 btn btn-secondary"
-												onclick="addCheck(card_id_0)"
-											>
-												추가
-											</button>
+											<button type="button" value="add_check" class="add_event_btn_<%=i%> btn btn-secondary" onclick="addRadio(card_id_<%=i%>)">추가												</button>
 										</label>
 										<div class="toggle_wrap">
 											<pre class="float-left font-size-15">필수 </pre>
-											<label
-												class="float-right c-switch c-switch-3d c-switch-primary addbtn-side-vertical-match"
-											>
-												<input
-													type="checkbox"
-													class="c-switch-input"
-													onchange="isRequired(card_id_0,this)"
-												/>
+											<label class="float-right c-switch c-switch-3d c-switch-primary addbtn-side-vertical-match">
+												<input type="checkbox" class="c-switch-input" onchange="isRequired(card_id_<%=i%>,this)">
 												<span class="c-switch-slider"></span>
 											</label>
 										</div>
 									</div>
 								</div>
+								<%}%>
+								<%if(v.answertype=='normal'){%>
+								<div class="card">
+									<div class="card-body" id="card_id_<%=i%>">
+										<div class="input-group mb-3">
+											<div class="input-group-prepend">
+												<span class="input-group-text" id="question">질문</span>
+											</div>
+											<input type="text" class="form-control" placeholder="Question" aria-label="question" 
+											 oninput="updateQuestion(card_id_<%=i%>,this)" value="<%=v.question%>">
+											<button type="button" class="btn btn-secondary add_event_btn" onclick="deleteCard(card_id_<%=i%>,this)">질문삭제</button>
+										</div>
+										<div class="toggle_normal_wrap">
+											<pre class="float-left font-size-15">필수 </pre>
+											<label class="float-right c-switch c-switch-3d c-switch-primary addbtn-side-vertical-match">
+												<input type="checkbox" class="c-switch-input" onchange="isRequired(card_id_<%=i%>,this)">
+												<span class="c-switch-slider"></span>
+											</label>
+										</div>
+									</div>
+								</div>
+								<%}%>
+								<%
+									});
+								%>
 							</div>
 						</div>
 					</div>
@@ -395,27 +437,53 @@
 					</div>
 					<script>
 						let sendObject = [
-							//ajax로 보내는 object
+						<% result.forEach(function(v,i){ %>
 							{
-								id: 'card_id_0', //프론트에서 찾기 쉽게 사용하는 용도라 백엔드에서는 다르게 받기로
-								type: 'check',
-								question: '',
-								askList: [
-									{
-										id: 'check_0_0',
-										ask: '',
-									},
-								],
+								id: 'card_id_<%=i%>',
+								type: '<%= v.answertype%>',
+								question: '<%=v.question%>',
+								<%if (v.answertype=='check'){%> 
+								askList:[
+										<%v.answer.split(',').forEach(function(b,j){%>
+										{
+											id:'check_<%=i%>_<%=j%>',
+											ask:'<%=b%>'
+										},
+										<%}) %>
+									],
+										<%}%>
+								<%if (v.answertype=='radio'){%> 
+								askList:[
+										<%v.answer.split(',').forEach(function(b,j){%>
+										{
+											id:'radio_<%=i%>_<%=j%>',
+											ask:'<%=b%>'
+										},
+										<%}) %>
+									],
+										<%}%>
 								required: false,
 							},
-						];
-
-						let i = 0;
-						let cur_i = 0;
+					<%})%>];
+						if(sendObject.length===0){
+							$('.col-8').append(`
+							<div class="jumbotron jumbotron-fluid">
+							  <div class="container">
+								<h1 class="display-4">아무도 없나요?</h1>
+								<p class="lead">이런! 저장된 설문이 없군요! 오른쪽 버튼들을 통해 설문을 추가해보아요:)</p>
+							  </div>
+							</div>
+							`);
+						}
+						let i = <%=result.length-1%>;
+						let cur_i = <%=result.length-1%>;
 
 						$('.add_event_btn_').click(function (e) {
 							switch (e.target.value) {
 								case 'add_check_card':
+									if(sendObject.length===0){
+										$('div').remove('.jumbotron');
+									}
 									$('.col-8').append(`
                         <div class="card">
                         <div class="card-body" id=card_id_${++i}>
@@ -460,7 +528,9 @@
 									cur_i = i;
 									break;
 								case 'add_radio_card':
-									j = 0;
+									if(sendObject.length===0){
+										$('div').remove('.jumbotron');
+									}
 									$('.col-8').append(`
                         <div class="card">
                         <div class="card-body" id=card_id_${++i}>
@@ -505,6 +575,9 @@
 									cur_i = i;
 									break;
 								case 'add_nomal_card':
+									if(sendObject.length===0){
+										$('div').remove('.jumbotron');
+									}
 									$('.col-8').append(`
                     <div class="card">
                     <div class="card-body" id=card_id_${++i}>
@@ -533,6 +606,9 @@
 									cur_i = i;
 									break;
 									case "add_grid_card":
+									if(sendObject.length===0){
+										$('div').remove('.jumbotron');
+									}
                                 $(".col-8").append(`
                                     <div class="card">
                                     <div class="card-body" id=card_id_${++i}>
@@ -592,6 +668,19 @@
 									break;
 							}
 						});
+						$('#add_type_button').click(function(e){
+							$.ajax({
+								type:'POST',
+								dataType:'json',
+								url:'../addType',
+								async:true,
+								data:{"add_type" : $('#type-name').val()},
+								success:function(data){
+									
+									window.location.reload();
+								}
+							})
+						})
 						function deleteCard(parent, me) {
 							--i;
 							if (i + 1 == cur_i) {
@@ -601,6 +690,16 @@
 							const findParentIndex = sendObject.findIndex((v) => v.id === parent.id);
 							sendObject.splice(findParentIndex, 1);
 							$(me).parentsUntil('.col-8').remove();
+							if(sendObject.length===0){
+								$('.col-8').append(`
+							<div class="jumbotron jumbotron-fluid">
+							  <div class="container">
+								<h1 class="display-4">아무도 없나요?</h1>
+								<p class="lead">이런! 저장된 설문이 없군요! 오른쪽 버튼들을 통해 설문을 추가해보아요:)</p>
+							  </div>
+							</div>
+							`);
+							}
 						}
 
 						function deleteAsk(parent, me) {
@@ -699,7 +798,7 @@
 							}
 						}
 					</script>
-					<script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
+					
 				</main>
 				<footer class="c-footer">
 					<div><a href="https://coreui.io">CoreUI</a> &copy; 2020 creativeLabs.</div>

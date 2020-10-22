@@ -41,9 +41,14 @@ Yuhan University Psychotherapy Application
 * WebView에서 가져온 쿠키 기간 설정 (Flutter) ✔
 * WebView 접근 시 쿠키 보내기 (Flutter) ✔
 
-### 2020.09.27 ~ 
-* 예약 시스템, 관리자 부분 심리검사 질문 작성 폼 구현 및 DB 구축
-* 예약 시스템, 사용자 부분 개인정보 제공 동의 및 심리검사 답변 작성 폼 구현
+### 2020.09.27 ~ 2020.10.08
+* 예약 시스템, 관리자 부분 심리검사 질문 작성 폼 구현 및 DB 구축 ✔
+* 예약 시스템, 사용자 부분 개인정보 제공 동의 및 심리검사 답변 작성 폼 구현 ⛔
 * WebView 뒤로가기 처리 (Flutter) ✔
 * WebView에서 텍스트박스 클릭 시 발생하는 스크롤 이슈 해결 (Flutter) ✔
-* WebView 패키지 Flutter InAppWebView로 변경 (Flutter)
+* WebView 패키지 Flutter InAppWebView로 변경 (Flutter) ✔
+
+### 2020.10.08 ~
+* 채팅 시스템 상세화 및 채팅 룸 설정
+* WebView 텍스트 박스 선택 시 발생하는 뒤로가기 이슈 해결 (Flutter) 
+* FCM 개발 (Flutter) 

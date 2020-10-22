@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -43,8 +42,9 @@ class _LoginState extends State<Login> {
   }
 
   //progressDialog 초기화
-  setProgressDialog() async{
-    progressDialog = new ProgressDialog(context,type: ProgressDialogType.Normal);
+  setProgressDialog() async {
+    progressDialog =
+        new ProgressDialog(context, type: ProgressDialogType.Normal);
     progressDialog.style(message: '잠시만 기다려주세요...');
     //progressDialog 커스텀하는 방법
     // progressDialog.style(
@@ -83,7 +83,7 @@ class _LoginState extends State<Login> {
 
   Widget _buildLoginLayout(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(top: 150, left: 20, right: 20), //상, 좌, 우 여백
+      padding: EdgeInsets.only(top: 150, left: 20, right: 20), // 상, 좌, 우 여백
       child: Column(
         children: <Widget>[
           _userIDTextField(context),
@@ -117,7 +117,7 @@ class _LoginState extends State<Login> {
   Widget _userPasswordTextField(BuildContext context) {
     return TextFormField(
       onChanged: (value) => userPassword = value,
-      obscureText: true, //Text 암호화 표시
+      obscureText: true, // Text 암호화 표시
       decoration: InputDecoration(
         labelText: 'Enter Password',
         filled: true,
@@ -148,7 +148,7 @@ class _LoginState extends State<Login> {
           "Login",
         ),
         onPressed: () {
-          //로그인 버튼 눌렀을 때 실행 될 내용
+          // 로그인 버튼 눌렀을 때 실행 될 내용
           portalLogin(userID, userPassword, isAutoLogin);
         },
       ),
@@ -177,10 +177,10 @@ class _LoginState extends State<Login> {
     );
 
     if (res.statusCode == 200) {
-      //응답의 헤더에서 cookie값 가져와서 저장
+      // 응답의 헤더에서 cookie값 가져와서 저장
       Cookie cookie = Cookie.fromSetCookieValue(res.headers['set-cookie']);
       if (isAutoLogin) {
-        //만료일자(30일 후)세팅, 쿠키값 저장, 만료일자 저장
+        // 만료일자(30일 후)세팅, 쿠키값 저장, 만료일자 저장
         DateTime dateTime = cookie.expires.add(new Duration(days: 30));
         prefs.setString('cookie', cookie.toString());
         prefs.setString('expires', dateTime.toString());

@@ -13,6 +13,12 @@
 				integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
 				crossorigin="anonymous">
 		</script>
+		
+		<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" 
+				integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" 
+				crossorigin="anonymous">
+		</script>
+
 		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
 				integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
 				crossorigin="anonymous">
@@ -91,6 +97,24 @@
         </div>
 		
 		<div class="container-fluid">
+			
+			<div class="row">
+				<div class="col-title col">
+					<label class="text-primary text-counselor">상담사 선생님 선택</label>
+				</div>
+			</div>
+		
+			<div class="row">
+				<div class="dropdown">
+					<button class="btn btn-secondary dropdown-toggle dropdown-counselor-title" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">상담사 선생님</button>
+					<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+						<% for(let i = 0; i < counselorNameList.length; i++){ %>
+							<button class="dropdown-counselor dropdown-item" value="<%= counselorNameList[i][0] %>"><%= counselorNameList[i][1] %></button>
+						<% } %>
+						
+					</div>
+				</div>
+			</div>
             <div class="row">
                 <div class="col-title col">
                     <label class="text-primary">상담 유형 선택</label>
@@ -191,6 +215,7 @@
             <div class="row">
                 <div class="col-submit col">
                     <form method="POST">
+						<input type="hidden" id="reserv_counselorId_id" name="reserv_counselorId" value="">
                         <input type="hidden" id="reserv_type_id" name="reserv_type" value="">
                         <input type="hidden" id="reserv_date_id" name="reserv_date" value="">
                         <input type="hidden" id="reserv_time_id" name="reserv_time" value="">
@@ -243,7 +268,14 @@
                     }
                 }
             });
-            
+            $('.dropdown-counselor').click(function() {
+				let selectedCounselorName = $(this).text();
+				let selectedCounselorId = $(this).val();
+				
+				$('.dropdown-counselor-title').text(selectedCounselorName);
+				$('#reserv_counselorId_id').val(selectedCounselorId);
+				
+			});
             $('.btn-type').click(function() {
                 $(this).removeClass('btn-outline-primary');
                 $(this).addClass('btn-primary');
@@ -266,21 +298,26 @@
                     dataType: "json",
                     url: "./getPossibleTime",
                     async: true,
-                    data: { "sendAjax" : $('#reserv_date_id').val() },
+                    data: {"ajax_counselorId" : $('#reserv_counselorId_id').val(), "ajax_date" : $('#reserv_date_id').val()},
 
                     success: function (data) {
+						console.info(data);
                         for(let j=0; j<8; j++) {
-                            $('.btn-time').eq(j).attr('disabled', false);
-
-                            $('.btn-time').eq(j).removeClass('btn-outline-dark');
+                            $('.btn-time').eq(j).attr('disabled', true);
+							
+							
+                            $('.btn-time').eq(j).addClass('btn-outline-dark');
+							/*
 							$('.btn-time').eq(j).removeClass('btn-success');
                             $('.btn-time').eq(j).addClass('btn-outline-success');
 							
 							$('#reserv_time_id').val("");
-                
-							$('#reserv_submit').attr('disabled', true);
+                			*/
+							
+							// $('#reserv_submit').attr('disabled', true);
                         }
-
+						
+						/*
                         for(var i=0; i<data.rtntime.length; i++) {
                             if(data.rtntime[i].CNT === 2){
 								let getTime = data.rtntime[i].starttime;		
@@ -294,6 +331,19 @@
                                 $('.btn-time').eq(getTime).addClass('btn-outline-dark');
                             }
                         }
+						*/
+						
+						for(let i = 0; i < data.rtntime.length; i++){
+							let getTime = data.rtntime[i].starttime;
+							
+							if(getTime < 12) getTime = getTime - 9;
+							else getTime = getTime - 10;
+							
+							$('.btn-time').eq(getTime).removeClass('btn-outline-dark');
+							$('.btn-time').eq(getTime).addClass('btn-outline-success');
+							$('.btn-time').eq(getTime).attr('disabled', false);
+						}
+					
                     }
                 });
             });

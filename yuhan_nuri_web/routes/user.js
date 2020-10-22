@@ -19,12 +19,12 @@ router.post('/', function (req, res) { //POST /user
 	let adminCheckSql = "SELECT empno, empname FROM Counselor WHERE empno = ?" // 관리자 계정인지 체크하는 함수
 	
 	connection.execute(adminCheckSql, [userId], (err, rows) => {
-		//console.info(rows[0]);
+		
 		if(err) {
 			console.error(err)
 		}
 		else if(rows[0] !== undefined) {
-			// 관리자 계정일 경우 - 윤권
+			// 관리자 계정일 경우 - 윤권 (근로학생도 포함)
 			let adminInfo = {
 				empno : rows[0].empno,
 				empname : rows[0].empname
@@ -32,11 +32,7 @@ router.post('/', function (req, res) { //POST /user
 			req.session.adminInfo = adminInfo; // 사용자 정보를 세션으로 저장
 		
 			console.info(req.session.adminInfo.empname);
-			/*
-			res.render('admin', {
-				empname : adminInfo.empname
-			});
-			*/
+			
 			res.redirect('/admin');
 		}
 		else {
@@ -117,10 +113,28 @@ router.post('/mobile', function(req, res) { //POST /user/mobile
 });
 
 router.get('/reservation', function (req, res) { //GET /user/reservation
-    res.render('reservation');
+	
+	// 상담사를 먼저 선택하고 ajax 로 받아서 그다음에 일정을 처리해야 할것으로 보임
+	const sql_counselorList = "SELECT empno, empname FROM Counselor WHERE position = 'counselor'";
+
+	connection.execute(sql_counselorList, (err, rows) => {
+		if(err){
+			console.error(err);
+			return;
+		}else{
+			let counselorNameList = rows.map(v => [v.empno, v.empname]);
+		
+			console.info(counselorNameList);
+			res.render('reservation', {counselorNameList : counselorNameList});
+		}
+		
+	});
+	
+
 });
 
 router.post('/reservation', function (req, res) { //POST /user/reservation
+	let reservation_counselorId = req.body.reserv_counselorId;
     let reservation_date = req.body.reserv_date;
     let reservation_time = req.body.reserv_time;
 	let reservation_type = req.body.reserv_type;
@@ -156,7 +170,7 @@ router.post('/reservation', function (req, res) { //POST /user/reservation
 			newSerialNum, 
 			reservation_type,
 			req.session.userInfo.stuCode,
-			"", 
+			reservation_counselorId, 
 			reservation_date,
 			reservation_time,
 			0,
@@ -199,12 +213,19 @@ router.get('/selfcheck', function (req, res) { //GET /user/privacy
 
 router.post("/getPossibleTime", function(req, res){ //POST /user/postTest
 	// 예약 승인이 되었을때의 기준 (status = 1)
-	let getReservationByDateSql = "SELECT starttime, COUNT(starttime) AS CNT FROM Reservation WHERE date = ? AND status = 1 GROUP BY starttime";
-	console.info(req.body.sendAjax);
+	//let getReservationByDateSql = "SELECT starttime, COUNT(starttime) AS CNT FROM Reservation WHERE date = ? AND status = 1 GROUP BY starttime";
+	let getCanCounselSchedule = "SELECT starttime FROM CanCounselSchedule WHERE date = ? AND empno = ?";
 	
-	connection.execute(getReservationByDateSql, [req.body.sendAjax], (error, rows, fields) => {
-  		if (error) throw error;
-		else res.json({ok: true, rtntime: rows});
+	
+	let empno = req.body.ajax_counselorId;
+	let date = req.body.ajax_date;
+	
+	
+	connection.execute(getCanCounselSchedule, [date, empno], (error, rows, fields) => {
+  		if (error) console.error(error);
+		
+		else  
+			res.json({ok: true, rtntime: rows});
 	});
 });
 

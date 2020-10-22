@@ -8,6 +8,13 @@
     <!-- CoreUI CSS -->
     <link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
     <title>유한누리 어드민</title>	
+	<link rel="stylesheet" type="text/css" href="https://uicdn.toast.com/tui-calendar/latest/tui-calendar.css" />
+    <link rel="stylesheet" type="text/css" href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css" />
+    <link rel="stylesheet" type="text/css" href="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.css" />
+    <script src="https://uicdn.toast.com/tui.code-snippet/v1.5.2/tui-code-snippet.min.js"></script>
+    <script src="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.min.js"></script>
+    <script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.min.js"></script>
+    <script src="https://uicdn.toast.com/tui-calendar/latest/tui-calendar.js"></script>
 	<script src="https://code.jquery.com/jquery-latest.min.js"></script>
 </head>
 <body class="c-app">
@@ -220,23 +227,14 @@
             <main class="c-main">
                 <div class="container-fluid">
                     <div class="fade-in">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <h4 class="card-title mb-0">예약 리스트</h4>
-                                        <div class="text-muted"><%= `${new Date().getFullYear()}-${new Date().getMonth()+1}-${new Date().getDate()}`%></div>
-                                    </div>
-                                </div>
-                            </div>
-							<% getReservation.forEach(function(val,i){ %>
-								<div class="card-body list-group-item">
-                                    <h5 class="card-title">학번: <%=val.stuno%></h5>
-                                    <p class="card-text">상담 유형: <%= val.typecode%> 상담 시간 <%= val.starttime%></p>
-                                    <button class="btn btn-primary float-right reser-btn" id="accept-reservation-btn-<%=i%>" value="<%= val.no%>">수락</button>
-                                </div>
-							<% }) %>
-                        </div>
+						<h2 id='date'></h2>
+						<button id="nowBtn">오늘</button>
+						<button id="prevBtn">이전</button>
+						<button id="nextBtn">다음</button>
+						<button id="dayViewBtn">일간</button>
+						<button id="weekViewBtn">주간</button>
+						<button id="monthViewBtn">월간</button>
+						<div id="calendar" style="height: 800px;"></div>
                     </div>
                 </div>
             </main>
@@ -246,6 +244,147 @@
             </footer>
         </div>
     </div>
+	<script>
+		const container = document.getElementById('calendar');
+
+		const options = {
+			defaultView: 'month',
+			useCreationPopup: true,
+			useDetailPopup: true
+		}
+		var Calendar = tui.Calendar;
+
+		const calendar = new Calendar(container, options);
+		const nowBtn = document.getElementById('nowBtn');
+		const prevBtn = document.getElementById('prevBtn');
+		const nextBtn = document.getElementById('nextBtn');
+		const dayViewBtn = document.getElementById('dayViewBtn');
+		const weekViewBtn = document.getElementById('weekViewBtn');
+		const monthViewBtn = document.getElementById('monthViewBtn');
+		const date = document.getElementById('date');
+
+		date.textContent = `${calendar.getDate().getFullYear()}-${calendar.getDate().getMonth() + 1}`;
+
+		// calendar._controller.schedules.items //전체 스케줄 뽑는 방법
+
+		calendar.setCalendars([
+			{
+				id: 'Major Subject',
+				name: '전공 필수',
+				color: '#ffffff',
+				bgColor: '#ff5583',
+				dragBgColor: '#ff5583',
+				borderColor: '#ff5583'
+			},
+			{
+				id: 'Elective Subject',
+				name: '전공 선택',
+				color: '#ffffff',
+				bgColor: '#ffbb3b',
+				dragBgColor: '#ffbb3b',
+				borderColor: '#ffbb3b'
+			},
+			{
+				id: 'General Subject',
+				name: '일반 교양',
+				color: '#ffffff',
+				bgColor: '#03bd9e',
+				dragBgColor: '#03bd9e',
+				borderColor: '#03bd9e'
+			}
+		]); //캘린더 종류 등록
+
+		calendar.createSchedules([
+			{
+				id: '1',
+				calendarId: 'Major Subject', // 등록된 캘린더 종류에 따른 id값 매핑
+				title: '자료구조론',
+				category: 'time',              // 일반 일정
+				start: '2020-10-01T10:00:00',
+				end: '2020-10-02T10:00:00'
+			},
+			{
+				id: '2',
+				calendarId: 'Elective Subject',
+				title: '웹 프로그래밍',
+				category: 'time',
+				start: '2020-10-03T10:00:00',
+				end: '2020-10-04T10:00:00',
+			},
+			{
+				id: '3',
+				calendarId: 'General Subject',
+				title: '영양과 건강',
+				category: 'time',
+				start: '2019-11-27T13:00:00',
+				end: '2019-11-27T14:00:00'
+			},
+			{
+				id: '4',
+				calendarId: 'Major Subject',
+				title: '하...',
+				category: 'allday',              // 종일 일정
+				start: '2020-10-26',
+				end: '2020-10-30',
+				color: '#ffffff',
+				bgColor: '#ff4040',              // 일정 색상을 직접 지정할 수 있어요
+				dragBgColor: '#ff4040',
+				borderColor: '#ff4040'
+			}
+		]);
+
+		calendar.on('beforeCreateSchedule', scheduleData => {
+			const schedule = { // 해당 객체의 형태로 db를 구성해야 할 것 같음
+				calendarId: scheduleData.calendarId,
+				id: String(Math.random() * 100000000000000000), // 겹칠 일이 없도록 만드는 것이 중요함
+				title: scheduleData.title,
+				isAllDay: scheduleData.isAllDay,
+				start: scheduleData.start,
+				end: scheduleData.end,
+				category: scheduleData.isAllDay ? 'allday' : 'time',
+				location: scheduleData.location             // 장소 정보도 입력할 수 있네요!
+			};
+
+			calendar.createSchedules([schedule]);
+
+			// alert('일정 생성 완료');
+		});
+		calendar.on('beforeUpdateSchedule', event => {
+			const { schedule, changes } = event;
+
+			calendar.updateSchedule(schedule.id, schedule.calendarId, changes);
+		});
+		calendar.on('beforeDeleteSchedule', scheduleData => {
+			const { schedule } = scheduleData;
+
+			calendar.deleteSchedule(schedule.id, schedule.calendarId);
+		});
+		nowBtn.addEventListener('click', () => {
+			calendar.today();
+			date.textContent = `${calendar.getDate().getFullYear()}-${calendar.getDate().getMonth() + 1}`;
+		})
+		prevBtn.addEventListener('click', () => {
+			calendar.prev();
+			date.textContent = `${calendar.getDate().getFullYear()}-${calendar.getDate().getMonth() + 1}`;
+		});
+
+		nextBtn.addEventListener('click', () => {
+			calendar.next();
+			date.textContent = `${calendar.getDate().getFullYear()}-${calendar.getDate().getMonth() + 1}`;
+		});
+
+		dayViewBtn.addEventListener('click', () => {
+			calendar.changeView('day', true);
+		});
+
+		weekViewBtn.addEventListener('click', () => {
+			calendar.changeView('week', true);
+		});
+
+		monthViewBtn.addEventListener('click', () => {
+			calendar.changeView('month', true);
+		});
+	</script>
     <script src="https://unpkg.com/@popperjs/core@2"></script>
     <script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.min.js"></script>
 </body>

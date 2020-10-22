@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
@@ -32,8 +33,7 @@ class YuhanNuriState extends State<YuhanNuri> {
   DateTime currentBackPressTime;
   Map<String, String> header; // 전달받은 Cookie객체를 string과 합쳐서 header만듦
   GlobalKey globalKey = new GlobalKey(); //네비게이션 바 외부에서 접근가능하게 해줄 Key변수
-  // var urlhistory = List();
-  // var currentindex;
+
   YuhanNuriState(String cookieParam) {
     header = {'Cookie': '$cookieParam'};
   }
@@ -65,6 +65,7 @@ class YuhanNuriState extends State<YuhanNuri> {
 
                   KeyboardVisibility.onChange.listen((bool visible) async {
                     if (visible) {
+                      print(await fcm.getToken());
                       if (await _webViewController.getUrl() !=
                           "https://yuhannuri.run.goorm.io/chat") {
                         await _webViewController.evaluateJavascript(
@@ -107,7 +108,9 @@ class YuhanNuriState extends State<YuhanNuri> {
                       _webViewController.loadUrl(url: 'https://google.com');
                       break;
                     case 2:
-                      _webViewController.loadUrl(url: 'https://youtube.com');
+                      _webViewController.loadUrl(
+                          url: 'https://yuhannuri.run.goorm.io/user/fcmEx/' +
+                              fcm.getToken().toString());
                       break;
                     case 3:
                       _webViewController.loadUrl(
@@ -148,5 +151,16 @@ class YuhanNuriState extends State<YuhanNuri> {
               });
               return null;
             }));
+  }
+
+  final FirebaseMessaging fcm = FirebaseMessaging();
+  void asd() {
+    fcm.configure(onMessage: (Map<String, dynamic> message) async {
+      print("onMessage: $message");
+    }, onResume: (Map<String, dynamic> message) async {
+      print("onResume: $message");
+    }, onLaunch: (Map<String, dynamic> message) async {
+      print("onLaunch: $message");
+    });
   }
 }

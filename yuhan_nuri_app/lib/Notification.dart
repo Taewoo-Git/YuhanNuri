@@ -19,10 +19,6 @@ class CustomNotification {
     _flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
-  getFlugin() {
-    return _flutterLocalNotificationsPlugin;
-  }
-
   void showNotification() async {
     // Detail에는 icon이나 push 알람이 일어났을 때의 알람소리등의 디테일 부분을 설정
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
@@ -35,7 +31,7 @@ class CustomNotification {
     var scheduledNotificationDateTime =
         DateTime.now().add(Duration(seconds: 5));
 
-    await _flutterLocalNotificationsPlugin.schedule(
+    _flutterLocalNotificationsPlugin.schedule(
       0, // 해당 notification의 id를 나타내며 이 id값을 통해 Notication을 취소한다.
       'Notification 제목',
       'Notification 내용',

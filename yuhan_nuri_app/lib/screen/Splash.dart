@@ -61,7 +61,7 @@ class SplashState extends State<Splash> {
       cookieParam = "NoCookie";
     }
 
-    //만료일자가 지나지 않았음, cookie string 확인
+    // 만료일자가 지나지 않았음, cookie string 확인
     if (cookieParam != "NoCookie") {
       // cookie에 정상적인 값이 있으면 바로 webView가있는 페이지로 이동, YuhanNuri.dart
       Navigator.of(context).pushReplacement(MaterialPageRoute(

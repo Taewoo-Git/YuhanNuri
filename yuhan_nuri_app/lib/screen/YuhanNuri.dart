@@ -7,6 +7,8 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:toast/toast.dart';
 
+final FirebaseMessaging fcm = FirebaseMessaging();
+
 class YuhanNuri extends StatefulWidget {
   final String cookie;
   YuhanNuri({Key key, this.title, this.cookie}) : super(key: key);
@@ -34,13 +36,34 @@ class YuhanNuriState extends State<YuhanNuri> {
   Map<String, String> header; // 전달받은 Cookie객체를 string과 합쳐서 header만듦
   GlobalKey globalKey = new GlobalKey(); //네비게이션 바 외부에서 접근가능하게 해줄 Key변수
 
+  final FirebaseMessaging fcm = FirebaseMessaging();
+
   YuhanNuriState(String cookieParam) {
     header = {'Cookie': '$cookieParam'};
   }
 
   void initState() {
     super.initState();
+
+    fcm.configure(onMessage: (Map<String, dynamic> message) async {
+      print("onMessage: $message");
+      print(message['data']['fileno']);
+    }, onResume: (Map<String, dynamic> message) async {
+      print("onResume: $message");
+      print(message['data']['fileno']);
+    }, onLaunch: (Map<String, dynamic> message) async {
+      print("onLaunch: $message"); //
+      print(message['data']['fileno']);
+    });
   }
+
+  // static Future<void> onBackgroundMessage(Map<String, dynamic> message) async {
+  //   if (message.containsKey('data')) {
+  //     //final dynamic data = message['data'];
+  //     CustomNotification test = new CustomNotification();
+  //     test.showNotification(5);
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -66,18 +89,26 @@ class YuhanNuriState extends State<YuhanNuri> {
                   KeyboardVisibility.onChange.listen((bool visible) async {
                     if (visible) {
                       print(await fcm.getToken());
-                      if (await _webViewController.getUrl() !=
-                          "https://yuhannuri.run.goorm.io/chat") {
-                        await _webViewController.evaluateJavascript(
-                            source:
-                                'document.activeElement.scrollIntoView( {block: "center"})');
-                      } else {
-                        int viewHeight = int.parse(
-                            await _webViewController.evaluateJavascript(
-                                source:
-                                    "parseInt(document.activeElement.getBoundingClientRect().y)"));
-                        _webViewController.scrollTo(x: 0, y: viewHeight);
-                      }
+                      // if (await _webViewController.getUrl() !=
+                      //     "https://yuhannuri.run.goorm.io/chat") {
+                      //   await _webViewController.evaluateJavascript(
+                      //       source:
+                      //           'document.activeElement.scrollIntoView( {block: "center"})');
+                      // } else {
+                      //   int viewHeight = int.parse(
+                      //       await _webViewController.evaluateJavascript(
+                      //           source:
+                      //               "parseInt(document.activeElement.getBoundingClientRect().y)"));
+                      //   _webViewController.scrollTo(x: 0, y: viewHeight);
+                      // }
+                      // if (await _webViewController.getUrl() ==
+                      //     "https://yuhannuri.run.goorm.io/user/application") {
+                      //   print(
+                      //       '여기는 application @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2');
+                      //   await _webViewController.evaluateJavascript(
+                      //       source:
+                      //           'document.activeElement.scrollIntoView( {block: "center"})');
+                      // }
                     } else {
                       await _webViewController.evaluateJavascript(
                           source: 'document.activeElement.blur()');
@@ -123,6 +154,8 @@ class YuhanNuriState extends State<YuhanNuri> {
                 animationCurve: Curves.easeOut, // transition-animation 설정
                 height: 55.0, // 높이
               ),
+              resizeToAvoidBottomInset: true,
+              // resizeToAvoidBottomInset = true;
             ),
             onWillPop: () async {
               if (await _webViewController.getUrl() ==
@@ -151,16 +184,5 @@ class YuhanNuriState extends State<YuhanNuri> {
               });
               return null;
             }));
-  }
-
-  final FirebaseMessaging fcm = FirebaseMessaging();
-  void asd() {
-    fcm.configure(onMessage: (Map<String, dynamic> message) async {
-      print("onMessage: $message");
-    }, onResume: (Map<String, dynamic> message) async {
-      print("onResume: $message");
-    }, onLaunch: (Map<String, dynamic> message) async {
-      print("onLaunch: $message"); //
-    });
   }
 }

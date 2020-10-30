@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "1077468891600",
+    "firebase_url": "https://yuhannuri-50a5e.firebaseio.com",
+    "project_id": "yuhannuri-50a5e",
+    "storage_bucket": "yuhannuri-50a5e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1077468891600:android:b95437d2d5cac7cb5a91d5",
+        "android_client_info": {
+          "package_name": "com.example.yuhan_nuri_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1077468891600-arp9arkahvjk830d7khsn13kihmuru4q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBVot5O8JQnlMJNPiGv1jP7N_TzymoE6Hg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1077468891600-arp9arkahvjk830d7khsn13kihmuru4q.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

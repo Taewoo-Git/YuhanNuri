@@ -7,6 +7,12 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:toast/toast.dart';
 
+<<<<<<< HEAD
+=======
+final FirebaseMessaging fcm = FirebaseMessaging();
+CookieManager cm;
+//CurvedNavigationBarState navBarState;
+>>>>>>> f2705088c1eac9fa6986962ffde95a84021af2c2
 
 class YuhanNuri extends StatefulWidget {
   final String cookie;
@@ -34,7 +40,13 @@ class YuhanNuriState extends State<YuhanNuri> {
   DateTime currentBackPressTime;
   Map<String, String> header; // 전달받은 Cookie객체를 string과 합쳐서 header만듦
   GlobalKey globalKey = new GlobalKey(); //네비게이션 바 외부에서 접근가능하게 해줄 Key변수
+<<<<<<< HEAD
   CookieManager cm;
+=======
+  CurvedNavigationBarState navBarState;
+  bool abc = false;
+  final FirebaseMessaging fcm = FirebaseMessaging();
+>>>>>>> f2705088c1eac9fa6986962ffde95a84021af2c2
 
   YuhanNuriState(String cookieParam) {
     header = {'Cookie': '$cookieParam'};
@@ -43,6 +55,21 @@ class YuhanNuriState extends State<YuhanNuri> {
 
   void initState() {
     super.initState();
+<<<<<<< HEAD
+=======
+
+    fcm.configure(onMessage: (Map<String, dynamic> message) async {
+      print("onMessage: $message");
+      print(message['data']['fileno']);
+    }, onResume: (Map<String, dynamic> message) async {
+      print("onResume: $message");
+      print(message['data']['fileno']);
+    }, onLaunch: (Map<String, dynamic> message) async {
+      print("onLaunch: $message"); //
+      print(message['data']['fileno']);
+    });
+
+>>>>>>> f2705088c1eac9fa6986962ffde95a84021af2c2
     cm = new CookieManager();
   }
 
@@ -71,7 +98,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                   
                   _webViewController = controller;
                   // url로드전에 cookie 지워주지 않으면 cookie 안먹는 경우 있음
-                  CookieManager cm = new CookieManager();
+
                   cm.deleteAllCookies();
                   print( "//////////print header in Yuhannuri before loadUrl////////"+header.toString()+ "//////");
                   _webViewController.loadUrl(
@@ -79,6 +106,7 @@ class YuhanNuriState extends State<YuhanNuri> {
 
                   KeyboardVisibility.onChange.listen((bool visible) async {
                     if (visible) {
+<<<<<<< HEAD
                       //print( "//////////////////////////////////////"+await fcm.getToken() + "//////"+header.toString());
                       // if (await _webViewController.getUrl() !=
                       //     "https://yuhannuri.run.goorm.io/chat") {
@@ -100,6 +128,19 @@ class YuhanNuriState extends State<YuhanNuri> {
                       //       source:
                       //           'document.activeElement.scrollIntoView( {block: "center"})');
                       // }
+=======
+                      sleep(const Duration(milliseconds: 250));
+                      if (await _webViewController.getUrl() ==
+                          'https://yuhannuri.run.goorm.io/user/mypage') {
+                        await _webViewController.evaluateJavascript(
+                            source:
+                                'document.activeElement.scrollIntoView( {block: "center"})');
+                      } else {
+                        await _webViewController.evaluateJavascript(
+                            source:
+                                'document.activeElement.scrollIntoView( {block: "center"})');
+                      }
+>>>>>>> f2705088c1eac9fa6986962ffde95a84021af2c2
                     } else {
                       await _webViewController.evaluateJavascript(
                           source: 'document.activeElement.blur()');
@@ -123,13 +164,18 @@ class YuhanNuriState extends State<YuhanNuri> {
                   int navigationIndex = index;
                   switch (navigationIndex) {
                     case 0:
+<<<<<<< HEAD
                     cm.deleteAllCookies();
                     print( "/////////case0///////case0///////////"+header.toString());
+=======
+                      cm.deleteAllCookies();
+>>>>>>> f2705088c1eac9fa6986962ffde95a84021af2c2
                       _webViewController.loadUrl(
                           url: 'https://yuhannuri.run.goorm.io', headers: header);
                       break;
                     case 1:
                       cm.deleteAllCookies();
+<<<<<<< HEAD
                       print( "/////////case1///////case1///////////"+header.toString());
                       _webViewController.loadUrl(
                         url: 'https://yuhannuri.run.goorm.io/fcm', headers: header
@@ -140,6 +186,15 @@ class YuhanNuriState extends State<YuhanNuri> {
                       // _webViewController.loadUrl(
                       //     url: 'https://yuhannuri.run.goorm.io/user/fcmEx/' +
                               
+=======
+                      _webViewController.loadUrl(url: 'https://google.com');
+                      break;
+                    case 2:
+                      cm.deleteAllCookies();
+                      _webViewController.loadUrl(
+                          url: 'https://yuhannuri.run.goorm.io/user/fcmEx/' +
+                              fcm.getToken().toString());
+>>>>>>> f2705088c1eac9fa6986962ffde95a84021af2c2
                       break;
                     case 3:
                       cm.deleteAllCookies();
@@ -172,16 +227,55 @@ class YuhanNuriState extends State<YuhanNuri> {
                 }
                 return Future.value(true); // if문이 거짓일때는 바로 종료
               }
-
-              var future = _webViewController.canGoBack();
-              future.then((value) {
-                if (value) {
-                  final CurvedNavigationBarState navBarState =
-                      globalKey.currentState;
-                  navBarState.setPage(0);
-                }
-              });
+              abc = await _webViewController.evaluateJavascript(
+                  source: //'let obj = document.getElementById("chattingCard");' +
+                      'if(document.getElementById("chattingCard") != null) true;' +
+                          'else false;');
+              print(abc);
+              print(await fcm.getToken());
+              if (abc) {
+                showBackButtonDialog(context);
+              } else {
+                navBarState = globalKey.currentState;
+                navBarState.setPage(0);
+              }
               return null;
             }));
+  }
+
+  showBackButtonDialog(BuildContext context) {
+    Widget continueButton = FlatButton(
+      child: Text("예"),
+      onPressed: () {
+        Navigator.of(context).pop();
+
+        navBarState = globalKey.currentState;
+        navBarState.setPage(0);
+      },
+    );
+
+    Widget cancelButton = FlatButton(
+      child: Text("아니오"),
+      onPressed: () async {
+        //  Navigator.of(context).pop();
+        Navigator.pop(context);
+      },
+    );
+
+    AlertDialog alert = AlertDialog(
+      title: Text("유한누리"),
+      content: Text("메인화면으로 돌아가시겠습니까?"),
+      actions: [
+        continueButton,
+        cancelButton,
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 }

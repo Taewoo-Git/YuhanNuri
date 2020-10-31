@@ -186,7 +186,11 @@ class _LoginState extends State<Login> {
         'userId': userID.trim(),
         'password': userPassword.trim(),
         'isAutoLogin': isAutoLogin.toString(),
+<<<<<<< HEAD
         'myToken' : await fcm.getToken()
+=======
+        'myToken': await fcm.getToken()
+>>>>>>> f2705088c1eac9fa6986962ffde95a84021af2c2
       },
     );
 

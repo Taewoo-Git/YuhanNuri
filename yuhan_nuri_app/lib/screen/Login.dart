@@ -6,6 +6,9 @@ import 'package:toast/toast.dart';
 import 'package:yuhan_nuri_app/screen/YuhanNuri.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:progress_dialog/progress_dialog.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
+final FirebaseMessaging fcm = FirebaseMessaging();
 
 String userID = "";
 String userPassword = "";
@@ -40,6 +43,16 @@ class _LoginState extends State<Login> {
     // ignore: todo
     // TODO: implement initState
     setProgressDialog();
+    fcm.configure(onMessage: (Map<String, dynamic> message) async {
+      print("onMessage: $message");
+      print(message['data']['fileno']);
+    }, onResume: (Map<String, dynamic> message) async {
+      print("onResume: $message");
+      print(message['data']['fileno']);
+    }, onLaunch: (Map<String, dynamic> message) async {
+      print("onLaunch: $message"); //
+      print(message['data']['fileno']);
+    });
   }
 
   //progressDialog 초기화
@@ -173,6 +186,7 @@ class _LoginState extends State<Login> {
         'userId': userID.trim(),
         'password': userPassword.trim(),
         'isAutoLogin': isAutoLogin.toString(),
+        'myToken' : await fcm.getToken()
       },
     );
 

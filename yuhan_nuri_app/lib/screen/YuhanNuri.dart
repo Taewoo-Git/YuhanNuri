@@ -7,7 +7,6 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:toast/toast.dart';
 
-final FirebaseMessaging fcm = FirebaseMessaging();
 
 class YuhanNuri extends StatefulWidget {
   final String cookie;
@@ -35,26 +34,16 @@ class YuhanNuriState extends State<YuhanNuri> {
   DateTime currentBackPressTime;
   Map<String, String> header; // 전달받은 Cookie객체를 string과 합쳐서 header만듦
   GlobalKey globalKey = new GlobalKey(); //네비게이션 바 외부에서 접근가능하게 해줄 Key변수
-
-  final FirebaseMessaging fcm = FirebaseMessaging();
+  CookieManager cm;
 
   YuhanNuriState(String cookieParam) {
     header = {'Cookie': '$cookieParam'};
+    
   }
 
   void initState() {
     super.initState();
-
-    fcm.configure(onMessage: (Map<String, dynamic> message) async {
-      print("onMessage: $message");
-      print(message['data']['fileno']);
-    }, onResume: (Map<String, dynamic> message) async {
-      print("onResume: $message");
-      print(message['data']['fileno']);
-    }, onLaunch: (Map<String, dynamic> message) async {
-      print("onLaunch: $message"); //
-      print(message['data']['fileno']);
-    });
+    cm = new CookieManager();
   }
 
   // static Future<void> onBackgroundMessage(Map<String, dynamic> message) async {
@@ -78,17 +67,19 @@ class YuhanNuriState extends State<YuhanNuri> {
                     crossPlatform: InAppWebViewOptions(
                   debuggingEnabled: true,
                 )),
-                onWebViewCreated: (InAppWebViewController controller) {
+                onWebViewCreated: (InAppWebViewController controller) async{
+                  
                   _webViewController = controller;
                   // url로드전에 cookie 지워주지 않으면 cookie 안먹는 경우 있음
                   CookieManager cm = new CookieManager();
                   cm.deleteAllCookies();
+                  print( "//////////print header in Yuhannuri before loadUrl////////"+header.toString()+ "//////");
                   _webViewController.loadUrl(
                       url: 'https://yuhannuri.run.goorm.io', headers: header);
 
                   KeyboardVisibility.onChange.listen((bool visible) async {
                     if (visible) {
-                      print(await fcm.getToken());
+                      //print( "//////////////////////////////////////"+await fcm.getToken() + "//////"+header.toString());
                       // if (await _webViewController.getUrl() !=
                       //     "https://yuhannuri.run.goorm.io/chat") {
                       //   await _webViewController.evaluateJavascript(
@@ -121,10 +112,10 @@ class YuhanNuriState extends State<YuhanNuri> {
                 index: 0,
                 backgroundColor: Colors.blueAccent,
                 items: <Widget>[
-                  Icon(Icons.add, size: 25),
-                  Icon(Icons.list, size: 25),
+                  Icon(Icons.home, size: 25),
+                  Icon(Icons.insert_invitation, size: 25),
+                  Icon(Icons.headset_mic, size: 25),
                   Icon(Icons.person, size: 25),
-                  Icon(Icons.chat_bubble, size: 25),
                 ],
                 animationDuration:
                     const Duration(milliseconds: 300), // trainsition 설정
@@ -132,18 +123,26 @@ class YuhanNuriState extends State<YuhanNuri> {
                   int navigationIndex = index;
                   switch (navigationIndex) {
                     case 0:
+                    cm.deleteAllCookies();
+                    print( "/////////case0///////case0///////////"+header.toString());
                       _webViewController.loadUrl(
-                          url: 'https://yuhannuri.run.goorm.io');
+                          url: 'https://yuhannuri.run.goorm.io', headers: header);
                       break;
                     case 1:
-                      _webViewController.loadUrl(url: 'https://google.com');
+                      cm.deleteAllCookies();
+                      print( "/////////case1///////case1///////////"+header.toString());
+                      _webViewController.loadUrl(
+                        url: 'https://yuhannuri.run.goorm.io/fcm', headers: header
+                      );
                       break;
                     case 2:
-                      _webViewController.loadUrl(
-                          url: 'https://yuhannuri.run.goorm.io/user/fcmEx/' +
-                              fcm.getToken().toString());
+                      cm.deleteAllCookies();
+                      // _webViewController.loadUrl(
+                      //     url: 'https://yuhannuri.run.goorm.io/user/fcmEx/' +
+                              
                       break;
                     case 3:
+                      cm.deleteAllCookies();
                       _webViewController.loadUrl(
                           url: 'https://waveon.run.goorm.io');
                       break;

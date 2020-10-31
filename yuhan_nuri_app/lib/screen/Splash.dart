@@ -6,6 +6,7 @@ import 'Introduce.dart';
 import 'YuhanNuri.dart';
 import 'Login.dart';
 
+
 class SplashApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -22,6 +23,7 @@ class Splash extends StatefulWidget {
 }
 
 class SplashState extends State<Splash> {
+
   // 앱이 처음 실행되는지 체크
   checkFirstSeen() async {
     // 간단한 값을 어플리케이션에 파일 형태로 저장하는 클래스
@@ -30,7 +32,7 @@ class SplashState extends State<Splash> {
     bool _seen = (prefs.getBool('seen') ?? false);
 
     if (_seen) {
-      // 봤으면 로그인 스크린 실행, Login.dart
+      // 봤으면 Cookie가지고 있는지 확인
       checkHavingCookie();
     } else {
       // 안 봤으면 앱 소개 스크린 실행, introduce.dart
@@ -63,6 +65,9 @@ class SplashState extends State<Splash> {
 
     // 만료일자가 지나지 않았음, cookie string 확인
     if (cookieParam != "NoCookie") {
+      
+      print("#################print cookie in Splash before pushReplacement" +str + "@@@@@@@@@@@@@@@@@@");
+
       // cookie에 정상적인 값이 있으면 바로 webView가있는 페이지로 이동, YuhanNuri.dart
       Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (BuildContext context) => YuhanNuri(
@@ -73,6 +78,12 @@ class SplashState extends State<Splash> {
           MaterialPageRoute(builder: (BuildContext context) => LoginApp()));
     }
   }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +103,7 @@ class SplashState extends State<Splash> {
       styleTextUnderTheLoader: new TextStyle(),
       photoSize: 100.0,
       onClick: () => print("Flutter"),
-      loaderColor: Colors.red,
+      loaderColor: Colors.lightBlue,
     );
   }
 }

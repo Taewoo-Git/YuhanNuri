@@ -7,6 +7,10 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:toast/toast.dart';
 
+final FirebaseMessaging fcm = FirebaseMessaging();
+CookieManager cm;
+//CurvedNavigationBarState navBarState;
+
 class YuhanNuri extends StatefulWidget {
   final String cookie;
   YuhanNuri({Key key, this.title, this.cookie}) : super(key: key);
@@ -33,6 +37,9 @@ class YuhanNuriState extends State<YuhanNuri> {
   DateTime currentBackPressTime;
   Map<String, String> header; // 전달받은 Cookie객체를 string과 합쳐서 header만듦
   GlobalKey globalKey = new GlobalKey(); //네비게이션 바 외부에서 접근가능하게 해줄 Key변수
+  CurvedNavigationBarState navBarState;
+  bool abc = false;
+  final FirebaseMessaging fcm = FirebaseMessaging();
 
   YuhanNuriState(String cookieParam) {
     header = {'Cookie': '$cookieParam'};
@@ -40,6 +47,19 @@ class YuhanNuriState extends State<YuhanNuri> {
 
   void initState() {
     super.initState();
+
+    fcm.configure(onMessage: (Map<String, dynamic> message) async {
+      print("onMessage: $message");
+      print(message['data']['fileno']);
+    }, onResume: (Map<String, dynamic> message) async {
+      print("onResume: $message");
+      print(message['data']['fileno']);
+    }, onLaunch: (Map<String, dynamic> message) async {
+      print("onLaunch: $message"); //
+      print(message['data']['fileno']);
+    });
+
+    cm = new CookieManager();
   }
 
   @override
@@ -58,25 +78,23 @@ class YuhanNuriState extends State<YuhanNuri> {
                 onWebViewCreated: (InAppWebViewController controller) {
                   _webViewController = controller;
                   // url로드전에 cookie 지워주지 않으면 cookie 안먹는 경우 있음
-                  CookieManager cm = new CookieManager();
+
                   cm.deleteAllCookies();
                   _webViewController.loadUrl(
                       url: 'https://yuhannuri.run.goorm.io', headers: header);
 
                   KeyboardVisibility.onChange.listen((bool visible) async {
                     if (visible) {
-                      print(await fcm.getToken());
-                      if (await _webViewController.getUrl() !=
-                          "https://yuhannuri.run.goorm.io/chat") {
+                      sleep(const Duration(milliseconds: 250));
+                      if (await _webViewController.getUrl() ==
+                          'https://yuhannuri.run.goorm.io/user/mypage') {
                         await _webViewController.evaluateJavascript(
                             source:
                                 'document.activeElement.scrollIntoView( {block: "center"})');
                       } else {
-                        int viewHeight = int.parse(
-                            await _webViewController.evaluateJavascript(
-                                source:
-                                    "parseInt(document.activeElement.getBoundingClientRect().y)"));
-                        _webViewController.scrollTo(x: 0, y: viewHeight);
+                        await _webViewController.evaluateJavascript(
+                            source:
+                                'document.activeElement.scrollIntoView( {block: "center"})');
                       }
                     } else {
                       await _webViewController.evaluateJavascript(
@@ -90,10 +108,10 @@ class YuhanNuriState extends State<YuhanNuri> {
                 index: 0,
                 backgroundColor: Colors.blueAccent,
                 items: <Widget>[
-                  Icon(Icons.add, size: 25),
-                  Icon(Icons.list, size: 25),
+                  Icon(Icons.home, size: 25),
+                  Icon(Icons.insert_invitation, size: 25),
+                  Icon(Icons.headset_mic, size: 25),
                   Icon(Icons.person, size: 25),
-                  Icon(Icons.chat_bubble, size: 25),
                 ],
                 animationDuration:
                     const Duration(milliseconds: 300), // trainsition 설정
@@ -101,18 +119,22 @@ class YuhanNuriState extends State<YuhanNuri> {
                   int navigationIndex = index;
                   switch (navigationIndex) {
                     case 0:
+                      cm.deleteAllCookies();
                       _webViewController.loadUrl(
                           url: 'https://yuhannuri.run.goorm.io');
                       break;
                     case 1:
+                      cm.deleteAllCookies();
                       _webViewController.loadUrl(url: 'https://google.com');
                       break;
                     case 2:
+                      cm.deleteAllCookies();
                       _webViewController.loadUrl(
                           url: 'https://yuhannuri.run.goorm.io/user/fcmEx/' +
                               fcm.getToken().toString());
                       break;
                     case 3:
+                      cm.deleteAllCookies();
                       _webViewController.loadUrl(
                           url: 'https://waveon.run.goorm.io');
                       break;
@@ -140,27 +162,55 @@ class YuhanNuriState extends State<YuhanNuri> {
                 }
                 return Future.value(true); // if문이 거짓일때는 바로 종료
               }
-
-              var future = _webViewController.canGoBack();
-              future.then((value) {
-                if (value) {
-                  final CurvedNavigationBarState navBarState =
-                      globalKey.currentState;
-                  navBarState.setPage(0);
-                }
-              });
+              abc = await _webViewController.evaluateJavascript(
+                  source: //'let obj = document.getElementById("chattingCard");' +
+                      'if(document.getElementById("chattingCard") != null) true;' +
+                          'else false;');
+              print(abc);
+              print(await fcm.getToken());
+              if (abc) {
+                showBackButtonDialog(context);
+              } else {
+                navBarState = globalKey.currentState;
+                navBarState.setPage(0);
+              }
               return null;
             }));
   }
 
-  final FirebaseMessaging fcm = FirebaseMessaging();
-  void asd() {
-    fcm.configure(onMessage: (Map<String, dynamic> message) async {
-      print("onMessage: $message");
-    }, onResume: (Map<String, dynamic> message) async {
-      print("onResume: $message");
-    }, onLaunch: (Map<String, dynamic> message) async {
-      print("onLaunch: $message");
-    });
+  showBackButtonDialog(BuildContext context) {
+    Widget continueButton = FlatButton(
+      child: Text("예"),
+      onPressed: () {
+        Navigator.of(context).pop();
+
+        navBarState = globalKey.currentState;
+        navBarState.setPage(0);
+      },
+    );
+
+    Widget cancelButton = FlatButton(
+      child: Text("아니오"),
+      onPressed: () async {
+        //  Navigator.of(context).pop();
+        Navigator.pop(context);
+      },
+    );
+
+    AlertDialog alert = AlertDialog(
+      title: Text("유한누리"),
+      content: Text("메인화면으로 돌아가시겠습니까?"),
+      actions: [
+        continueButton,
+        cancelButton,
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 }

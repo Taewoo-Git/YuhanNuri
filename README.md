@@ -48,7 +48,16 @@ Yuhan University Psychotherapy Application
 * WebView에서 텍스트박스 클릭 시 발생하는 스크롤 이슈 해결 (Flutter) ✔
 * WebView 패키지 Flutter InAppWebView로 변경 (Flutter) ✔
 
-### 2020.10.08 ~
-* 채팅 시스템 상세화 및 채팅 룸 설정
-* WebView 텍스트 박스 선택 시 발생하는 뒤로가기 이슈 해결 (Flutter) 
-* FCM 개발 (Flutter) 
+### 2020.10.08 ~ 2020.10.21
+* 채팅 시스템 상세화 및 채팅 룸 설정 ✔
+* WebView 텍스트 박스 선택 시 발생하는 뒤로가기 이슈 해결 (Flutter)
+* FCM 개발 (Flutter)
+
+### 2020.10.21 ~ 2020.11.01
+* 홈, 문의 메뉴 마무리 ✔
+* WebView 텍스트 박스 선택 시 발생하는 뒤로가기 이슈 해결 (Flutter) ✔
+* FCM 개발 (Flutter) ✔
+
+### 2020.11.01
+* 예약, 마이페이지 메뉴 마무리
+* FCM 적용 및 마무리 (Flutter)

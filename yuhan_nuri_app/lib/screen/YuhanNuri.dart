@@ -6,11 +6,10 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:flutter_styled_toast/flutter_styled_toast.dart';
+import 'package:oktoast/oktoast.dart';
 
 final FirebaseMessaging fcm = FirebaseMessaging();
 CookieManager cm;
-//CurvedNavigationBarState navBarState;
 
 class YuhanNuri extends StatefulWidget {
   final String cookie;
@@ -71,21 +70,8 @@ class YuhanNuriState extends State<YuhanNuri> {
       DeviceOrientation.portraitDown,
       DeviceOrientation.portraitUp,
     ]);
-    return StyledToast(
-        textStyle: TextStyle(fontSize: 25.0, color: Colors.black),
-        backgroundColor: Color(0xFFFFFFFF),
-        // borderRadius: BorderRadius.circular(5.0),
-        //textPadding: EdgeInsets.symmetric(horizontal: 17.0, vertical: 10.0),
-        toastPositions: StyledToastPosition.center,
-        toastAnimation: StyledToastAnimation.fade,
-        reverseAnimation: StyledToastAnimation.fade,
-        curve: Curves.fastOutSlowIn,
-        reverseCurve: Curves.fastLinearToSlowEaseIn,
-        duration: Duration(seconds: 3),
-        animDuration: Duration(seconds: 1),
-        dismissOtherOnShow: false,
-        movingOnWindowChange: true,
-        locale: const Locale('KR'),
+    return OKToast(
+        position: ToastPosition.bottom,
         child: MaterialApp(
             debugShowCheckedModeBanner: false,
             home: WillPopScope(
@@ -187,14 +173,9 @@ class YuhanNuriState extends State<YuhanNuri> {
                       // back 버튼을 눌렀을때의 시간과 전에 back버튼을 눌렀을때의 차이가 2초를 넘었으면
                       currentBackPressTime = now;
                       print(await fcm.getToken());
-
-                      showToast('뒤로가기 버튼을 한번 더 클릭하면 \n종료합니다.',
-                          context: context,
-                          animation: StyledToastAnimation.fade,
-                          curve: Curves.linear,
-                          reverseCurve: Curves.linear);
-
+                      showToast("뒤로가기 버튼을 한번 더 클릭하면      \n 종료합니다.");
                       return Future.value(false); // 종료 안함.
+
                     }
                     return Future.value(true); // if문이 거짓일때는 바로 종료
                   }
@@ -247,20 +228,4 @@ class YuhanNuriState extends State<YuhanNuri> {
       },
     );
   }
-
-  Widget toasted = Center(
-    child: ClipRRect(
-      borderRadius: BorderRadius.circular(30.0),
-      child: Container(
-        width: 40.0,
-        height: 40.0,
-        color: Colors.grey.withOpacity(0.3),
-        child: Icon(
-          Icons.add,
-          size: 30.0,
-          color: Colors.green,
-        ),
-      ),
-    ),
-  );
 }

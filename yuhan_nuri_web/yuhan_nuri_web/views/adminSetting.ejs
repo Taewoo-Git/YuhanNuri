@@ -7,27 +7,98 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- CoreUI CSS -->
     <link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
-    <title>유한누리 어드민</title>	
-	<script src="https://code.jquery.com/jquery-latest.min.js"></script>
+    <title>유한누리 어드민</title>
+    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+    <style>
+		.dropdown-toggle::after{
+			margin-left: 10% !important;
+		}
+        .dropTitle {
+            float: left;
+            margin: 0 !important;
+            text-align: left;
+			width:inherit;
+        }
+        .custom-list-item {
+            width: 100%;
+        }
+        .custom-btn-position {
+            float: right;
+            margin-top: -7px;
+        }
+        .btn-secondary {
+            background-color: #fafbfd;
+        }
+        .btn-secondary:hover {
+            background-color: #fafbfd;
+        }
+        .btn-secondary:focus {
+            background-color: #fafbfd;
+        }
+        .show>.btn-secondary.dropdown-toggle {
+            background-color: #fafbfd !important;
+        }
+    </style>
 </head>
-<body class="c-app">
-		<script>
-				$(function () {
-				$('button.reser-btn').click(function(e) {
-						$.ajax({
-						type: "POST",
-						dataType: "json",
-						url: "./accessReservation",
-						async: true,
-						data: { "sendAjax" : $(`#${e.target.id}`).val() },
-						success: function (data) { 
-							window.location.reload();
-						}
-					});
 
-				});
-			});
-		</script>
+<body class="c-app">
+	<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+		  <div class="modal-dialog" role="document">
+			<div class="modal-content">
+			  <div class="modal-header">
+				<h5 class="modal-title" id="deleteModalLabel">항목 삭제 하기</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				  <span aria-hidden="true">&times;</span>
+				</button>
+			  </div>
+			  <div class="modal-body">
+				<form>
+				  <div class="form-group">
+					<label for="type-name" class="col-form-label">다시 한번 더 삭제할 항목을 입력시켜주세요!</label>
+					<input type="text" class="form-control" id="delete-type" placeholder="항목 이름을 작성해주세요.">
+				  </div>
+					<p id="deleteError"></p>
+				</form>
+			  </div>
+			  <div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal" onClick="exitModal()">닫기</button>
+				<button type="button" class="btn btn-primary" id="deleteBtn" onClick="deleteCheck('#delete-type')">삭제하기</button>
+			  </div>
+			</div>
+		  </div>
+	</div>
+	<div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
+		  <div class="modal-dialog" role="document">
+			<div class="modal-content">
+			  <div class="modal-header">
+				<h5 class="modal-title" id="updateModalLabel">항목 수정 하기</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				  <span aria-hidden="true">&times;</span>
+				</button>
+			  </div>
+				<div class="modal-body">
+				<form>
+				  <div class="form-group">
+					<label for="type-name" class="col-form-label">수정 대상</label>
+					<input type="text" class="form-control" id="update-name" readonly>
+				  </div>
+				</form>
+			  </div>
+			  <div class="modal-body">
+				<form>
+				  <div class="form-group">
+					<label for="type-name" class="col-form-label">수정 하실 이름을 입력해주세요!</label>
+					<input type="text" class="form-control" id="update-text" placeholder="항목 이름을 작성해주세요.">
+				  </div>
+				</form>
+			  </div>
+			  <div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+				<button type="button" class="btn btn-primary" id="updateBtn" onClick="updateName('#update-text')">수정하기</button>
+			  </div>
+			</div>
+		  </div>
+	</div>
     <div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
         <div class="c-sidebar-brand d-lg-down-none">
             <svg class="c-sidebar-brand-full" width="118" height="46" alt="CoreUI Logo">
@@ -37,89 +108,7 @@
                 <use xlink:href="assets/brand/coreui.svg#signet"></use>
             </svg>
         </div>
-        <ul class="c-sidebar-nav">
-            <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="index.html">
-                    <svg class="c-sidebar-nav-icon">
-                        <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-speedometer"></use>
-                    </svg> Dashboard<span class="badge badge-info">NEW</span></a></li>
-            <li class="c-sidebar-nav-title">Theme</li>
-            <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="colors.html">
-                    <svg class="c-sidebar-nav-icon">
-                        <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-drop1"></use>
-                    </svg> Colors</a></li>
-            <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="typography.html">
-                    <svg class="c-sidebar-nav-icon">
-                        <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-pencil"></use>
-                    </svg> Typography</a></li>
-            <li class="c-sidebar-nav-title">Components</li>
-            <li class="c-sidebar-nav-item c-sidebar-nav-dropdown"><a
-                    class="c-sidebar-nav-link c-sidebar-nav-dropdown-toggle" href="#">
-                    <svg class="c-sidebar-nav-icon">
-                        <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-puzzle"></use>
-                    </svg> Base</a>
-            </li>
-            <li class="c-sidebar-nav-item c-sidebar-nav-dropdown"><a
-                    class="c-sidebar-nav-link c-sidebar-nav-dropdown-toggle" href="#">
-                    <svg class="c-sidebar-nav-icon">
-                        <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-cursor"></use>
-                    </svg> Buttons</a>
-            </li>
-            <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="charts.html">
-                    <svg class="c-sidebar-nav-icon">
-                        <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-chart-pie"></use>
-                    </svg> Charts</a></li>
-            <li class="c-sidebar-nav-dropdown"><a class="c-sidebar-nav-dropdown-toggle" href="#">
-                    <svg class="c-sidebar-nav-icon">
-                        <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-star"></use>
-                    </svg> Icons</a>
-            </li>
-            <li class="c-sidebar-nav-item c-sidebar-nav-dropdown"><a
-                    class="c-sidebar-nav-link c-sidebar-nav-dropdown-toggle" href="#">
-                    <svg class="c-sidebar-nav-icon">
-                        <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-bell"></use>
-                    </svg> Notifications</a>
-            </li>
-            <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="widgets.html">
-                    <svg class="c-sidebar-nav-icon">
-                        <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-calculator"></use>
-                    </svg> Widgets<span class="badge badge-info">NEW</span></a></li>
-            <li class="c-sidebar-nav-divider"></li>
-            <li class="c-sidebar-nav-title">Extras</li>
-            <li class="c-sidebar-nav-item c-sidebar-nav-dropdown"><a
-                    class="c-sidebar-nav-link c-sidebar-nav-dropdown-toggle" href="#">
-                    <svg class="c-sidebar-nav-icon">
-                        <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-star"></use>
-                    </svg> Pages</a>
-                <ul class="c-sidebar-nav-dropdown-items">
-                    <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="login.html" target="_top">
-                            <svg class="c-sidebar-nav-icon">
-                                <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-account-logout"></use>
-                            </svg> Login</a></li>
-                    <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="register.html" target="_top">
-                            <svg class="c-sidebar-nav-icon">
-                                <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-account-logout"></use>
-                            </svg> Register</a></li>
-                    <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="404.html" target="_top">
-                            <svg class="c-sidebar-nav-icon">
-                                <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-bug"></use>
-                            </svg> Error 404</a></li>
-                    <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="500.html" target="_top">
-                            <svg class="c-sidebar-nav-icon">
-                                <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-bug"></use>
-                            </svg> Error 500</a></li>
-                </ul>
-            </li>
-            <li class="c-sidebar-nav-item mt-auto"><a class="c-sidebar-nav-link c-sidebar-nav-link-success"
-                    href="https://coreui.io" target="_top">
-                    <svg class="c-sidebar-nav-icon">
-                        <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-cloud-download"></use>
-                    </svg> Download CoreUI</a></li>
-            <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link c-sidebar-nav-link-danger"
-                    href="https://coreui.io/pro/" target="_top">
-                    <svg class="c-sidebar-nav-icon">
-                        <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-layers"></use>
-                    </svg> Try CoreUI<strong>PRO</strong></a></li>
-        </ul>
+        <%- include ('adminNav'); -%>
         <button class="c-sidebar-minimizer c-class-toggler" type="button" data-target="_parent"
             data-class="c-sidebar-minimized"></button>
     </div>
@@ -146,19 +135,19 @@
                 <li class="c-header-nav-item px-3"><a class="c-header-nav-link" href="#">Settings</a></li>
             </ul>
             <ul class="c-header-nav ml-auto mr-4">
-                <li class="c-header-nav-item d-md-down-none mx-2"><a class="c-header-nav-link" href="#">
+                <li class="c-header-nav-item d-md-down-none mx-2"><a class="c-header-nav-link" href="#" style="background:red;">
                         <svg class="c-icon">
                             <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-bell"></use>
                         </svg></a></li>
-                <li class="c-header-nav-item d-md-down-none mx-2"><a class="c-header-nav-link" href="#">
+                <li class="c-header-nav-item d-md-down-none mx-2"><a class="c-header-nav-link" href="#" style="background:red;">
                         <svg class="c-icon">
                             <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-list-rich"></use>
                         </svg></a></li>
-                <li class="c-header-nav-item d-md-down-none mx-2"><a class="c-header-nav-link" href="#">
+                <li class="c-header-nav-item d-md-down-none mx-2"><a class="c-header-nav-link" href="#" style="background:red;">
                         <svg class="c-icon">
                             <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-envelope-open"></use>
                         </svg></a></li>
-                <li class="c-header-nav-item dropdown"><a class="c-header-nav-link" data-toggle="dropdown" href="#"
+                <!--<li class="c-header-nav-item dropdown"><a class="c-header-nav-link" data-toggle="dropdown" href="#"
                         role="button" aria-haspopup="true" aria-expanded="false">
                         <div class="c-avatar"><img class="c-avatar-img" src="assets/img/avatars/6.jpg"
                                 alt="user@gmail.com"></div>
@@ -204,7 +193,7 @@
                                 <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-account-logout"></use>
                             </svg> Logout</a>
                     </div>
-                </li>
+                </li>-->
             </ul>
             <div class="c-subheader px-3">
                 <!-- Breadcrumb-->
@@ -222,20 +211,33 @@
                     <div class="fade-in">
                         <div class="card">
                             <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <h4 class="card-title mb-0">예약 리스트</h4>
-                                        <div class="text-muted"><%= `${new Date().getFullYear()}-${new Date().getMonth()+1}-${new Date().getDate()}`%></div>
+                                <div class="m-auto" style="width:80%;">
+                                    <div class="m-auto" style="width:85%;">
+                                        <h4 class="card-title">상담항목 수정/삭제</h4>
+                                        <div class="btn-group" role="group" style="width:inherit">
+                                            <button id="btnGroupDrop1" type="button"
+                                                class="btn-lg btn-secondary  dropdown-toggle" data-toggle="dropdown"
+                                                aria-expanded="false" style="width:inherit;">
+                                                <p class="dropTitle">자가진단</p>
+                                            </button>
+                                            <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="width:inherit;">
+												<% types.forEach(function(v,i){%>
+												<li class="list-group-item dropdown-item custom-list-item">
+                                                    <%= v.typename%>
+                                                    <div class="text-right custom-btn-position">
+                                                        <button class="btn btn-outline-success" data-toggle="modal" data-target="#updateModal"
+																id="showUpdateModalBtn" onClick="giveName(`<%=v.typename%>`)">v</button>
+                                                        <button class="btn btn-outline-danger" data-toggle="modal" data-target="#deleteModal"
+																id="showDeleteModalBtn" onClick="setChoiceType(`<%=v.typename%>`)">X</button>
+                                                    </div>
+                                                </li>
+												<% }) %>
+                                            </div>
+                                        </div>
                                     </div>
+
                                 </div>
                             </div>
-							<% getReservation.forEach(function(val,i){ %>
-								<div class="card-body list-group-item">
-                                    <h5 class="card-title">학번: <%=val.stuno%></h5>
-                                    <p class="card-text">상담 유형: <%= val.typecode%> 상담 시간 <%= val.starttime%></p>
-                                    <button class="btn btn-primary float-right reser-btn" id="accept-reservation-btn-<%=i%>" value="<%= val.no%>">수락</button>
-                                </div>
-							<% }) %>
                         </div>
                     </div>
                 </div>
@@ -246,9 +248,63 @@
             </footer>
         </div>
     </div>
-    <script src="https://unpkg.com/@popperjs/core@2"></script>
-    <script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.min.js"></script>
+    <script>
+		let choiceType="";
+		
+		const setChoiceType=(chType)=>{
+			choiceType=chType;
+		}
+		
+		function exitModal(e){
+			
+		}
+		
+		function deleteCheck(deleteType){
+			const updateItem=$(deleteType).val();
+			if(deleteItem===choiceType){
+				$.ajax({
+							type:'POST',
+							dataType:'json',
+							url:'./removeFormItem',
+							async:true,
+							data:{"formItem" : item},
+							success:function(data){
+								if(data==='ok'){
+									window.location.reload();
+								}
+							}
+						})
+				item="";
+			}else{
+				$('#deleteError').css('color','#f05454');
+				$('#deleteError').text('삭제하시려는 항목의 이름이 달라요!');
+			}
+			
+		}
+		function updateName(updateType){
+			const sendObject={
+				item:$(updateType).val(),
+				pastItem:$('#update-name').val(),
+			}
+			$.ajax({
+				type:'POST',
+				dateType:'json',
+				url:'./updateFormItem',
+				async:true,
+				data:{"formItem":JSON.stringify(sendObject)},
+				success:function(data){
+					if(data==='ok'){
+						window.location.reload();
+					}
+				}
+			});
+		}
+		function giveData(str){
+			document.querySelector('#update-name').value=str;
+			document.querySelector('#update-text').value='';
+		}
+    </script>
+    <script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
 </body>
 
 </html>
-

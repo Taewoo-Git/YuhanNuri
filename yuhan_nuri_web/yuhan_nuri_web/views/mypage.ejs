@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>마이페이지</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+		
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+		  integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z"
+		  crossorigin="anonymous">
+		
+		<script src="https://code.jquery.com/jquery-3.5.1.min.js"
+			integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+			crossorigin="anonymous">
+		</script>
+		
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+			integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+			crossorigin="anonymous">
+		</script>
+		<style>
+			html, body{
+                height: 100% !important;
+				width: 100% !important;
+            }
+            .card{
+                height: inherit;
+				width: 100%;
+				border-top: 0 !important;
+            	border-radius: 0 !important;
+            }
+            .msg_card_body{
+                overflow-y: auto;
+				margin-top: 5% !important;
+            }
+            .card-footer{
+                border-top: 0 !important;
+            }
+            .type_msg{
+				background-color: #EAEAEA !important;
+                border: 0 !important;
+                color:black !important;
+                height: 50px !important;
+                overflow-y: auto;
+				padding-bottom: 10px;
+            }
+            .type_msg:focus{
+                box-shadow:none !important;
+                outline:0px !important;
+            }
+            .send_btn{
+				padding-right: 1.3rem;
+				background-color: #EAEAEA !important;
+                border: 0 !important;
+                cursor: pointer;
+            }
+            .msg_cotainer{
+                margin-top: auto;
+                margin-bottom: auto;
+                border-radius: 0.5rem;
+                padding: 10px;
+                position: relative;
+				max-width: 70%;
+				text-align: left;
+				background-color: #EAEAEA !important;
+            }
+            .msg_cotainer_send{
+                margin-top: auto;
+                margin-bottom: auto;
+                border-radius: 0.5rem;
+                padding: 10px;
+                position: relative;
+				max-width: 70%;
+				text-align: left;
+				color: white;
+            }
+            .msg_time{
+                position: relative;
+                margin-left: 5px;
+				margin-top: auto;
+                color: rgba(0,0,0,0.5);
+                font-size: 10px;
+            }
+            .msg_time_send{
+                position: relative;
+				margin-right: 5px;
+				margin-top: auto;
+                color: rgba(0,0,0,0.5);
+                font-size: 10px;
+            }
+            .msg_name{
+                position: absolute;
+                left: 3px;
+                top: -23px;
+                color: rgba(0,0,0,0.7);
+                font-size: 15px;
+                font-weight: bold;
+				min-width: 130px;
+				text-align: left;
+            }
+            .msg_name_send{
+                position: absolute;
+                right: 7px;
+                top: -23px;
+                color: rgba(0,0,0,0.7);
+                font-size: 15px;
+                font-weight: bold;
+				min-width: 130px;
+				text-align: right;
+            }
+            .msg_head{
+                position: relative;
+            }
+			.align_spinner{
+				margin: 0;
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				-ms-transform: translateY(-50%);
+				transform: translateY(-50%);
+				-ms-transform: translateX(-50%);
+				transform: translateX(-50%);
+			}
+			.msg_card_body::-webkit-scrollbar{
+				width:7px;
+			}
+			.msg_card_body::-webkit-scrollbar-thumb{
+				border-radius:3px;
+				background:rgba(0,0,0,0.3);
+			}
+			.table td{
+				padding:.75rem 0 0 0 !important;
+			}
+		</style>
+	</head>
+	<body class="container">
+		<div class="row">
+			<div class="col">
+				<label style="font-size:150%;">마이페이지</label>
+			</div>
+		</div>
+		<div class="row">
+			<div class="form" style="width:100%;">
+				<ul class="nav nav-tabs">
+					<li class="nav-item ml-3">
+						<a class="nav-link" data-toggle="tab" href="#reservation" id="reserv">예약확인</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" data-toggle="tab" href="#question" id="quest">문의내역</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" data-toggle="tab" href="#chatting" id="chat">채팅</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<div class="tab-content">
+			<div class="tab-pane fade" style="padding:1rem!important;" id="reservation">
+				<p class="text text-danger">
+					예약확인
+				</p>
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+				Nunc id ornare libero. Vivamus iaculis, justo vel mattis pharetra, nisi ligula varius nisl, sit amet mollis tortor ligula vitae nisi.
+				</p>
+			</div>
+			<div class="tab-pane fade" style="padding:1rem!important;" id="question">
+				<p class="text text-danger">
+					문의내역
+				</p>
+				<table class="table">
+                    <tbody>
+					<%if(questions.length===0){%>
+						<tr>
+                        <td col=3 align=center>문의한 내역이 없습니다!</td>
+                      </tr>
+					<%}else{%>
+						<%questions.forEach(function(v,i){%>
+							<tr>
+							<%if(isAnswerList[i]==='완료'){%>
+								<td style='width: 20%; color:green; font-size: 0.9em;'>완료</td>
+							<%}else{%>
+								<td style="width: 20%; font-size: 0.9em;">미완료</td>
+							<%}%>
+							<td align=center style="font-size: 0.9em; width: 50%;"><%=v.title%></td>
+							<td align=right style="font-size: 0.9em; width:20%;"><%=v.date%></td>
+						  </tr>	
+						<%})%>
+					<%}%>
+                    </tbody>
+                  </table>
+			</div>
+			<div class="tab-pane fade" id="chatting" style="margin-left: -15px; margin-right: -15px;">
+				<div class='align_spinner' id='chattingLoad'>
+					<div class='spinner-border text-primary'></div>
+				</div>
+			</div>
+		</div>
+		
+		<script src="/socket.io/socket.io.js"></script>
+		<script>
+			$(function() {
+				
+				if(location.search.includes("chatting")) {
+					$("#chatting").addClass("show active");
+					$("#chat").addClass("active");
+					window.history.replaceState(null, null, window.location.pathname);
+				}
+				else {
+					$("#reservation").addClass("show active");
+					$("#reserv").addClass("active");
+					window.history.replaceState(null, null, window.location.pathname);
+				}
+				
+				const myname = "<%= stuName %>";
+				const mycode = "<%= stuCode %>";
+				const empno = "<%= empno %>";
+				
+				const socket = io('/chat');
+				
+				const chattingElm = "<div class='card' id='chattingCard'>" +
+							"<div id='bodyChat' class='card-body msg_card_body'>" +
+							"</div>" +
+							"<div class='card-footer' style='padding:0!important;'>" +
+								"<div class='input-group'>" +
+									"<input type='text' id='msgForm' class='form-control type_msg' style='border-radius:0!important;'" +
+									" placeholder='메시지 전송...'/>" +
+										
+									"<div id='btnSend' class='input-group-append' style='border-radius:0!important;'>" +
+										"<span class='input-group-text send_btn'><i class='fa fa-paper-plane text-primary'></i></span>" +
+									"</div>" +
+								"</div>" +
+							"</div>" +
+						"</div>";
+				
+				socket.emit("join", {
+					name: myname,
+					code: mycode,
+					empno: empno
+				});
+				
+				socket.on("msg", function(data) {
+					$("#bodyChat").append(
+						"<div class='d-flex justify-content-start mb-5 mt-2'>" +
+							"<div class='msg_cotainer'>" +
+								"<span class='msg_name'>" + data.name + " 선생님 </span>" +
+								escapeHtml(data.msg) +
+							"</div>" +
+							"<div class='msg_time'>" +
+								new Date().getHours() + ":" + ("00" + new Date().getMinutes()).slice(-2) +
+							"</div>" +
+						"</div>"
+					);
+					$("#bodyChat").scrollTop($("#bodyChat")[0].scrollHeight);
+					
+					// if(Notification.permission==="granted"){
+					// 	const notification=new Notification("Test",{ 
+					// 		body:data.msg,
+					// 		icon:"",
+					// 	});
+					// }else if(Notification.permission !=="denied"){
+					// 	Notification.requestPermission().then(auth=>{
+					// 		const notification=new Notification("Test",{ 
+					// 			body:data.msg,
+					// 			icon:"",
+					// 		});
+					// 	});
+					// }
+				});
+				
+				<% if(isChatting === 0) { %>
+						$("#chatting").append(`
+							<center style="margin-top:10%;">
+								<div style="font-size:1.3em; color:#565656;">예약된 채팅상담이 없습니다.</div>
+								<div id="fresh" style="font-size:1.2em; color:#828282; margin-top:5%; cursor:pointer;">
+									새로고침 &nbsp <i class="fa fa-refresh" aria-hidden="true" style="color:#777;"></i>
+								</div>
+							</center>
+						`);
+				
+						$("#chattingLoad").remove();
+						
+						$("#fresh").click(function(e) {
+							$(".fa-refresh").addClass('fa-spin');
+							location.replace(location.origin+location.pathname+"?chatting");
+						});
+				<% } else if(isChatting === 1) { %>
+						setHeight();
+
+						$("#chatting").append(chattingElm);
+
+						$("#chattingLoad").remove();
+
+						$('#msgForm').focus();
+
+						$('#btnSend').click(function(e) {
+							if($("#msgForm").val() != "") {
+								socket.emit("msg", $("#msgForm").val());
+								$("#bodyChat").append(
+									"<div class='d-flex justify-content-end mb-5 mt-2'>" +
+										"<div class='msg_time_send'>" +
+											new Date().getHours() + ":" + ("00" + new Date().getMinutes()).slice(-2) +
+										"</div>" +
+										"<div class='bg-primary msg_cotainer_send'>" +
+											"<span class='msg_name_send'>Me</span>" +
+											escapeHtml($('#msgForm').val()) +
+										"</div>" +
+									"</div>"
+								);
+								$("#bodyChat").scrollTop($("#bodyChat")[0].scrollHeight);
+								$('#msgForm').val("");
+							}
+							else {
+								$('#msgForm').focus();
+							}
+						});
+
+						$("#msgForm").keydown(function(key) {
+							if (key.keyCode == 13) $('#btnSend').click();
+						});
+				<% } else if(isChatting === 2) { %>
+						$("#chatting").append(`
+							<center style="margin-top:10%;">
+								<div style="font-size:1.3em; color:#565656;">예약 접수를 기다리고 있습니다.</div>
+								<div id="fresh" style="font-size:1.2em; color:#828282; margin-top:5%; cursor:pointer;">
+									새로고침 &nbsp <i class="fa fa-refresh" aria-hidden="true" style="color:#777;"></i>
+								</div>
+							</center>
+						`);
+				
+						$("#chattingLoad").remove();
+						
+						$("#fresh").click(function(e) {
+							$(".fa-refresh").addClass('fa-spin');
+							location.replace(location.origin+location.pathname+"?chatting");
+						});
+				<% } else if(isChatting === 3) { %>
+						$("#chatting").append(`
+							<center style="margin-top:10%;">
+								<div style="font-size:1.3em; color:#565656;">아직 채팅상담 시간이 아닙니다.</div>
+								<div id="fresh" style="font-size:1.2em; color:#828282; margin-top:5%; cursor:pointer;">
+									새로고침 &nbsp <i class="fa fa-refresh" aria-hidden="true" style="color:#777;"></i>
+								</div>
+							</center>
+						`);
+				
+						$("#chattingLoad").remove();
+						
+						$("#fresh").click(function(e) {
+							$(".fa-refresh").addClass('fa-spin');
+							location.replace(location.origin+location.pathname+"?chatting");
+						});
+				<% } %>
+			});
+			
+			function setHeight() {
+				let top = document.getElementsByClassName("row");
+				$("#chatting").height(window.innerHeight - (top[0].clientHeight + top[1].clientHeight));
+			}
+	
+			// xss 취약점 막는 함수, php의 htmlspecialcharacter 과 같은 함수
+			function escapeHtml(str) {
+				var map = {
+					'&': '&amp;',
+					'<': '&lt;',
+					'>': '&gt;',
+					'"': '&quot;',
+					"'": '&#039;'
+				};
+				return str.replace(/[&<>"']/g, function(m) { return map[m]; });
+			}
+			
+			if(Notification.permission === "granted"){
+				
+			} else if(Notification.permission !== "denied"){
+				Notification.requestPermission().then(auth=>{
+					
+				});
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<!-- Required meta tags -->
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<!-- CoreUI CSS -->
+		<link
+			rel="stylesheet"
+			href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css"
+			crossorigin="anonymous"
+		/>
+		
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
+			  integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU"
+			  crossorigin="anonymous">
+		
+		<title>유한누리 관리자 | 채팅 상담</title>
+		<script src="https://code.jquery.com/jquery-latest.min.js"></script>
+		<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
+		<style>
+			.toggle_wrap {
+				float: right;
+				margin-right: 1.25rem;
+				margin-top: 0.25rem;
+				font-size: 15px;
+			}
+			.font-size-15 {
+				font-size: 15px!important;
+			}
+			.fixed_btn_position {
+				top: 20%;
+				left: 90%;
+			}
+			.toggle_normal_wrap {
+				float: right;
+				margin-top: 0.25rem;
+				font-size: 15px;
+			}
+			.card{
+				width: 100%;
+				background-color: rgba(0,0,0,0);
+            	border-radius: 0.5em!important;
+				border: 0!important;
+            }
+            .msg_card_body{
+				background-color: white!important;
+				border-radius: 0.5em!important;
+				border: 1px #bbb solid !important;
+				margin-bottom: 20px;
+				padding-top: 5vh;
+                overflow-y: auto;
+            }
+            .card-footer{
+                border: 0 !important;
+				background-color: rgba(0,0,0,0);
+            }
+            .type_msg{
+				background-color: #fff !important;
+                border: 1px #bbb solid !important;
+				border-top-left-radius: 0.5em!important;
+				border-bottom-left-radius: 0.5em!important;
+                color:black !important;
+                height: 50px !important;
+                overflow-y: auto;
+				padding-bottom: 10px;
+            }
+            .type_msg:focus{
+                box-shadow:none !important;
+                outline:0px !important;
+            }
+            .send_btn{
+				width: 10vw;
+				padding-right: 1.3rem;
+				background-color: #0275d8 !important;
+                border: 0 !important;
+                cursor: pointer;
+				color: white !important;
+				display: flex;
+  				justify-content: center;
+            }
+            .msg_cotainer{
+                margin-top: auto;
+                margin-bottom: auto;
+                border-radius: 0.5rem;
+                padding: 10px;
+                position: relative;
+				max-width: 70%;
+				text-align: left;
+				background-color: #EAEAEA !important;
+            }
+            .msg_cotainer_send{
+                margin-top: auto;
+                margin-bottom: auto;
+                border-radius: 0.5rem;
+                padding: 10px;
+                position: relative;
+				max-width: 70%;
+				text-align: left;
+				background-color: #0275d8;
+				color: white;
+            }
+            .msg_time{
+                position: relative;
+                margin-left: 5px;
+				margin-top: auto;
+                color: rgba(0,0,0,0.5);
+                font-size: 10px;
+            }
+            .msg_time_send{
+                position: relative;
+				margin-right: 5px;
+				margin-top: auto;
+                color: rgba(0,0,0,0.5);
+                font-size: 10px;
+            }
+            .msg_name{
+                position: absolute;
+                left: 3px;
+                top: -23px;
+                color: rgba(0,0,0,0.7);
+                font-size: 15px;
+                font-weight: bold;
+				min-width: 130px;
+				text-align: left;
+            }
+            .msg_name_send{
+                position: absolute;
+                right: 7px;
+                top: -23px;
+                color: rgba(0,0,0,0.7);
+                font-size: 15px;
+                font-weight: bold;
+				min-width: 130px;
+				text-align: right;
+            }
+            .msg_head{
+                position: relative;
+            }			
+			.chat_alert{
+				width: 100%;
+				margin-top: auto;
+                margin-bottom: 3rem;
+				text-align: center;
+			}
+			.msg_card_body::-webkit-scrollbar{
+				width:7px;
+			}
+			.msg_card_body::-webkit-scrollbar-thumb{
+				border-radius:3px;
+				background:rgba(0,0,0,0.3);
+			}
+			.pr_30{
+				padding-right:30px;
+			}
+			.pr_10{
+				padding-right:10px;
+			}
+    	</style>
+	</head>
+	<body class="c-app">
+		<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		  <div class="modal-dialog" role="document">
+			<div class="modal-content">
+			  <div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLabel">항목 추가</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				  <span aria-hidden="true">&times;</span>
+				</button>
+			  </div>
+			  <div class="modal-body">
+				<form>
+				  <div class="form-group">
+					<label for="type-name" class="col-form-label">항목 이름:</label>
+					<input type="text" class="form-control" id="type-name" placeholder="항목이름을 작성해주세요.">
+				  </div>
+				</form>
+			  </div>
+			  <div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+				<button type="button" class="btn btn-primary" id="add_type_button">추가하기</button>
+			  </div>
+			</div>
+		  </div>
+		</div>
+		<div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show c-sidebar-unfoldable" id="sidebar">
+			<div class="c-sidebar-brand d-lg-down-none">
+				<svg class="c-sidebar-brand-full" width="118" height="46" alt="CoreUI Logo">
+					<use xlink:href="assets/brand/coreui.svg#full"></use>
+				</svg>
+				<svg class="c-sidebar-brand-minimized" width="46" height="46" alt="CoreUI Logo">
+					<use xlink:href="assets/brand/coreui.svg#signet"></use>
+				</svg>
+			</div>
+			<%- include ('adminNav'); -%>
+			<button
+				class="c-sidebar-minimizer c-class-toggler"
+				type="button"
+				data-target="_parent"
+				data-class="c-sidebar-minimized"
+			></button>
+		</div>
+		<div class="c-wrapper c-fixed-components">
+			<header class="c-header c-header-light c-header-fixed c-header-with-subheader">
+				<button
+					class="c-header-toggler c-class-toggler d-lg-none mfe-auto"
+					type="button"
+					data-target="#sidebar"
+					data-class="c-sidebar-show"
+				>
+					<svg class="c-icon c-icon-lg">
+						<use
+							xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-menu"
+						></use>
+					</svg></button
+				><a class="c-header-brand d-lg-none" href="#">
+					<svg width="118" height="46" alt="CoreUI Logo">
+						<use xlink:href="assets/brand/coreui.svg#full"></use></svg
+				></a>
+				<button
+					class="c-header-toggler c-class-toggler mfs-3 d-md-down-none"
+					type="button"
+					data-target="#sidebar"
+					data-class="c-sidebar-lg-show"
+					responsive="true"
+				>
+					<svg class="c-icon c-icon-lg">
+						<use
+							xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-menu"
+						></use>
+					</svg>
+				</button>
+				<ul class="c-header-nav d-md-down-none">
+					<li class="c-header-nav-item px-3">
+						<a class="c-header-nav-link" href="#">Dashboard</a>
+					</li>
+					<li class="c-header-nav-item px-3">
+						<a class="c-header-nav-link" href="#">Users</a>
+					</li>
+					<li class="c-header-nav-item px-3">
+						<a class="c-header-nav-link" href="#">Settings</a>
+					</li>
+				</ul>
+				<ul class="c-header-nav ml-auto mr-4">
+                <li class="c-header-nav-item dropdown"><a class="c-header-nav-link" data-toggle="dropdown" href="#"
+                        role="button" aria-haspopup="true" aria-expanded="false">
+                        <div class="c-avatar"><i class="cil-user"></i></div>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right pt-0">
+                        <div class="dropdown-header bg-light py-2"><strong>계정</strong></div>
+                            <a class="dropdown-item" href="/user/logout">
+                            <i class="cil-account-logout pr_10"></i> 로그아웃</a>
+                </li>
+            </ul>
+				<div class="c-subheader px-3">
+					<!-- Breadcrumb-->
+					<ol class="breadcrumb border-0 m-0">
+						<li class="breadcrumb-item"><a href="/admin">Home</a></li>
+						<li class="breadcrumb-item active">채팅</li>
+						<!-- Breadcrumb Menu-->
+					</ol>
+				</div>
+			</header>
+			<div class="c-body"> <!-- bbody -->
+				<main class="c-main">
+					<div class="container-fluid" style="height:70vh!important;">
+						<div class='card' id='chattingCard' style="height:inherit;"> 
+							<div id='bodyChat' class='card-body msg_card_body'> 
+							</div> 
+							<div class='card-footer' style='padding:0!important;'> 
+								<div class='input-group'> 
+									<input type='text' id='msgForm' class='form-control type_msg' placeholder='메시지 전송...'/> 
+
+									<div id='btnSend' class='input-group-append'> 
+										<span class='input-group-text send_btn'>
+											<i class='fa fa-paper-plane'></i>
+										</span> 
+									</div> 
+								</div> 
+							</div> 
+						</div>
+					</div>
+				</main>
+				<footer class="c-footer">
+					<div><a href="https://coreui.io">CoreUI</a> &copy; 2020 creativeLabs.</div>
+					<div class="ml-auto">
+						Powered by&nbsp;<a href="https://coreui.io/">CoreUI</a>
+					</div>
+				</footer>
+			</div>
+		</div>
+		<script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
+		<script src="/socket.io/socket.io.js"></script>
+		<script>
+			
+			// xss 취약점 막는 함수, php의 htmlspecialcharacter 과 같은 함수
+			function escapeHtml(str) {
+				var map = {
+					'&': '&amp;',
+					'<': '&lt;',
+					'>': '&gt;',
+					'"': '&quot;',
+					"'": '&#039;'
+				};
+				return str.replace(/[&<>"']/g, function(m) { return map[m]; });
+			}
+			
+			$(function() {
+				const empno = "<%= empno %>";
+				const empname = "<%= empname %>";
+				
+				let socket = io('/chat');
+				socket.emit("open", {
+					empno: empno,
+					empname: empname
+				});
+				
+				$('#btnSend').click(function(e) {
+					if($("#msgForm").val() != "") {
+						socket.emit("msg", $("#msgForm").val());
+						$("#bodyChat").append(
+							"<div class='d-flex justify-content-end mb-5 mt-2'>" +
+								"<div class='msg_time_send'>" +
+									new Date().getHours() + ":" + ("00" + new Date().getMinutes()).slice(-2) +
+								"</div>" +
+								"<div class='msg_cotainer_send'>" +
+									"<span class='msg_name_send'>Me</span>" +
+									escapeHtml($('#msgForm').val()) +
+								"</div>" +
+							"</div>"
+						);
+						$("#bodyChat").scrollTop($("#bodyChat")[0].scrollHeight);
+						$('#msgForm').val("");
+					}
+					else {
+						$('#msgForm').focus();
+					}
+				});
+
+				$("#msgForm").keydown(function(key) {
+					if (key.keyCode == 13) $('#btnSend').click();
+				});
+				
+				socket.on("msg", function(data) {
+					$("#bodyChat").append(
+						"<div class='d-flex justify-content-start mb-5 mt-2'>" +
+							"<div class='msg_cotainer'>" +
+								"<span class='msg_name'>" + data.name + " 학생 </span>" +
+								escapeHtml(data.msg) +
+							"</div>" +
+							"<div class='msg_time'>" +
+								new Date().getHours() + ":" + ("00" + new Date().getMinutes()).slice(-2) +
+							"</div>" +
+						"</div>"
+					);
+					$("#bodyChat").scrollTop($("#bodyChat")[0].scrollHeight);
+				});
+				
+				socket.on("join", function(data) {
+					$("#bodyChat").append(`
+						<div class="chat_alert"><b>${data.name} 학생이 참가하였습니다.</b></div>
+					`);
+					$("#bodyChat").scrollTop($("#bodyChat")[0].scrollHeight);
+				});
+				
+				socket.on("exit", function(data) {
+					$("#bodyChat").append(`
+						<div class="chat_alert"><b>${data.name} 학생이 퇴장하였습니다.</b></div>
+					`);
+					$("#bodyChat").scrollTop($("#bodyChat")[0].scrollHeight);
+				});
+			});
+		</script>
+	</body>
+</html>

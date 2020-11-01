@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- CoreUI CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
+    <title>유한누리 어드민</title>	
+	<script src="https://code.jquery.com/jquery-latest.min.js"></script>
+	<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
+	<style>
+		.pr_10{
+			padding-right:10px;
+		}
+		.pr_30{
+			padding-right:30px;
+		}
+		.ques_btn{
+			position: relative;
+    		top: -40px;
+		}
+	</style>
+</head>
+<body class="c-app">
+	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">답변 남기기</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onClick="exitModal()" >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="message-text" class="col-form-label">답변 내용:</label>
+            <textarea class="form-control" id="message-text" rows=10></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onClick="exitModal()" data-dismiss="modal">닫기</button>
+        <button type="button" class="btn btn-primary" id="update_question">답변전송</button>
+      </div>
+    </div>
+  </div>
+</div>
+		<script>
+				
+			
+		</script>
+    <div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
+        <div class="c-sidebar-brand d-lg-down-none">
+            <svg class="c-sidebar-brand-full" width="118" height="46" alt="CoreUI Logo">
+                <use xlink:href="assets/brand/coreui.svg#full"></use>
+            </svg>
+            <svg class="c-sidebar-brand-minimized" width="46" height="46" alt="CoreUI Logo">
+                <use xlink:href="assets/brand/coreui.svg#signet"></use>
+            </svg>
+        </div>
+                <%- include ('adminNav'); -%>
+        <button class="c-sidebar-minimizer c-class-toggler" type="button" data-target="_parent"
+            data-class="c-sidebar-minimized"></button>
+    </div>
+    <div class="c-wrapper c-fixed-components">
+        <header class="c-header c-header-light c-header-fixed c-header-with-subheader">
+            <button class="c-header-toggler c-class-toggler d-lg-none mfe-auto" type="button" data-target="#sidebar"
+                data-class="c-sidebar-show">
+                <svg class="c-icon c-icon-lg">
+                    <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-menu"></use>
+                </svg>
+            </button><a class="c-header-brand d-lg-none" href="#">
+                <svg width="118" height="46" alt="CoreUI Logo">
+                    <use xlink:href="assets/brand/coreui.svg#full"></use>
+                </svg></a>
+            <button class="c-header-toggler c-class-toggler mfs-3 d-md-down-none" type="button" data-target="#sidebar"
+                data-class="c-sidebar-lg-show" responsive="true">
+                <svg class="c-icon c-icon-lg">
+                    <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-menu"></use>
+                </svg>
+            </button>
+            <ul class="c-header-nav d-md-down-none">
+                <li class="c-header-nav-item px-3"><a class="c-header-nav-link" href="#">Dashboard</a></li>
+                <li class="c-header-nav-item px-3"><a class="c-header-nav-link" href="#">Users</a></li>
+                <li class="c-header-nav-item px-3"><a class="c-header-nav-link" href="#">Settings</a></li>
+            </ul>
+			<ul class="c-header-nav ml-auto mr-4">
+                <li class="c-header-nav-item dropdown"><a class="c-header-nav-link" data-toggle="dropdown" href="#"
+                        role="button" aria-haspopup="true" aria-expanded="false">
+                        <div class="c-avatar"><i class="cil-user"></i></div>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right pt-0">
+                        <div class="dropdown-header bg-light py-2"><strong>계정</strong></div>
+                            <a class="dropdown-item" href="/user/logout">
+                            <i class="cil-account-logout pr_10"></i> 로그아웃</a>
+                </li>
+            </ul>
+            <div class="c-subheader px-3">
+                <ol class="breadcrumb border-0 m-0">
+                    <li class="breadcrumb-item">Home</li>
+                    <li class="breadcrumb-item"><a href="#">Admin</a></li>
+                    <li class="breadcrumb-item active">Dashboard</li>
+                </ol>
+            </div>
+        </header>
+        <div class="c-body">
+            <main class="c-main">
+                <div class="container-fluid">
+                    <div class="fade-in">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 class="card-title mb-0">문의 리스트</h4>
+                                    </div>
+                                </div>
+								<% selectList.forEach(function(val,i){ %>
+								<div class="card-body list-group-item">
+                                    <h5 class="card-title">학번: <%=val.stuno%></h5>
+									<p class="card-text">상담 시간 <%= val.date%></p>
+									<p class="card-text" id="ques_content">내용 <%= val.content%></p>
+									<button type="button" class="btn btn-primary float-right ques_btn" data-toggle="modal" data-target="#exampleModal" onClick="giveData(<%=val.no%>)">답변하기</button>
+                                </div>
+								<% }) %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+			<script>
+				let updateNumber;
+				function exitModal(){
+					document.querySelector('#message-text').value='';
+				}
+				function giveData(str){
+					updateNumber=str;
+					document.querySelector('#message-text').value='';
+				}
+				$(function () {
+				$('#update_question').click(function(e) {
+						$.ajax({
+						type: "POST",
+						dataType: "json",
+						url: "./saveQuestion",
+						async: true,
+						data: { "sendData" : $('#message-text').val(), "sendNumber":updateNumber },
+						success: function (data) { 
+							if(data.state==='ok'){
+								window.location.reload();
+							}else{
+								$('.c-main').prepend(`<div class="alert alert-danger alert-dismissible fade show" role="alert">
+							  <strong>저장 실패!</strong> 이런! 다시 한번 더 확인 해보아요!
+							  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							  </button>
+							</div>`);
+							}
+						}
+					});
+
+				});
+			});
+				
+			</script>
+            <footer class="c-footer">
+                <div><a href="https://coreui.io">CoreUI</a> &copy; 2020 creativeLabs.</div>
+                <div class="ml-auto">Powered by&nbsp;<a href="https://coreui.io/">CoreUI</a></div>
+            </footer>
+        </div>
+    </div>
+	<script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
+</body>
+
+</html>
+

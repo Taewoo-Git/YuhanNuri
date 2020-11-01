@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>메인 페이지</title>
+		<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
+		
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+		  integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z"
+		  crossorigin="anonymous">
+		<script src="https://code.jquery.com/jquery-3.5.1.min.js"
+			integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+			crossorigin="anonymous">
+		</script>
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+			integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+			crossorigin="anonymous">
+		</script>
+		<style>
+			body {
+				width:100%;
+				background-color:#f0f4f7;
+			}
+			.fade-text {
+				font-size:150%;
+				color:#494949;
+  				animation: fadein-text 3s;
+  				-moz-animation: fadein-text 3s; /* Firefox */
+  				-webkit-animation: fadein-text 3s; /* Safari and Chrome */
+  				-o-animation: fadein-text 3s; /* Opera */
+			}
+			.fade-app {
+				font-size:80%;
+				color:#444444;
+				
+  				animation: fadein-app 3s;
+  				-moz-animation: fadein-app 3s; /* Firefox */
+  				-webkit-animation: fadein-app 3s; /* Safari and Chrome */
+  				-o-animation: fadein-app 3s; /* Opera */
+			}
+			@keyframes fadein-text {
+    			from {
+        			opacity: 0;
+		  			transform: translateY(50%);
+    			}
+    			to {
+        			opacity: 1;
+					transform: translateY(0);
+				}
+			}
+			@keyframes fadein-app {
+    			from {
+        			opacity: 0;
+    			}
+    			to {
+        			opacity: 1;
+				}
+			}
+			.btnClass{
+				display:none;
+			}
+			.btnClass + label{ 
+				display: inline-block; 
+				cursor: pointer; 
+				line-height: 20px; 
+				padding-left: 26px; 
+				background: url('/res/imgs/check-off.png') left/18px no-repeat; 
+			}
+			.btnClass:checked + label {
+				background-image: url('/res/imgs/check-on.png');
+			}
+			.btnMentalClass{
+				display: inline-block;
+				cursor: pointer;
+				line-height: 22px;
+				padding-left: 18px;
+				border:none;
+				background: url('/res/imgs/btnMentalDes-normal.png')  left/22px no-repeat;
+				outline:none;
+			}
+
+			.btnMentalClass:hover{
+				display: inline-block;
+				cursor: pointer;
+				line-height: 22px;
+				padding-left: 18px;
+				border:none;
+				background: url('/res/imgs/btnMentalDes-overlay.png')  left/22px no-repeat;
+			}
+			.form-nametag {
+				font-size : 18px;
+			}
+			.form-question {
+				margin-top:40px;
+				margin-bottom:10px;
+			}
+			.form-card {
+				margin-bottom:20px;
+			}
+			.col-title{
+				text-align: left;
+				font-weight: bold;
+				margin-top: 0;
+			}
+			.col-agreetext{
+				font-weight:normal;
+				color:#60b6aa;
+				font-size:80%;
+			}
+			.col-text{
+				width: 100%;
+				margin-bottom: 10%;
+			}
+			.form-text{
+				padding-bottom:30%;
+			}
+			.formDate {
+				margin-left: 5px;
+				margin-right: 5px;
+				border:1px solid #ddd;
+				border-left:0!important;
+				border-right:0!important;
+			}
+			.btnDate {
+				cursor: pointer;
+				padding: 2vh 0;
+				text-align:center;
+				font-size: 1.3em;
+				background-color: white;
+			}
+			.formTime {
+				margin-left: 5px;
+				margin-right: 5px;
+				border:1px solid #ddd;
+				border-left:0!important;
+				border-right:0!important;
+			}
+			.btnTime {
+				cursor: pointer;
+				padding: 2vh 0;
+				text-align:center;
+				font-size: 1.3em;
+				background-color: white;
+			}
+			.selfchek-title {
+                font-size:150%;
+				color:#494949;
+                margin-bottom: 5%;
+                margin-top: 3%;
+            }
+            .selfcheck-subject {
+                font-size:130%;
+				color:#494949;
+                font-weight: bold;
+            }
+            #radios{
+                position:relative;
+                width:70%;
+                margin:0 auto;
+            }
+            .selfcheck-radio{
+                position:absolute;
+                right:1000%;
+            }
+            .radio-border{
+                float:left;
+                width:15%; padding-bottom:15%;
+                margin:0 2.5%;
+                background:#0275d8;
+                border-radius:50%;
+                cursor:pointer;
+            }
+            #slider{
+                position:absolute;
+                left:40%; top:0;
+                width:10%; padding-bottom:10%;
+                margin:2.5% 0 0 5%;
+                background:#fff;
+                transition:transform 1s;
+                border-radius:50%;
+                animation-timing-function: ease-in-out;
+                animation-duration:.3s;
+                animation-fill-mode: forwards;
+                transition: 0.2s left .05s ease-in-out;
+            }
+            .radio1:checked  ~ #slider{ animation-name: radio1; left:0; }
+			.radio2:checked  ~ #slider{ animation-name: radio2; left:20%; }
+			.radio3:checked  ~ #slider{ animation-name: radio3; left:40%; }
+			.radio4:checked  ~ #slider{ animation-name: radio4; left:60%; }
+			.radio5:checked  ~ #slider{ animation-name: radio5; left:80%; }
+		</style>
+	</head>
+	
+	<body>
+		<div class="container-fluid">
+			<div class="row" style="height: 60px; background-color:white;">
+				<div class="col align-self-center">
+					<label style="font-size: 150%;">예약</label>
+				</div>
+			</div>
+			
+			<div class="tab-content">
+                
+				<div class="tab-pane fade show active" id="applicationTab">
+					<div class="row" style="height: 60px;">
+						<div class="fade-text col align-self-center text-center">
+							<label>무엇이 고민인가요?</label>
+						</div>
+					</div>
+					
+					<div class="row align-self-center" style="height: 40px; margin-bottom:40px;">
+						<div class="fade-app col text-center align-self-center">
+							<input type="radio" id="appMental" name="btnApp" class="btnClass">
+							<label for="appMental" class="mr-4">심리검사</label>
+
+							<input type="radio" id="appConsult" name="btnApp" class="btnClass">
+							<label for="appConsult">상담예약</label>
+						</div>
+					</div>
+					
+					<div style="border:0px; display:none;" id="applicationForm">
+						<div style="margin-bottom:30px;">
+							<label><b>학번</b></label>
+							<input type="text" class="form-control border-top-0 border-left-0 border-right-0 rounded-0"
+								   placeholder="학번을 입력하세요." id="userGrade" value="<%= stuInfo.stuCode %>">
+						</div>
+						
+						<div style="margin-bottom:30px;">
+							<label><b>이름</b></label>
+							<input type="text" class="form-control border-top-0 border-left-0 border-right-0 rounded-0"
+								   placeholder="이름을 입력하세요." id="userName" value="<%= stuInfo.stuName %>">
+						</div>
+						
+						<div style="margin-bottom:30px;">
+							<label><b>성별</b></label>
+							<br/>
+							<input type="radio" class="form-input" name="userGender" id="genderFemale" style="border:1px solid #ffff00; margin-left:10px;">
+							<label for="genderFemale">여성</label>
+							<input type="radio" class="form-input" name="userGender" id="genderMale" style="border:1px solid #ffff00; margin-left:10px;">
+							<label for="genderMale">남성</label>
+						</div>
+						
+						<div style="margin-bottom:30px;">
+							<label><b>생년월일</b></label>
+							<br/>
+							<%
+								const userBirth = stuInfo.stuBirth;
+								const nowYear = new Date().getFullYear().toString().substring(2, 4);
+							
+								let fullBirth = "";
+							
+								if(parseInt(nowYear) > parseInt(userBirth.substring(0, 2))) {
+									fullBirth = "20" + userBirth.substring(0, 2) + "-" + userBirth.substring(2, 4) + "-" + userBirth.substring(4, 6);
+								}
+								else {
+									fullBirth = "19" + userBirth.substring(0, 2) + "-" + userBirth.substring(2, 4) + "-" + userBirth.substring(4, 6);
+								}
+							%>
+							<input type="date" class="form-control border-top-0 border-left-0 border-right-0 rounded-0" id="userBirth"
+								   autocomplete="off" tabindex="0" value="<%= fullBirth %>">
+						</div>
+						
+						<div id="phoneForm" style="margin-bottom:30px;">
+							<label><b>휴대폰</b></label>
+							<input type="phone" class="form-control border-top-0 border-left-0 border-right-0 rounded-0"
+								   placeholder="010-XXXX-XXXX" id="userPhone" value="<%= stuInfo.stuPhoneNum %>">
+						</div>
+						
+						<div id="emailForm" style="margin-bottom:30px;">
+							<label><b>이메일</b></label>
+							<input type="email" class="form-control border-top-0 border-left-0 border-right-0 rounded-0"
+								   placeholder="email@example.com" id="userEmail" value="<%= stuInfo.stuEmail %>">
+						</div>
+						
+						<% var questionList = JSON.parse(result[0].content) %>
+						<% for(let i=0; i<questionList.length; i++){ %>
+						<div class="form-group">
+							<% if(questionList[i].type === "radio"){ %>
+							<div class="form-group form-question" id="<%= questionList[i].id %>">
+								<label><b><%= questionList[i].question %></b></label><br/>
+								<% for(let j=0; j<questionList[i].askList.length; j++){ %>
+								<input type="hidden" id="questionData<%= i %>" value="">
+								<input type="radio" class="from-input" name="questionAsk<%= i %>" 
+									   id="<%= questionList[i].askList[j].id %>" value="<%= questionList[i].askList[j].ask %>">
+								<label for="<%= questionList[i].askList[j].id %>"><%= questionList[i].askList[j].ask %></label><br/>
+								<% } %>
+							</div>
+							<% } %>
+							<% if(questionList[i].type === "check"){ %>
+							<div class="form-group form-question">
+								<label><b><%= questionList[i].question %></b></label><br/>
+								<% for(let j=0; j<questionList[i].askList.length; j++){ %>
+								<input type="checkbox" class="from-input" name="questionAsk<%= i %>"
+									   id="<%= questionList[i].askList[j].id %>" value="<%= questionList[i].askList[j].ask %>">
+								<label for="<%= questionList[i].askList[j].id %>"><%= questionList[i].askList[j].ask %></label><br/>
+								<% } %>
+							</div>
+							<% } %>
+							<% if(questionList[i].type === "normal"){ %>
+							<div class="form-group form-question">
+								<label><b><%= questionList[i].question %></b></label><br/>
+								<textarea class="form-control" placeholder="자유롭게 작성해 주세요."
+										  id="<%= questionList[i].id %>" style="resize:none;"></textarea>
+							</div>
+							<% } %>
+						</div>
+						<% } %>
+						
+						<div class="form-group" id="mentalType" style="margin-top:70px;">
+							<label style="margin-bottom:30px;"><b>원하는 심리검사를 선택해주세요.</b><br/>(중복선택 가능)</label><br/>
+							<div class="form-group">
+								<% for(let i=0; i<mentalResult.length; i++){ %>
+								<div class="form-group">
+									<input type="checkbox" class="pull-left;" id="<%= 'mentalType'+i %>"
+										   value="<%= mentalResult[i].name %>" name="mentalList" style="margin-right:20px;">
+									<label for="<%= 'mentalType'+i %>"><%= mentalResult[i].name %></label>
+									<input type="button" class="btnMentalClass pull-right" id="<%= 'mentalDes'+i%>"
+										   onclick="alert('<%= mentalResult[i].description%>');">
+								</div>
+								<br/>
+								<% } %>
+							</div>
+						</div>
+
+						<div class="form-group text-right" style="margin-top:50px;"> 
+							<input type="button" class="btn btn-primary mb-2" id="btnFirstNext" value="다 음">
+						</div>
+						
+					</div>
+				</div>
+				
+				<div class="tab-pane fade" id="reservationTab">
+					<div style="margin-bottom:30px; margin-top:10%;">
+						<select class="custom-select" id="counselorList" style="width:180px;">
+							<option value="">상담 선생님 선택</option>
+						</select>
+					</div>
+					<div style="margin-bottom:30px; display:none;" id="divDate">
+						<label><b>날짜</b></label>
+						<div class="row formDate" id="possibleDate">
+						</div>
+					</div>
+					<div style="margin-bottom:30px; display:none;" id="divTime">
+						<label><b>시간</b></label>
+						<div class="row formTime" id="possibleTime">
+						</div>
+					</div>
+					
+					<div class="form-group text-right" style="margin-top:50px; margin-bottom:0!important; display:none;" id="divSecondNext"> 
+						<input type="button" class="btn btn-primary mb-2" id="btnSecondNext" style="margin-top:2px;" value="다 음">
+					</div>
+				</div>
+				
+				<div class="tab-pane fade" id="selfcheckTab">
+					<div class="row selfchek-title" style="height: 60px;">
+						<div class="col align-self-center text-center">
+							<label>간단 자가진단</label>
+						</div>
+					</div>
+					<div id="divisionSelfcheck">
+					</div>
+					
+					<div class="form-group text-right" style="margin-top:50px; margin-bottom:0!important;" id="divThirdNext"> 
+						<input type="button" class="btn btn-primary mb-2" id="btnThirdNext" style="margin-top:2px;" value="다 음">
+					</div>
+				</div>
+				
+				<div class="tab-pane fade" id="privacyTab">
+					
+					<div class="row">
+						<div class="col-title col">
+							<input type="checkbox" id="agreebox1" name="agreebox" class="btnClass"><label for="agreebox1" class="text-default"><label class="col-agreetext">(필수)
+							</label> 유한누리 이용약관 동의</label>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-text col">
+							<div class="form-text form-control overflow-auto">
+								<p class="text-danger">
+									테스트1
+								</p>
+								<p>
+									Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+									Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
+									when an unknown printer took a galley of type and scrambled it to make a type specimen book.
+
+									Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+									Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
+									when an unknown printer took a galley of type and scrambled it to make a type specimen book.
+								</p>
+							</div>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-title col">
+						<input type="checkbox" id="agreebox2" name="agreebox" class="btnClass"><label for="agreebox2" class="text-default"><label class="col-agreetext">
+							(필수)</label> 개인정보 수집 및 이용 동의</label>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-text col">
+							<div class="form-text form-control overflow-auto">
+								<p class="text-danger">
+									테스트2
+								</p>
+								<p>
+									Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+									Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
+									when an unknown printer took a galley of type and scrambled it to make a type specimen book.
+
+									Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+									Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
+									when an unknown printer took a galley of type and scrambled it to make a type specimen book.
+								</p>
+							</div>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-title col">
+						<input type="checkbox" id="agreebox3" name="agreebox" class="btnClass">
+							<label for="agreebox3" class="text-default">유한누리 이용약관, 개인정보 수집 및 이용에 모두 동의합니다.</label>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col text-right" style="margin-top:45px;">
+							<input type="button" class="btn btn-submit btn-primary mb-2" id="btnComplete" value="확 인">
+						</div>
+					</div>
+					
+				</div>
+			</div>
+		</div>
+		<script src="/socket.io/socket.io.js"></script>
+		<script>
+			$(function() {
+				const socket = io('/reservation');
+				
+				$('#appMental').click(function(e) {
+					document.getElementById("applicationForm").style.display = "block";
+					document.getElementById("mentalType").style.display = "block";
+				});
+				
+				$('#appConsult').click(function(e) {
+					document.getElementById("applicationForm").style.display = "block";
+					document.getElementById("mentalType").style.display = "none";
+				});
+
+				$("#btnFirstNext").click(function() {
+					if($('#appMental').is(':checked') === true && applicationValidCheck()) socket.emit('initPrivacy');
+					else if($('#appConsult').is(':checked') === true && applicationValidCheck()) socket.emit('initReservation');
+				});
+                
+                socket.on('initPrivacy', function() {
+                    $('#applicationTab').removeClass('show active');
+                    $('#selfcheckTab').removeClass('show active');
+
+                    $('#privacyTab').addClass('show active');
+                });
+				
+				socket.on('initReservation', function(data) {
+					const counselor = data;
+					
+					for(let i = 0; i < counselor.length; i++) {
+						$('#counselorList').append(`
+							<option value="${counselor[i].empno}">${counselor[i].empname} 선생님</option>
+						`);
+					}
+					
+					const tomorrow = new Date(new Date().getTime() + 86400000);
+                    
+					let passCount = 0;
+					
+					$('#possibleDate').before(`<br/><label style="font-size:0.8em;">${tomorrow.getMonth()+1}월</label>`)
+					for(let i=0; i<11; i++) {
+						if(i === 5) $('#possibleDate').append(`<div class="w-100"></div>`);
+						else {
+							let countDate = new Date((tomorrow.getTime() + (86400000 * i)));
+							if(countDate.getDay() === 0 || countDate.getDay() === 6) passCount = passCount + 1;
+							$('#possibleDate').append(`
+								<div class="col btnDate" id="btnDate${countDate.getDate() + passCount}">${countDate.getDate() + passCount}</div>
+							`);
+						}
+					}
+					
+					for(let i=0; i<9; i++) {
+						let countTime = i + 9;
+						if(countTime === 12) continue;
+						else if(countTime === 14) {
+							$('#possibleTime').append(`
+								<div class="w-100"></div>
+								<div class="col btnTime" id="btnTime${countTime}">${countTime}</div>
+							`);
+						}
+						else {
+							$('#possibleTime').append(`
+								<div class="col btnTime" id="btnTime${countTime}">${countTime}</div>
+							`);
+						}
+					}
+					
+					$(".btnDate").click(function(e) {
+						const dateList = document.getElementsByClassName('btnDate');
+						if($(this).hasClass('possible')) {
+							for(let i=0; i<dateList.length; i++) {
+								dateList[i].style.backgroundColor = "#fff";
+								if(dateList[i].className.includes("possible")) dateList[i].style.color = "#007BFF";
+								else dateList[i].style.color = "#212529";
+							}
+							$(this).css("background-color", '#0275d8');
+							$(this).css("color", '#fff');
+							
+							$('#divTime').css('display', 'block');
+							$('#divSecondNext').css('display', 'none');
+							
+							socket.emit("selectDateTime", {
+								date: $(this).val(),
+								empno: $('#counselorList').val()
+							});
+						}
+					});
+					
+					$(".btnTime").click(function(e) {
+						const dateList = document.getElementsByClassName('btnTime');
+						if($(this).hasClass('possible')) {
+							for(let i=0; i<dateList.length; i++) {
+								dateList[i].style.backgroundColor = "#fff";
+								if(dateList[i].className.includes("possible")) dateList[i].style.color = "#007BFF";
+								else dateList[i].style.color = "#212529";
+							}
+							$(this).css("background-color", '#0275d8');
+							$(this).css("color", '#fff');
+							$('#divSecondNext').css('display', 'block');
+						}
+					});
+                    
+					$('#applicationTab').removeClass('show active');
+					$('#reservationTab').addClass('show active');
+				});
+                				
+				$("#counselorList").change(function() {
+					const empno = $("#counselorList").val();
+					if(empno === "") {
+						const dateList1 = document.getElementsByClassName('btnDate');
+						for(let i=0; i<dateList1.length; i++) {
+							dateList1[i].classList.remove("possible");
+							dateList1[i].style.backgroundColor = "#fff";
+							dateList1[i].style.color = "#212529";
+						}
+						
+						const dateList2 = document.getElementsByClassName('btnTime');
+						for(let i=0; i<dateList2.length; i++) {
+							dateList2[i].classList.remove("possible");
+							dateList2[i].style.backgroundColor = "#fff";
+							dateList2[i].style.color = "#212529";
+						}
+						
+						$('#divDate').css('display', 'none');
+						$('#divTime').css('display', 'none');
+						$('#divSecondNext').css('display', 'none');
+					}
+					else {
+						socket.emit('selectCounselor', empno);
+						
+						const dateList = document.getElementsByClassName('btnTime');
+						
+						for(let i=0; i<dateList.length; i++) {
+							dateList[i].classList.remove("possible");
+							dateList[i].style.backgroundColor = "#fff";
+							dateList[i].style.color = "#212529";
+						}
+						
+						$('#divDate').css('display', 'block');
+						$('#divTime').css('display', 'none');
+						$('#divSecondNext').css('display', 'none');
+					}
+				});
+				
+				socket.on('selectCounselor', function(date) {
+					if(date.length > 0) {
+						for(let i=0; i<date.length; i++) {
+							const tempDate = new Date(date[i].possible).getDate();
+							
+							$('#btnDate'+tempDate).css("background-color", '#fff');
+							$('#btnDate'+tempDate).css("color", '#0275d8');
+							$('#btnDate'+tempDate).addClass('possible');
+							
+							$('#btnDate'+tempDate).val(date[i].possible);
+						}
+					}
+					else {
+						const dateList = document.getElementsByClassName('btnDate');
+						
+						for(let i=0; i<dateList.length; i++) {
+							dateList[i].classList.remove("possible");
+							dateList[i].style.backgroundColor = "#fff";
+							dateList[i].style.color = "#212529";
+						}
+					}
+				});
+				
+				socket.on('returnTime', function(list) {
+					const dateList = document.getElementsByClassName('btnTime');
+					
+					for(let i=0; i<dateList.length; i++) {
+						dateList[i].classList.remove("possible");
+						dateList[i].style.backgroundColor = "#fff";
+						dateList[i].style.color = "#212529";
+					}
+					
+					for(let i=0; i<list.length; i++) {
+						if(list[i] === 12) continue;
+						else {
+							$('#btnTime'+list[i]).css("color", '#0275d8');
+							$('#btnTime'+list[i]).addClass('possible');
+						}
+					}
+				});
+				
+				$("#btnSecondNext").click(function(e) {
+					const empno = $("#counselorList").val();
+					socket.emit('initSelfcheck', empno);
+				});
+				
+				socket.on('initSelfcheck', function(list) {
+					for(let i=0; i<list.length; i++) {
+						$('#divisionSelfcheck').append(`
+							<div class="row selfcheck-subject">
+								<div class="col align-self-center text-center">
+									<label><b>${list[i].ask}</b></label>
+								</div>
+							</div>
+							<div class="row" style="margin-bottom:70px;">
+								<label style="font-size:130%;color:#494949;margin-left:3%;padding-top:2%;">나쁨</label>
+								<div id="radios">
+								  <label class="radio-border" for="${list[i].id}_1"></label>
+								  <input class="selfcheck-radio radio1" id="${list[i].id}_1" name="${list[i].id}" type="radio" value="1"/>
+								  <label class="radio-border" for="${list[i].id}_2"></label>
+								  <input class="selfcheck-radio radio2" id="${list[i].id}_2" name="${list[i].id}" type="radio" value="2"/>
+								  <label class="radio-border" for="${list[i].id}_3"></label>
+								  <input class="selfcheck-radio radio3" id="${list[i].id}_3" name="${list[i].id}" type="radio" value="3"/>
+								  <label class="radio-border" for="${list[i].id}_4"></label>
+								  <input class="selfcheck-radio radio4" id="${list[i].id}_4" name="${list[i].id}" type="radio" value="4"/>
+								  <label class="radio-border" for="${list[i].id}_5"></label>
+								  <input class="selfcheck-radio radio5" id="${list[i].id}_5" name="${list[i].id}" type="radio" value="5"/>
+								  <span id="slider"></span>
+								</div>
+							   <label style="font-size:130%;color:#494949;margin-right:3%;padding-top:2%;">좋음</label>
+							</div>
+						`);
+						$("input:radio[name='"+list[i].id+"']:radio[value='3']").prop('checked', true);
+					}
+						
+					$('#reservationTab').removeClass('show active');
+					$('#selfcheckTab').addClass('show active');
+				});
+				
+				$('input[name=agreebox]').click(function(){
+					if($("#agreebox3").is(":checked")){
+						if(!$("#agreebox2").is(":checked") || !$("#agreebox1").is(":checked")) {
+							$("input:checkbox[id='agreebox3']").prop("checked", false);
+						}
+					}
+
+					if($("#agreebox1").is(":checked") && $("#agreebox2").is(":checked")) {
+						$("input:checkbox[name=agreebox]").each(function() {
+							this.checked = true;
+						});
+					}
+				});
+				
+				$('#agreebox3').click(function(e) {	// 모두 동의 버튼					
+					if($("input:checkbox[id='agreebox3']").is(":checked") == false) {
+						agreebox1.checked = true;
+						agreebox2.checked = true;
+						$("input:checkbox[id='agreebox3']").prop("checked", true);
+					}
+					else{
+						agreebox1.checked = false;
+						agreebox2.checked = false;
+						$("input:checkbox[id='agreebox3']").prop("checked", false);
+					}
+				});
+				
+				$('#btnComplete').click(function(e) {
+					if($('#agreebox3').is(':checked') === true) {
+						
+					}
+					else{
+						alert("개인정보동의서를 동의해야 신청이 가능합니다.");
+						document.getElementById("agreebox3").focus();
+					}
+				});
+				
+				function applicationValidCheck() {
+					if($('#userGrade').val() === ""){
+						document.getElementById("userGrade").focus();
+						alert("학번을 입력하세요.");
+						return false;
+					}else{
+						if($('#userName').val() === ""){
+							document.getElementById("userName").focus();
+							alert("이름을 입력하세요.");
+							return false;
+						}else{
+							if($('input:radio[name=userGender]').is(':checked') === false){
+								document.getElementById("genderFemale").focus();
+								alert("성별을 선택하세요.");
+								return false;
+							}else{
+								if($('#userEmail').val() === ""){
+									document.getElementById("userEmail").focus();
+									alert("이메일을 작성하세요.");
+									return false;
+								}else if(CheckEmail(document.getElementById("userEmail").value) === false){
+									document.getElementById("userEmail").focus();
+									alert("이메일의 형식을 확인하세요.");
+									return false;
+								}else{
+									if($('#appMental').is(':checked') === true && $('input:checkbox[name=mentalList]').is(':checked') == false){
+										alert("심리검사 유형을 1개 이상 선택하세요.");
+										document.getElementById("mentalType0").focus();
+										return false;
+									}else{
+										return true;
+									}
+								}
+							}
+						}
+					}
+				} // 간단 신청서 부분 유효성 검사
+				
+				function CheckEmail(str){                                                 
+					const reg_email = /^([0-9a-zA-Z_\.-]+)@([0-9a-zA-Z_-]+)(\.[0-9a-zA-Z_-]+){1,2}$/;
+					if(!reg_email.test(str)) return false;
+					else return true;                        
+				}  // 간단 신청서 부분 이메일 유효성 검사
+				
+			});
+		</script>
+	</body>
+</html>

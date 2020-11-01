@@ -51,7 +51,7 @@ class _LoginState extends State<Login> {
       print("★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★onLaunchonResume: $message");
       print(message['data']['fileno']);
     }, onLaunch: (Map<String, dynamic> message) async {
-      print("★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★onLaunch: $message"); //
+      print("★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★onLaunch: $message");
       print(message['data']['fileno']);
     });
   }

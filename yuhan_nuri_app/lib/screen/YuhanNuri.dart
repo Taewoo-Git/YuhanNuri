@@ -137,7 +137,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                     case 1:
                       _webViewController.loadUrl(
                           url:
-                              'https://yuhannuri.run.goorm.io/user/application',
+                              'https://yuhannuri.run.goorm.io/user/reservation',
                           headers: header);
                       break;
                     case 2:

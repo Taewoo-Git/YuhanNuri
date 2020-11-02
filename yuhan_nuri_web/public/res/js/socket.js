@@ -5,16 +5,85 @@ const connection = db.init();
 
 db.open(connection,'socket');
 
+const moment = require('moment');
+require('moment-timezone'); 
+moment.tz.setDefault("Asia/Seoul");
+
 module.exports = (server) => {	
 	const io = socket(server, {
 		cookie: false
 	});
 	
 	io.of('/reservation').on('connection', function(socket) {
-		socket.on('initPrivacy', function() {
-			console.log("privacy!");
-
+		socket.on('initPrivacy', function() {	
 			socket.emit('initPrivacy');
+		});
+		
+		socket.on('initComplete', function(recvData) {
+			
+			let insertSimpleApplyForm = "INSERT INTO SimpleApplyForm(typeno, stuno, stuname, gender, age, email, data) " +
+										"VALUES(?, ?, ?, ?, ?, ?, ?);";
+			
+			let insertReservation = "INSERT INTO Reservation(no, typecode, stuno, empno, date, starttime, agree, status, finished) " +
+									"VALUES(?, ?, ?, ?, ?, ?, 1, 0, 0);";
+			
+			let insertSelfCheck = "INSERT INTO SelfCheck(typeno, stuno, data) VALUES(?, ?, ?);"
+			
+			let simpleApplyFormData = [
+				recvData.type,
+				recvData.stuCode,
+				recvData.stuName,
+				recvData.stuGender,
+				recvData.stuBirth,
+				recvData.stuEmail,
+				recvData.stuAnswer
+			];
+			
+			let reservationData = [
+				parseInt(recvData.reservationCode),
+				recvData.stuCode,
+				recvData.empno,
+				recvData.date,
+				parseInt(recvData.time)
+			];
+			
+			let selfCheck = [
+				recvData.type,
+				recvData.stuCode,
+				recvData.selfcheck
+				
+			];
+			
+			connection.execute(insertSimpleApplyForm, simpleApplyFormData, (err) => {
+				if(err) console.error(err);
+				else {
+					if(recvData.type === 5) socket.emit('initComplete');
+					else if(recvData.type === 4) {
+						let serialCheck = `select no+1 as 'serial' from Reservation where no like '${new moment().format("YYYYMMDD")}%' order by no desc limit 1;`;
+						connection.execute(serialCheck, [], (err, result) => {
+							if(err) console.error(err);
+							else {					
+								if(result.length > 0) reservationData.splice(0, 0, result[0].serial);
+								else reservationData.splice(0, 0, `${new moment().format("YYYYMMDD")}0001`);
+								
+								connection.execute(insertReservation, reservationData, (err) => {
+									if(err) console.error(err);
+									else {
+										connection.execute(insertSelfCheck, selfCheck, (err) => {
+											if(err) console.error(err);
+											else {
+												socket.emit('initComplete');
+											}
+										});
+									}
+								});
+								
+							}
+						});
+					}
+				}
+			});
+			
 		});
 		
 		socket.on('initReservation', function() {

@@ -30,8 +30,6 @@ app.use('/uploads',express.static(path.join(__dirname, 'uploads')));
 app.use('/style',express.static(path.join(__dirname, '/public/res/css')));
 app.use('/lib',express.static(path.join(__dirname, '/public/res/lib')));
 
-
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -93,3 +91,187 @@ app.use((err,req,res,next)=>{
 	res.status(err.status || 500);
 	res.render('error');
 });
+
+// 			<div class="tab-pane fade show active" id="공지사항">
+// 				<label><b>공지사항</b></label><br/>
+// 				<% JSON.parse(data[0].content).forEach(function(b,i){%>
+// 					<%if(b.type == "paragraph"){%>
+// 						<p>
+// 							<%= b.data.text%>
+// 						</p>
+// 					<%}%>
+// 					<%if(b.type == "image"){%>
+// 						<img src="<%=b.data.file.url%>" alt="<%=b.data.caption%>"/>
+// 					<%}%>
+// 					<%if(b.type == "header"){%>
+// 						<%if(b.data.level === 1){%>
+// 							<h1>
+// 								<%= b.data.text%>
+// 							</h1>
+// 						<%}%>
+// 						<%if(b.data.level === 2){%>
+// 							<h2>
+// 								<%= b.data.text%>
+// 							</h2>
+// 						<%}%>
+// 						<%if(b.data.level === 3){%>
+// 							<h3>
+// 								<%= b.data.text%>
+// 							</h3>
+// 						<%}%>
+// 						<%if(b.data.level === 4){%>
+// 							<h4>
+// 								<%= b.data.text%>
+// 							</h4>
+// 						<%}%>
+// 						<%if(b.data.level === 5){%>
+// 							<h5>
+// 								<%= b.data.text%>
+// 							</h5>
+// 						<%}%>
+// 						<%if(b.data.level === 6){%>
+// 							<h6>
+// 								<%= b.data.text%>
+// 							</h6>
+// 						<%}%>
+// 					<%}%>
+// 					<%if(b.type == "list"){%>
+// 						<% if(b.data.style==="ordered"){%>
+// 							<ol>
+// 								<% b.data.items.forEach(function(v,i){%>
+// 									<li><%=v%></li>
+// 								<%})%>
+// 							</ol>
+// 						<%}%>
+// 						<% if(b.data.style==="unordered"){%>
+// 							<ol>
+// 								<% b.data.items.forEach(function(v,i){%>
+// 									<li><%=v%></li>
+// 								<%})%>
+// 							</ol>
+// 						<%}%>
+// 					<%}%>
+// 				<%})%>
+//   			</div>
+//   			<div class="tab-pane fade" id="이용안내">
+// 				<label><b>이용안내</b></label><br/>
+//     							<% JSON.parse(data[1].content).forEach(function(b,i){%>
+// 					<%if(b.type == "paragraph"){%>
+// 						<p>
+// 							<%= b.data.text%>
+// 						</p>
+// 					<%}%>
+// 					<%if(b.type == "image"){%>
+// 						<img src="<%=b.data.file.url%>" alt="<%=b.data.caption%>"/>
+// 					<%}%>
+// 					<%if(b.type == "header"){%>
+// 						<%if(b.data.level === 1){%>
+// 							<h1>
+// 								<%= b.data.text%>
+// 							</h1>
+// 						<%}%>
+// 						<%if(b.data.level === 2){%>
+// 							<h2>
+// 								<%= b.data.text%>
+// 							</h2>
+// 						<%}%>
+// 						<%if(b.data.level === 3){%>
+// 							<h3>
+// 								<%= b.data.text%>
+// 							</h3>
+// 						<%}%>
+// 						<%if(b.data.level === 4){%>
+// 							<h4>
+// 								<%= b.data.text%>
+// 							</h4>
+// 						<%}%>
+// 						<%if(b.data.level === 5){%>
+// 							<h5>
+// 								<%= b.data.text%>
+// 							</h5>
+// 						<%}%>
+// 						<%if(b.data.level === 6){%>
+// 							<h6>
+// 								<%= b.data.text%>
+// 							</h6>
+// 						<%}%>
+// 					<%}%>
+// 					<%if(b.type == "list"){%>
+// 						<% if(b.data.style==="ordered"){%>
+// 							<ol>
+// 								<% b.data.items.forEach(function(v,i){%>
+// 									<li><%=v%></li>
+// 								<%})%>
+// 							</ol>
+// 						<%}%>
+// 						<% if(b.data.style==="unordered"){%>
+// 							<ol>
+// 								<% b.data.items.forEach(function(v,i){%>
+// 									<li><%=v%></li>
+// 								<%})%>
+// 							</ol>
+// 						<%}%>
+// 					<%}%>
+// 				<%})%>
+//   			</div>
+//   			<div class="tab-pane fade" id="FAQ">
+// 				<label><b>FAQ</b></label><br/>
+// 				<% JSON.parse(data[2].content).forEach(function(b,i){%>
+// 					<%if(b.type == "paragraph"){%>
+// 						<p>
+// 							<%= b.data.text%>
+// 						</p>
+// 					<%}%>
+// 					<%if(b.type == "image"){%>
+// 						<img src="<%=b.data.file.url%>" alt="<%=b.data.caption%>"/>
+// 					<%}%>
+// 					<%if(b.type == "header"){%>
+// 						<%if(b.data.level === 1){%>
+// 							<h1>
+// 								<%= b.data.text%>
+// 							</h1>
+// 						<%}%>
+// 						<%if(b.data.level === 2){%>
+// 							<h2>
+// 								<%= b.data.text%>
+// 							</h2>
+// 						<%}%>
+// 						<%if(b.data.level === 3){%>
+// 							<h3>
+// 								<%= b.data.text%>
+// 							</h3>
+// 						<%}%>
+// 						<%if(b.data.level === 4){%>
+// 							<h4>
+// 								<%= b.data.text%>
+// 							</h4>
+// 						<%}%>
+// 						<%if(b.data.level === 5){%>
+// 							<h5>
+// 								<%= b.data.text%>
+// 							</h5>
+// 						<%}%>
+// 						<%if(b.data.level === 6){%>
+// 							<h6>
+// 								<%= b.data.text%>
+// 							</h6>
+// 						<%}%>
+// 					<%}%>
+// 					<%if(b.type == "list"){%>
+// 						<% if(b.data.style==="ordered"){%>
+// 							<ol>
+// 								<% b.data.items.forEach(function(v,i){%>
+// 									<li><%=v%></li>
+// 								<%})%>
+// 							</ol>
+// 						<%}%>
+// 						<% if(b.data.style==="unordered"){%>
+// 							<ol>
+// 								<% b.data.items.forEach(function(v,i){%>
+// 									<li><%=v%></li>
+// 								<%})%>
+// 							</ol>
+// 						<%}%>
+// 					<%}%>
+// 				<%})%>
+//   			</div>

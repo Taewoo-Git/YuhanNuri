@@ -9,8 +9,6 @@ const fs = require('fs');
 const path=require('path');
 const multer=require('multer');
 
-const bcrypt=require('bcrypt');
-
 const {isAdminLoggedIn} = require('./middlewares'); 
 
 const moment = require("moment");
@@ -187,6 +185,7 @@ router.post("/deleteSchedule",isAdminLoggedIn, function(req, res, next){
 	const sql_deleteSchedule = "DELETE FROM Schedule WHERE id = ?";
 	const sql_isOnSchedule = "SELECT calendarId FROM Schedule WHERE id = ?";
 	
+	console.info(data);
 	
 	connection.execute(sql_isOnSchedule, [data.id], (err, schedule_rows) => {
 		if(err) {
@@ -245,16 +244,27 @@ router.post("/createSchedule", isAdminLoggedIn,function(req, res, next){
 	let startIndex = moment(new Date(data.start)).format(date_format);
 	let location = "";
 	let isDuplicate;
-	if(data.location !== undefined) location = data.location;
+	if(data.location !== undefined) location = data.location; // 특정 장소를 입력하면 입력한 장소 값이 여기로 들어감
 
-	console.info(empno, data.calendarId, data.title, data.category, start, end, location);
+	console.info(empno, data.calendarId, data.title, data.category, start, end, location); // 
 	
+	/*
+	let endIndex = moment(new Date(data.end)).format(date_format);
+	
+	
+	if(calendarId === "Reservation" && startIndex !== endIndex){ // 예약 가능 일정을 추가하는데 만약 날짜가 다를 경우 에러
+		res.json({state : "error : date different"});
+	}
+	*/
+	/*
+	// 이미 동일한 타입으로 스케줄을 예약하였는지를 판단하는 코드
 	connection.execute(sql_getAlreadyScheduled, [startIndex], (err, row) => {
 		if(err) console.error(err);
 		else{
-			for(let time = row[0].start; time <= row[0].end; time++){
-				scheduled_hour.push(time);
-			}			
+			if(row.length > 0){
+				
+			}
+					
 			
 			
 			let created_start = new Date(start).getHours();
@@ -284,6 +294,10 @@ router.post("/createSchedule", isAdminLoggedIn,function(req, res, next){
 		
 		
 	});
+	*/
+	
+	
+	
 	
 	connection.execute(sql_createSchedule, [empno, data.calendarId, data.title, data.category, start, end, location], (err, rows) => {
 		if(err){
@@ -307,41 +321,28 @@ router.post("/accessReservation",isAdminLoggedIn, function(req,res,next) { //POS
 	let usedScheduleData = [];
 	let reservedStart = "";
 	connection.execute(getReservationData, [data], (err, rows) => {
-	
-		
-		
 		if(err){
 			console.error(err);
 			next(err);
 		}else{
 			usedScheduleData = rows;
-		
-			
 			reservedStart = usedScheduleData[0].date + " " +usedScheduleData[0].starttime + ":00:00";
-			
 			connection.execute(sql_selectId, [empno, usedScheduleData[0].date], (err, rows) => {
 				if(err)
 				{
 					console.error(err);
 					next(err);
 				}else{
-					
 					console.info(rows[0]);
-					
-					
 					connection.execute(sql_insertUsedScheduleData, [usedScheduleData[0].stuno, usedScheduleData[0].stuname, rows[0].id, reservedStart], (err, rows) => {
 						if(err) {
 							console.error(err);
 							next(err);
 						}
 					});
-					
 				}
-				
 			});
-			
 		}
-		
 	});
 	
 	connection.execute(getAccessReservationData, [empno, data], (err,rows) => {
@@ -351,6 +352,7 @@ router.post("/accessReservation",isAdminLoggedIn, function(req,res,next) { //POS
 		}
 		
 		res.json({getReservation: rows});
+		
 	});
 });
 
@@ -625,21 +627,111 @@ router.get('/question',isAdminLoggedIn,function(req,res){
 router.post('/saveQuestion',isAdminLoggedIn,function(req,res,next){
 	const sendData=req.body.sendData;
 	const sendNumber=req.body.sendNumber;
+	const sql_selectOverlappedAnswer='select * from QuestionBoard where no=?';
 	const sql_updateAnswer='update QuestionBoard set empno=?,answerdate=?,answer=? where no=?';
 	let nowMoment = moment().format("YYYYMMDD");
-
-	connection.execute(sql_updateAnswer,[req.session.adminInfo.empno,nowMoment,sendData,sendNumber],(err,rows)=>{
+	let isOverraped=true;
+	connection.execute(sql_selectOverlappedAnswer,[sendNumber],(err,rows)=>{
+		if(err){
+			console.error(err);
+			next(err);
+		}else{
+			if(rows[0].empno===null && rows[0].answerdata===undefined && rows[0].answer===null){
+					isOverraped=false;
+			}
+		}
+	});
+	
+	
+	if(isOverraped){
+		res.json({state:'overlapped'});
+	}else{
+		connection.execute(sql_updateAnswer,[req.session.adminInfo.empno,nowMoment,sendData,sendNumber],(err,rows)=>{
+			if(err){
+				console.error(err);
+				next(err);
+			}else{
+				res.json({state:'ok'});
+			}
+		});
+	}
+	
+});
+router.get('/myReservation',function(req,res,next){
+	let empno=req.session.adminInfo.empno;
+	const sql_findTypes="select type from EditTest";
+	const sql_selectMyReservation="select * from Reservation where status=1 and empno=?";
+	let types=[];
+	connection.execute(sql_findTypes,(err,rows)=>{
+		if(err){
+			console.error(err);
+			next(err);
+		}
+		if(rows.length==0){
+			next(err);
+		}else{
+			types=rows;
+		}
+	});
+	connection.execute(sql_selectMyReservation,[empno],(err,rows)=>{
+		if(err){
+			console.error(err);
+			next(err);
+		}else{
+			res.render('adminMyReservation',{myReservation:rows,types:types});
+		}
+	})
+});
+router.post("/finishedReservation",isAdminLoggedIn, function(req,res,next) { //POST /admin/finishedReservation
+	const sql_updateFinished = "UPDATE Reservation SET finished=1 WHERE empno = ? AND no = ? AND finisehd = 0";
+	let data = req.body.sendAjax;
+	let empno = req.session.adminInfo.empno;
+	connection.execute(sql_updateFinished,[empno,data],(err,rows)=>{
 		if(err){
 			console.error(err);
 			next(err);
 		}else{
 			res.json({state:'ok'});
 		}
+	})
+});
+
+
+
+
+
+var reservationAcceptPush = function() {
+	connection.execute(sql_AcceptedToken, [req.body.title], (err, rows) => {
+		if(err){
+				console.error(err);
+				next(err);
+		}
+		else
+		{
+			console.log(rows[0]);
+			const fcm_target_token = rows[0].token;
 		
-	});
-})
-
-
+			const fcm_message = {
+				token : fcm_target_token,
+				notification : {
+		 			title: 'yuhan1', 
+					body: '요청하신 예약이 수락되었습니다.',
+					//
+				},
+				data : {
+					click_action: 'FLUTTER_NOTIFICATION_CLICK',
+				}
+			}
+			
+			fcm_admin.messaging().send(fcm_message)
+			.then(function(response){
+				console.log('fcm보내기 성공');
+			 }).catch(function(error){
+				console.log(error);
+			});
+		}
+	}); 
+};
 
 
 module.exports = router;

@@ -233,9 +233,8 @@
 				
 				console.info(data.schedules);
 
-				data.schedules.forEach((row, index) => {
+				data.schedules.forEach((row) => {
 					delete row.empno;
-					row.id = row.id.toString();
 					console.info(row);
 					row.start = row.start.replace(".000Z", "");
 					row.end = row.end.replace(".000Z", "");
@@ -268,7 +267,8 @@
 				});
 				
 				
-				calendar.createSchedules(reservedSchedules);	
+				calendar.createSchedules(reservedSchedules);
+				
 			}
 		});
 		
@@ -329,9 +329,6 @@
 			};
 
 			
-			
-
-			
 			console.info(schedule);
 			let sendAjax = {
 				
@@ -346,21 +343,31 @@
 			
 			console.info(sendAjax);
 			
+			
+			/*
+			
+			*/
+			
 			$.ajax({
 				type: "POST",
 				dataType: "json",
 				url: "./createSchedule",
 				async: true,
 				data: { "sendAjax" : JSON.stringify(sendAjax) },
-				success: function (data) { 
-					// window.location.reload();
+				success: function (data) { 	
 					console.info(data);
-					if(data.state === false){
+					if(data.state === "ok"){
 						console.info("info : 스케줄 추가가 완료되었습니다.");
 						calendar.createSchedules([schedule]);
-					}else if(data.state === true){
-						console.info("error : 스케줄이 중복되어 새로 추가할 수 없습니다.");
+						window.location.reload();
 					}
+					
+					
+					/*
+					if(data.state === "error : date different"){
+					
+					}
+					*/
 				}
 			});
 			
@@ -426,6 +433,11 @@
 				data : {"sendAjax" : JSON.stringify(sendAjax)},
 				success : function(data){
 					// console.info(data.state);
+					/*
+					
+					*/
+					
+					
 					if(data.state === "can't delete : already Accept"){
 						console.info("error : 이미 예약이 수락되어있어 삭제가 불가능 합니다.");
 					}

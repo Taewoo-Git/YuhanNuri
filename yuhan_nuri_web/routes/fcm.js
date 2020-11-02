@@ -121,7 +121,7 @@ router.post('/', function (req,res,next){
 	
 	// 2. 예약이 신청 -> 승인 -> 예약이완료되었습니다.
 	//'예약의 no가져오는 방식'
-	// var reservationAcceptPush = function() {connection.execute(sql_AcceptedToken, [req.body.title], (err, rows) => {
+	// var reservationAcceptPush = function(reservationtokenno) {connection.execute(sql_AcceptedToken, [reservationtokenno], (err, rows) => {
 	// 	if(err){
 	// 			console.error(err);
 	// 			next(err);
@@ -159,7 +159,7 @@ router.post('/', function (req,res,next){
 	
 	// 3.관리자가 문의에 대한 답변을 달았을 때
 	
-	// var answerPush = function() {connection.execute(sql_notifyAnswer , [req.body.title], (err, rows) => {
+	// var answerPush = function(tokenno) {connection.execute(sql_notifyAnswer , [tokenno], (err, rows) => {
 		
 		
 	// 		if(err){
@@ -197,33 +197,33 @@ router.post('/', function (req,res,next){
 	
 	// 3. 만족도조사 참여 메시지
 	
-	var satisfactionPush = function(satisfactionNo){ connection.execute(sql_satisfaction, [satisfactionNo], (err, rows) => {
-			if(err){
-				console.error(err);
-				next(err);
-		}
-		else
-		{
-			console.log(rows[0]);
-			const fcm_target_token = rows[0].token;
+// 	var satisfactionPush = function(satisfactionNo){ connection.execute(sql_satisfaction, [satisfactionNo], (err, rows) => {
+// 			if(err){
+// 				console.error(err);
+// 				next(err);
+// 		}
+// 		else
+// 		{
+// 			console.log(rows[0]);
+// 			const fcm_target_token = rows[0].token;
 		
-			const fcm_message = {
-				token : fcm_target_token,
-				notification : {
-		 			title: '유한누리', 
-					body: '만족도조사에 참여해주세요!' }
-			};
+// 			const fcm_message = {
+// 				token : fcm_target_token,
+// 				notification : {
+// 		 			title: '유한누리', 
+// 					body: '만족도조사에 참여해주세요!' }
+// 			};
 					
-			fcm_admin.messaging().send(fcm_message)
-			.then(function(response){
-				console.log('fcm보내기 성공');
-			 }).catch(function(error){
-				console.log(error);
-			});	
-		}
-	});
-};
-	satisfactionPush(req.body.title);
+// 			fcm_admin.messaging().send(fcm_message)
+// 			.then(function(response){
+// 				console.log('fcm보내기 성공');
+// 			 }).catch(function(error){
+// 				console.log(error);
+// 			});	
+// 		}
+// 	});
+// };
+	
 	
 	
 	res.render('fcmEx');

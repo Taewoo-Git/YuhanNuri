@@ -137,7 +137,7 @@
 	<body class="container">
 		<div class="row">
 			<div class="col">
-				<label style="font-size:150%;">마이페이지</label>
+				<label style="font-size:150%; height: 60px;">마이페이지</label>
 			</div>
 		</div>
 		<div class="row">
@@ -156,19 +156,32 @@
 			</div>
 		</div>
 		<div class="tab-content">
-			<div class="tab-pane fade" style="padding:1rem!important;" id="reservation">
-				<p class="text text-danger">
-					예약확인
-				</p>
-				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-				Nunc id ornare libero. Vivamus iaculis, justo vel mattis pharetra, nisi ligula varius nisl, sit amet mollis tortor ligula vitae nisi.
-				</p>
+			<div class="tab-pane fade" style="padding:0rem!important;" id="reservation">
+
+				<table class="table table-borderless" style="margin-top:30px; border-top:1px solid #dee2e6; border-bottom:1px solid #dee2e6;">
+					<tr>
+						<th scope="row">상담유형</th>
+						<td>심리검사</td>
+					</tr>
+					<tr>
+						<th rowspan="3" scope="row">검사유형</th>
+						<td>MBTI</td>
+					</tr>
+					<tr>
+						<td>TCI</td>
+					</tr>
+					<tr>
+						<td>성격 5요인 검사</td>
+					</tr>
+					<tr>
+						<th scope="row">접수현황</th>
+						<td style="color:green;">접수완료</td>
+					</tr>
+				</table>
+				<input type="button" class="btn btn-primary pull-right" value="취 소" style="padding:.300rem .60rem">
 			</div>
-			<div class="tab-pane fade" style="padding:1rem!important;" id="question">
-				<p class="text text-danger">
-					문의내역
-				</p>
-				<table class="table">
+			<div class="tab-pane fade" style="padding:0rem!important;" id="question">
+				<table class="table table-borderless" style="border-bottom:1px solid #dee2e6;">
                     <tbody>
 					<%if(questions.length===0){%>
 						<tr>
@@ -176,7 +189,7 @@
                       </tr>
 					<%}else{%>
 						<%questions.forEach(function(v,i){%>
-							<tr>
+							<tr style="height:50px;">
 							<%if(isAnswerList[i]==='완료'){%>
 								<td style='width: 20%; color:green; font-size: 0.9em;'>완료</td>
 							<%}else{%>

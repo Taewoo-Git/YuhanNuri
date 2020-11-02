@@ -19,7 +19,6 @@
 		<style>
 			body {
 				width:100%;
-				background-color:#f0f4f7;
 			}
 			.fade-text {
 				font-size:150%;
@@ -32,7 +31,6 @@
 			.fade-app {
 				font-size:80%;
 				color:#444444;
-				
   				animation: fadein-app 3s;
   				-moz-animation: fadein-app 3s; /* Firefox */
   				-webkit-animation: fadein-app 3s; /* Safari and Chrome */
@@ -113,6 +111,20 @@
 			}
 			.form-text{
 				padding-bottom:30%;
+			}
+			.formType {
+				margin-left: 5px;
+				margin-right: 5px;
+				border:1px solid #ddd;
+				border-left:0!important;
+				border-right:0!important;
+			}
+			.btnType {
+				cursor: pointer;
+				padding: 2vh 0;
+				text-align:center;
+				font-size: 1em;
+				background-color: white;
 			}
 			.formDate {
 				margin-left: 5px;
@@ -222,7 +234,7 @@
 						<div style="margin-bottom:30px;">
 							<label><b>학번</b></label>
 							<input type="text" class="form-control border-top-0 border-left-0 border-right-0 rounded-0"
-								   placeholder="학번을 입력하세요." id="userGrade" value="<%= stuInfo.stuCode %>">
+								   placeholder="학번을 입력하세요." id="userCode" value="<%= stuInfo.stuCode %>">
 						</div>
 						
 						<div style="margin-bottom:30px;">
@@ -234,9 +246,9 @@
 						<div style="margin-bottom:30px;">
 							<label><b>성별</b></label>
 							<br/>
-							<input type="radio" class="form-input" name="userGender" id="genderFemale" style="border:1px solid #ffff00; margin-left:10px;">
+							<input type="radio" class="form-input" name="userGender" id="genderFemale" style="border:1px solid #ffff00; margin-left:10px;" value="여성">
 							<label for="genderFemale">여성</label>
-							<input type="radio" class="form-input" name="userGender" id="genderMale" style="border:1px solid #ffff00; margin-left:10px;">
+							<input type="radio" class="form-input" name="userGender" id="genderMale" style="border:1px solid #ffff00; margin-left:10px;" value="남성">
 							<label for="genderMale">남성</label>
 						</div>
 						
@@ -275,34 +287,27 @@
 						<% var questionList = JSON.parse(result[0].content) %>
 						<% for(let i=0; i<questionList.length; i++){ %>
 						<div class="form-group">
+							<div class="form-group form-question">
+								<label id="dynamicQuestion<%=i%>"><b><%= questionList[i].question %></b></label><br/>
 							<% if(questionList[i].type === "radio"){ %>
-							<div class="form-group form-question" id="<%= questionList[i].id %>">
-								<label><b><%= questionList[i].question %></b></label><br/>
 								<% for(let j=0; j<questionList[i].askList.length; j++){ %>
-								<input type="hidden" id="questionData<%= i %>" value="">
-								<input type="radio" class="from-input" name="questionAsk<%= i %>" 
+								<input type="radio" class="from-input" name="dynamicAnswer<%=i%>"
 									   id="<%= questionList[i].askList[j].id %>" value="<%= questionList[i].askList[j].ask %>">
 								<label for="<%= questionList[i].askList[j].id %>"><%= questionList[i].askList[j].ask %></label><br/>
 								<% } %>
-							</div>
 							<% } %>
 							<% if(questionList[i].type === "check"){ %>
-							<div class="form-group form-question">
-								<label><b><%= questionList[i].question %></b></label><br/>
 								<% for(let j=0; j<questionList[i].askList.length; j++){ %>
-								<input type="checkbox" class="from-input" name="questionAsk<%= i %>"
+								<input type="checkbox" class="from-input" name="dynamicAnswer<%=i%>"
 									   id="<%= questionList[i].askList[j].id %>" value="<%= questionList[i].askList[j].ask %>">
 								<label for="<%= questionList[i].askList[j].id %>"><%= questionList[i].askList[j].ask %></label><br/>
 								<% } %>
-							</div>
 							<% } %>
 							<% if(questionList[i].type === "normal"){ %>
-							<div class="form-group form-question">
-								<label><b><%= questionList[i].question %></b></label><br/>
-								<textarea class="form-control" placeholder="자유롭게 작성해 주세요."
+								<textarea class="form-control" placeholder="자유롭게 작성해 주세요." name="dynamicAnswer<%=i%>"
 										  id="<%= questionList[i].id %>" style="resize:none;"></textarea>
-							</div>
 							<% } %>
+							</div>
 						</div>
 						<% } %>
 						
@@ -335,11 +340,35 @@
 							<option value="">상담 선생님 선택</option>
 						</select>
 					</div>
+					
+					<div style="margin-bottom:30px; display:none;" id="divType">
+						<label><b>유형</b></label>
+						<div class="row formType" id="reservationType">
+							<div class="col btnType">
+								채팅<br/>상담
+								<input type="hidden" class="reservationValue" value="1">
+							</div>
+							<div class="col btnType">
+								화상<br/>상담
+								<input type="hidden" class="reservationValue" value="2">
+							</div>
+							<div class="col btnType">
+								전화<br/>상담
+								<input type="hidden" class="reservationValue" value="3">
+							</div>
+							<div class="col btnType">
+								대면<br/>상담
+								<input type="hidden" class="reservationValue" value="4">
+							</div>
+						</div>
+					</div>
+					
 					<div style="margin-bottom:30px; display:none;" id="divDate">
 						<label><b>날짜</b></label>
 						<div class="row formDate" id="possibleDate">
 						</div>
 					</div>
+					
 					<div style="margin-bottom:30px; display:none;" id="divTime">
 						<label><b>시간</b></label>
 						<div class="row formTime" id="possibleTime">
@@ -439,6 +468,7 @@
 		<script>
 			$(function() {
 				const socket = io('/reservation');
+				let sendData = {}
 				
 				$('#appMental').click(function(e) {
 					document.getElementById("applicationForm").style.display = "block";
@@ -450,12 +480,80 @@
 					document.getElementById("mentalType").style.display = "none";
 				});
 
-				$("#btnFirstNext").click(function() {
-					if($('#appMental').is(':checked') === true && applicationValidCheck()) socket.emit('initPrivacy');
-					else if($('#appConsult').is(':checked') === true && applicationValidCheck()) socket.emit('initReservation');
+				$("#btnFirstNext").click(function(e) {
+					if($('#appMental').is(':checked') === true && applicationValidCheck()) {
+						let temp = getDynamicAnswer();
+						if(temp != undefined && temp.length > 0) {
+							sendData = {
+								type: 5,
+								stuCode: $('#userCode').val(),
+								stuName: $('#userName').val(),
+								stuGender: $("input[name='userGender']:checked").val(),
+								stuBirth: $('#userBirth').val(),
+								stuEmail: $('#userEmail').val(),
+								stuAnswer: temp
+							}
+
+							socket.emit('initPrivacy');
+						}
+					}
+					else if($('#appConsult').is(':checked') === true && applicationValidCheck()) {
+						let temp = getDynamicAnswer();
+						if(temp != undefined && temp.length > 0) {
+							sendData = {
+								type: 4,
+								stuCode: $('#userCode').val(),
+								stuName: $('#userName').val(),
+								stuGender: $("input[name='userGender']:checked").val(),
+								stuBirth: $('#userBirth').val(),
+								stuEmail: $('#userEmail').val(),
+								stuAnswer: temp
+							}
+
+							socket.emit('initReservation');
+						}
+					}
 				});
                 
                 socket.on('initPrivacy', function() {
+					$('input[name=agreebox]').click(function(){
+						if($("#agreebox3").is(":checked")){
+							if(!$("#agreebox2").is(":checked") || !$("#agreebox1").is(":checked")) {
+								$("input:checkbox[id='agreebox3']").prop("checked", false);
+							}
+						}
+
+						if($("#agreebox1").is(":checked") && $("#agreebox2").is(":checked")) {
+							$("input:checkbox[name=agreebox]").each(function() {
+								this.checked = true;
+							});
+						}
+					});
+
+					$('#agreebox3').click(function(e) {	// 모두 동의 버튼
+						if($("input:checkbox[id='agreebox3']").is(":checked") == false) {
+							agreebox1.checked = true;
+							agreebox2.checked = true;
+							$("input:checkbox[id='agreebox3']").prop("checked", true);
+						}
+						else{
+							agreebox1.checked = false;
+							agreebox2.checked = false;
+							$("input:checkbox[id='agreebox3']").prop("checked", false);
+						}
+					});
+
+					$('#btnComplete').click(function(e) {
+						if($('#agreebox3').is(':checked') === true) {
+							console.log(sendData);
+							socket.emit('initComplete', sendData);
+						}
+						else{
+							alert("개인정보동의서를 모두 동의해야 신청이 가능합니다.");
+							document.getElementById("agreebox3").focus();
+						}
+					});
+					
                     $('#applicationTab').removeClass('show active');
                     $('#selfcheckTab').removeClass('show active');
 
@@ -503,6 +601,19 @@
 						}
 					}
 					
+					$(".btnType").click(function(e) {
+						const dateList = document.getElementsByClassName('btnType');
+						for(let i=0; i<dateList.length; i++) {
+							dateList[i].style.backgroundColor = "#fff";
+							if(dateList[i].className.includes("possible")) dateList[i].style.color = "#007BFF";
+							else dateList[i].style.color = "#212529";
+						}
+						$(this).css("background-color", '#0275d8');
+						$(this).css("color", '#fff');
+
+						sendData.reservationCode = $(this)[0].getElementsByClassName('reservationValue')[0].value;
+					});
+					
 					$(".btnDate").click(function(e) {
 						const dateList = document.getElementsByClassName('btnDate');
 						if($(this).hasClass('possible')) {
@@ -521,6 +632,8 @@
 								date: $(this).val(),
 								empno: $('#counselorList').val()
 							});
+							
+							sendData.date = $(this).val();
 						}
 					});
 					
@@ -529,55 +642,69 @@
 						if($(this).hasClass('possible')) {
 							for(let i=0; i<dateList.length; i++) {
 								dateList[i].style.backgroundColor = "#fff";
-								if(dateList[i].className.includes("possible")) dateList[i].style.color = "#007BFF";
+								if(dateList[i].className.includes("possible")) {
+									dateList[i].style.color = "#007BFF";
+								}
 								else dateList[i].style.color = "#212529";
 							}
 							$(this).css("background-color", '#0275d8');
 							$(this).css("color", '#fff');
 							$('#divSecondNext').css('display', 'block');
+							
+							sendData.time = $(this)[0].innerText;
 						}
+					});
+					
+					$("#counselorList").change(function() {
+						const empno = $("#counselorList").val();
+						if(empno === "") {
+							const dateList1 = document.getElementsByClassName('btnDate');
+							for(let i=0; i<dateList1.length; i++) {
+								dateList1[i].classList.remove("possible");
+								dateList1[i].style.backgroundColor = "#fff";
+								dateList1[i].style.color = "#212529";
+							}
+
+							const dateList2 = document.getElementsByClassName('btnTime');
+							for(let i=0; i<dateList2.length; i++) {
+								dateList2[i].classList.remove("possible");
+								dateList2[i].style.backgroundColor = "#fff";
+								dateList2[i].style.color = "#212529";
+							}
+
+							$('#divType').css('display', 'none');
+							$('#divDate').css('display', 'none');
+							$('#divTime').css('display', 'none');
+							
+							$('#divSecondNext').css('display', 'none');
+						}
+						else {
+							socket.emit('selectCounselor', empno);
+
+							const dateList = document.getElementsByClassName('btnTime');
+
+							for(let i=0; i<dateList.length; i++) {
+								dateList[i].classList.remove("possible");
+								dateList[i].style.backgroundColor = "#fff";
+								dateList[i].style.color = "#212529";
+							}
+							
+							$('#divType').css('display', 'block');
+							$('#divDate').css('display', 'block');
+							$('#divTime').css('display', 'none');
+							
+							$('#divSecondNext').css('display', 'none');
+						}
+						sendData.empno = empno;
+					});
+
+					$("#btnSecondNext").click(function(e) {
+						const empno = $("#counselorList").val();
+						socket.emit('initSelfcheck', empno);
 					});
                     
 					$('#applicationTab').removeClass('show active');
 					$('#reservationTab').addClass('show active');
-				});
-                				
-				$("#counselorList").change(function() {
-					const empno = $("#counselorList").val();
-					if(empno === "") {
-						const dateList1 = document.getElementsByClassName('btnDate');
-						for(let i=0; i<dateList1.length; i++) {
-							dateList1[i].classList.remove("possible");
-							dateList1[i].style.backgroundColor = "#fff";
-							dateList1[i].style.color = "#212529";
-						}
-						
-						const dateList2 = document.getElementsByClassName('btnTime');
-						for(let i=0; i<dateList2.length; i++) {
-							dateList2[i].classList.remove("possible");
-							dateList2[i].style.backgroundColor = "#fff";
-							dateList2[i].style.color = "#212529";
-						}
-						
-						$('#divDate').css('display', 'none');
-						$('#divTime').css('display', 'none');
-						$('#divSecondNext').css('display', 'none');
-					}
-					else {
-						socket.emit('selectCounselor', empno);
-						
-						const dateList = document.getElementsByClassName('btnTime');
-						
-						for(let i=0; i<dateList.length; i++) {
-							dateList[i].classList.remove("possible");
-							dateList[i].style.backgroundColor = "#fff";
-							dateList[i].style.color = "#212529";
-						}
-						
-						$('#divDate').css('display', 'block');
-						$('#divTime').css('display', 'none');
-						$('#divSecondNext').css('display', 'none');
-					}
 				});
 				
 				socket.on('selectCounselor', function(date) {
@@ -588,6 +715,8 @@
 							$('#btnDate'+tempDate).css("background-color", '#fff');
 							$('#btnDate'+tempDate).css("color", '#0275d8');
 							$('#btnDate'+tempDate).addClass('possible');
+							
+							$('#btnDate'+tempDate).css("font-weight", "bold");
 							
 							$('#btnDate'+tempDate).val(date[i].possible);
 						}
@@ -617,13 +746,9 @@
 						else {
 							$('#btnTime'+list[i]).css("color", '#0275d8');
 							$('#btnTime'+list[i]).addClass('possible');
+							$('#btnTime'+list[i]).css("font-weight", "bold");
 						}
 					}
-				});
-				
-				$("#btnSecondNext").click(function(e) {
-					const empno = $("#counselorList").val();
-					socket.emit('initSelfcheck', empno);
 				});
 				
 				socket.on('initSelfcheck', function(list) {
@@ -631,74 +756,57 @@
 						$('#divisionSelfcheck').append(`
 							<div class="row selfcheck-subject">
 								<div class="col align-self-center text-center">
-									<label><b>${list[i].ask}</b></label>
+									<label name="selfcheck"><b>${list[i].ask}</b></label>
 								</div>
 							</div>
 							<div class="row" style="margin-bottom:70px;">
 								<label style="font-size:130%;color:#494949;margin-left:3%;padding-top:2%;">나쁨</label>
 								<div id="radios">
 								  <label class="radio-border" for="${list[i].id}_1"></label>
-								  <input class="selfcheck-radio radio1" id="${list[i].id}_1" name="${list[i].id}" type="radio" value="1"/>
+								  <input class="selfcheck-radio radio1" id="${list[i].id}_1" name="selfcheck${i}" type="radio" value="1"/>
 								  <label class="radio-border" for="${list[i].id}_2"></label>
-								  <input class="selfcheck-radio radio2" id="${list[i].id}_2" name="${list[i].id}" type="radio" value="2"/>
+								  <input class="selfcheck-radio radio2" id="${list[i].id}_2" name="selfcheck${i}" type="radio" value="2"/>
 								  <label class="radio-border" for="${list[i].id}_3"></label>
-								  <input class="selfcheck-radio radio3" id="${list[i].id}_3" name="${list[i].id}" type="radio" value="3"/>
+								  <input class="selfcheck-radio radio3" id="${list[i].id}_3" name="selfcheck${i}" type="radio" value="3"/>
 								  <label class="radio-border" for="${list[i].id}_4"></label>
-								  <input class="selfcheck-radio radio4" id="${list[i].id}_4" name="${list[i].id}" type="radio" value="4"/>
+								  <input class="selfcheck-radio radio4" id="${list[i].id}_4" name="selfcheck${i}" type="radio" value="4"/>
 								  <label class="radio-border" for="${list[i].id}_5"></label>
-								  <input class="selfcheck-radio radio5" id="${list[i].id}_5" name="${list[i].id}" type="radio" value="5"/>
+								  <input class="selfcheck-radio radio5" id="${list[i].id}_5" name="selfcheck${i}" type="radio" value="5"/>
 								  <span id="slider"></span>
 								</div>
 							   <label style="font-size:130%;color:#494949;margin-right:3%;padding-top:2%;">좋음</label>
 							</div>
 						`);
-						$("input:radio[name='"+list[i].id+"']:radio[value='3']").prop('checked', true);
+						$("input:radio[name='selfcheck"+i+"']:radio[value='3']").prop('checked', true);
 					}
+					
+					$("#btnThirdNext").click(function(e) {
+						const elmSelfcheck = document.getElementsByName('selfcheck');
+						let selfcheckList = [];
+						
+						for(let i=0; i < elmSelfcheck.length; i++) {
+							let temp = {};
+							temp.ask = elmSelfcheck[i].innerText;
+							temp.choice = $('input[name=selfcheck'+i+']:checked').val();
+							selfcheckList.push(temp);
+						}
+						sendData.selfcheck = selfcheckList;
+						
+						socket.emit('initPrivacy');
+					});
 						
 					$('#reservationTab').removeClass('show active');
 					$('#selfcheckTab').addClass('show active');
 				});
 				
-				$('input[name=agreebox]').click(function(){
-					if($("#agreebox3").is(":checked")){
-						if(!$("#agreebox2").is(":checked") || !$("#agreebox1").is(":checked")) {
-							$("input:checkbox[id='agreebox3']").prop("checked", false);
-						}
-					}
-
-					if($("#agreebox1").is(":checked") && $("#agreebox2").is(":checked")) {
-						$("input:checkbox[name=agreebox]").each(function() {
-							this.checked = true;
-						});
-					}
-				});
-				
-				$('#agreebox3').click(function(e) {	// 모두 동의 버튼					
-					if($("input:checkbox[id='agreebox3']").is(":checked") == false) {
-						agreebox1.checked = true;
-						agreebox2.checked = true;
-						$("input:checkbox[id='agreebox3']").prop("checked", true);
-					}
-					else{
-						agreebox1.checked = false;
-						agreebox2.checked = false;
-						$("input:checkbox[id='agreebox3']").prop("checked", false);
-					}
-				});
-				
-				$('#btnComplete').click(function(e) {
-					if($('#agreebox3').is(':checked') === true) {
-						
-					}
-					else{
-						alert("개인정보동의서를 동의해야 신청이 가능합니다.");
-						document.getElementById("agreebox3").focus();
-					}
+				socket.on('initComplete', function() {
+					alert("예약이 완료되었습니다, 감사합니다.");
+					location.replace('http://yuhannuri.run.goorm.io');
 				});
 				
 				function applicationValidCheck() {
-					if($('#userGrade').val() === ""){
-						document.getElementById("userGrade").focus();
+					if($('#userCode').val() === ""){
+						document.getElementById("userCode").focus();
 						alert("학번을 입력하세요.");
 						return false;
 					}else{
@@ -739,6 +847,53 @@
 					if(!reg_email.test(str)) return false;
 					else return true;                        
 				}  // 간단 신청서 부분 이메일 유효성 검사
+				
+				function getDynamicAnswer() {
+					let dynamic = [];
+					
+					for(let i=0; i < <%= questionList.length %>; i++) {
+						let temp = {}
+						
+						let what_type = document.getElementsByName('dynamicAnswer'+i)[0].type;
+						if(what_type === 'radio') {
+							let checkAnswer = $('input[name=dynamicAnswer'+i+']:checked').val();
+							if(checkAnswer != undefined) temp.answer = $('input[name=dynamicAnswer'+i+']:checked').val();
+							else {
+								alert('답변하지 않은 질문이 있습니다.');
+								$('input[name=dynamicAnswer'+i).focus();
+								dynamic.length = 0;
+								break;
+							}
+						}
+						else if(what_type === 'checkbox') {
+							let checkAnswer = [];
+							$('input:checkbox[name=dynamicAnswer'+i+']:checked').each(function() {
+								checkAnswer.push($(this).val());
+							});
+							
+							if(checkAnswer.length !== 0) temp.answer = checkAnswer;
+							else {
+								alert('답변하지 않은 질문이 있습니다.');
+								$('input:checkbox[name=dynamicAnswer'+i+']').focus();
+								dynamic.length = 0;
+								break;
+							}
+						}
+						else if(what_type === 'textarea') {
+							let txt = $('[name=dynamicAnswer'+i+']').val();
+							if(txt !== "") temp.answer = $('[name=dynamicAnswer'+i+']').val();
+							else {
+								alert('답변하지 않은 질문이 있습니다.');
+								$('[name=dynamicAnswer'+i+']').focus();
+								dynamic.length = 0;
+								break;
+							}
+						}
+						temp.question = document.getElementById('dynamicQuestion'+i).innerText;
+						dynamic.push(temp);
+					}
+					return dynamic;
+				}
 				
 			});
 		</script>

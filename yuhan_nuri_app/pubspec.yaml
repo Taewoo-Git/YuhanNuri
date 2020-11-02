@@ -42,8 +42,7 @@ dev_dependencies:
   introduction_screen: ^1.0.7
   flutter_inappwebview: ^4.0.0+4
   progress_dialog: ^1.2.4
-
-  
+  oktoast : ^ 2.3.2
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

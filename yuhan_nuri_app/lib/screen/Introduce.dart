@@ -46,7 +46,9 @@ class IntroduceScreenState extends State<IntroduceScreen> {
       pages: [
         PageViewModel(
           title: "안녕하세용",
-          image: Image(image: AssetImage('assets/hi.png')),
+          image: Image(
+            image: AssetImage("assets/hi.png"),
+          ),
           body: "유한 대학교 심리 상담 센터 예약 앱 유한누리입니다.",
           decoration: pageDecoration,
         ),

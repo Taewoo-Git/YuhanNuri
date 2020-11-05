@@ -93,27 +93,41 @@ class YuhanNuriState extends State<YuhanNuri> {
                           headers: header);
                       KeyboardVisibility.onChange.listen((bool visible) async {
                         if (visible) {
+                          //키보드 올라왔을때
                           if (await _webViewController.getUrl() ==
                               'https://yuhannuri.run.goorm.io/user/mypage') {
+                            // 마이페이지 ( 채팅 )
                             Future.delayed(
                                 Duration(milliseconds: 500),
                                 () async =>
                                     await _webViewController.evaluateJavascript(
                                         source: 'setHeight();'));
+                          } else if (await _webViewController.getUrl() ==
+                              "https://yuhannuri.run.goorm.io/user/question") {
+                            // 문의페이지면 아무것도안함
                           } else {
-                            await _webViewController.evaluateJavascript(
-                                source:
-                                    'document.activeElement.scrollIntoView( {block: "center"})');
+                            // 다른페이지 ( 예약페이지 등)
+                            Future.delayed(
+                                Duration(milliseconds: 500),
+                                () async =>
+                                    await _webViewController.evaluateJavascript(
+                                        source:
+                                            'document.activeElement.scrollIntoView( {block: "center"})')); // 해당 텍스트박스를 화면에 나오게
+                          }
+                        } else {
+                          //키보드가 내려갈때
+                          if (await _webViewController.getUrl() ==
+                              'https://yuhannuri.run.goorm.io/user/mypage') {
+                            //마이페이지 ( 채팅 ) 이면
+                            Future.delayed(
+                                Duration(milliseconds: 500),
+                                () async =>
+                                    await _webViewController.evaluateJavascript(
+                                        source: 'setHeight();'));
                           }
                           await _webViewController.evaluateJavascript(
-                              source: 'setHeight();');
-                        } else {
-                          Future.delayed(
-                              Duration(milliseconds: 500),
-                              () async => await _webViewController
-                                  .evaluateJavascript(source: 'setHeight();'));
-                          await _webViewController.evaluateJavascript(
-                              source: 'document.activeElement.blur()');
+                              source:
+                                  'document.activeElement.blur()'); //해당 텍스트박스의 포커싱을 지움
                         }
                       });
                     },

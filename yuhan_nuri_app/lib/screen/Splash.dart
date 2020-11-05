@@ -49,25 +49,15 @@ class SplashState extends State<Splash> {
     String str = (prefs.getString('expires') ?? DateTime.now().toString());
     DateTime resetDay = DateTime.parse(str);
 
-    // prefs.remove('expires');
-    print("Reset Day : " + resetDay.toString());
-    print("Now : " + DateTime.now().toString());
-
-    //만료날짜가 지금보다 이후이면
-    if (resetDay.isAfter(DateTime.now())) {
-      print("날짜 초기화 필요!");
-    } else {
+    if (!resetDay.isAfter(DateTime.now())) {
       // 지금이 초기화 지정 날짜이후이면 쿠키 만료일자와 쿠키 값 지움
       prefs.remove('expires');
       prefs.remove('cookie');
       cookieParam = "NoCookie";
-    }
+    } 
 
     // 만료일자가 지나지 않았음, cookie string 확인
     if (cookieParam != "NoCookie") {
-      
-      print("#################print cookie in Splash before pushReplacement" +str + "@@@@@@@@@@@@@@@@@@");
-
       // cookie에 정상적인 값이 있으면 바로 webView가있는 페이지로 이동, YuhanNuri.dart
       Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (BuildContext context) => YuhanNuri(

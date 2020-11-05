@@ -45,34 +45,36 @@ class IntroduceScreenState extends State<IntroduceScreen> {
       key: introKey,
       pages: [
         PageViewModel(
-          title: "안내 및 소개 페이지 1",
-          //image: _buildImage('img name'),
-          body: "테스트 ",
+          title: "안녕하세용",
+          image: Image(image: AssetImage('assets/hi.png')),
+          body: "유한 대학교 심리 상담 센터 예약 앱 유한누리입니다.",
           decoration: pageDecoration,
         ),
         PageViewModel(
-          title: "안내 및 소개 페이지 2",
-          body: "테스트",
-          footer: RaisedButton(
-            onPressed: () {
-              introKey.currentState?.animateScroll(0);
-            },
-            child: const Text(
-              'Button',
-              style: TextStyle(color: Colors.black),
-            ),
-            color: Colors.amber,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0)),
-          ),
+          title: "하단 탭",
+          body: "",
+          // footer: RaisedButton(
+          //   onPressed: () {
+          //     introKey.currentState?.animateScroll(0);
+          //   },
+          //   child: const Text(
+          //     'Button',
+          //     style: TextStyle(color: Colors.black),
+          //   ),
+          //   color: Colors.amber,
+          //   shape: RoundedRectangleBorder(
+          //       borderRadius: BorderRadius.circular(8.0)),
+          // ),
           decoration: pageDecoration,
         ),
         PageViewModel(
-          title: "안내 및 소개 페이지 3",
+          title: "마이 페이지",
           bodyWidget: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: const [
-              Text("테스트", style: bodyStyle),
+              Text("테스트1", style: bodyStyle),
+              Text("테스트2", style: bodyStyle),
+              Text("테스트3", style: bodyStyle),
             ],
           ),
           decoration: pageDecoration,

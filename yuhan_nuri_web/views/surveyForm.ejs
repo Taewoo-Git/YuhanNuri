@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- CoreUI CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
+    <title>유한누리 어드민</title>
+    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+	<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
+    <style>
+        .dropTitle {
+            float: left;
+            margin: 0 !important;
+            text-align: left;
+            width: 1000px;
+        }
+
+        .custom-list-item {
+            width: 1000px;
+        }
+
+        .custom-btn-position {
+            float: right;
+            margin-top: -7px;
+        }
+
+        .btn-secondary {
+            background-color: #fafbfd;
+        }
+
+        .btn-secondary:hover {
+            background-color: #fafbfd;
+        }
+
+        .btn-secondary:focus {
+            background-color: #fafbfd;
+        }
+
+        .show>.btn-secondary.dropdown-toggle {
+            background-color: #fafbfd !important;
+        }
+
+        .nav-link {
+            padding: .5rem 3rem;
+        }
+		.fixed_btn_position {
+            top: 25%;
+            left: 90%;
+        }
+		.pr_10{
+			padding-right:10px;
+		}
+		.pr_30{
+			padding-right:30px;
+		}
+    </style>
+</head>
+
+<body class="c-app">
+    <div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
+        <div class="c-sidebar-brand d-lg-down-none">
+            <svg class="c-sidebar-brand-full" width="118" height="46" alt="CoreUI Logo">
+                <use xlink:href="assets/brand/coreui.svg#full"></use>
+            </svg>
+            <svg class="c-sidebar-brand-minimized" width="46" height="46" alt="CoreUI Logo">
+                <use xlink:href="assets/brand/coreui.svg#signet"></use>
+            </svg>
+        </div>
+        <%- include ('adminNav'); -%>
+        <button class="c-sidebar-minimizer c-class-toggler" type="button" data-target="_parent"
+            data-class="c-sidebar-minimized"></button>
+    </div>
+    <div class="c-wrapper c-fixed-components">
+        <header class="c-header c-header-light c-header-fixed c-header-with-subheader">
+            <button class="c-header-toggler c-class-toggler d-lg-none mfe-auto" type="button" data-target="#sidebar"
+                data-class="c-sidebar-show">
+                <svg class="c-icon c-icon-lg">
+                    <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-menu"></use>
+                </svg>
+            </button><a class="c-header-brand d-lg-none" href="#">
+                <svg width="118" height="46" alt="CoreUI Logo">
+                    <use xlink:href="assets/brand/coreui.svg#full"></use>
+                </svg></a>
+            <button class="c-header-toggler c-class-toggler mfs-3 d-md-down-none" type="button" data-target="#sidebar"
+                data-class="c-sidebar-lg-show" responsive="true">
+                <svg class="c-icon c-icon-lg">
+                    <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-menu"></use>
+                </svg>
+            </button>
+            <ul class="c-header-nav d-md-down-none">
+                <li class="c-header-nav-item px-3"><a class="c-header-nav-link" href="#">Dashboard</a></li>
+                <li class="c-header-nav-item px-3"><a class="c-header-nav-link" href="#">Users</a></li>
+                <li class="c-header-nav-item px-3"><a class="c-header-nav-link" href="#">Settings</a></li>
+            </ul>
+			<ul class="c-header-nav ml-auto mr-4">
+                <li class="c-header-nav-item dropdown"><a class="c-header-nav-link" data-toggle="dropdown" href="#"
+                        role="button" aria-haspopup="true" aria-expanded="false">
+                        <div class="c-avatar"><i class="cil-user"></i></div>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right pt-0">
+                        <div class="dropdown-header bg-light py-2"><strong>계정</strong></div>
+                            <a class="dropdown-item" href="/user/logout">
+                            <i class="cil-account-logout pr_10"></i> 로그아웃</a>
+                </li>
+            </ul>
+            <div class="c-subheader px-3">
+                <!-- Breadcrumb-->
+                <ol class="breadcrumb border-0 m-0">
+                    <li class="breadcrumb-item"><a href="/admin">Home</a></li>
+                    <li class="breadcrumb-item">양식항목</li>
+                    <li class="breadcrumb-item active"><%=type%></li>
+                    <!-- Breadcrumb Menu-->
+                </ol>
+            </div>
+    </header>
+    <div class="c-body">
+        <main class="c-main">
+            <div class="container-fluid">
+                <div class="fade-in">
+                    <div class="card">
+						<div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 class="card-title mb-0">설문지 양식</h4>
+                                        <div class="text-muted"><%= `${new Date().getFullYear()}-${new Date().getMonth()+1}-${new Date().getDate()}`%></div>
+                                    </div>
+                                </div>
+                            </div>
+                        <div class="card-body list-group-item" id="askList">
+                            <ul class="nav justify-content-center">
+                                <li class="nav-item disabled">
+                                    <a class="nav-link">매우 나쁨</a>
+                                </li>
+                                <li class="nav-item disabled">
+                                    <a class="nav-link">나쁨</a>
+                                </li>
+                                <li class="nav-item disabled">
+                                    <a class="nav-link">보통</a>
+                                </li>
+                                <li class="nav-item disabled">
+                                    <a class="nav-link ">좋음</a>
+                                </li>
+                                <li class="nav-item disabled">
+                                    <a class="nav-link ">
+                                        매우 좋음</a>
+                                </li>
+                            </ul>
+							<% result.forEach(function(v,i){%>
+								<div class="input-group mb-3" style="width:65%; margin:0 auto;" id="<%=v.id%>">
+									<input type="text" class="form-control" placeholder="질문을 입력해주세요."
+										aria-label="Example text with button addOn1" aria-describedby="button-addon1" oninput=updateAsk(ask_0,this) value="<%=v.ask%>">
+									<div class="input-group-append">
+										<button class="btn btn-outline-secondary remove_event_btn" type="button"
+											id="button-removeOn2" style="color:#f05454;">X</button>
+									</div>
+                            	</div>
+							<%})%>
+                        </div>
+						<div class="btn-group-vertical position-fixed fixed_btn_position">
+					<button
+						type="button"
+						class="btn btn-secondary"
+						onClick=addAsk('#askList')
+					>
+						질문 추가
+					</button>
+					<button class="btn btn-secondary" value="save" onClick="saveList()">
+						Save
+					</button>
+			</div>
+                    </div>
+                </div>
+				
+            </div>
+			
+        </main>
+    </div>
+    </div>
+    <script>
+        let i = 0;
+        let cur_i = 0;
+		
+        let askList = [<% result.forEach(function(v,i){%>
+			{
+				id:'<%=v.id%>',
+				ask:'<%=v.ask%>'
+			},
+			<%});%>];
+        function addAsk(e) {
+            $(e).append(`<div class="input-group mb-3" style="width:65%; margin:0 auto;" id="ask_${++i}">
+                                <input type="text" class="form-control" placeholder="질문을 입력해주세요."
+                                    aria-label="Example text with button addon" aria-describedby="button-addon1" oninput=updateAsk(ask_${i},this)>
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-secondary" type="button" id="button-addon2"
+                                        style="color:#f05454;" onClick=removeAsk(ask_${i})>X</button>
+                                </div>
+                            </div>`);
+            askList.push({ id: `ask_${i}`, ask: '' });
+			cur_i = i;
+        }
+        function removeAsk(me) {
+			--i;
+			if (i + 1 == cur_i) {
+				// 1 2 3에서 2번 카드를 지우면 3이 되어 이후 추가이벤트로 인해 생겨있던 카드 3과 생겨질 카드3에서 중복 발생하여 중복 제거하기 위함
+				i = cur_i;
+			}
+            const findMyIndex = askList.findIndex((v) => v.id === me.id);
+            askList.splice(findMyIndex, 1);
+            $(me).remove();
+        }
+        function updateAsk(parent,me) {
+            const findMyIndex = askList.findIndex((v) => v.id === parent.id);
+            askList[findMyIndex].ask = me.value;
+        }
+		function saveList(){
+			$.ajax({
+					type: 'POST',
+					dataType: 'json',
+					url: '../saveForm/<%=type%>',
+					async: true,
+					data: { sendAjax: JSON.stringify(askList) },
+					success: function (data) {
+						if (data.state === 'ok') {
+							$('.c-main').prepend(`<div class="alert alert-success alert-dismissible fade show" role="alert">
+							  <strong>저장 성공!</strong> 성공적으로 저장이 되었어요!
+							  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							  </button>
+							</div>`);
+						}else{
+							$('.c-main').prepend(`<div class="alert alert-danger alert-dismissible fade show" role="alert">
+							  <strong>저장 실패!</strong> 이런! 다시 한번 더 확인 해보아요!
+							  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							  </button>
+							</div>`);
+						}
+					},
+				});
+		}
+        
+    </script>
+    <script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
+</body>
+
+</html>

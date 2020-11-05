@@ -1,0 +1,52 @@
+<ul class="c-sidebar-nav">
+	<li class="c-sidebar-nav-title">예약</li>
+	<li class="c-sidebar-nav-item c-sidebar-nav-dropdown"><a
+            class="c-sidebar-nav-link c-sidebar-nav-dropdown-toggle" href="#">
+        <i class="cil-list-rich pr_30"></i>예약 리스트</a>
+        <ul class="c-sidebar-nav-dropdown-items">
+			<li class="c-sidebar-nav-item">
+				<a class="c-sidebar-nav-link" href="/admin">
+			<i class="cil-clipboard pr_30"></i>
+			총 예약 리스트</a>
+			</li>
+			<li class="c-sidebar-nav-item">
+				<a class="c-sidebar-nav-link" href="/admin/myReservation">
+			<i class="cil-clipboard pr_30"></i>
+			내 예약 리스트</a>
+			</li>
+        </ul>
+    </li>
+	
+	<!-- <li class="c-sidebar-nav-item">
+		<a class="c-sidebar-nav-link" href="/admin">
+			<i class="cil-clipboard pr_30"></i>
+			예약 리스트</a>
+	</li> -->
+	<li class="c-sidebar-nav-item">
+	<a class="c-sidebar-nav-link" href="/admin/schedule">
+		<i class="cil-calendar pr_30"></i>
+		스케줄</a>
+	</li>
+				<!-- <li class="c-sidebar-nav-title">양식 항목</li> -->
+	<li class="c-sidebar-nav-item c-sidebar-nav-dropdown"><a
+            class="c-sidebar-nav-link c-sidebar-nav-dropdown-toggle" href="#">
+        <i class="cil-list-rich pr_30"></i>양식 항목</a>
+        <ul class="c-sidebar-nav-dropdown-items">
+			<% types.forEach(function(v,i){%>
+				<li class="c-sidebar-nav-item">
+					<a class="c-sidebar-nav-link" href="/admin/form/<%=v.type%>" target="_top">
+						<svg class="c-sidebar-nav-icon">
+							<use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-account-logout"></use>
+						</svg> <%=v.type%>
+					</a>
+					</li>
+				<%});%>
+        </ul>
+    </li>
+	<li class="c-sidebar-nav-title">채팅 항목</li>
+	<li class="c-sidebar-nav-item">
+		<a class="c-sidebar-nav-link" href="/admin/chat" target="_top">
+			<i class="cil-chat-bubble pr_30"></i>
+				채팅</a>
+	</li>
+</ul>

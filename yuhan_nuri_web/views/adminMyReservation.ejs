@@ -60,19 +60,22 @@
 
 				});
 			});
-			$('#add_type_button').click(function(e){
-							$.ajax({
-								type:'POST',
-								dataType:'json',
-								url:'../addType',
-								async:true,
-								data:{"add_type" : $('#type-name').val()},
-								success:function(data){
-									
-									window.location.reload();
-								}
-							})
-						});
+			$(function () {
+				$('button.finished-btn').click(function(e) {
+						$.ajax({
+						type: "POST",
+						dataType: "json",
+						url: "./admin/finishedReservation",
+						async: true,
+						data: { "sendAjax" : $(`#${e.target.id}`).val() },
+						success: function (data) { 
+							if(data.state==='ok') {
+								window.location.reload();
+							}
+						}
+					});
+				});
+			});
 		</script>
     <div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
         <div class="c-sidebar-brand d-lg-down-none">
@@ -141,10 +144,11 @@
                                     </div>
                                 </div>
                             </div>
-							<% getReservation.forEach(function(val,i){ %>
+							<% myReservation.forEach(function(val,i){ %>
 								<div class="card-body list-group-item">
                                     <h5 class="card-title">학번: <%=val.stuno%></h5>
                                     <p class="card-text">상담 유형: <%= val.typecode%> 상담 시간 <%= val.starttime%></p>
+									<button class="btn btn-danger float-right finished-btn" id="finished-reservation-btn-<%=i%>" value="<%= val.no%>">종료</button>
                                     <button class="btn btn-primary float-right reser-btn" id="accept-reservation-btn-<%=i%>" value="<%= val.no%>">수락</button>
                                 </div>
 							<% }) %>

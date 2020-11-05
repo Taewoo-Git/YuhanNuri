@@ -9,8 +9,20 @@
     <link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
     <title>유한누리 어드민</title>	
 	<script src="https://code.jquery.com/jquery-latest.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/list@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/embed@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/simple-image@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/image@latest"></script>
 	<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
 	<style>
+		.fixed_save_btn{
+			position: fixed;
+			top: 20%;
+			left: 80%;
+		}
 		.pr_10{
 			padding-right:10px;
 		}
@@ -20,6 +32,21 @@
 	</style>
 </head>
 <body class="c-app">
+	<script>
+		$('#add_type_button').click(function(e){
+							$.ajax({
+								type:'POST',
+								dataType:'json',
+								url:'../addType',
+								async:true,
+								data:{"add_type" : $('#type-name').val()},
+								success:function(data){
+									
+									window.location.reload();
+								}
+							})
+						});
+	</script>
 	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
 		  <div class="modal-dialog" role="document">
 			<div class="modal-content">
@@ -44,36 +71,6 @@
 			</div>
 		  </div>
 		</div>
-		<script>
-				$(function () {
-				$('button.reser-btn').click(function(e) {
-						$.ajax({
-						type: "POST",
-						dataType: "json",
-						url: "./admin/accessReservation",
-						async: true,
-						data: { "sendAjax" : $(`#${e.target.id}`).val() },
-						success: function (data) { 
-							window.location.reload();
-						}
-					});
-
-				});
-			});
-			$('#add_type_button').click(function(e){
-							$.ajax({
-								type:'POST',
-								dataType:'json',
-								url:'../addType',
-								async:true,
-								data:{"add_type" : $('#type-name').val()},
-								success:function(data){
-									
-									window.location.reload();
-								}
-							})
-						});
-		</script>
     <div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
         <div class="c-sidebar-brand d-lg-down-none">
             <svg class="c-sidebar-brand-full" width="118" height="46" alt="CoreUI Logo">
@@ -83,7 +80,7 @@
                 <use xlink:href="assets/brand/coreui.svg#signet"></use>
             </svg>
         </div>
-                <%- include ('adminNav'); -%>
+         <%- include ('adminNav'); -%>
         <button class="c-sidebar-minimizer c-class-toggler" type="button" data-target="_parent"
             data-class="c-sidebar-minimized"></button>
     </div>
@@ -109,10 +106,11 @@
                 <li class="c-header-nav-item px-3"><a class="c-header-nav-link" href="#">Users</a></li>
                 <li class="c-header-nav-item px-3"><a class="c-header-nav-link" href="#">Settings</a></li>
             </ul>
-			<ul class="c-header-nav ml-auto mr-4">
+            <ul class="c-header-nav ml-auto mr-4">
                 <li class="c-header-nav-item dropdown"><a class="c-header-nav-link" data-toggle="dropdown" href="#"
                         role="button" aria-haspopup="true" aria-expanded="false">
-                        <div class="c-avatar"><i class="cil-user"></i></div>
+                        <div class="c-avatar"><img class="c-avatar-img" src="assets/img/avatars/6.jpg"
+                                alt="user@gmail.com"></div>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right pt-0">
                         <div class="dropdown-header bg-light py-2"><strong>계정</strong></div>
@@ -121,10 +119,12 @@
                 </li>
             </ul>
             <div class="c-subheader px-3">
+                <!-- Breadcrumb-->
                 <ol class="breadcrumb border-0 m-0">
                     <li class="breadcrumb-item">Home</li>
-                    <li class="breadcrumb-item"><a href="#">Admin</a></li>
-                    <li class="breadcrumb-item active">Dashboard</li>
+                    <li class="breadcrumb-item">양식항목</li>
+                    <li class="breadcrumb-item active"><%=type%></li>
+                    <!-- Breadcrumb Menu-->
                 </ol>
             </div>
         </header>
@@ -134,20 +134,13 @@
                     <div class="fade-in">
                         <div class="card">
                             <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <h4 class="card-title mb-0">예약 리스트</h4>
-                                        <div class="text-muted"><%= `${new Date().getFullYear()}-${new Date().getMonth()+1}-${new Date().getDate()}`%></div>
-                                    </div>
-                                </div>
+                                <div id="editorjs">
+									
+								</div>
+								<button id="saveBtn" class="fixed_save_btn btn btn-secondary">
+									저장
+								</button>
                             </div>
-							<% getReservation.forEach(function(val,i){ %>
-								<div class="card-body list-group-item">
-                                    <h5 class="card-title">학번: <%=val.stuno%></h5>
-                                    <p class="card-text">상담 유형: <%= val.typecode%> 상담 시간 <%= val.starttime%></p>
-                                    <button class="btn btn-primary float-right reser-btn" id="accept-reservation-btn-<%=i%>" value="<%= val.no%>">수락</button>
-                                </div>
-							<% }) %>
                         </div>
                     </div>
                 </div>
@@ -158,6 +151,89 @@
             </footer>
         </div>
     </div>
+	<script>
+		const ImageTool = window.ImageTool;
+		const editData=[<%result.forEach(function(v,i){%>
+					<%-JSON.stringify(v)%>,
+			 	<%})%>];
+            const editor = new EditorJS({
+                holderId: 'editorjs',
+                tools: {
+                    header: {
+                        class: Header,
+                        inlineToolbar: ['link']
+                    },
+                    list: {
+                        class: List,
+                        inlineToolbar: [
+                            'link',
+                            'bold',
+                        ]
+                    },
+                    embed: {
+                        class: Embed,
+                        inlineToolbar: false,
+                        config: {
+                            services: {
+                                youtube: true,
+                                coub: true
+                            }
+                        }
+                    },
+                    image: {
+                        class: ImageTool,
+                        config: {
+                            endpoints: {
+                                byFile: 'https://yuhannuri.run.goorm.io/admin/uploadFile',
+                            },
+							captionPlaceholder:"이미지 설명",
+                        }
+                    },
+                },
+				data:{
+					time:new Date(),
+					blocks: editData,
+				}
+            }
+        );
+		let saveBtn = document.querySelector('#saveBtn');
+            let test={};
+            saveBtn.addEventListener('click', async function () {
+                try {
+                    await editor.save().then((outputData) => {
+						$(function () {
+								$.ajax({
+								type: "POST",
+								dataType: "json",
+								url: '../saveForm/<%=type%>',
+								async: true,
+								data: { "sendAjax" : JSON.stringify(outputData.blocks) },
+								success: function (data) { 
+										if (data.state === 'ok') {
+										$('.c-main').prepend(`<div class="alert alert-success alert-dismissible fade show" role="alert">
+										  <strong>저장 성공!</strong> 성공적으로 저장이 되었어요!
+										  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+											<span aria-hidden="true">&times;</span>
+										  </button>
+										</div>`);
+									}else{
+										$('.c-main').prepend(`<div class="alert alert-danger alert-dismissible fade show" role="alert">
+										  <strong>저장 실패!</strong> 이런! 다시 한번 더 확인 해보아요!
+										  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+											<span aria-hidden="true">&times;</span>
+										  </button>
+										</div>`);
+									}
+								}
+							});
+						});
+						
+                    });
+                } catch (error) {
+                    console.log('Saving failed', error);
+                }
+            });
+	</script>
 	<script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
 </body>
 

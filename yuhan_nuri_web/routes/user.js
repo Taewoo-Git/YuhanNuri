@@ -5,35 +5,49 @@ const cheerio = require('cheerio-httpcli');
 
 const db = require('../public/res/js/database.js')();
 const connection = db.init();
+
 db.open(connection,'user');
 
 const moment = require('moment');
 require('moment-timezone'); 
 moment.tz.setDefault("Asia/Seoul");
 
-router.post('/', function (req, res) { //POST /user
+const {isUserLoggedIn}=require('./middlewares');
+
+const bcrypt=require('bcrypt');
+
+router.post('/', function(req, res,next) { //POST /user
     const userId = req.body.userId; // 사용자 아이디
     const password = req.body.password; // 사용자 패스워드
 	const isAutoLogin = req.body.isAutoLogin; // 자동 로그인 여부
 	
-	let adminCheckSql = "SELECT empno, empname FROM Counselor WHERE empno = ?" // 관리자 계정인지 체크하는 함수
-	
+	let adminCheckSql = "SELECT empno, empname, password FROM Counselor WHERE empno = ?" // 관리자 계정인지 체크하는 함수
+
 	connection.execute(adminCheckSql, [userId], (err, rows) => {
 		
 		if(err) {
-			console.error(err)
+			console.error(err);
+			next(err);
 		}
 		else if(rows[0] !== undefined) {
-			// 관리자 계정일 경우 - 윤권 (근로학생도 포함)
-			let adminInfo = {
-				empno : rows[0].empno,
-				empname : rows[0].empname
-			}
-			req.session.adminInfo = adminInfo; // 사용자 정보를 세션으로 저장
-		
-			console.info(req.session.adminInfo.empname);
-			
-			res.redirect('/admin');
+			bcrypt.compare(password,rows[0].password).then(function(result){
+				if(result){
+					let adminInfo = {
+						empno : rows[0].empno,
+						empname : rows[0].empname
+					};
+
+					req.session.adminInfo = adminInfo; // 사용자 정보를 세션으로 저장
+
+					console.info(req.session.adminInfo.empname);
+
+					res.redirect('/admin');
+				}else{
+					const error=new Error('로그인 정보가 잘못되었습니다.');
+					error.status=404;
+					next(error); 
+				}
+			});
 		}
 		else {
 			// 학생 계정일 경우 아래와 같이 정상 로그인 로직 수행 - 윤권
@@ -48,14 +62,14 @@ router.post('/', function (req, res) { //POST /user
 						signed: true
 					});
 				}
-				console.info(req.session);
 				res.redirect('/');
 			}, function(error) {
 				console.error(error);
-				res.redirect('/');
+					res.redirect('/');
 			});
 		}
 	});
+	
 });
 
 router.get('/logout', function(req, res) { //GET /user/logout
@@ -88,23 +102,40 @@ router.get('/auto', function(req, res) { //GET /user/auto
 });
 
 router.post('/mobile', function(req, res) { //POST /user/mobile
-	console.log(req.body);
+	// console.log(req.body); 엌ㅋㅋㅋ 비번 털림 ㅋㅋ루삥뽕
 	
     const userId = req.body.userId; // 사용자 아이디
     const password = req.body.password; // 사용자 패스워드
 	const isAutoLogin = req.body.isAutoLogin; // 자동 로그인 여부
+	const userToken = req.body.myToken;
+	
+	console.log(userToken);
+	
+	let selectUser = 'SELECT * FROM User WHERE stuno=?';
+	let insertToekn = 'UPDATE User SET token=? WHERE stuno=?';
 	
 	getUserInfo(userId, password)
 	.then(function(userInfo) {
 		req.session.userInfo = userInfo; // 사용자 정보를 세션으로 저장
+
 		if(isAutoLogin == 'true') {
 			let expiryDate = new Date(Date.now() + 10 * 60 * 1000); // 만료기간 10분, 60 * 60 * 1000 * 24 * 30 == 30일
 			res.cookie('isAutoLogin', userInfo.stuCode, { // 자동 로그인 체크시 암호화된 학번으로 쿠키 생성
 				expires: expiryDate,
 				// httpOnly: true,
-				signed: true
+				signed: true 
 			});
 		}
+		
+		connection.execute(selectUser, [userInfo.stuCode], (selectErr, rows) => {
+			if(selectErr) console.error(selectErr);
+			else if(rows.length > 0) {
+				connection.execute(insertToekn, [userToken, userInfo.stuCode], (insertErr) => {
+					if(insertErr) console.error(insertErr);
+				});
+			}
+		});
+		
 		res.json(userInfo);
 	}, function(error) {
 		res.json(null)
@@ -112,28 +143,7 @@ router.post('/mobile', function(req, res) { //POST /user/mobile
 	});
 });
 
-router.get('/reservation', function (req, res) { //GET /user/reservation
-	
-	// 상담사를 먼저 선택하고 ajax 로 받아서 그다음에 일정을 처리해야 할것으로 보임
-	const sql_counselorList = "SELECT empno, empname FROM Counselor WHERE position = 'counselor'";
-
-	connection.execute(sql_counselorList, (err, rows) => {
-		if(err){
-			console.error(err);
-			return;
-		}else{
-			let counselorNameList = rows.map(v => [v.empno, v.empname]);
-		
-			console.info(counselorNameList);
-			res.render('reservation', {counselorNameList : counselorNameList});
-		}
-		
-	});
-	
-
-});
-
-router.post('/reservation', function (req, res) { //POST /user/reservation
+/*router.post('/reservation', function (req, res) { //POST /user/reservation
 	let reservation_counselorId = req.body.reserv_counselorId;
     let reservation_date = req.body.reserv_date;
     let reservation_time = req.body.reserv_time;
@@ -182,7 +192,7 @@ router.post('/reservation', function (req, res) { //POST /user/reservation
 	});
 	
 	res.redirect('/user/privacy');
-});
+});*/
 
 router.get('/privacy', function (req, res) { //GET /user/privacy
     res.render('privacy');
@@ -191,6 +201,70 @@ router.get('/privacy', function (req, res) { //GET /user/privacy
 router.post('/privacy', function (req, res) { //POST /user/privacy
 	console.info(req.body);
 	res.redirect('/');
+});
+
+router.get('/question', isUserLoggedIn,function (req, res) { //GET /user/question
+    res.render('question');
+});
+
+router.post('/question', isUserLoggedIn,function (req, res, next) { //POST /user/question
+	// console.info("테슷흐");
+	console.info(req.body);
+	let questionTitle = req.body.questionTitle;
+	let questionText = req.body.questionText;
+	let stuno=req.session.userInfo.stuCode;
+	let questionInfoSql = "insert into QuestionBoard (stuno, date,title, content) values (?,?,?,?)";
+	let nowMoment = moment().format("YYYYMMDD");
+	
+	connection.execute(questionInfoSql, [stuno,nowMoment,questionTitle,questionText], (err, result) => {
+		if(err){
+			console.error(err);
+			next(err);
+		}else {
+			console.info("문의 입력 완료")
+		}
+		res.redirect('/');
+	});
+});
+
+/*router.get('/reservation', function (req, res,next) { //GET /user/reservation
+	let questionSelect = 'SELECT *, (SELECT GROUP_CONCAT(content) FROM FormAnswer WHERE cardno=c.cardno) AS answer '
+						+ 'FROM FormTypeContent c WHERE typeno=?';
+	
+	let mentalTypeSelect = 'SELECT * FROM PsyCounselType';
+	
+	let questionResult = "";
+	
+	connection.execute(questionSelect, [0], (err, result) => {
+		if(err) console.error(err);
+		else {
+			connection.execute(mentalTypeSelect, [0], (err, result) =>{
+				if(err) console.error(err);
+				else{
+					res.render('reservation', {result:questionResult, mentalResult:result});
+				}
+			});
+		}
+	});
+});*/
+
+router.get('/reservation', function (req, res) { //GET /user/reservation
+    let questionSelect = 'SELECT * FROM EditTest WHERE no = 3';
+	let mentalTypeSelect = 'SELECT * FROM PsyCounselType';
+	let questionResult = "";
+	
+	connection.execute(questionSelect, [0], (err, result) => {
+		if(err) console.error(err);
+		else {
+			questionResult = result;
+			connection.execute(mentalTypeSelect, [0], (err, result) => {
+				if(err) console.error(err);
+				else{
+					res.render('reservation', {result:questionResult, mentalResult:result, stuInfo: req.session.userInfo});
+				}
+			});
+		}
+	});
 });
 
 router.get('/selfcheck', function (req, res) { //GET /user/privacy
@@ -207,25 +281,62 @@ router.get('/selfcheck', function (req, res) { //GET /user/privacy
 	});
 });
 
-/*router.post('/selfcheck', function (req, res) { //POST /user/privacy
+router.get('/mypage',isUserLoggedIn, function (req, res) { //GET /user/mypage	
+	let reservationSelect = 'SELECT date, starttime, status, empno FROM Reservation ' +
+		'WHERE typecode=1 AND stuno=? order by date desc';
+	let questionSelect='SELECT * from QuestionBoard where stuno=?';
+	let isAnswerList=[];
 	
-});*/
+	let empno = '';
+	let isChatting;	// 0: "예약된 채팅상담이 없습니다."
+					// 1: 채팅창 제공
+					// 2: "예약 접수를 기다리고 있습니다."
+					// 3: "아직 채팅상담 시간이 아닙니다."
+	
+	connection.execute(reservationSelect, [req.session.userInfo.stuCode], (err, result) => {
+		if(err) console.error(err);
+		else {					
+			if(result.length == 0) isChatting = 0;
+			else {
+				const now = moment().format('YYYY-MM-DD');
+				const rsv = moment(result[0].date.toString()).format('YYYY-MM-DD');
 
-router.post("/getPossibleTime", function(req, res){ //POST /user/postTest
-	// 예약 승인이 되었을때의 기준 (status = 1)
-	//let getReservationByDateSql = "SELECT starttime, COUNT(starttime) AS CNT FROM Reservation WHERE date = ? AND status = 1 GROUP BY starttime";
-	let getCanCounselSchedule = "SELECT starttime FROM CanCounselSchedule WHERE date = ? AND empno = ?";
+				if(result[0].status === 1) {
+					if(now == rsv) {
+						if(result[0].starttime === Number(moment().format('HH'))) {
+							isChatting = 1;
+							empno = result[0].empno;
+						}
+						else isChatting = 3;
+					}
+					else if(now > rsv) isChatting = 0;
+					else isChatting = 3;
+				}
+				else isChatting = 2;
+			}
+		}
+	});
 	
-	
-	let empno = req.body.ajax_counselorId;
-	let date = req.body.ajax_date;
-	
-	
-	connection.execute(getCanCounselSchedule, [date, empno], (error, rows, fields) => {
-  		if (error) console.error(error);
-		
-		else  
-			res.json({ok: true, rtntime: rows});
+	connection.execute(questionSelect,[req.session.userInfo.stuCode],(err,rows)=>{
+		if(err){
+			console.error(err);
+		}else{
+			rows.forEach((data,index)=>{
+				if(data.empno===null && data.answerdata===undefined && data.answer===null){
+					isAnswerList.push('미완료');
+				}else{
+					isAnswerList.push('완료');
+				}
+			});
+			res.render('mypage', {
+				stuName: req.session.userInfo.stuName,
+				stuCode: req.session.userInfo.stuCode,
+				empno: 'emp100001', //empno,
+				isChatting: 1, //isChatting,
+				questions:rows,
+				isAnswerList:isAnswerList,
+			});
+		}
 	});
 });
 

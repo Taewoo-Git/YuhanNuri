@@ -52,7 +52,11 @@ class _LoginState extends State<Login> {
       print("★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★onLaunchonResume: $message");
       print(message['data']['fileno']);
     }, onLaunch: (Map<String, dynamic> message) async {
+<<<<<<< HEAD
       print("★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★onLaunch: $message"); //
+=======
+      print("★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★onLaunch: $message");
+>>>>>>> 92f834e9d945cd92188e6ace83166ec6640387dd
       print(message['data']['fileno']);
     });
   }
@@ -76,14 +80,20 @@ class _LoginState extends State<Login> {
     //           color: Colors.black, fontSize: 19.0, fontWeight: FontWeight.w600),
     //     );
   }
+<<<<<<< HEAD
   
   Widget buildId(BuildContext context){
+=======
+
+  Widget buildId(BuildContext context) {
+>>>>>>> 92f834e9d945cd92188e6ace83166ec6640387dd
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
           '아이디',
           style: TextStyle(
+<<<<<<< HEAD
             color: Colors.white,
             fontSize: 13,
             fontWeight: FontWeight.bold
@@ -103,10 +113,27 @@ class _LoginState extends State<Login> {
               )
             ]
           ),
+=======
+              color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        Container(
+          alignment: Alignment.centerLeft,
+          decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black26, blurRadius: 6, offset: Offset(0, 2))
+              ]),
+>>>>>>> 92f834e9d945cd92188e6ace83166ec6640387dd
           height: 60,
           child: TextField(
             onChanged: (value) => userID = value,
             keyboardType: TextInputType.emailAddress,
+<<<<<<< HEAD
             style: TextStyle(
               color: Colors.black87
             ),
@@ -121,6 +148,18 @@ class _LoginState extends State<Login> {
                hintStyle: TextStyle(
                  color: Colors.black38
                 ),
+=======
+            style: TextStyle(color: Colors.black87),
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.only(top: 14),
+              prefixIcon: Icon(
+                Icons.account_circle,
+                color: Color(0xFF81C0D5),
+              ),
+              hintText: 'ID',
+              hintStyle: TextStyle(color: Colors.black38),
+>>>>>>> 92f834e9d945cd92188e6ace83166ec6640387dd
             ),
           ),
         )
@@ -128,13 +167,18 @@ class _LoginState extends State<Login> {
     );
   }
 
+<<<<<<< HEAD
   Widget buildPassword(BuildContext context){
+=======
+  Widget buildPassword(BuildContext context) {
+>>>>>>> 92f834e9d945cd92188e6ace83166ec6640387dd
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
           '비밀번호',
           style: TextStyle(
+<<<<<<< HEAD
             color: Colors.white,
             fontSize: 13,
             fontWeight: FontWeight.bold
@@ -174,11 +218,44 @@ class _LoginState extends State<Login> {
                 ),
             ),
           ),
+=======
+              color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        Container(
+          alignment: Alignment.centerLeft,
+          decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black26, blurRadius: 6, offset: Offset(0, 2))
+              ]),
+          height: 60,
+          child: TextField(
+            onChanged: (value) => userPassword = value,
+            obscureText: true,
+            style: TextStyle(color: Colors.black87),
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.only(top: 14),
+              prefixIcon: Icon(
+                Icons.lock,
+                color: Color(0xFF81C0D5),
+              ),
+              hintText: 'Password',
+              hintStyle: TextStyle(color: Colors.black38),
+            ),
+          ),
+>>>>>>> 92f834e9d945cd92188e6ace83166ec6640387dd
         )
       ],
     );
   }
 
+<<<<<<< HEAD
   Widget buildLoginBtn(){
   return Container(
     padding: EdgeInsets.symmetric(vertical: 25),
@@ -189,6 +266,23 @@ class _LoginState extends State<Login> {
       padding: EdgeInsets.all(15),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(7)
+=======
+  Widget buildLoginBtn() {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 25),
+      width: double.infinity,
+      child: RaisedButton(
+        elevation: 5,
+        onPressed: () => {portalLogin(userID, userPassword, isAutoLogin)},
+        padding: EdgeInsets.all(15),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        color: Colors.white,
+        child: Text('로그인',
+            style: TextStyle(
+                color: Color(0xFF81C0D5),
+                fontSize: 18,
+                fontWeight: FontWeight.bold)),
+>>>>>>> 92f834e9d945cd92188e6ace83166ec6640387dd
       ),
       color: Colors.white,
       child: Text(
@@ -211,12 +305,18 @@ class _LoginState extends State<Login> {
       checkColor: Colors.lightBlue,
       activeColor: Colors.white,
       title: Text(
+<<<<<<< HEAD
           'Remember',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold
           ),
         ),
+=======
+        'Remember',
+        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+      ),
+>>>>>>> 92f834e9d945cd92188e6ace83166ec6640387dd
       value: isAutoLogin,
       onChanged: (bool newValue) {
         setState(() {
@@ -230,6 +330,7 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+<<<<<<< HEAD
       //body: _buildLayoutContainer(context)
       body:AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.light,
@@ -287,6 +388,52 @@ class _LoginState extends State<Login> {
       )
     );
      
+=======
+        //body: _buildLayoutContainer(context)
+        body: AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: GestureDetector(
+          child: Stack(children: <Widget>[
+        Container(
+          height: double.infinity,
+          width: double.infinity,
+          decoration: BoxDecoration(
+              gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                Color(0xFF71A7D0),
+                Color(0xFF8CC3D9),
+                Color(0xFF81C0D5),
+                Color(0xFF85D1D6),
+              ])),
+          child: SingleChildScrollView(
+            physics: AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.symmetric(horizontal: 25, vertical: 120),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  '유한누리',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 50),
+                buildId(context),
+                SizedBox(height: 50),
+                buildPassword(context),
+                SizedBox(height: 20),
+                buildCheckAutoLogin(context),
+                buildLoginBtn(),
+              ],
+            ),
+          ),
+        )
+      ])),
+    ));
+>>>>>>> 92f834e9d945cd92188e6ace83166ec6640387dd
   }
   
   

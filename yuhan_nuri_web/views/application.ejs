@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>메인 페이지</title>
+		<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
+		
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+		  integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z"
+		  crossorigin="anonymous">
+		<script src="https://code.jquery.com/jquery-3.5.1.min.js"
+			integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+			crossorigin="anonymous">
+		</script>
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+			integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+			crossorigin="anonymous">
+		</script>
+		<style>
+			body {
+				width:100%;
+			}
+			
+			.fade-text {
+				font-size:150%;
+				color:#494949;
+  				animation: fadein-text 3s;
+  				-moz-animation: fadein-text 3s; /* Firefox */
+  				-webkit-animation: fadein-text 3s; /* Safari and Chrome */
+  				-o-animation: fadein-text 3s; /* Opera */
+			}
+			
+			.fade-app {
+				font-size:80%;
+				color:#444444;
+				
+  				animation: fadein-app 3s;
+  				-moz-animation: fadein-app 3s; /* Firefox */
+  				-webkit-animation: fadein-app 3s; /* Safari and Chrome */
+  				-o-animation: fadein-app 3s; /* Opera */
+			}
+			
+			@keyframes fadein-text {
+    			from {
+        			opacity: 0;
+		  			transform: translateY(50%);
+    			}
+    			to {
+        			opacity: 1;
+					transform: translateY(0);
+				}
+			}
+			
+			@keyframes fadein-app {
+    			from {
+        			opacity: 0;
+    			}
+    			to {
+        			opacity: 1;
+				}
+			}
+			
+				.btnClass{
+					display:none;
+				}
+			
+				.btnClass + label{ 
+					display: inline-block; 
+					cursor: pointer; 
+					line-height: 20px; 
+					padding-left: 26px; 
+					background: url('/res/imgs/check-off.png') left/18px no-repeat; 
+				}
+			
+				.btnClass:checked + label {
+					background-image: url('/res/imgs/check-on.png');
+				}
+			
+				.btnMentalClass{
+					display: inline-block;
+					cursor: pointer;
+					line-height: 22px;
+					padding-left: 18px;
+					border:none;
+					background: url('/res/imgs/btnMentalDes-normal.png')  left/22px no-repeat;
+					outline:none;
+				}
+			
+				.btnMentalClass:hover{
+					display: inline-block;
+					cursor: pointer;
+					line-height: 22px;
+					padding-left: 18px;
+					border:none;
+					background: url('/res/imgs/btnMentalDes-overlay.png')  left/22px no-repeat;
+				}
+			
+			.form-nametag {
+				font-size : 18px;
+			}
+			
+			.form-question {
+				margin-bottom : 40px;
+			}
+			
+			
+			.form-card {
+				margin-bottom:20px;
+			}
+			
+			.col-title{
+			text-align: left;
+			font-weight: bold;
+			margin-top: 0;
+			}
+			.col-agreetext{
+			font-weight:normal;
+			color:#60b6aa;
+			font-size:80%;
+			}
+			.col-text{
+			width: 100%;
+			margin-bottom: 10%;
+			}
+			.form-text{
+			padding-bottom:30%;
+			}
+		</style>
+	</head>
+	
+	<body>
+		<div class="container-fluid">
+			<div class="row" style="height: 60px; background:white;">
+				<div class="col align-self-center">
+					<label style="font-size: 150%;">예약</label>
+				</div>
+			</div>
+			
+			<div id="simpleApplicationForm">
+				<div class="row" style="height: 60px;">
+					<div class="fade-text col align-self-center text-center">
+						<label>무엇이 고민인가요?</label>
+					</div>
+				</div>
+				
+				<div class="row align-self-center" style="height: 40px; margin-bottom:40px;">
+					<div class="fade-app col text-center align-self-center">
+						<input type="radio" id="appMental" name="btnApp" class="btnClass" onclick="btnMental()">
+						<label for="appMental" class="mr-4">심리검사</label>
+						
+						<input type="radio" id="appConsult" name="btnApp" class="btnClass" onclick="btnConsult()">
+						<label for="appConsult">상담예약</label>
+					</div>
+				</div>
+				
+				<div style="border:0px; display:none;" id="applicationForm">
+					<div class="form-group" style="margin-bottom:30px;">
+						<label><b>학번</b></label>
+						<input type="text" class="form-control border-top-0 border-left-0 border-right-0 rounded-0" placeholder="학번을 입력하세요." id="userGrade">
+					</div>
+					<div class="form-group" style="margin-bottom:30px;">
+						<label><b>이름</b></label>
+						<input type="text" class="form-control border-top-0 border-left-0 border-right-0 rounded-0" placeholder="이름을 입력하세요." id="userName">
+					</div>
+					<div class="form-group" style="margin-bottom:30px;">
+						<label><b>성별</b></label><br/>
+							<input type="radio" class="form-input" name="userGender" id="genderFemale" style="border:1px solid #ffff00; margin-left:10px;" value="여성">
+							<label for="genderFemale">여성</label>
+							<input type="radio" class="form-input" name="userGender" id="genderMale" style="border:1px solid #ffff00; margin-left:10px;" value="남성">
+							<label for="genderMale">남성</label>
+					</div>
+					<div class="form-group" style="margin-bottom:30px;">
+						<label><b>나이</b></label>
+							<select class="custom-select" id="ageSelect" style="width:100px; margin-left:10px;">
+								<%for(let i=19;i<40;i++){ %>
+								<option value="<%=i%>"><%=i%></option>
+								<%}%>
+							</select>
+					</div>
+					<div class="form-group" id="emailForm" style="margin-bottom:50px;">
+						<label><b>이메일</b>(필수)</label>
+						<input type="email" class="form-control border-top-0 border-left-0 border-right-0 rounded-0"
+							   placeholder="email@example.com" id="userEmail">
+					</div>
+					<%var questionList = JSON.parse(result[0].content)%>
+					<% for(let i=0; i<questionList.length; i++){%>
+					<div class="form-group">
+						<% if(questionList[i].type === "radio"){%>
+						<div class="form-group form-question" id="<%=questionList[i].id%>">
+							<label><b><%=questionList[i].question%></b></label><br/>
+							<% for(let j=0; j<questionList[i].askList.length; j++){%>
+							<input type="hidden" id="questionData<%=i%>" value="">
+							<input type="radio" class="from-input" name="questionAsk<%=i%>" 
+								   id="<%=questionList[i].askList[j].id%>" value="<%=questionList[i].askList[j].ask%>">
+							<label for="<%=questionList[i].askList[j].id%>"><%=questionList[i].askList[j].ask%></label><br/>
+							<%}%>
+						</div>
+						<%}%>
+						<% if(questionList[i].type === "check"){%>
+						<div class="form-group form-question">
+							<label><b><%=questionList[i].question%></b></label><br/>
+							<% for(let j=0; j<questionList[i].askList.length; j++){%>
+							<input type="checkbox" class="from-input" name="questionAsk<%=i%>"
+								   id="<%=questionList[i].askList[j].id%>" value="<%=questionList[i].askList[j].ask%>">
+							<label for="<%=questionList[i].askList[j].id%>"><%=questionList[i].askList[j].ask%></label><br/>
+							<%}%>
+						</div>
+						<%}%>
+						<%if(questionList[i].type === "normal"){%>
+						<div class="form-group form-question">
+							<label><b><%=questionList[i].question%></b></label><br/>
+							<textarea class="form-control" placeholder="자유롭게 작성해 주세요."
+									  id="<%=questionList[i].id%>" style="resize:none;"></textarea>
+						</div>
+						<%}%>
+					</div>
+					<%}%>
+					
+					<div class="form-group" id="mentalType" style="margin-top:70px;">
+						<label style="margin-bottom:30px;"><b>원하는 심리검사를 선택해주세요.</b><br/>(중복선택 가능)</label><br/>
+						<div class="form-group">
+							<%for(let i=0; i<mentalResult.length; i++){%>
+							<div class="form-group">
+								<input type="checkbox" class="pull-left;" id="<%='mentalType'+i%>"
+									   value="<%= mentalResult[i].name %>" name="mentalList" style="margin-right:20px;">
+								<label for="<%='mentalType'+i%>"><%= mentalResult[i].name %></label>
+								<input type="button" class="btnMentalClass pull-right" id="<%='mentalDes'+i%>"
+									   onclick="alert('<%= mentalResult[i].description%>');">
+							</div>
+							<br/>
+							<%}%>
+						</div>
+					</div>
+					
+					<div class="form-group text-right" style="margin-top:50px;">
+						<input type="button" class="btn btn-primary mb-2" id="btnNext" value="다 음">
+					</div>
+				</div>
+			</div>
+			
+			<div id="privacyForm" style="display:none; margin-top:30px;">
+				
+			</div>
+		</div>
+		
+		<script>
+			function btnMental(){
+				document.getElementById("applicationForm").style.display = "block";
+				document.getElementById("mentalType").style.display = "block";
+			}
+			
+			function btnConsult(){
+				document.getElementById("applicationForm").style.display = "block";
+				document.getElementById("mentalType").style.display = "none";
+			}
+			function CheckEmail(str){                                                 
+    	 		var reg_email = /^([0-9a-zA-Z_\.-]+)@([0-9a-zA-Z_-]+)(\.[0-9a-zA-Z_-]+){1,2}$/;
+    	 		if(!reg_email.test(str)) {                            
+          			return false;         
+     			}                            
+     			else {                       
+          			return true;         
+     			}                            
+			}
+		</script>
+		<script>
+			$("#btnNext").click(function(){
+				let checkCnt = 0;
+				if($('#userGrade').val() === ""){
+					document.getElementById("userGrade").focus();
+					alert("학번을 입력하세요.");
+				}else{
+					if($('#userName').val() === ""){
+						document.getElementById("userName").focus();
+						alert("이름을 입력하세요.");
+					}else{
+						if($('input:radio[name=userGender]').is(':checked') === false){
+							document.getElementById("genderFemale").focus();
+							alert("성별을 선택하세요.");
+						}else{
+							if($('#userEmail').val() === ""){
+								document.getElementById("userEmail").focus();
+								alert("이메일을 작성하세요.");
+							}else if(CheckEmail(document.getElementById("userEmail").value) === false){
+									document.getElementById("userEmail").focus();
+									alert("이메일의 형식을 확인하세요.");
+							}else{
+								if($('#appMental').is(':checked') === true && $('input:checkbox[name=mentalList]').is(':checked') == false){
+									alert("심리검사 유형을 1개 이상 선택하세요.");
+									document.getElementById("mentalType0").focus();
+								}else{
+									if($('#appMental').is(':checked') === true){
+										alert("심리검사 완료");
+										$("#simpleApplicationForm").css("display","none");
+										$("#privacyForm").css("display","block");
+										$("body").css("background","#f0f4f7");
+									}
+									if($('#appConsult').is(':checked') === true){
+										alert("상담예약 완료");
+									}
+								}
+							}
+						}
+					}
+				}
+			});
+		</script>
+		<script>
+$(function(){	// 모두 동의 버튼 자동 활성화 비활성화 로직
+    $('input[name=agreebox]').click(function(){
+		if($("#agreebox3").is(":checked")){
+			if(!$("#agreebox2").is(":checked") || !$("#agreebox1").is(":checked")){
+				$("input:checkbox[id='agreebox3']").prop("checked", false);
+			}
+		}
+
+		if($("#agreebox1").is(":checked") && $("#agreebox2").is(":checked")){
+				$("input:checkbox[name=agreebox]").each(function() {
+							this.checked = true;
+				});
+			}
+    });
+});	
+		
+	function agreeAll(checkFlag){	// 모두 동의 버튼
+		if(checkFlag.checked == true){
+			agreebox1.checked = true;
+			agreebox2.checked = true;
+		}else{
+			agreebox1.checked = false;
+			agreebox2.checked = false;
+			}
+	}
+		</script>
+		<script>
+		
+		</script>
+	</body>
+</html>

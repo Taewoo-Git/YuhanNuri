@@ -30,7 +30,7 @@ class SplashState extends State<Splash> {
     bool _seen = (prefs.getBool('seen') ?? false);
 
     if (_seen) {
-      // 봤으면 로그인 스크린 실행, Login.dart
+      // 봤으면 Cookie가지고 있는지 확인
       checkHavingCookie();
     } else {
       // 안 봤으면 앱 소개 스크린 실행, introduce.dart
@@ -47,14 +47,7 @@ class SplashState extends State<Splash> {
     String str = (prefs.getString('expires') ?? DateTime.now().toString());
     DateTime resetDay = DateTime.parse(str);
 
-    // prefs.remove('expires');
-    print("Reset Day : " + resetDay.toString());
-    print("Now : " + DateTime.now().toString());
-
-    //만료날짜가 지금보다 이후이면
-    if (resetDay.isAfter(DateTime.now())) {
-      print("날짜 초기화 필요!");
-    } else {
+    if (!resetDay.isAfter(DateTime.now())) {
       // 지금이 초기화 지정 날짜이후이면 쿠키 만료일자와 쿠키 값 지움
       prefs.remove('expires');
       prefs.remove('cookie');
@@ -72,6 +65,11 @@ class SplashState extends State<Splash> {
       Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (BuildContext context) => LoginApp()));
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
   }
 
   @override

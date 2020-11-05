@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -13,7 +14,7 @@ final FirebaseMessaging fcm = FirebaseMessaging();
 
 String userID = "";
 String userPassword = "";
-bool isAutoLogin = false;
+bool isAutoLogin = true;
 String myCookie = "";
 
 class LoginApp extends StatelessWidget {
@@ -83,7 +84,7 @@ class _LoginState extends State<Login> {
         Text(
           '아이디',
           style: TextStyle(
-              color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+              color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
         ),
         SizedBox(
           height: 10,
@@ -92,7 +93,7 @@ class _LoginState extends State<Login> {
           alignment: Alignment.centerLeft,
           decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(7),
               boxShadow: [
                 BoxShadow(
                     color: Colors.black26, blurRadius: 6, offset: Offset(0, 2))
@@ -125,7 +126,7 @@ class _LoginState extends State<Login> {
         Text(
           '비밀번호',
           style: TextStyle(
-              color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+              color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
         ),
         SizedBox(
           height: 10,
@@ -134,7 +135,7 @@ class _LoginState extends State<Login> {
           alignment: Alignment.centerLeft,
           decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(7),
               boxShadow: [
                 BoxShadow(
                     color: Colors.black26, blurRadius: 6, offset: Offset(0, 2))
@@ -168,7 +169,7 @@ class _LoginState extends State<Login> {
         elevation: 5,
         onPressed: () => {portalLogin(userID, userPassword, isAutoLogin)},
         padding: EdgeInsets.all(15),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
         color: Colors.white,
         child: Text('로그인',
             style: TextStyle(
@@ -221,24 +222,26 @@ class _LoginState extends State<Login> {
                 Color(0xFF85D1D6),
               ])),
           child: SingleChildScrollView(
-            physics: AlwaysScrollableScrollPhysics(),
+            //physics: AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.symmetric(horizontal: 25, vertical: 120),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  '유한누리',
+                  '유한 누리',
                   style: TextStyle(
+                      fontFamily: 'jua',
                       color: Colors.white,
                       fontSize: 40,
                       fontWeight: FontWeight.bold),
                 ),
-                SizedBox(height: 50),
+                SizedBox(height: 30),
                 buildId(context),
-                SizedBox(height: 50),
+                SizedBox(height: 30),
                 buildPassword(context),
-                SizedBox(height: 20),
+                SizedBox(height: 7),
                 buildCheckAutoLogin(context),
+                SizedBox(height: 63),
                 buildLoginBtn(),
               ],
             ),

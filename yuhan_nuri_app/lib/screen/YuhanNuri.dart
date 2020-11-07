@@ -107,12 +107,10 @@ class YuhanNuriState extends State<YuhanNuri> {
                             // 문의페이지면 아무것도안함
                           } else {
                             // 다른페이지 ( 예약페이지 등)
-                            Future.delayed(
-                                Duration(milliseconds: 500),
-                                () async =>
-                                    await _webViewController.evaluateJavascript(
-                                        source:
-                                            'document.activeElement.scrollIntoView( {block: "center"})')); // 해당 텍스트박스를 화면에 나오게
+
+                            await _webViewController.evaluateJavascript(
+                                source:
+                                    'document.activeElement.scrollIntoView( {block: "center"})'); // 해당 텍스트박스를 화면에 나오게
                           }
                         } else {
                           //키보드가 내려갈때
@@ -124,12 +122,24 @@ class YuhanNuriState extends State<YuhanNuri> {
                                 () async =>
                                     await _webViewController.evaluateJavascript(
                                         source: 'setHeight();'));
+                            await _webViewController.evaluateJavascript(
+                                source:
+                                    'document.activeElement.blur()'); //해당 텍스트박스의 포커싱을 지움
+                          } else {
+                            await _webViewController.evaluateJavascript(
+                                source:
+                                    'document.activeElement.blur()'); //해당 텍스트박스의 포커싱을 지움
                           }
-                          await _webViewController.evaluateJavascript(
-                              source:
-                                  'document.activeElement.blur()'); //해당 텍스트박스의 포커싱을 지움
                         }
                       });
+                      _webViewController.addJavaScriptHandler(
+                          // 웹뷰 JavaScript와 통신하는 핸들러
+                          handlerName:
+                              'PageHandler', // 해당 핸들러를 웹뷰에서 호출( 예약완료 버튼클릭 )할 시  메인으로 돌아감
+                          callback: (args) {
+                            navBarState = globalKey.currentState;
+                            navBarState.setPage(0);
+                          });
                     },
                   ))),
                   bottomNavigationBar: CurvedNavigationBar(

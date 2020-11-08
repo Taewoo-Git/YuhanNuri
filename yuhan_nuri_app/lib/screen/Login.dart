@@ -46,13 +46,10 @@ class _LoginState extends State<Login> {
     // TODO: implement initState
     setProgressDialog();
     fcm.configure(onMessage: (Map<String, dynamic> message) async {
-      print("★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★onLaunchonMessage: $message");
       print(message['data']['fileno']);
     }, onResume: (Map<String, dynamic> message) async {
-      print("★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★onLaunchonResume: $message");
       print(message['data']['fileno']);
     }, onLaunch: (Map<String, dynamic> message) async {
-      print("★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★onLaunch: $message"); //
       print(message['data']['fileno']);
     });
   }

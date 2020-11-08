@@ -6,7 +6,6 @@ import 'Introduce.dart';
 import 'YuhanNuri.dart';
 import 'Login.dart';
 
-
 class SplashApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -23,7 +22,6 @@ class Splash extends StatefulWidget {
 }
 
 class SplashState extends State<Splash> {
-
   // 앱이 처음 실행되는지 체크
   checkFirstSeen() async {
     // 간단한 값을 어플리케이션에 파일 형태로 저장하는 클래스
@@ -54,7 +52,7 @@ class SplashState extends State<Splash> {
       prefs.remove('expires');
       prefs.remove('cookie');
       cookieParam = "NoCookie";
-    } 
+    }
 
     // 만료일자가 지나지 않았음, cookie string 확인
     if (cookieParam != "NoCookie") {
@@ -73,7 +71,6 @@ class SplashState extends State<Splash> {
   void initState() {
     super.initState();
   }
-
 
   @override
   Widget build(BuildContext context) {

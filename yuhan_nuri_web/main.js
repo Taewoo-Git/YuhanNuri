@@ -7,9 +7,11 @@ const session = require('express-session');
 const dotenv = require('dotenv');
 const path=require('path');
 
+const helmet=require('helmet');
+
 const userRouter = require('./routes/user');
 const adminRouter = require('./routes/admin');
-const fcmRouter=require('./routes/fcm');
+// const fcmRouter=require('./routes/fcm');
 
 const cookieParser = require('cookie-parser');
 
@@ -36,9 +38,22 @@ app.use(express.urlencoded({ extended: false }));
 app.use(session({ secret: process.env.COOKIE_SECRET, resave: false, saveUninitialized: false}));
 app.use(cookieParser('vaCzbAVeMy9pT7Uw'));
 
+if(process.env.NODE_ENV==='production'){
+	app.use(helmet());
+	// helmet 미들웨어에는 이런 기능들을 통해 보안을 설정 합니다. 어느정도 타협해야하는 보안 수준이 있다면 말씀해 주시면 빼도록 하겠습니다 - 성준
+	// csp: Content-Security-Policy 헤더 설정. XSS(Cross-site scripting) 공격 및 기타 교차 사이트 인젝션 예방.
+	// hidePoweredBy: X-Powered-By 헤더 제거.
+	// hpkp: Public Key Pinning 헤더 추가. 위조된 인증서를 이용한 중간자 공격 방지.
+	// hsts: SSL/TLS를 통한 HTTP 연결을 적용하는 Strict-Transport-Security 헤더 설정.
+	// noCache : Cache-Control 및 Pragma 헤더를 설정하여 클라이언트 측에서 캐싱을 사용하지 않도록 함.
+	// frameguard : X-Frame-Options 헤더 설정하여 clickjacking에 대한 보호 제공.
+	// ieNoOpen : (IE8 이상) X-Download-Options 설정.
+	// xssFilter :  X-XSS-Protection 설정. 대부분의 최신 웹 브라우저에서 XSS(Cross-site scripting) 필터를 사용.
+	// noSniff : X-Content-Type-Options 설정하여, 선언된 콘텐츠 유형으로부터 벗어난 응답에 대한 브라우저의 MIME 가로채기를 방지.
+}
 app.use('/user', userRouter);
 app.use('/admin',adminRouter);
-app.use('/fcm',fcmRouter);
+// app.use('/fcm',fcmRouter);
 
 
 const server = app.listen(port, () => {
@@ -91,187 +106,3 @@ app.use((err,req,res,next)=>{
 	res.status(err.status || 500);
 	res.render('error');
 });
-
-// 			<div class="tab-pane fade show active" id="공지사항">
-// 				<label><b>공지사항</b></label><br/>
-// 				<% JSON.parse(data[0].content).forEach(function(b,i){%>
-// 					<%if(b.type == "paragraph"){%>
-// 						<p>
-// 							<%= b.data.text%>
-// 						</p>
-// 					<%}%>
-// 					<%if(b.type == "image"){%>
-// 						<img src="<%=b.data.file.url%>" alt="<%=b.data.caption%>"/>
-// 					<%}%>
-// 					<%if(b.type == "header"){%>
-// 						<%if(b.data.level === 1){%>
-// 							<h1>
-// 								<%= b.data.text%>
-// 							</h1>
-// 						<%}%>
-// 						<%if(b.data.level === 2){%>
-// 							<h2>
-// 								<%= b.data.text%>
-// 							</h2>
-// 						<%}%>
-// 						<%if(b.data.level === 3){%>
-// 							<h3>
-// 								<%= b.data.text%>
-// 							</h3>
-// 						<%}%>
-// 						<%if(b.data.level === 4){%>
-// 							<h4>
-// 								<%= b.data.text%>
-// 							</h4>
-// 						<%}%>
-// 						<%if(b.data.level === 5){%>
-// 							<h5>
-// 								<%= b.data.text%>
-// 							</h5>
-// 						<%}%>
-// 						<%if(b.data.level === 6){%>
-// 							<h6>
-// 								<%= b.data.text%>
-// 							</h6>
-// 						<%}%>
-// 					<%}%>
-// 					<%if(b.type == "list"){%>
-// 						<% if(b.data.style==="ordered"){%>
-// 							<ol>
-// 								<% b.data.items.forEach(function(v,i){%>
-// 									<li><%=v%></li>
-// 								<%})%>
-// 							</ol>
-// 						<%}%>
-// 						<% if(b.data.style==="unordered"){%>
-// 							<ol>
-// 								<% b.data.items.forEach(function(v,i){%>
-// 									<li><%=v%></li>
-// 								<%})%>
-// 							</ol>
-// 						<%}%>
-// 					<%}%>
-// 				<%})%>
-//   			</div>
-//   			<div class="tab-pane fade" id="이용안내">
-// 				<label><b>이용안내</b></label><br/>
-//     							<% JSON.parse(data[1].content).forEach(function(b,i){%>
-// 					<%if(b.type == "paragraph"){%>
-// 						<p>
-// 							<%= b.data.text%>
-// 						</p>
-// 					<%}%>
-// 					<%if(b.type == "image"){%>
-// 						<img src="<%=b.data.file.url%>" alt="<%=b.data.caption%>"/>
-// 					<%}%>
-// 					<%if(b.type == "header"){%>
-// 						<%if(b.data.level === 1){%>
-// 							<h1>
-// 								<%= b.data.text%>
-// 							</h1>
-// 						<%}%>
-// 						<%if(b.data.level === 2){%>
-// 							<h2>
-// 								<%= b.data.text%>
-// 							</h2>
-// 						<%}%>
-// 						<%if(b.data.level === 3){%>
-// 							<h3>
-// 								<%= b.data.text%>
-// 							</h3>
-// 						<%}%>
-// 						<%if(b.data.level === 4){%>
-// 							<h4>
-// 								<%= b.data.text%>
-// 							</h4>
-// 						<%}%>
-// 						<%if(b.data.level === 5){%>
-// 							<h5>
-// 								<%= b.data.text%>
-// 							</h5>
-// 						<%}%>
-// 						<%if(b.data.level === 6){%>
-// 							<h6>
-// 								<%= b.data.text%>
-// 							</h6>
-// 						<%}%>
-// 					<%}%>
-// 					<%if(b.type == "list"){%>
-// 						<% if(b.data.style==="ordered"){%>
-// 							<ol>
-// 								<% b.data.items.forEach(function(v,i){%>
-// 									<li><%=v%></li>
-// 								<%})%>
-// 							</ol>
-// 						<%}%>
-// 						<% if(b.data.style==="unordered"){%>
-// 							<ol>
-// 								<% b.data.items.forEach(function(v,i){%>
-// 									<li><%=v%></li>
-// 								<%})%>
-// 							</ol>
-// 						<%}%>
-// 					<%}%>
-// 				<%})%>
-//   			</div>
-//   			<div class="tab-pane fade" id="FAQ">
-// 				<label><b>FAQ</b></label><br/>
-// 				<% JSON.parse(data[2].content).forEach(function(b,i){%>
-// 					<%if(b.type == "paragraph"){%>
-// 						<p>
-// 							<%= b.data.text%>
-// 						</p>
-// 					<%}%>
-// 					<%if(b.type == "image"){%>
-// 						<img src="<%=b.data.file.url%>" alt="<%=b.data.caption%>"/>
-// 					<%}%>
-// 					<%if(b.type == "header"){%>
-// 						<%if(b.data.level === 1){%>
-// 							<h1>
-// 								<%= b.data.text%>
-// 							</h1>
-// 						<%}%>
-// 						<%if(b.data.level === 2){%>
-// 							<h2>
-// 								<%= b.data.text%>
-// 							</h2>
-// 						<%}%>
-// 						<%if(b.data.level === 3){%>
-// 							<h3>
-// 								<%= b.data.text%>
-// 							</h3>
-// 						<%}%>
-// 						<%if(b.data.level === 4){%>
-// 							<h4>
-// 								<%= b.data.text%>
-// 							</h4>
-// 						<%}%>
-// 						<%if(b.data.level === 5){%>
-// 							<h5>
-// 								<%= b.data.text%>
-// 							</h5>
-// 						<%}%>
-// 						<%if(b.data.level === 6){%>
-// 							<h6>
-// 								<%= b.data.text%>
-// 							</h6>
-// 						<%}%>
-// 					<%}%>
-// 					<%if(b.type == "list"){%>
-// 						<% if(b.data.style==="ordered"){%>
-// 							<ol>
-// 								<% b.data.items.forEach(function(v,i){%>
-// 									<li><%=v%></li>
-// 								<%})%>
-// 							</ol>
-// 						<%}%>
-// 						<% if(b.data.style==="unordered"){%>
-// 							<ol>
-// 								<% b.data.items.forEach(function(v,i){%>
-// 									<li><%=v%></li>
-// 								<%})%>
-// 							</ol>
-// 						<%}%>
-// 					<%}%>
-// 				<%})%>
-//   			</div>

@@ -51,7 +51,6 @@ module.exports = (server) => {
 				recvData.type,
 				recvData.stuCode,
 				recvData.selfcheck
-				
 			];
 			
 			connection.execute(insertSimpleApplyForm, simpleApplyFormData, (err) => {

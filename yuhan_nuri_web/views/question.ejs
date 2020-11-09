@@ -17,9 +17,9 @@
 			crossorigin="anonymous">
 		</script>
 		<style>
-		body {
+			body 
+			{
 				width:100%;
-				background:#f0f4f7;
 			}
 			
 			.fade-text {
@@ -63,42 +63,43 @@
 	
 	<body>
 		<form method="POST" >
-		<div class="container-fluid">
-			
+			<div class="container-fluid">
+				<div class="row" style="height:60px;">
+					<div class="col ml-3 align-self-center">
+						<label style="font-size:150%;">문의</label>
+					</div>
+				</div>
+				<div class="row" style="height:60px; margin-bottom:30px;">
+					<div class="fade-text col align-self-center text-center">
+						<label>고민을 말해주세요.</label>
+					</div>
+				</div>
+				
+				<div class="form-group" style="margin-bottom:30px;">
+					<label><b>제목</b></label>
+					<input type="text" class="form-control form-control" placeholder="제목을 입력하세요." id="questionTitle" name="questionTitle" required>
+				</div>
 
-		<div class="row" style="height: 60px; background:white;">
-			<div class="col align-self-center">
-				<label style="font-size: 150%;">문의</label>
+				<div class="form-group" style="margin-bottom:30px;">
+					<label><b>내용</b></label>
+					<textarea class="form-control" id="questionText" name="questionText" rows="11" placeholder="내용을 입력하세요." style="resize:none;" required></textarea>
+				</div>
+				
+				<div class="form-group text-right" style="margin-top:30px;"> 
+						<input type="submit" class="btn btn-primary mb-2" id="btnNext" value="작 성">
+				</div>
 			</div>
-		</div>
-		<div class="row" style="height:60px; margin-bottom:30px;">
-			<div class="fade-text col align-self-center text-center">
-				<label>고민을 말해주세요.</label>
-			</div>
-		</div>
-			
-			<div class="form-group" style="margin-bottom:30px;">
-						<label><b>제목</b></label>
-						<input type="text" class="form-control form-control" placeholder="제목을 입력하세요." id="questionTitle" name="questionTitle" required>
-			</div>
-			
-			<div class="form-group" style="margin-bottom:30px;">
-						<label><b>내용</b></label>
-						 <textarea class="form-control" id="questionText" name="questionText" rows="12" placeholder="내용을 입력하세요." style="resize:none;" required></textarea>
-			</div>
-			<div class="form-group text-right" style="margin-top:30px;"> 
-					<input type="submit" class="btn btn-primary mb-2" id="btnNext" value="작 성">
-			</div>
-		</div>
-	</form>
+		</form>
 		<script>
-			$("#btnNext").click(function(){
-				if(!$('#questionTitle').val() == ""){
-					if(!$('#questionText').val() == ""){
-						alert("문의가 작성되었습니다.");
+			$(function() {
+				$("#btnNext").click(function(){
+					if(!$('#questionTitle').val() == ""){
+						if(!$('#questionText').val() == ""){
+							alert("문의가 작성되었습니다.");
+						}
 					}
-				}
-			});
+				});
+			})
 		</script>
 	</body>
 </html>

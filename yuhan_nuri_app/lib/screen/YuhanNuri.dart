@@ -150,6 +150,15 @@ class YuhanNuriState extends State<YuhanNuri> {
                             navBarState.setPage(0);
                           });
                     },
+                    onLoadStart: (InAppWebViewController controller, String url) async{
+                      _webViewController = controller;
+                      url = await _webViewController.getUrl();
+
+                      if(url == 'https://yuhannuri.run.goorm.io'){
+                        navBarState.setPage(0);
+                      }
+
+                    },
                   ))),
                   bottomNavigationBar: CurvedNavigationBar(
                     key: globalKey,

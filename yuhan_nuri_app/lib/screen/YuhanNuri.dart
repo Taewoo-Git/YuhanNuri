@@ -98,7 +98,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                               'https://yuhannuri.run.goorm.io/user/mypage') {
                             // 마이페이지 ( 채팅 )
                             Future.delayed(
-                                Duration(milliseconds: 500),
+                                Duration(milliseconds: 300),
                                 () async =>
                                     await _webViewController.evaluateJavascript(
                                         source: 'setHeight();'));
@@ -108,7 +108,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                           } else {
                             // 다른페이지 ( 예약페이지 등)
                             Future.delayed(
-                                Duration(milliseconds: 500),
+                                Duration(milliseconds: 300),
                                 () async =>
                                     await _webViewController.evaluateJavascript(
                                         source:

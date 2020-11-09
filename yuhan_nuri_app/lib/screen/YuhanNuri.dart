@@ -107,19 +107,9 @@ class YuhanNuriState extends State<YuhanNuri> {
                             // 문의페이지면 아무것도안함
                           } else {
                             // 다른페이지 ( 예약페이지 등)
-<<<<<<< HEAD
-                            Future.delayed(
-                                Duration(milliseconds: 300),
-                                () async =>
-                                    await _webViewController.evaluateJavascript(
-                                        source:
-                                            'document.activeElement.scrollIntoView( {block: "center"})')); // 해당 텍스트박스를 화면에 나오게
-=======
-
                             await _webViewController.evaluateJavascript(
                                 source:
                                     'document.activeElement.scrollIntoView( {block: "center"})'); // 해당 텍스트박스를 화면에 나오게
->>>>>>> c18e4a6621fac1287ac5ccdfc2c1d51b3bcffad3
                           }
                         } else {
                           //키보드가 내려갈때
@@ -127,7 +117,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                               'https://yuhannuri.run.goorm.io/user/mypage') {
                             //마이페이지 ( 채팅 ) 이면
                             Future.delayed(
-                                Duration(milliseconds: 500),
+                                Duration(milliseconds: 300),
                                 () async =>
                                     await _webViewController.evaluateJavascript(
                                         source: 'setHeight();'));
@@ -149,15 +139,6 @@ class YuhanNuriState extends State<YuhanNuri> {
                             navBarState = globalKey.currentState;
                             navBarState.setPage(0);
                           });
-                    },
-                    onLoadStart: (InAppWebViewController controller, String url) async{
-                      _webViewController = controller;
-                      url = await _webViewController.getUrl();
-
-                      if(url == 'https://yuhannuri.run.goorm.io'){
-                        navBarState.setPage(0);
-                      }
-
                     },
                   ))),
                   bottomNavigationBar: CurvedNavigationBar(
@@ -216,7 +197,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                       // back 버튼을 눌렀을때의 시간과 전에 back버튼을 눌렀을때의 차이가 2초를 넘었으면
                       currentBackPressTime = now;
                       print(await fcm.getToken());
-                      showToast("뒤로가기 버튼을 한번 더 클릭하면      \n 종료합니다.");
+                      showToast("뒤로가기 버튼을 한번 더      \n 클릭하면 종료합니다.");
                       return Future.value(false); // 종료 안함.
 
                     }

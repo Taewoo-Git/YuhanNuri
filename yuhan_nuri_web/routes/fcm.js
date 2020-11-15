@@ -1,15 +1,13 @@
-const express = require('express');
-const router = express.Router();
-
 const db = require('../public/res/js/database.js')();
 const connection = db.init();
 
 db.open(connection,'fcm');
 
 const sql_whoispost = "SELECT User.token FROM Reservation, User WHERE Reservation.date = ? AND User.stuno = Reservation.stuno AND User.status = 1";
-const sql_AcceptedToken= "SELECT token FROM User WHERE stuno = (select stuno FROM Reservation WHERE no = ?)";
+const sql_AcceptedToken= "SELECT token FROM User WHERE stuno = (select stuno FROM Reservation WHERE no = ? and status = 1)"; 
+//똑같은 쿼리문 같아서 확실하게 확인 하기 위해 and를 추가 했어요! 혹시 문제가 된다 싶으면 알려주세요!! - 성준
 const sql_notifyAnswer = "SELECT token FROM User WHERE stuno = (select stuno FROM QuestionBoard WHERE no =?)";
-const sql_satisfaction = "SELECT token FROM User WHERE stuno = (select stuno FROM Reservation WHERE no = ?)";	
+const sql_satisfaction = "SELECT token FROM User WHERE stuno = (select stuno FROM Reservation WHERE no = ? and finished = 1)";	
 
 const fcm_admin = require('firebase-admin');
 var serviceAccount = require('../serviceAccountCredentials.json');
@@ -34,13 +32,113 @@ require('moment-timezone');
 moment.tz.setDefault("Asia/Seoul");
 
 
-router.get('/', function (req, res) { // GET /fcmEx/isdhsaiudhsauhdsaiuh
-    res.render('fcmEx');
-});
+// router.get('/', function (req, res) { // GET /fcmEx/isdhsaiudhsauhdsaiuh
+//     res.render('fcmEx');
+// });
+
+
+exports.reservationAcceptPush = (reservationNumber) => {
+	connection.execute(sql_AcceptedToken, [reservationNumber], (err, rows) => {
+		if(err){
+				console.error(err);
+				next(err);
+		}
+		else
+		{
+			console.log(rows[0]);
+			const fcm_target_token = rows[0].token;
+		
+			const fcm_message = {
+				token : fcm_target_token,
+				notification : {
+		 			title: 'YuhanNuri', 
+					body: '요청하신 예약이 수락되었습니다.',
+					//
+				},
+				data : {
+					click_action: 'FLUTTER_NOTIFICATION_CLICK',
+				}
+			}
+			
+			fcm_admin.messaging().send(fcm_message)
+			.then(function(response){
+				console.log('fcm보내기 성공');
+			 }).catch(function(error){
+				console.log(error);
+			});
+		}
+	}); 
+};
+
+exports.questionAnswerPush = (reservationNumber) => {
+	connection.execute(sql_notifyAnswer, [reservationNumber], (err, rows) => {
+		if(err){
+				console.error(err);
+				next(err);
+		}
+		else
+		{
+			console.log(rows[0]);
+			const fcm_target_token = rows[0].token;
+		
+			const fcm_message = {
+				token : fcm_target_token,
+				notification : {
+		 			title: 'YuhanNuri', 
+					body: '문의하신 글의 답변이 달렸습니다!',
+					//
+				},
+				data : {
+					click_action: 'FLUTTER_NOTIFICATION_CLICK',
+				}
+			}
+			
+			fcm_admin.messaging().send(fcm_message)
+			.then(function(response){
+				console.log('fcm보내기 성공');
+			 }).catch(function(error){
+				console.log(error);
+			});
+		}
+	}); 
+}
+
+exports.reservationFinishPush = (reservationNumber) => {
+	connection.execute(sql_satisfaction, [reservationNumber], (err, rows) => {
+		if(err){
+				console.error(err);
+				next(err);
+		}
+		else
+		{
+			console.log(rows[0]);
+			const fcm_target_token = rows[0].token;
+		
+			const fcm_message = {
+				token : fcm_target_token,
+				notification : {
+		 			title: 'YuhanNuri', 
+					body: '상담이 종료되었습니다. 만족도 조사를 해주세요!',
+					//
+				},
+				data : {
+					click_action: 'FLUTTER_NOTIFICATION_CLICK',
+				}
+			}
+			
+			fcm_admin.messaging().send(fcm_message)
+			.then(function(response){
+				console.log('fcm보내기 성공');
+			 }).catch(function(error){
+				console.log(error);
+			});
+		}
+	}); 
+};
 
 
 
-router.post('/', function (req,res,next){	
+// router.post('/', function (req,res,next){	
 	
 	
 	// 1. 예약 하루전에 "하루전입니다." 발송 로직
@@ -121,36 +219,36 @@ router.post('/', function (req,res,next){
 	
 	// 2. 예약이 신청 -> 승인 -> 예약이완료되었습니다.
 	//'예약의 no가져오는 방식'
-	// var reservationAcceptPush = function(reservationtokenno) {connection.execute(sql_AcceptedToken, [reservationtokenno], (err, rows) => {
-	// 	if(err){
-	// 			console.error(err);
-	// 			next(err);
-	// 	}
-	// 	else
-	// 	{
-	// 		console.log(rows[0]);
-	// 		const fcm_target_token = rows[0].token;
+// 	var reservationAcceptPush = function(reservationTokenNo) {connection.execute(sql_AcceptedToken, [reservationTokenNo], (err, rows) => {
+// 		if(err){
+// 				console.error(err);
+// 				next(err);
+// 		}
+// 		else
+// 		{
+// 			console.log(rows[0]);
+// 			const fcm_target_token = rows[0].token;
 		
-	// 		const fcm_message = {
-	// 			token : fcm_target_token,
-	// 			notification : {
-	// 	 			title: 'yuhan1', 
-	// 				body: '요청하신 예약이 수락되었습니다.',
-	// 				//
-	// 			},
-	// 			data : {
-	// 				click_action: 'FLUTTER_NOTIFICATION_CLICK',
-	// 			}
-	// 		}
+// 			const fcm_message = {
+// 				token : fcm_target_token,
+// 				notification : {
+// 		 			title: 'yuhan1', 
+// 					body: '요청하신 예약이 수락되었습니다.',
+// 					//
+// 				},
+// 				data : {
+// 					click_action: 'FLUTTER_NOTIFICATION_CLICK',
+// 				}
+// 			}
 			
-	// 		fcm_admin.messaging().send(fcm_message)
-	// 		.then(function(response){
-	// 			console.log('fcm보내기 성공');
-	// 		 }).catch(function(error){
-	// 			console.log(error);
-	// 		});
-	// 	}
-	// }); 
+// 			fcm_admin.messaging().send(fcm_message)
+// 			.then(function(response){
+// 				console.log('fcm보내기 성공');
+// 			 }).catch(function(error){
+// 				console.log(error);
+// 			});
+// 		}
+// 	}); 
 // };
 			
 
@@ -226,10 +324,9 @@ router.post('/', function (req,res,next){
 	
 	
 	
-	res.render('fcmEx');
+// 	res.render('fcmEx');
 	
-});
+// });
 
 
 
-module.exports = router;

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>메인 페이지</title>
+		<title>예약 페이지</title>
 		<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
 		
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -205,9 +205,9 @@
 	
 	<body>
 		<div class="container-fluid">
-			<div class="row" style="height: 60px; background-color:white;">
-				<div class="col align-self-center">
-					<label style="font-size: 150%;">예약</label>
+			<div class="row" style="height:60px;">
+				<div class="col ml-3 align-self-center">
+					<label style="font-size:150%;">예약</label>
 				</div>
 			</div>
 			
@@ -801,7 +801,9 @@
 				
 				socket.on('initComplete', function() {
 					alert("예약이 완료되었습니다, 감사합니다.");
-					location.replace('http://yuhannuri.run.goorm.io');
+					//location.replace('http://yuhannuri.run.goorm.io');
+					  window.flutter_inappwebview
+                      .callHandler('PageHandler', 'replaceMain');  // Flutter Inappwebview 의 ReservationHandler를 호출  
 				});
 				
 				function applicationValidCheck() {

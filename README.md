@@ -58,6 +58,11 @@ Yuhan University Psychotherapy Application
 * WebView 텍스트 박스 선택 시 발생하는 뒤로가기 이슈 해결 (Flutter) ✔
 * FCM 개발 (Flutter) ✔
 
-### 2020.11.01
+### 2020.11.01 ~ 2020.11.09
 * 예약, 마이페이지 메뉴 마무리
-* FCM 적용 및 마무리 (Flutter)
+* FCM 적용 및 마무리 (Flutter) ✔
+
+### 2020.11.09 ~
+* 홈, 예약, 문의, 마이페이지 메뉴 마무리
+* 데이테베이스 구조 변경
+* DAO를 통한 비즈니스 로직 분리

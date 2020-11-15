@@ -98,7 +98,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                               'https://yuhannuri.run.goorm.io/user/mypage') {
                             // 마이페이지 ( 채팅 )
                             Future.delayed(
-                                Duration(milliseconds: 500),
+                                Duration(milliseconds: 300),
                                 () async =>
                                     await _webViewController.evaluateJavascript(
                                         source: 'setHeight();'));
@@ -107,12 +107,9 @@ class YuhanNuriState extends State<YuhanNuri> {
                             // 문의페이지면 아무것도안함
                           } else {
                             // 다른페이지 ( 예약페이지 등)
-                            Future.delayed(
-                                Duration(milliseconds: 500),
-                                () async =>
-                                    await _webViewController.evaluateJavascript(
-                                        source:
-                                            'document.activeElement.scrollIntoView( {block: "center"})')); // 해당 텍스트박스를 화면에 나오게
+                            await _webViewController.evaluateJavascript(
+                                source:
+                                    'document.activeElement.scrollIntoView( {block: "center"})'); // 해당 텍스트박스를 화면에 나오게
                           }
                         } else {
                           //키보드가 내려갈때
@@ -120,25 +117,28 @@ class YuhanNuriState extends State<YuhanNuri> {
                               'https://yuhannuri.run.goorm.io/user/mypage') {
                             //마이페이지 ( 채팅 ) 이면
                             Future.delayed(
-                                Duration(milliseconds: 500),
+                                Duration(milliseconds: 300),
                                 () async =>
                                     await _webViewController.evaluateJavascript(
                                         source: 'setHeight();'));
+                            await _webViewController.evaluateJavascript(
+                                source:
+                                    'document.activeElement.blur()'); //해당 텍스트박스의 포커싱을 지움
+                          } else {
+                            await _webViewController.evaluateJavascript(
+                                source:
+                                    'document.activeElement.blur()'); //해당 텍스트박스의 포커싱을 지움
                           }
-                          await _webViewController.evaluateJavascript(
-                              source:
-                                  'document.activeElement.blur()'); //해당 텍스트박스의 포커싱을 지움
                         }
                       });
-                    },
-                    onLoadStart: (InAppWebViewController controller, String url) async{
-                      _webViewController = controller;
-                      url = await _webViewController.getUrl();
-
-                      if(url == 'https://yuhannuri.run.goorm.io'){
-                        navBarState.setPage(0);
-                      }
-
+                      _webViewController.addJavaScriptHandler(
+                          // 웹뷰 JavaScript와 통신하는 핸들러
+                          handlerName:
+                              'PageHandler', // 해당 핸들러를 웹뷰에서 호출( 예약완료 버튼클릭 )할 시  메인으로 돌아감
+                          callback: (args) {
+                            navBarState = globalKey.currentState;
+                            navBarState.setPage(0);
+                          });
                     },
                   ))),
                   bottomNavigationBar: CurvedNavigationBar(
@@ -197,7 +197,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                       // back 버튼을 눌렀을때의 시간과 전에 back버튼을 눌렀을때의 차이가 2초를 넘었으면
                       currentBackPressTime = now;
                       print(await fcm.getToken());
-                      showToast("뒤로가기 버튼을 한번 더 클릭하면      \n 종료합니다.");
+                      showToast("뒤로가기 버튼을 한번 더      \n 클릭하면 종료합니다.");
                       return Future.value(false); // 종료 안함.
 
                     }

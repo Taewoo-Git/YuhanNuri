@@ -89,7 +89,7 @@ class SplashState extends State<Splash> {
       backgroundColor: Colors.white,
       styleTextUnderTheLoader: new TextStyle(),
       photoSize: 100.0,
-      onClick: () => print("Flutter"),
+      //onClick: () => print("Flutter"),
       loaderColor: Colors.lightBlue,
     );
   }

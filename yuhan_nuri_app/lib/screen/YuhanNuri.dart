@@ -46,23 +46,49 @@ class YuhanNuriState extends State<YuhanNuri> {
 
   void initState() {
     super.initState();
-
+    
     fcm.configure(onMessage: (Map<String, dynamic> message) async {
-      _webViewController.loadUrl(
-          url: 'https://yuhannuri.run.goorm.io/fcm', headers: header);
+      gotoPage(message['data']['page']);
     }, onResume: (Map<String, dynamic> message) async {
-      _webViewController.loadUrl(
-          url: 'https://yuhannuri.run.goorm.io/fcm', headers: header);
+        gotoPage(message['data']['page']);
     }, onLaunch: (Map<String, dynamic> message) async {
       //앱이 꺼진 상태에서 알림을 눌렀을 때 발생, 아래에 loadurl보다 빨리 호출돼서 타이머 달아놈
-      Timer(Duration(seconds: 3), () {
-        _webViewController.loadUrl(
-            url: 'https://yuhannuri.run.goorm.io/fcm', headers: header);
+      Timer(Duration(milliseconds: 2500), () {
+        gotoPage(message['data']['page']);    
       });
+
     });
 
     cm = new CookieManager();
   }
+
+  void gotoPage(String msg) {
+
+        navBarState = globalKey.currentState;
+        navBarState.setPage(3);
+        
+        if(msg == "question"){
+          print("RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR");
+          
+          _webViewController.injectJavascriptFileFromUrl(urlFile: "https://code.jquery.com/jquery-3.3.1.min.js");   
+
+          Timer(Duration(milliseconds: 2500), () {
+            _webViewController.evaluateJavascript(source: 
+            "\$('#reserv').removeClass('active'); "+
+            "\$('#quest').addClass('active');"+
+            "\$('#reservation').removeClass('active show');" +
+            "\$('#question').addClass('active show');"
+          );
+
+        
+          });
+
+
+        }else{
+          print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+        }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +113,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                     onWebViewCreated: (InAppWebViewController controller) {
                       _webViewController = controller;
                       // url로드전에 cookie 지워주지 않으면 cookie 안먹는 경우 있음
-                      cm.deleteAllCookies();
+                      cm.deleteAllCookies(); 
                       _webViewController.loadUrl(
                           url: 'https://yuhannuri.run.goorm.io',
                           headers: header);

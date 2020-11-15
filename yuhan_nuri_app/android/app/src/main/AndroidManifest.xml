@@ -38,7 +38,11 @@
               android:resource="@drawable/launch_background"
               />
             
-              <meta-data android:name="flutterEmbedding" android:value="2"/>
+            <meta-data 
+              android:name="com.google.firebase.messaging.default_notification_icon"
+              android:resource="@drawable/pushicon" />
+
+            <meta-data android:name="flutterEmbedding" android:value="2"/>
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

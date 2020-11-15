@@ -206,6 +206,7 @@ class _LoginState extends State<Login> {
     return CheckboxListTile(
       controlAffinity: ListTileControlAffinity.leading,
       autofocus: true,
+      
       checkColor: Colors.lightBlue,
       activeColor: Colors.white,
       title: Text(

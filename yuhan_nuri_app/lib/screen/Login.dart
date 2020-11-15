@@ -187,12 +187,13 @@ class _LoginState extends State<Login> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(7)
       ),
-      color: Colors.white,
+      // color: Colors.white,
+      color: Color(0xFF0275D8),
       child: Text(
         '로그인',
         style:TextStyle(
           
-          color: Color(0xFF81C0D5),
+          color: Color(0xFFAFD9FE),
           fontSize: 18,
           fontWeight: FontWeight.bold
         )
@@ -237,16 +238,17 @@ class _LoginState extends State<Login> {
                 height : double.infinity,
                 width:double.infinity,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end:Alignment.bottomCenter,
-                    colors: [
-                      Color(0xFF71A7D0),
-                      Color(0xFF8CC3D9),
-                      Color(0xFF81C0D5),
-                      Color(0xFF85D1D6),
-                    ]
-                  )
+                  color: Color(0xFFF0F0F0),
+                  // gradient: LinearGradient(
+                  //   begin: Alignment.topCenter,
+                  //   end:Alignment.bottomCenter,
+                  //   colors: [
+                  //     Color(0xFFF0F0F0),
+                  //     //Color(0xFFF5F5F5),
+                  //     Color(0xFFD9EDFF),
+                  //     Color(0xFFAFD9FE)                      
+                  //   ]
+                  // )
                 ),
                 child: SingleChildScrollView(
                   //physics: AlwaysScrollableScrollPhysics(),
@@ -261,10 +263,11 @@ class _LoginState extends State<Login> {
                       '유한 누리',
                       style: TextStyle(
                         fontFamily: 'jua',
-                        color: Colors.white,
+                        color: Color(0xFF3C3C3C),
                         fontSize: 40,
-                        fontWeight: FontWeight.bold
+                        fontWeight: FontWeight.bold        
                       ),
+                      
                     ),
                     SizedBox(height:30),
                     buildId(context),

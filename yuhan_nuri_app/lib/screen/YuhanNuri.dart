@@ -147,8 +147,13 @@ class YuhanNuriState extends State<YuhanNuri> {
                           handlerName:
                               'PageHandler', // 해당 핸들러를 웹뷰에서 호출( 예약완료 버튼클릭 )할 시  메인으로 돌아감
                           callback: (args) {
-                            navBarState = globalKey.currentState;
-                            navBarState.setPage(0);
+                            if (args[0].toString() == "replaceMain") {
+                              navBarState = globalKey.currentState;
+                              navBarState.setPage(0);
+                            } else if (args[0].toString() == "replaceMypage") {
+                              navBarState = globalKey.currentState;
+                              navBarState.setPage(3);
+                            }
                           });
                     },
                   ))),
@@ -250,7 +255,7 @@ class YuhanNuriState extends State<YuhanNuri> {
 
     AlertDialog alert = AlertDialog(
       title: Text("유한누리"),
-      content: Text("현재 채팅이 활성화되어있습니다. \n 홈화면으로 돌아가시겠습니까?"),
+      content: Text("현재 채팅이 활성화되어있습니다. \n홈 화면으로 돌아가시겠습니까?"),
       actions: [
         continueButton,
         cancelButton,

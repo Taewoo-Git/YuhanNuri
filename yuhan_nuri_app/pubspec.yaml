@@ -63,7 +63,13 @@ flutter:
     - assets/sad_face.png
     - assets/social_media.png
     - assets/team_success.png
-  #   - images/a_dot_ham.jpeg
+    - assets/home.ico
+    - assets/question.ico
+    - assets/reservation.ico
+    - assets/mypage.ico
+    - assets/nuri.png
+    
+    #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

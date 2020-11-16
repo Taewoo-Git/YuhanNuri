@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:oktoast/oktoast.dart';
+import 'package:vibration/vibration.dart';
 
 final FirebaseMessaging fcm = FirebaseMessaging();
 CookieManager cm;
@@ -46,47 +47,33 @@ class YuhanNuriState extends State<YuhanNuri> {
 
   void initState() {
     super.initState();
-    
-    fcm.configure(onMessage: (Map<String, dynamic> message) async {
-      gotoPage(message['data']['page']);
-    }, onResume: (Map<String, dynamic> message) async {
-        gotoPage(message['data']['page']);
-    }, onLaunch: (Map<String, dynamic> message) async {
-      //앱이 꺼진 상태에서 알림을 눌렀을 때 발생, 아래에 loadurl보다 빨리 호출돼서 타이머 달아놈
-      Timer(Duration(milliseconds: 2500), () {
-        gotoPage(message['data']['page']);    
-      });
 
+    fcm.configure(onMessage: (Map<String, dynamic> message) async {
+      // 앱이 켜져있을때는 페이지 안바꿈.
+    }, onResume: (Map<String, dynamic> message) async {
+      gotoPage(message['data']['page']);
+    }, onLaunch: (Map<String, dynamic> message) async {
+      Timer(Duration(milliseconds: 1500), () {
+        gotoPage(message['data']['page']);
+      });
     });
 
     cm = new CookieManager();
   }
 
   void gotoPage(String msg) {
-
-        navBarState = globalKey.currentState;
-        navBarState.setPage(3);
-        
-        if(msg == "question"){
-          print("RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR");     
-
-          Timer(Duration(milliseconds: 2500), () {
-            _webViewController.evaluateJavascript(source: 
-            "\$('#reserv').removeClass('active'); "+
-            "\$('#quest').addClass('active');"+
-            "\$('#reservation').removeClass('active show');" +
-            "\$('#question').addClass('active show');"
-          );
-
-        
-          });
-
-
-        }else{
-          print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-        }
+    navBarState = globalKey.currentState;
+    navBarState.setPage(3);
+    if (msg == "question") {
+      Timer(Duration(milliseconds: 850), () {
+        _webViewController.evaluateJavascript(
+            source: "\$('#reserv').removeClass('active'); " +
+                "\$('#quest').addClass('active');" +
+                "\$('#reservation').removeClass('active show');" +
+                "\$('#question').addClass('active show');");
+      });
+    }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +98,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                     onWebViewCreated: (InAppWebViewController controller) {
                       _webViewController = controller;
                       // url로드전에 cookie 지워주지 않으면 cookie 안먹는 경우 있음
-                      cm.deleteAllCookies(); 
+                      cm.deleteAllCookies();
                       _webViewController.loadUrl(
                           url: 'https://yuhannuri.run.goorm.io',
                           headers: header);
@@ -160,8 +147,13 @@ class YuhanNuriState extends State<YuhanNuri> {
                           handlerName:
                               'PageHandler', // 해당 핸들러를 웹뷰에서 호출( 예약완료 버튼클릭 )할 시  메인으로 돌아감
                           callback: (args) {
-                            navBarState = globalKey.currentState;
-                            navBarState.setPage(0);
+                            if (args[0].toString() == "replaceMain") {
+                              navBarState = globalKey.currentState;
+                              navBarState.setPage(0);
+                            } else if (args[0].toString() == "replaceMypage") {
+                              navBarState = globalKey.currentState;
+                              navBarState.setPage(3);
+                            }
                           });
                     },
                   ))),
@@ -233,6 +225,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                           'if(document.getElementById("chattingCard") != null) true;' +
                               'else false;');
                   if (isChatting) {
+                    Vibration.vibrate();
                     showBackButtonDialog(context);
                   } else {
                     navBarState = globalKey.currentState;
@@ -262,7 +255,7 @@ class YuhanNuriState extends State<YuhanNuri> {
 
     AlertDialog alert = AlertDialog(
       title: Text("유한누리"),
-      content: Text("현재 채팅이 활성화되어있습니다. \n 홈화면으로 돌아가시겠습니까?"),
+      content: Text("현재 채팅이 활성화되어있습니다. \n홈 화면으로 돌아가시겠습니까?"),
       actions: [
         continueButton,
         cancelButton,

@@ -81,7 +81,7 @@ class SplashState extends State<Splash> {
           new Timer(new Duration(milliseconds: 3000), () => {checkFirstSeen()}),
       title: new Text(
         'YUHAN NURI',
-        style: new TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
+        style: new TextStyle(fontWeight: FontWeight.bold, fontSize: 35.0),
       ),
       image: new Image(
         image: AssetImage("assets/logo.png"),

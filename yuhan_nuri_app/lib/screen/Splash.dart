@@ -86,7 +86,7 @@ class SplashState extends State<Splash> {
       image: new Image(
         image: AssetImage("assets/logo.png"),
       ),
-      backgroundColor: Color(0xFF0274D6),
+      backgroundColor: Colors.white,
       styleTextUnderTheLoader: new TextStyle(),
       photoSize: 100.0,
       //onClick: () => print("Flutter"),

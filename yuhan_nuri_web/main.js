@@ -11,7 +11,6 @@ const helmet=require('helmet');
 
 const userRouter = require('./routes/user');
 const adminRouter = require('./routes/admin');
-// const fcmRouter=require('./routes/fcm');
 
 const cookieParser = require('cookie-parser');
 
@@ -52,8 +51,7 @@ if(process.env.NODE_ENV==='production'){
 	// noSniff : X-Content-Type-Options 설정하여, 선언된 콘텐츠 유형으로부터 벗어난 응답에 대한 브라우저의 MIME 가로채기를 방지.
 }
 app.use('/user', userRouter);
-app.use('/admin',adminRouter);
-// app.use('/fcm',fcmRouter);
+app.use('/admin', adminRouter);
 
 
 const server = app.listen(port, () => {
@@ -63,35 +61,23 @@ const server = app.listen(port, () => {
 const io = require(__dirname + '/public/res/js/socket.js')(server); // socket.js파일에 server를 미들웨어로 사용
 
 app.get('/', function (req, res) {
-	let isInfo = req.session.userInfo; // 기존 세션의 존재 여부를 판단하여 view 처리.
 	//console.info("isAutoLogin: " + req.signedCookies.isAutoLogin);
-	let mainDataSql = "SELECT no, type, content FROM EditTest";	// 메인에 들어가는 데이터 SQL문
-	if(isInfo) {
-		connection.execute(mainDataSql,(err,rows)=>{
-		if(err){
-			console.error(err);
-		}
-		    res.render('main', {
-				username: isInfo.stuName,
-				data:rows
-			});
-		});
+	let selectHomeBoard = "select  * from HomeBoard";
+
+	if(req.session.userInfo){
+		connection.execute(selectHomeBoard,(err,rows)=>{
+			if(err){
+				console.error(err);
+			}else{
+				res.render('main',{
+					data:rows
+				});
+			}
+		})
 	}
+	
 	else if(req.signedCookies.isAutoLogin != undefined) res.redirect('/user/auto');
 	else res.render('login');
-});
-
-app.get('/main', function (req, res) {
-	let mainDataSql = "SELECT no, type, content FROM EditTest";	// 메인에 들어가는 데이터 SQL문
-	connection.execute(mainDataSql,(err,rows)=>{
-		if(err){
-			console.error(err);
-		}
-		    res.render('main', {
-			username: req.session.userInfo.stuName,
-			data:rows
-			});
-		});
 });
 
 app.use((req,res,next)=>{

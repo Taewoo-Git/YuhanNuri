@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -21,63 +20,12 @@
 </head>
 <body class="c-app">
 	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-		  <div class="modal-dialog" role="document">
-			<div class="modal-content">
-			  <div class="modal-header">
-				<h5 class="modal-title" id="exampleModalLabel">항목 추가</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-				  <span aria-hidden="true">&times;</span>
-				</button>
-			  </div>
-			  <div class="modal-body">
-				<form>
-				  <div class="form-group">
-					<label for="type-name" class="col-form-label">항목 이름:</label>
-					<input type="text" class="form-control" id="type-name" placeholder="항목이름을 작성해주세요.">
-				  </div>
-				</form>
-			  </div>
-			  <div class="modal-footer">
-				<button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
-				<button type="button" class="btn btn-primary" id="add_type_button">추가하기</button>
-			  </div>
+		<div class="modal-dialog" role="document">
+			<div class="modal-content" id="applyModal">
+				
 			</div>
-		  </div>
 		</div>
-		<script>
-				// 예약 수락하는 버튼 ajax
-				$(function () {
-				$('button.reser-btn').click(function(e) {
-						$.ajax({
-						type: "POST",
-						dataType: "json",
-						url: "./admin/accessReservation",
-						async: true,
-						data: { "sendAjax" : $(`#${e.target.id}`).val() },
-						success: function (data) { 
-							window.location.reload();
-						}
-					});
-
-				});
-			});
-			
-			// 왼쪽 탭 메뉴 추가하는 버튼
-			
-			$('#add_type_button').click(function(e){
-							$.ajax({
-								type:'POST',
-								dataType:'json',
-								url:'../addType',
-								async:true,
-								data:{"add_type" : $('#type-name').val()},
-								success:function(data){
-									
-									window.location.reload();
-								}
-							})
-						});
-		</script>
+	</div>
     <div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
         <div class="c-sidebar-brand d-lg-down-none">
             <svg class="c-sidebar-brand-full" width="118" height="46" alt="CoreUI Logo">
@@ -114,9 +62,11 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-right pt-0">
                         <div class="dropdown-header bg-light py-2"><strong>계정</strong></div>
-                            <a class="dropdown-item" href="/user/logout">
+                            <a class="dropdown-item" href="/admin/logout">
                             <i class="cil-account-logout pr_10"></i> 로그아웃</a>
-                </li>
+							<a class="dropdown-item" href="/admin/changePassword">
+								<i class="cil-dialpad pr_10"></i> 비밀번호 변경</a>
+					</div></li>
             </ul>
             <div class="c-subheader px-3">
                 <ol class="breadcrumb border-0 m-0">
@@ -139,11 +89,29 @@
                                 </div>
                             </div>
 							<% getReservation.forEach(function(val,i){ %>
-								<div class="card-body list-group-item">
-                                    <h5 class="card-title">학번: <%=val.stuno%></h5>
-                                    <p class="card-text">상담 유형: <%= val.typecode%> 상담 시간 <%= val.starttime%></p>
-                                    <button class="btn btn-primary float-right reser-btn" id="accept-reservation-btn-<%=i%>" value="<%= val.no%>">수락</button>
-                                </div>
+								<% if(val.typename == undefined) { %>
+									<div class="card-body list-group-item">
+										<h5 class="card-title">학번: <%=val.stuno%></h5>
+										<p class="card-text"><b>상담 유형</b> : 심리검사</p>
+										<div class="float-right">
+											<button class="btn btn-info check-btn mr-2 showModalMental" id="check-register-btn-<%=i%>" value="<%= val.no%>" data-toggle="modal"
+													data-target="#exampleModal">신청서 확인</button>
+											<button class="btn btn-success reser-btn mr-2" id="accept-reservation-btn-<%=i%>" value="<%= val.no%>">수락</button>
+										</div>
+									</div>
+								<% } else { %>
+									<div class="card-body list-group-item">
+										<h5 class="card-title">학번 : <%=val.stuno%></h5>
+										<p class="card-text"><b>상담 유형 : </b> <%= val.typename%> &nbsp;&nbsp;&nbsp;&nbsp; <b>상담시간 : </b><%= val.starttime%> 시</p>
+										<div class="float-right">
+											<button class="btn btn-info check-btn mr-2 showModalConsult" id="check-register-btn-<%=i%>" value="<%= val.no%>" data-toggle="modal"
+													data-target="#exampleModal">신청서 확인</button>
+											<button class="btn btn-success  reser-btn mr-2" id="accept-reservation-btn-<%=i%>" value="<%= val.no%>">수락</button>
+											<button class="btn btn-danger  cancel-btn" id="cancel-btn-<%=i%>" value="<%= val.no%>">취소</button>	
+										</div>
+										
+									</div>
+								<% } %>
 							<% }) %>
                         </div>
                     </div>
@@ -156,7 +124,201 @@
         </div>
     </div>
 	<script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
-</body>
+	<script>
+		// 예약 수락하는 버튼 ajax
+		$(function () {
+			$('button.reser-btn').click(function(e) {
+					$.ajax({
+					type: "POST",
+					dataType: "json",
+					url: "./admin/accessReservation",
+					async: true,
+					data: { "sendAjax" : $(`#${e.target.id}`).val() },
+					success: function (data) { 
+						window.location.reload();
+					}
+				});
+			});
+		});
 
+		// 왼쪽 탭 메뉴 추가하는 버튼
+		$('button.cancel-btn').click(function(e){
+			$.ajax({
+				type:'POST',
+				dataType:'json',
+				url:'./admin/cancelReservation',
+				async:true,
+				data: { "sendAjax" : $(`#${e.target.id}`).val() },
+				success:function(data){
+					if(data.state === "ok"){
+						
+						alert("예약이 취소되었습니다.");
+						window.location.reload();
+					}
+				}
+			})
+		});
+	</script>
+	<script>
+		$('.showModalMental').click(function(e) {
+			$.ajax({
+				type:'POST',
+				dataType:'json',
+				url:'./admin/getMentalApplyForm',
+				async:true,
+				data:{"serialno": $(this).val()},
+				success:function(data) {
+					$('#applyModal').empty();
+					$('#applyModal').append(`
+						<div class="modal-header">
+							<h5 class="modal-title" id="exampleModalLabel">신청서 확인</h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body" id="modalPart">
+							<div class="form-group">
+								<label class="col-form-label"><b>학번</b></label>
+								<label class="form-control">${data.stuno}</label>
+							</div>
+							<div class="form-group">
+								<label class="col-form-label"><b>이름</b></label>
+								<label class="form-control">${data.stuname}</label>
+							</div>
+							<div class="form-group">
+								<label class="col-form-label"><b>성별</b></label>
+								<label class="form-control">${data.gender}</label>
+							</div>
+							<div class="form-group">
+								<label class="col-form-label"><b>생년월일</b></label>
+								<label class="form-control">${data.birth}</label>
+							</div>
+							<div class="form-group">
+								<label class="col-form-label"><b>이메일</b></label>
+								<label class="form-control">${data.email}</label>
+							</div>
+							<div class="form-group">
+								<label class="col-form-label"><b>신청일자</b></label>
+								<label class="form-control">${data.date}</label>
+							</div>
+						</div>
+					`);
+					if(data.asks != null) {
+						for(let i=0; i<data.asks.split('|').length; i++) {
+							$('#modalPart').append(`
+								<div class="form-group">
+									<label class="col-form-label"><b>${data.asks.split('|')[i]}</b></label>
+									<label class="form-control">${data.answers.split('|')[i]}</label>
+								</div>
+							`);
+						}
+					}
+					$('#modalPart').append(`
+						<div class="form-group">
+							<label class="col-form-label"><b>신청 심리검사</b></label>
+							<label class="form-control">${data.testnames}</label>
+						</div>
+					`);
+					$('#applyModal').append(`
+						<div class="modal-footer">
+							<button type="button" class="btn btn-danger" data-dismiss="modal">닫기</button>
+						</div>
+					`);
+				}
+			});
+		});
+		
+		$('.showModalConsult').click(function(e) {
+			$.ajax({
+				type:'POST',
+				dataType:'json',
+				url:'./admin/getConsultApplyForm',
+				async:true,
+				data:{"serialno": $(this).val()},
+				success:function(data) {
+					console.log(data);
+					$('#applyModal').empty();
+					$('#applyModal').append(`
+						<div class="modal-header">
+							<h5 class="modal-title" id="exampleModalLabel">신청서 확인</h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body" id="modalPart">
+							<div class="form-group">
+								<label class="col-form-label"><b>학번</b></label>
+								<label class="form-control">${data.stuno}</label>
+							</div>
+							<div class="form-group">
+								<label class="col-form-label"><b>이름</b></label>
+								<label class="form-control">${data.stuname}</label>
+							</div>
+							<div class="form-group">
+								<label class="col-form-label"><b>성별</b></label>
+								<label class="form-control">${data.gender}</label>
+							</div>
+							<div class="form-group">
+								<label class="col-form-label"><b>생년월일</b></label>
+								<label class="form-control">${data.birth}</label>
+							</div>
+							<div class="form-group">
+								<label class="col-form-label"><b>이메일</b></label>
+								<label class="form-control">${data.email}</label>
+							</div>
+							<div class="form-group">
+								<label class="col-form-label"><b>신청일자</b></label>
+								<label class="form-control">${data.date}</label>
+							</div>
+						</div>
+					`);
+					if(data.asks != null) {
+						for(let i=0; i<data.asks.split('|').length; i++) {
+							$('#modalPart').append(`
+								<div class="form-group">
+									<label class="col-form-label"><b>${data.asks.split('|')[i]}</b></label>
+									<label class="form-control">${data.answers.split('|')[i]}</label>
+								</div>
+							`);
+						}
+					}
+					if(data.checknames != null) {
+						for(let i=0; i<data.checknames.split('|').length; i++) {
+							let score = "";
+							switch (parseInt(data.scores.split('|')[i])) {
+								case 1 :
+									score = "매우 나쁨";
+									break;
+								case 2 :
+									score = "나쁨";
+									break;
+								case 3 :
+									score = "보통";
+									break;
+								case 4 :
+									score = "좋음";
+									break;
+								case 5 :
+									score = "매우 좋음";
+									break;
+							}
+							$('#modalPart').append(`
+								<div class="form-group">
+									<label class="col-form-label"><b>${data.checknames.split('|')[i]}</b></label>
+									<label class="form-control">${score}</label>
+								</div>
+							`);
+						}
+					}
+					$('#applyModal').append(`
+						<div class="modal-footer">
+							<button type="button" class="btn btn-danger" data-dismiss="modal">닫기</button>
+						</div>
+					`);
+				}
+			});
+		});
+	</script>
+</body>
 </html>
 

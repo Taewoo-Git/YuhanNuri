@@ -39,9 +39,9 @@
 	</head>
 	<body>
 	<div class="container-fluid">
-		<div class="row" style="height:60px;">
-			<div class="col ml-3 align-self-center">
-				<label style="font-size:150%;">홈</label>
+		<div class="row" style="height:60px; margin-bottom:20px;">
+			<div class="col align-self-center">
+				<label style="font-size:180%;">홈</label>
 			</div>
 		</div>
 		<div class="row">
@@ -58,11 +58,125 @@
 		</div>
 		<div class="tab-content m-1 mt-3 content-style">
 			<div class="tab-pane fade show active" id="공지사항">
-				<label><b>공지사항</b></label><br/>
-			</div>
-			<div class="tab-pane fade" id="이용안내">
-				<label><b>이용안내</b></label><br/>
-			</div>
+				<% JSON.parse(data[0].content).forEach(function(b,i){%>	
+    					<%if(b.type == "paragraph"){%>	
+    						<p>	
+    							<%= b.data.text%>	
+    						</p>	
+    					<%}%>	
+    					<%if(b.type == "image"){%>	
+    						<img src="<%=b.data.file.url%>" alt="<%=b.data.caption%>"/>	
+    					<%}%>	
+    					<%if(b.type == "header"){%>	
+    						<%if(b.data.level === 1){%>	
+    							<h1>	
+    								<%= b.data.text%>	
+    							</h1>	
+    						<%}%>	
+    						<%if(b.data.level === 2){%>	
+    							<h2>	
+    								<%= b.data.text%>	
+    							</h2>	
+    						<%}%>	
+    						<%if(b.data.level === 3){%>	
+    							<h3>	
+    								<%= b.data.text%>	
+    							</h3>	
+    						<%}%>	
+    						<%if(b.data.level === 4){%>	
+    							<h4>	
+    								<%= b.data.text%>	
+    							</h4>	
+    						<%}%>	
+    						<%if(b.data.level === 5){%>	
+    							<h5>	
+    								<%= b.data.text%>	
+    							</h5>	
+    						<%}%>	
+    						<%if(b.data.level === 6){%>	
+    							<h6>	
+    								<%= b.data.text%>	
+    							</h6>	
+    						<%}%>	
+    					<%}%>	
+    					<%if(b.type == "list"){%>	
+    						<% if(b.data.style==="ordered"){%>	
+    							<ol>	
+    								<% b.data.items.forEach(function(v,i){%>	
+    									<li><%=v%></li>	
+    								<%})%>	
+    							</ol>	
+    						<%}%>	
+    						<% if(b.data.style==="unordered"){%>	
+    							<ol>	
+    								<% b.data.items.forEach(function(v,i){%>	
+    									<li><%=v%></li>	
+    								<%})%>	
+    							</ol>	
+    						<%}%>	
+    					<%}%>	
+    				<%})%>	
+      		</div>	
+      		<div class="tab-pane fade" id="이용안내">	
+        			<% JSON.parse(data[1].content).forEach(function(b,i){%>	
+    					<%if(b.type == "paragraph"){%>	
+    						<p>	
+    							<%= b.data.text%>	
+    						</p>	
+    					<%}%>	
+    					<%if(b.type == "image"){%>	
+    						<img src="<%=b.data.file.url%>" alt="<%=b.data.caption%>"/>	
+    					<%}%>	
+    					<%if(b.type == "header"){%>	
+    						<%if(b.data.level === 1){%>	
+    							<h1>	
+    								<%= b.data.text%>	
+    							</h1>	
+    						<%}%>	
+    						<%if(b.data.level === 2){%>	
+    							<h2>	
+    								<%= b.data.text%>	
+    							</h2>	
+    						<%}%>	
+    						<%if(b.data.level === 3){%>	
+    							<h3>	
+    								<%= b.data.text%>	
+    							</h3>	
+    						<%}%>	
+    						<%if(b.data.level === 4){%>	
+    							<h4>	
+    								<%= b.data.text%>	
+    							</h4>	
+    						<%}%>	
+    						<%if(b.data.level === 5){%>	
+    							<h5>	
+    								<%= b.data.text%>	
+    							</h5>	
+    						<%}%>	
+    						<%if(b.data.level === 6){%>	
+    							<h6>	
+    								<%= b.data.text%>	
+    							</h6>	
+    						<%}%>	
+    					<%}%>	
+    					<%if(b.type == "list"){%>	
+    						<% if(b.data.style==="ordered"){%>	
+    							<ol>	
+    								<% b.data.items.forEach(function(v,i){%>	
+    									<li><%=v%></li>	
+    								<%})%>	
+    							</ol>	
+    						<%}%>	
+    						<% if(b.data.style==="unordered"){%>	
+    							<ol>	
+    								<% b.data.items.forEach(function(v,i){%>	
+    									<li><%=v%></li>	
+    								<%})%>	
+    							</ol>	
+    						<%}%>	
+    					<%}%>	
+    				<%})%>	
+      		</div>	
 		</div>
 		</div>
 	</body>

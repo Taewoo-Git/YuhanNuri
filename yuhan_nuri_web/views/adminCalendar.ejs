@@ -8,11 +8,11 @@
     <!-- CoreUI CSS -->
     <link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
     <title>유한누리 어드민</title>	
-	<link rel="stylesheet" type="text/css" href="https://uicdn.toast.com/tui-calendar/latest/tui-calendar.css" />
+	<link rel="stylesheet" type="text/css" href="/res/css/tui-calendar.css" />
     <link rel="stylesheet" type="text/css" href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css" />
     <link rel="stylesheet" type="text/css" href="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.css" />
     <script src="https://uicdn.toast.com/tui.code-snippet/v1.5.2/tui-code-snippet.min.js"></script>
-    <script src="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.min.js"></script>
+    <script src="/lib/tui-time-picker.js"></script>
     <script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.min.js"></script>
 	<script src="/lib/tui-calendar.js"></script>
 	<script src="https://code.jquery.com/jquery-latest.min.js"></script>
@@ -112,8 +112,10 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-right pt-0">
                         <div class="dropdown-header bg-light py-2"><strong>계정</strong></div>
-                            <a class="dropdown-item" href="/user/logout">
+                            <a class="dropdown-item" href="/admin/logout">
                             <i class="cil-account-logout pr_10"></i> 로그아웃</a>
+							<a class="dropdown-item" href="/admin/changePassword">
+                            <i class="cil-dialpad pr_10"></i> 비밀번호 변경</a>
                 </li>
             </ul>
             <div class="c-subheader px-3">
@@ -152,7 +154,7 @@
 		const options = {
 			defaultView: 'month',
 			useCreationPopup: true,
-			useDetailPopup: true
+			useDetailPopup: true,
 		}
 		var Calendar = tui.Calendar;
 		
@@ -181,14 +183,7 @@
 				dragBgColor: '#ff5583',
 				borderColor: '#ff5583'
 			},
-			{
-				id: 'Vacation',
-				name: '휴가',
-				color: '#ffffff',
-				bgColor: '#ffbb3b',
-				dragBgColor: '#ffbb3b',
-				borderColor: '#ffbb3b'
-			},
+			
 			{
 				id: 'Meeting',
 				name: '회의',
@@ -197,6 +192,7 @@
 				dragBgColor: '#03bd9e',
 				borderColor: '#03bd9e'
 			},
+			
 			{
 				id: 'Reserved',
 				name: '예약됨',
@@ -222,10 +218,14 @@
 				console.info(data.schedules);
 
 				data.schedules.forEach((row) => {
-					delete row.empno;
+					delete row.empid;
 					console.info(row);
+					row.id = row.scheduleno;
+					/*
 					row.start = row.start.replace(".000Z", "");
 					row.end = row.end.replace(".000Z", "");
+					*/
+					
 					mySchedules.push(row);
 				});
 				
@@ -250,7 +250,9 @@
 				console.info(data);
 				
 				data.reserved.forEach((row, index) => {
-					delete row.empno;
+					delete row.empid;
+					delete row.scheduleno;
+					row.category = 'time';
 					reservedSchedules.push(row);
 				});
 				
@@ -316,7 +318,6 @@
 				location: scheduleData.location,            
 			};
 
-			
 			console.info(schedule);
 			let sendAjax = {
 				
@@ -332,9 +333,13 @@
 			console.info(sendAjax);
 			
 			
-			/*
+			if(schedule.calendarId === "Reserved"){
+				
+				console.info("error : 예약 건 확인 유형은 등록할 수 없습니다.");
+				alert("예약 건 확인 유형은 등록할 수 없습니다.");
+				return;
+			}
 			
-			*/
 			
 			$.ajax({
 				type: "POST",
@@ -346,8 +351,13 @@
 					console.info(data);
 					if(data.state === "ok"){
 						console.info("info : 스케줄 추가가 완료되었습니다.");
+						
+						alert("스케줄 추가가 완료되었습니다.");
 						calendar.createSchedules([schedule]);
 						window.location.reload();
+					}else if(data.state === "isDiffDate"){
+						alert("예약 가능 일정 추가는 날짜가 같아야 합니다.");
+						console.info(" error : 예약 가능 일정은 Date가 다르면 안됩니다.");
 					}
 					
 					
@@ -374,13 +384,18 @@
 			console.info(schedule); 
 			
 			if(schedule.calendarId === "Reserved"){
-				console.info("error : 예약 건 확인 스케줄은 삭제할 수 없습니다.");
+				
+				console.info("error : 예약 건 확인 스케줄은 수정할 수 없습니다.");
+				alert("예약 건 확인 스케줄은 수정할 수 없습니다.");
 				return;
 			}
 			
+			
+			
 			let sendAjax = {
 				id : schedule.id,
-				changes : changes
+				changes : changes,
+				schedule : schedule
 			}
 			
 			$.ajax({
@@ -392,13 +407,23 @@
 				success : function(data){
 					console.info(data);
 					if(data.state === "ok"){
+						alert("스케줄 수정이 완료되었습니다.");
 						console.info("info : 스케줄 수정이 완료되었습니다.");
 						calendar.updateSchedule(schedule.id, schedule.calendarId, changes);
 					}else if(data.state === "can't update"){
-						console.info("error : 예약 수락된 건이 있어 삭제가 되지 않습니다.");
-					}else if(data.state === "can't update other calendarId"){
+						alert("예약 건이 있어 수정이 되지 않습니다.");
+						console.info("error : 예약 건이 있어 수정이 되지 않습니다.");
+					}else if(data.state === "can't update : diff date"){
+						alert("서로 다른 날짜로 수정은 안됩니다.");
+						console.info("서로 다른 날짜로 수정은 안됩니다.");
+					}
+					
+					/*
+					else if(data.state === "can't update other calendarId"){
 						console.info("error : 예약 수락 건에 대한 스케줄이라 삭제가 되지 않습니다.");
 					}
+					*/
+					
 				}
 				
 			});
@@ -408,6 +433,15 @@
 		});
 		calendar.on('beforeDeleteSchedule', scheduleData => {
 			const { schedule } = scheduleData;
+			
+			
+			if(schedule.calendarId === "Reserved"){
+				
+				console.info("error : 예약 건 확인 스케줄은 삭제할 수 없습니다.");
+				alert("예약 건 확인 스케줄은 삭제할 수 없습니다.");
+				return;
+			}
+			
 			
 			let sendAjax = {
 				id : schedule.id
@@ -427,12 +461,15 @@
 					
 					
 					if(data.state === "can't delete : already Accept"){
+						alert("이미 예약이 수락되어있어 삭제가 불가능 합니다.");
 						console.info("error : 이미 예약이 수락되어있어 삭제가 불가능 합니다.");
 					}
 					else if(data.state === "can't delete : is not counselor's included schedule"){
+						alert("예약일정 스케줄만 삭제가 가능합니다.");
 						console.info("error : 예약일정 스케줄만 삭제가 가능합니다.");
 					}
 					else if(data.state === "ok"){
+						alert("스케줄 삭제가 완료되었습니다.");
 						console.info("info : 스케줄 삭제가 완료되었습니다.");
 						calendar.deleteSchedule(schedule.id, schedule.calendarId);
 					}

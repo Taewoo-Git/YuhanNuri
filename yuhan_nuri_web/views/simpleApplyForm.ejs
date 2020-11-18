@@ -104,8 +104,10 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-right pt-0">
                         <div class="dropdown-header bg-light py-2"><strong>계정</strong></div>
-                            <a class="dropdown-item" href="/user/logout">
+                            <a class="dropdown-item" href="/admin/logout">
                             <i class="cil-account-logout pr_10"></i> 로그아웃</a>
+							<a class="dropdown-item" href="/admin/changePassword">
+                            <i class="cil-dialpad pr_10"></i> 비밀번호 변경</a>
                 </li>
             </ul>
 				<div class="c-subheader px-3">
@@ -126,76 +128,76 @@
 								<%
 									result.forEach(function(v,i){
 								%>
-								<%if(v.type==='check'){%>
+								<%if(v.choicetypeno===2){%>
 								<div class="card">
-									<div class="card-body" id="card_id_<%=i%>">
+									<div class="card-body" id="card_id_<%=v.askno%>">
 										<div class="input-group mb-3">
 											<div class="input-group-prepend">
 												<span class="input-group-text" id="question">질문</span>
 											</div>
 											<input type="text" class="form-control" placeholder="Question" aria-label="question" 
-											 oninput="updateQuestion(card_id_<%=i%>,this)" value="<%=v.question%>">
-											<button type="button" class="btn btn-secondary ml-2" onclick="deleteCard(card_id_<%=i%>,this)">질문삭제</button>
+											 oninput="updateQuestion(card_id_<%=v.askno%>,this)" value="<%=v.ask%>">
+											<button type="button" class="btn btn-secondary ml-2" onclick="deleteCard(card_id_<%=v.askno%>,this,<%=v.askno%>)">질문삭제</button>
 										</div>
-									<%v.askList.forEach(function(b,j){%>
+									<%v.choice.split(',').forEach(function(b,j){%>
 										<div class="form-check">
 											<input class="form-check-input" type="checkbox">
 											<label class="form-check-label">
 												<input type="text" class="form-control" placeholder="답" aria-label="" size=50 
-												 id="check_<%=i%>_<%=j%>" oninput="updateAsk(card_id_<%=i%>,this)" value="<%=b.ask%>">
+												 id="check_<%=v.askno%>_<%=j%>" oninput="updateAsk(card_id_<%=v.askno%>,this)" value="<%=b%>">
 											</label>
 											<button type="button" class="btn btn-ghost-danger"
-															onclick="deleteAsk(card_id_<%=i%>,this)">X</button>
+															onclick="deleteAsk(card_id_<%=v.askno%>,this)">X</button>
 										</div>
 									<%}) %>
 								</div>
 							<div class="form-check mb-3 add_check_btn">
 								<label class="form-check-label">
-									<button type="button" value="add_check" class="add_event_btn_<%=i%> btn btn-secondary"  onclick="addCheck(card_id_<%=i%>)">추가</button>
+									<button type="button" value="add_check" class="add_event_btn_<%=v.askno%> btn btn-secondary"  onclick="addCheck(card_id_<%=v.askno%>)">추가</button>
 								</label>
 							</div>
 						</div>
 								<%}%>
-								<%if(v.type==='radio'){%>
+								<%if(v.choicetypeno===1){%>
 								<div class="card">
-									<div class="card-body" id="card_id_<%=i%>">
+									<div class="card-body" id="card_id_<%=v.askno%>">
 										<div class="input-group mb-3">
 											<div class="input-group-prepend">
 												<span class="input-group-text" id="question">질문</span>
 											</div>
 											<input type="text" class="form-control" placeholder="Question" aria-label="question" 
-											 oninput="updateQuestion(card_id_<%=i%>,this)" value="<%=v.question%>">
-											<button type="button" class="btn btn-secondary ml-2" onclick="deleteCard(card_id_<%=i%>,this)">질문삭제</button>
+											 oninput="updateQuestion(card_id_<%=v.askno%>,this)" value="<%=v.ask%>">
+											<button type="button" class="btn btn-secondary ml-2" onclick="deleteCard(card_id_<%=v.askno%>,this,<%=v.askno%>)">질문삭제</button>
 										</div>
-										<%v.askList.forEach(function(b,j){%>
+										<%v.choice.split(',').forEach(function(b,j){%>
 										<div class="form-check">
 											<input class="form-check-input" type="radio" name="radio_<%=j%>" id="exampleRadios_<%=j%>" value="option1">
 											<label class="form-check-label" for="exampleRadios1">
 												<input type="text" class="form-control" placeholder="답" aria-label="" size=50 
-												 id="radio_<%=i%>_<%=j%>" oninput="updateAsk(card_id_<%=i%>, this)" value="<%= b.ask%> ">
+												 id="radio_<%=v.askno%>_<%=j%>" oninput="updateAsk(card_id_<%=v.askno%>, this)" value="<%= b%> ">
 											</label>
 											<button type="button" class="btn btn-ghost-danger"
-												onclick="deleteAsk(card_id_<%=i%>,this)">X</button>
+												onclick="deleteAsk(card_id_<%=v.askno%>,this)">X</button>
 										</div>
 										<%}) %>
 									</div>
 									<div class="form-check mb-3">
 										<label class="form-check-label">
-											<button type="button" value="add_check" class="add_event_btn_<%=i%> btn btn-secondary" onclick="addRadio(card_id_<%=i%>)">추가												</button>
+											<button type="button" value="add_check" class="add_event_btn_<%=v.askno%> btn btn-secondary" onclick="addRadio(card_id_<%=v.askno%>)">추가												</button>
 										</label>
 									</div>
 								</div>
 								<%}%>
-								<%if(v.type==='normal'){%>
+								<%if(v.choicetypeno===3){%>
 								<div class="card">
-									<div class="card-body" id="card_id_<%=i%>">
+									<div class="card-body" id="card_id_<%=v.askno%>">
 										<div class="input-group mb-3">
 											<div class="input-group-prepend">
 												<span class="input-group-text" id="question">질문</span>
 											</div>
 											<input type="text" class="form-control" placeholder="Question" aria-label="question" 
-											 oninput="updateQuestion(card_id_<%=i%>,this)" value="<%=v.question%>">
-											<button type="button" class="btn btn-secondary add_event_btn" onclick="deleteCard(card_id_<%=i%>,this)">질문삭제</button>
+											 oninput="updateQuestion(card_id_<%=v.askno%>,this)" value="<%=v.ask%>">
+											<button type="button" class="btn btn-secondary add_event_btn ml-2" onclick="deleteCard(card_id_<%=v.askno%>,this,<%=v.askno%>)">질문삭제</button>
 										</div>
 									</div>
 								</div>
@@ -235,29 +237,35 @@
 						let sendObject = [
 						<% result.forEach(function(v,i){ %>
 							{
-								id: 'card_id_<%=i%>',
-								type: '<%= v.type%>',
-								question: '<%=v.question%>',
-								<%if(v.type=='check'){%> 
+								id: 'card_id_<%=v.askno%>',
+								type: <%if(v.choicetypeno===1){%>
+                                        "<%='radio'%>"
+                                	<%}if(v.choicetypeno===2) {%>
+                                    	"<%='check'%>"
+                                    <%}if(v.choicetypeno===3) {%>
+                                        "<%='normal'%>"
+                                    <%}%>,
+								question: '<%=v.ask%>',
+								<%if(v.choicetypeno==2){%> 
 								askList:[
-										<%v.askList.forEach(function(b,j){%>
+										<%v.choice.split(',').forEach(function(b,j){%>
 										{
-											id:'check_<%=i%>_<%=j%>',
-											ask:'<%=b.ask%>',
+											id:'check_<%=v.askno%>_<%=j%>',
+											ask:'<%=b%>'
 										},
 										<%}) %>
 									],
-										<%}%>
-								<%if(v.type=='radio'){%> 
+								<%}%>
+								<%if(v.choicetypeno==1){%> 
 								askList:[
-										<%v.askList.forEach(function(b,j){%>
+										<%v.choice.split(',').forEach(function(b,j){%>
 										{
-											id:'radio_<%=i%>_<%=j%>',
-											ask:'<%=b.ask%>',
+											id:'check_<%=v.askno%>_<%=j%>',
+											ask:'<%=b%>'
 										},
 										<%}) %>
 									],
-										<%}%>
+								<%}%>
 							},
 					<%});%>	];
 						if(sendObject.length===0){
@@ -270,8 +278,8 @@
 							</div>
 							`);
 						}
-						let i = <%=result.length-1%>;
-						let cur_i = <%=result.length-1%>;
+						let i = <%=max%>;
+						let cur_i = <%=max%>;
 
 						$('.add_event_btn_').click(function (e) {
 							switch (e.target.value) {
@@ -288,7 +296,7 @@
                                 </div>
                                 <input type="text" class="form-control" placeholder="Question" aria-label="question" 
                                  oninput="updateQuestion(card_id_${i},this)">
-                                <button type="button" class="btn btn-secondary ml-2" onclick="deleteCard(card_id_${i},this)">질문삭제</button>
+                                <button type="button" class="btn btn-secondary ml-2" onclick="cancelCard(card_id_${i},this)">질문취소</button>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="defaultCheck1">
@@ -328,7 +336,7 @@
                                 </div>
                                 <input type="text" class="form-control" placeholder="Question" aria-label="question" 
                                  oninput="updateQuestion(card_id_${i},this)">
-                                <button type="button" class="btn btn-secondary ml-2" onclick="deleteCard(card_id_${i},this)">질문삭제</button>
+                                <button type="button" class="btn btn-secondary ml-2" onclick="cancelCard(card_id_${i},this)">질문취소</button>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="radio_${i}" id="exampleRadios_${i}" value="option1">
@@ -368,7 +376,7 @@
                             </div>
                             <input type="text" class="form-control" placeholder="Question" aria-label="question" 
                              oninput="updateQuestion(card_id_${i},this)">
-                            <button type="button" class="btn btn-secondary add_event_btn" onclick="deleteCard(card_id_${i},this)">질문삭제</button>
+                            <button type="button" class="btn btn-secondary add_event_btn" onclick="cancelCard(card_id_${i},this)">질문취소</button>
                         </div>
                         <div class="toggle_normal_wrap">
                             <pre class="float-left font-size-15">필수 </pre>
@@ -399,7 +407,7 @@
                                             </div>
                                             <input type="text" class="form-control" placeholder="Question" aria-label="question" 
                                              oninput="updateQuestion(card_id_${i},this)">
-                                            <button type="button" class="btn btn-secondary" onclick="deleteCard(card_id_${i},this)">질문삭제</button>
+                                            <button type="button" class="btn btn-secondary" onclick="cancelCard(card_id_${i},this)">질문취소</button>
                                         </div>
                                         
                                         <div class="form-check">
@@ -432,7 +440,7 @@
 									$.ajax({
 										type: 'POST',
 										dataType: 'json',
-										url: '../saveForm/<%=type%>',
+										url: '../saveForm/<%= type%>',
 										async: true,
 										data: { sendAjax: JSON.stringify(sendObject) },
 										success: function (data) {
@@ -454,7 +462,7 @@
 										}
 										},
 									});
-									console.info(sendObject);
+									console.info('send',sendObject);
 									break;
 								default:
 									console.error('error!');
@@ -474,7 +482,37 @@
 								}
 							})
 						});
-						function deleteCard(parent, me) {
+						function deleteCard(parent, me,askno) {
+							--i;
+							if (i + 1 == cur_i) {
+								// 1 2 3에서 2번 카드를 지우면 3이 되어 이후 추가이벤트로 인해 생겨있던 카드 3과 생겨질 카드3에서 중복 발생하여 중복 제거하기 위함
+								i = cur_i;
+							}
+							const findParentIndex = sendObject.findIndex((v) => v.id === parent.id);
+							sendObject.splice(findParentIndex, 1);
+							$.ajax({
+								type:'POST',
+								dataType:'json',
+								url:'../noUseAsk',
+								async:true,
+								data:{"noUse" : askno},
+								success:function(data){
+									window.location.reload();
+								}
+							});
+							$(me).parentsUntil('.col-8').remove();
+							if(sendObject.length===0){
+								$('.col-8').append(`
+							<div class="jumbotron jumbotron-fluid">
+							  <div class="container">
+								<h1 class="display-4">아무도 없나요?</h1>
+								<p class="lead">이런! 저장된 설문이 없군요! 오른쪽 버튼들을 통해 설문을 추가해보아요:)</p>
+							  </div>
+							</div>
+							`);
+							}
+						}
+						function cancelCard(parent, me) {
 							--i;
 							if (i + 1 == cur_i) {
 								// 1 2 3에서 2번 카드를 지우면 3이 되어 이후 추가이벤트로 인해 생겨있던 카드 3과 생겨질 카드3에서 중복 발생하여 중복 제거하기 위함
@@ -505,15 +543,12 @@
 						}
 						function addCheck(e) {
 							const findParentIndex = sendObject.findIndex((v) => v.id === e.id);
-							const findParentIdTail =
-								sendObject[findParentIndex].id[
-									sendObject[findParentIndex].id.length - 1
-								];
+							const findParentId = e.id.split('_')[2];
 							const findAskListLength = sendObject[findParentIndex].askList.length;
 							sendObject
 								.find((v) => v.id === e.id)
 								.askList.push({
-									id: `check_${findParentIdTail}_${findAskListLength}`,
+									id: `check_${findParentId}_${findAskListLength}`,
 									ask: '',
 								});
 							$(e).append(`
@@ -521,35 +556,32 @@
                     <input class="form-check-input" type="checkbox">
                     <label class="form-check-label">
                         <input type="text" class="form-control" placeholder="답" aria-label="" size=50 
-                         id="check_${findParentIdTail}_${findAskListLength}" oninput="updateAsk(card_id_${findParentIdTail},this)">
+                         id="check_${findParentId}_${findAskListLength}" oninput="updateAsk(card_id_${findParentId},this)">
                     </label>
                     <button type="button" class="btn btn-ghost-danger"
-                                    onclick="deleteAsk(card_id_${findParentIdTail},this)">X</button>
+                                    onclick="deleteAsk(card_id_${findParentId},this)">X</button>
                 </div>
             `);
 						}
 						function addRadio(e) {
 							const findParentIndex = sendObject.findIndex((v) => v.id === e.id);
-							const findParentIdTail =
-								sendObject[findParentIndex].id[
-									sendObject[findParentIndex].id.length - 1
-								];
+							const findParentId = e.id.split('_')[2];
 							const findAskListLength = sendObject[findParentIndex].askList.length;
 							sendObject
 								.find((v) => v.id === e.id)
 								.askList.push({
-									id: `radio_${findParentIdTail}_${findAskListLength}`,
+									id: `radio_${findParentId}_${findAskListLength}`,
 									ask: '',
 								});
 							$(e).append(`
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="radio_${findParentIdTail}" id="exampleRadios_${findParentIdTail}">
+                    <input class="form-check-input" type="radio" name="radio_${findParentId}" id="exampleRadios_${findParentId}">
                     <label class="form-check-label" for="exampleRadios1">
                         <input type="text" class="form-control" placeholder="답" aria-label="" size=50 
-                        id="radio_${findParentIdTail}_${findAskListLength}" oninput="updateAsk(card_id_${findParentIdTail},this)">
+                        id="radio_${findParentId}_${findAskListLength}" oninput="updateAsk(card_id_${findParentId},this)">
                     </label>
                     <button type="button" class="btn btn-ghost-danger"
-                                    onclick="deleteAsk(card_id_${findParentIdTail},this)">X</button>
+                                    onclick="deleteAsk(card_id_${findParentId},this)">X</button>
                 </div>
             `);
 						}

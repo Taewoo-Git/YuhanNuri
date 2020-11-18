@@ -218,8 +218,11 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-right pt-0">
                         <div class="dropdown-header bg-light py-2"><strong>계정</strong></div>
-                            <a class="dropdown-item" href="/user/logout">
+                            <a class="dropdown-item" href="/admin/logout">
                             <i class="cil-account-logout pr_10"></i> 로그아웃</a>
+							<a class="dropdown-item" href="/admin/changePassword">
+                            <i class="cil-dialpad pr_10"></i> 비밀번호 변경</a>
+					</div>
                 </li>
             </ul>
 				<div class="c-subheader px-3">
@@ -276,12 +279,13 @@
 			}
 			
 			$(function() {
-				const empno = "<%= empno %>";
+				const empid = "<%= empid %>";
 				const empname = "<%= empname %>";
 				
 				let socket = io('/chat');
+				
 				socket.emit("open", {
-					empno: empno,
+					empid: empid,
 					empname: empname
 				});
 				

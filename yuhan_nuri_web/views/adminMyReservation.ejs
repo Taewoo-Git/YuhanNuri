@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -18,94 +17,81 @@
 			padding-right:30px;
 		}
 	</style>
+	<script>
+		$(function () {
+			$('button.finished-btn').click(function(e) {
+					$.ajax({
+					type: "POST",
+					dataType: "json",
+					url: "./finishedReservation",
+					async: true,
+					data: { "sendAjax" : $(`#${e.target.id}`).val() },
+					success: function (data) { 
+						if(data.state==='ok') {
+							window.location.reload();
+						}
+					}
+				});
+			});
+		});
+	</script>
 </head>
 <body class="c-app">
 	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-		  <div class="modal-dialog" role="document">
-			<div class="modal-content">
-			  <div class="modal-header">
-				<h5 class="modal-title" id="exampleModalLabel">항목 추가</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-				  <span aria-hidden="true">&times;</span>
-				</button>
-			  </div>
-			  <div class="modal-body">
-				<form>
-				  <div class="form-group">
-					<label for="type-name" class="col-form-label">항목 이름:</label>
-					<input type="text" class="form-control" id="type-name" placeholder="항목이름을 작성해주세요.">
-				  </div>
-				</form>
-			  </div>
-			  <div class="modal-footer">
-				<button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
-				<button type="button" class="btn btn-primary" id="add_type_button">추가하기</button>
-			  </div>
+		<div class="modal-dialog" role="document">
+			<div class="modal-content" id="applyModal">
+				
 			</div>
-		  </div>
 		</div>
-		<script>
-			$(function () {
-				$('button.finished-btn').click(function(e) {
-						$.ajax({
-						type: "POST",
-						dataType: "json",
-						url: "./finishedReservation",
-						async: true,
-						data: { "sendAjax" : $(`#${e.target.id}`).val() },
-						success: function (data) { 
-							if(data.state==='ok') {
-								window.location.reload();
-							}
-						}
-					});
-				});
-			});
-		</script>
+	</div>
     <div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
-        <div class="c-sidebar-brand d-lg-down-none">
-            <svg class="c-sidebar-brand-full" width="118" height="46" alt="CoreUI Logo">
-                <use xlink:href="assets/brand/coreui.svg#full"></use>
-            </svg>
-            <svg class="c-sidebar-brand-minimized" width="46" height="46" alt="CoreUI Logo">
-                <use xlink:href="assets/brand/coreui.svg#signet"></use>
+		<div class="c-sidebar-brand d-lg-down-none">
+			<svg class="c-sidebar-brand-full" width="118" height="46" alt="CoreUI Logo">
+				<use xlink:href="assets/brand/coreui.svg#full"></use>
+			</svg>
+			<svg class="c-sidebar-brand-minimized" width="46" height="46" alt="CoreUI Logo">
+				<use xlink:href="assets/brand/coreui.svg#signet"></use>
             </svg>
         </div>
-                <%- include ('adminNav'); -%>
-        <button class="c-sidebar-minimizer c-class-toggler" type="button" data-target="_parent"
-            data-class="c-sidebar-minimized"></button>
-    </div>
-    <div class="c-wrapper c-fixed-components">
-        <header class="c-header c-header-light c-header-fixed c-header-with-subheader">
-            <button class="c-header-toggler c-class-toggler d-lg-none mfe-auto" type="button" data-target="#sidebar"
-                data-class="c-sidebar-show">
-                <i class="cil-hamburger-menu"></i>
-            </button><a class="c-header-brand d-lg-none" href="#">
-                <i class="cil-hamburger-menu"></i></a>
-            <button class="c-header-toggler c-class-toggler mfs-3 d-md-down-none" type="button" data-target="#sidebar"
-                data-class="c-sidebar-lg-show" responsive="true">
-                <i class="cil-hamburger-menu"></i>
-            </button>
+		<%- include ('adminNav'); -%>
+		<button class="c-sidebar-minimizer c-class-toggler" type="button" data-target="_parent"
+				data-class="c-sidebar-minimized"></button>
+	</div>
+	<div class="c-wrapper c-fixed-components">
+		<header class="c-header c-header-light c-header-fixed c-header-with-subheader">
+			<button class="c-header-toggler c-class-toggler d-lg-none mfe-auto" type="button" data-target="#sidebar"
+					data-class="c-sidebar-show">
+				<i class="cil-hamburger-menu"></i>
+			</button><a class="c-header-brand d-lg-none" href="#">
+			<i class="cil-hamburger-menu"></i></a>
+			<button class="c-header-toggler c-class-toggler mfs-3 d-md-down-none" type="button" data-target="#sidebar"
+					data-class="c-sidebar-lg-show" responsive="true">
+				<i class="cil-hamburger-menu"></i>
+			</button>
 			<ul class="c-header-nav ml-auto mr-4">
-                <li class="c-header-nav-item dropdown"><a class="c-header-nav-link" data-toggle="dropdown" href="#"
-                        role="button" aria-haspopup="true" aria-expanded="false">
-                        <div class="c-avatar"><i class="cil-user"></i></div>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right pt-0">
-                        <div class="dropdown-header bg-light py-2"><strong>계정</strong></div>
-                            <a class="dropdown-item" href="/user/logout">
-                            <i class="cil-account-logout pr_10"></i> 로그아웃</a>
-                </li>
-            </ul>
-            <div class="c-subheader px-3">
-                <ol class="breadcrumb border-0 m-0">
-                    <li class="breadcrumb-item"><a href="/">Home</a></li>
-                    <li class="breadcrumb-item active">내 예약 리스트</li>
-                </ol>
-            </div>
-        </header>
-        <div class="c-body">
-            <main class="c-main">
+				<li class="c-header-nav-item dropdown">
+					<a class="c-header-nav-link" data-toggle="dropdown" href="#"
+					   role="button" aria-haspopup="true" aria-expanded="false">
+						<div class="c-avatar"><i class="cil-user"></i></div>
+					</a>
+					<div class="dropdown-menu dropdown-menu-right pt-0">
+						<div class="dropdown-header bg-light py-2"><strong>계정</strong></div>
+						<a class="dropdown-item" href="/admin/logout">
+							<i class="cil-account-logout pr_10"></i> 로그아웃</a>
+						<a class="dropdown-item" href="/admin/changePassword">
+                            <i class="cil-dialpad pr_10"></i> 비밀번호 변경</a>
+					</div>
+				</li>
+			</ul>
+			<div class="c-subheader px-3">
+				<ol class="breadcrumb border-0 m-0">
+					<li class="breadcrumb-item"><a href="/">Home</a></li>
+					<li class="breadcrumb-item active">내 예약 리스트</li>
+				</ol>
+			</div>
+		</header>
+		<div class="c-body">
+			<main class="c-main">
                 <div class="container-fluid">
                     <div class="fade-in">
                         <div class="card">
@@ -118,16 +104,31 @@
                                 </div>
                             </div>
 							<% myReservation.forEach(function(val,i){ %>
-								<div class="card-body list-group-item">
-                                    <h5 class="card-title">학번: <%=val.stuno%></h5>
-                                    <p class="card-text">상담 유형: <%= val.typecode%> 상담 시간 <%= val.starttime%></p>
-									<button class="btn btn-danger float-right finished-btn" id="finished-reservation-btn-<%=i%>" value="<%= val.no%>">종료</button>
-                                </div>
+							<% if(val.typename == undefined){ %>
+							<div class="card-body list-group-item">
+								<h5 class="card-title"><b>학번 : </b> <%=val.stuno%></h5>
+								<p class="card-text"><b>상담 유형 : </b> 심리검사</p>
+								<div class="float-right">
+									<button class="btn btn-info check-btn mr-2 showModalMental" id="check-register-btn-<%=i%>" value="<%= val.no%>"  data-toggle="modal"
+											data-target="#exampleModal">신청서 확인</button>
+								</div>
+							</div>
+							<% } else { %>
+							<div class="card-body list-group-item">
+								<h5 class="card-title"><b>학번 :</b> <%=val.stuno%></h5>
+								<p class="card-text"><b>상담 유형 :</b> <%= val.typename%> &nbsp;&nbsp;&nbsp;&nbsp; <b>상담 시간 :</b> <%= val.starttime %> 시</p>
+								<div class="float-right">
+									<button class="btn btn-info check-btn mr-2 showModalConsult" id="check-register-btn-<%=i%>" value="<%= val.no%>" data-toggle="modal"
+											data-target="#exampleModal">신청서 확인</button>
+									<button class="btn btn-danger finished-btn" id="finish-btn-<%=i%>" value="<%= val.no%>">종료</button>
+								</div>
+							</div>
+							<% } %>
 							<% }) %>
-                        </div>
-                    </div>
-                </div>
-            </main>
+						</div>
+					</div>
+				</div>
+			</main>
             <footer class="c-footer">
                 <div><a href="https://coreui.io">CoreUI</a> &copy; 2020 creativeLabs.</div>
                 <div class="ml-auto">Powered by&nbsp;<a href="https://coreui.io/">CoreUI</a></div>
@@ -135,7 +136,164 @@
         </div>
     </div>
 	<script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
+	<script>
+		$('.showModalMental').click(function(e) {
+			$.ajax({
+				type:'POST',
+				dataType:'json',
+				url:'./getMentalApplyForm',
+				async:true,
+				data:{"serialno": $(this).val()},
+				success:function(data) {
+					$('#applyModal').empty();
+					$('#applyModal').append(`
+						<div class="modal-header">
+							<h5 class="modal-title" id="exampleModalLabel">신청서 확인</h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body" id="modalPart">
+							<div class="form-group">
+								<label class="col-form-label"><b>학번</b></label>
+								<label class="form-control">${data.stuno}</label>
+							</div>
+							<div class="form-group">
+								<label class="col-form-label"><b>이름</b></label>
+								<label class="form-control">${data.stuname}</label>
+							</div>
+							<div class="form-group">
+								<label class="col-form-label"><b>성별</b></label>
+								<label class="form-control">${data.gender}</label>
+							</div>
+							<div class="form-group">
+								<label class="col-form-label"><b>생년월일</b></label>
+								<label class="form-control">${data.birth}</label>
+							</div>
+							<div class="form-group">
+								<label class="col-form-label"><b>이메일</b></label>
+								<label class="form-control">${data.email}</label>
+							</div>
+							<div class="form-group">
+								<label class="col-form-label"><b>신청일자</b></label>
+								<label class="form-control">${data.date}</label>
+							</div>
+						</div>
+					`);
+					if(data.asks != null) {
+						for(let i=0; i<data.asks.split('|').length; i++) {
+							$('#modalPart').append(`
+								<div class="form-group">
+									<label class="col-form-label"><b>${data.asks.split('|')[i]}</b></label>
+									<label class="form-control">${data.answers.split('|')[i]}</label>
+								</div>
+							`);
+						}
+					}
+					$('#modalPart').append(`
+						<div class="form-group">
+							<label class="col-form-label"><b>신청 심리검사</b></label>
+							<label class="form-control">${data.testnames}</label>
+						</div>
+					`);
+					$('#applyModal').append(`
+						<div class="modal-footer">
+							<button type="button" class="btn btn-danger" data-dismiss="modal">닫기</button>
+						</div>
+					`);
+				}
+			});
+		});
+		
+		$('.showModalConsult').click(function(e) {
+			$.ajax({
+				type:'POST',
+				dataType:'json',
+				url:'./getConsultApplyForm',
+				async:true,
+				data:{"serialno": $(this).val()},
+				success:function(data) {
+					$('#applyModal').empty();
+					$('#applyModal').append(`
+						<div class="modal-header">
+							<h5 class="modal-title" id="exampleModalLabel">신청서 확인</h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body" id="modalPart">
+							<div class="form-group">
+								<label class="col-form-label"><b>학번</b></label>
+								<label class="form-control">${data.stuno}</label>
+							</div>
+							<div class="form-group">
+								<label class="col-form-label"><b>이름</b></label>
+								<label class="form-control">${data.stuname}</label>
+							</div>
+							<div class="form-group">
+								<label class="col-form-label"><b>성별</b></label>
+								<label class="form-control">${data.gender}</label>
+							</div>
+							<div class="form-group">
+								<label class="col-form-label"><b>생년월일</b></label>
+								<label class="form-control">${data.birth}</label>
+							</div>
+							<div class="form-group">
+								<label class="col-form-label"><b>이메일</b></label>
+								<label class="form-control">${data.email}</label>
+							</div>
+							<div class="form-group">
+								<label class="col-form-label"><b>신청일자</b></label>
+								<label class="form-control">${data.date}</label>
+							</div>
+						</div>
+					`);
+					if(data.asks != null) {
+						for(let i=0; i<data.asks.split('|').length; i++) {
+							$('#modalPart').append(`
+								<div class="form-group">
+									<label class="col-form-label"><b>${data.asks.split('|')[i]}</b></label>
+									<label class="form-control">${data.answers.split('|')[i]}</label>
+								</div>
+							`);
+						}
+					}
+					if(data.checknames != null) {
+						for(let i=0; i<data.checknames.split('|').length; i++) {
+							let score = "";
+							switch (parseInt(data.scores.split('|')[i])) {
+								case 1 :
+									score = "매우 나쁨";
+									break;
+								case 2 :
+									score = "나쁨";
+									break;
+								case 3 :
+									score = "보통";
+									break;
+								case 4 :
+									score = "좋음";
+									break;
+								case 5 :
+									score = "매우 좋음";
+									break;
+							}
+							$('#modalPart').append(`
+								<div class="form-group">
+									<label class="col-form-label"><b>${data.checknames.split('|')[i]}</b></label>
+									<label class="form-control">${score}</label>
+								</div>
+							`);
+						}
+					}
+					$('#applyModal').append(`
+						<div class="modal-footer">
+							<button type="button" class="btn btn-danger" data-dismiss="modal">닫기</button>
+						</div>
+					`);
+				}
+			});
+		});
+	</script>
 </body>
-
 </html>
-

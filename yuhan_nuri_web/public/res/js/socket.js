@@ -15,78 +15,131 @@ module.exports = (server) => {
 	});
 	
 	io.of('/reservation').on('connection', function(socket) {
-		socket.on('initPrivacy', function() {	
+		socket.on('initPrivacy', function() {
 			socket.emit('initPrivacy');
 		});
 		
 		socket.on('initComplete', function(recvData) {
+			let selectSimpleApplyForm = "SELECT MAX(serialno) AS serialno from SimpleApplyForm;";
 			
-			let insertSimpleApplyForm = "INSERT INTO SimpleApplyForm(typeno, stuno, stuname, gender, age, email, data) " +
-										"VALUES(?, ?, ?, ?, ?, ?, ?);";
+			let insertSimpleApplyFormMental = "INSERT INTO SimpleApplyForm(serialno, stuno, stuname, gender, birth, email, date) " +
+											  "VALUES(?, ?, ?, ?, ?, ?, CURDATE());";
 			
-			let insertReservation = "INSERT INTO Reservation(no, typecode, stuno, empno, date, starttime, agree, status, finished) " +
-									"VALUES(?, ?, ?, ?, ?, ?, 1, 0, 0);";
+			let insertReservationMental = "INSERT INTO Reservation(serialno, stuno) VALUES(?, ?);";
 			
-			let insertSelfCheck = "INSERT INTO SelfCheck(typeno, stuno, data) VALUES(?, ?, ?);"
+			let insertAnswerLogMental = "INSERT INTO AnswerLog(serialno, askno, choiceanswer) VALUES(?, ?, ?);";
 			
-			let simpleApplyFormData = [
-				recvData.type,
-				recvData.stuCode,
-				recvData.stuName,
-				recvData.stuGender,
-				recvData.stuBirth,
-				recvData.stuEmail,
-				recvData.stuAnswer
-			];
+			let insertPsyTest = "INSERT INTO PsyTest(serialno, testno) VALUES(?, ?);";
 			
-			let reservationData = [
-				parseInt(recvData.reservationCode),
-				recvData.stuCode,
-				recvData.empno,
-				recvData.date,
-				parseInt(recvData.time)
-			];
+			let insertSimpleApplyFormConsult = "INSERT INTO SimpleApplyForm(serialno, stuno, stuname, gender, birth, email, date) " +
+											   "VALUES(?, ?, ?, ?, ?, ?, CURDATE());";
 			
-			let selfCheck = [
-				recvData.type,
-				recvData.stuCode,
-				recvData.selfcheck
-			];
+			let insertReservationConsult = "INSERT INTO Reservation(serialno, stuno, empid, typeno, date, starttime) VALUES(?, ?, ?, ?, ?, ?);";
 			
-			connection.execute(insertSimpleApplyForm, simpleApplyFormData, (err) => {
-				if(err) console.error(err);
-				else {
-					if(recvData.type === 5) socket.emit('initComplete');
-					else if(recvData.type === 4) {
-						let serialCheck = `select no+1 as 'serial' from Reservation where no like '${new moment().format("YYYYMMDD")}%' order by no desc limit 1;`;
-						connection.execute(serialCheck, [], (err, result) => {
-							if(err) console.error(err);
-							else {					
-								if(result.length > 0) reservationData.splice(0, 0, result[0].serial);
-								else reservationData.splice(0, 0, `${new moment().format("YYYYMMDD")}0001`);
-								
-								connection.execute(insertReservation, reservationData, (err) => {
-									if(err) console.error(err);
+			let insertAnswerLogConsult = "INSERT INTO AnswerLog(serialno, askno, choiceanswer) VALUES(?, ?, ?);";
+			
+			let insertSelfCheck = "INSERT INTO SelfCheck(serialno, checkno, score) VALUES(?, ?, ?);";
+			
+			if(recvData.type == 1) {
+				connection.execute(selectSimpleApplyForm, [], (err, result) => {
+					if(err) console.error(err);
+					else {
+						let serialno = 0;
+						
+						if(result.length == 0) serialno = 1;
+						else if(result.length > 0) serialno = result[0].serialno + 1;
+						
+						let simpleApplyFormData = [
+							serialno,
+							recvData.stuCode,
+							recvData.stuName,
+							recvData.stuGender,
+							recvData.stuBirth,
+							recvData.stuEmail
+						];
+						
+						connection.execute(insertSimpleApplyFormConsult, simpleApplyFormData, (insertSimpleApplyFormErr) => {
+							if(insertSimpleApplyFormErr) console.error(insertSimpleApplyFormErr);
+							else {
+								let reservationDate = [
+									serialno,
+									recvData.stuCode,
+									recvData.empid,
+									recvData.reservationCode,
+									recvData.date,
+									recvData.time
+								];
+								connection.execute(insertReservationConsult, reservationDate, (insertReservationErr) => {
+									if(insertReservationErr) console.error(insertReservationErr);
 									else {
-										connection.execute(insertSelfCheck, selfCheck, (err) => {
-											if(err) console.error(err);
-											else {
-												socket.emit('initComplete');
-											}
-										});
+										for(let i=0; i<recvData.stuAnswer.length; i++) {
+											connection.execute(insertAnswerLogConsult, [serialno, recvData.stuAnswer[i].question, recvData.stuAnswer[i].answer], (insertAnswerLogErr) => {
+												if(insertAnswerLogErr) console.error(insertAnswerLogErr);
+											});
+										}
+										
+										for(let i=0; i<recvData.selfcheckCode.split(',').length; i++) {
+											connection.execute(insertSelfCheck, [serialno, recvData.selfcheckCode.split(',')[i], recvData.selfcheckNum.split(',')[i]], (insertSelfCheckErr) => {
+												if(insertSelfCheckErr) console.error(insertSelfCheckErr);
+											});
+										}
+										
+										socket.emit('initComplete');
 									}
 								});
-								
 							}
 						});
 					}
-				}
-			});
-			
+				});
+			}
+			else if(recvData.type == 2) {
+				connection.execute(selectSimpleApplyForm, [], (err, result) => {
+					if(err) console.error(err);
+					else {
+						let serialno = 0;
+						
+						if(result.length == 0) serialno = 1;
+						else if(result.length > 0) serialno = result[0].serialno + 1;
+						
+						let simpleApplyFormData = [
+							serialno,
+							recvData.stuCode,
+							recvData.stuName,
+							recvData.stuGender,
+							recvData.stuBirth,
+							recvData.stuEmail
+						];
+						
+						connection.execute(insertSimpleApplyFormMental, simpleApplyFormData, (insertSimpleApplyFormErr) => {
+							if(insertSimpleApplyFormErr) console.error(insertSimpleApplyFormErr);
+							else {
+								connection.execute(insertReservationMental, [serialno, recvData.stuCode], (insertReservationErr) => {
+									if(insertReservationErr) console.error(insertReservationErr);
+									else {
+										for(let i=0; i<recvData.stuAnswer.length; i++) {
+											connection.execute(insertAnswerLogMental, [serialno, recvData.stuAnswer[i].question, recvData.stuAnswer[i].answer], (insertAnswerLogErr) => {
+												if(insertAnswerLogErr) console.error(insertAnswerLogErr);
+											});
+										}
+										
+										for(let i=0; i<recvData.psyTestList.split(',').length; i++) {
+											connection.execute(insertPsyTest, [serialno, recvData.psyTestList.split(',')[i]], (insertPsyTestErr) => {
+												if(insertPsyTestErr) console.error(insertPsyTestErr);
+											});
+										}
+										
+										socket.emit('initComplete');
+									}
+								});
+							}
+						});
+					}
+				});
+			}
 		});
 		
 		socket.on('initReservation', function() {
-			let selectCounselor = "SELECT empname, empno FROM Counselor WHERE position='counselor'";
+			let selectCounselor = "SELECT empname, empid FROM Counselor WHERE positionno=1";
 
 			connection.execute(selectCounselor, [], (err, rows) => {
 				if(err) console.error(err);
@@ -94,63 +147,42 @@ module.exports = (server) => {
 			});
 		});
 		
-		socket.on('selectCounselor', function(empno) {
-			let selectCounselor = "SELECT DISTINCT(DATE(start)) AS possible FROM Schedule WHERE empno=? " +
-				"AND DATE(start) > (CURDATE() + INTERVAL 1 DAY)";
+		socket.on('selectCounselor', function(empid) {
+			let selectCounselor = "SELECT DISTINCT(DATE(start)) AS possible FROM Schedule WHERE empid=? AND DATE(start) > CURDATE() AND calendarId='Reservation';";
 
-			connection.execute(selectCounselor, [empno], (err, rows) => {
+			connection.execute(selectCounselor, [empid], (err, rows) => {
 				if(err) console.error(err);
 				else socket.emit('selectCounselor', rows);
 			});
 		});
 		
 		socket.on('selectDateTime', function(requestTime) {
-			const getCanCounselTime = "SELECT id, HOUR(start) as start, HOUR(end) as end " +
-									"FROM Schedule WHERE calendarId = 'Reservation' AND DATE(start) = ? AND empno = ?";
+			const getCanCounselTime = "SELECT scheduleno, HOUR(start) as start, HOUR(end) as end FROM Schedule WHERE calendarId='Reservation' AND DATE(START)=? AND empid=?;";
 			
-			const getUsedScheduleTime = "SELECT HOUR(start) as start FROM UsedSchedule WHERE id = ?";
-			
-			let schedule_id = "";
 			let scheduled_time = [];
-
-			let usedScheduled_time = [];
-			let canCounselTimes = [];
-			let scheduleCount = 0;
 			
-			connection.execute(getCanCounselTime, [requestTime.date, requestTime.empno], (err, rows) => {
+			connection.execute(getCanCounselTime, [requestTime.date, requestTime.empid], (err, rows) => {
 				if (err) console.error(err);
 				else if(rows.length !== 0) {
 					scheduleCount = rows.length;
-
+					
 					rows.forEach((row, index) => {
-						schedule_id = row.id;
-						for(let time = row.start; time <= row.end; time++) {
+						for(let time = row.start; time < row.end; time++) {
 							scheduled_time.push(time);
 						}
-
-						connection.execute(getUsedScheduleTime, [schedule_id], (err, rows) => {
-							if(err) console.error(err);
-							else{
-								rows.forEach((item, index) => {
-									usedScheduled_time.push(item.start);
-								});
-
-								let rtn = scheduled_time.filter((item) => !usedScheduled_time.includes(item));
-
-								if(index+1 === scheduleCount) socket.emit('returnTime', rtn)
-							}
-						});
 					});
+						
+					socket.emit('returnTime', scheduled_time);
 				}
 			});
 		});
 		
-		socket.on('initSelfcheck', function(empno) {
-			let selectSelfCheck = "SELECT content FROM EditTest WHERE empno=? AND type='자가진단'";
+		socket.on('initSelfcheck', function() {
+			let selectSelfCheck = "SELECT checkno, checkname FROM SelfCheckList s WHERE s.use='Y';";
 
-			connection.execute(selectSelfCheck, [empno], (err, rows) => {
+			connection.execute(selectSelfCheck, [], (err, rows) => {
 				if(err) console.error(err);
-				else socket.emit('initSelfcheck', JSON.parse(rows[0].content));
+				else socket.emit('initSelfcheck', rows);
 			});
 		});
 	});

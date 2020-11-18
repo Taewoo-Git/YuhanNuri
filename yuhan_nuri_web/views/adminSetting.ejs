@@ -9,7 +9,14 @@
     <link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
     <title>유한누리 어드민</title>
     <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+	<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
     <style>
+		.pr_10{
+			padding-right:10px;
+		}
+		.pr_30{
+			padding-right:30px;
+		}
 		.dropdown-toggle::after{
 			margin-left: 10% !important;
 		}
@@ -46,7 +53,7 @@
 		  <div class="modal-dialog" role="document">
 			<div class="modal-content">
 			  <div class="modal-header">
-				<h5 class="modal-title" id="deleteModalLabel">항목 삭제 하기</h5>
+				<h5 class="modal-title" id="deleteModalLabel">관리자 삭제 하기</h5>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 				  <span aria-hidden="true">&times;</span>
 				</button>
@@ -54,8 +61,8 @@
 			  <div class="modal-body">
 				<form>
 				  <div class="form-group">
-					<label for="type-name" class="col-form-label">다시 한번 더 삭제할 항목을 입력시켜주세요!</label>
-					<input type="text" class="form-control" id="delete-type" placeholder="항목 이름을 작성해주세요.">
+					<label for="type-name" class="col-form-label">다시 한번 더 삭제할 아이디를 입력시켜주세요!</label>
+					<input type="text" class="form-control" id="delete-type" placeholder="다시 한번 더 아이디를 작성해주세요.">
 				  </div>
 					<p id="deleteError"></p>
 				</form>
@@ -68,36 +75,44 @@
 		  </div>
 	</div>
 	<div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
+		<form action="updateCounselor" method="POST">
 		  <div class="modal-dialog" role="document">
 			<div class="modal-content">
 			  <div class="modal-header">
-				<h5 class="modal-title" id="updateModalLabel">항목 수정 하기</h5>
+				<h5 class="modal-title" id="updateModalLabel">관리자 수정 하기</h5>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 				  <span aria-hidden="true">&times;</span>
 				</button>
 			  </div>
 				<div class="modal-body">
-				<form>
-				  <div class="form-group">
-					<label for="type-name" class="col-form-label">수정 대상</label>
-					<input type="text" class="form-control" id="update-name" readonly>
-				  </div>
-				</form>
-			  </div>
-			  <div class="modal-body">
-				<form>
+					<div class="form-group">
+						<label for="type-name" class="col-form-label">수정 대상</label>
+						<input type="text" class="form-control" id="update-name" readonly>
+					</div>
+				</div>
+				<div class="modal-body">
+					<div class="form-group">
+						<label for="positionList">직책</label>
+						<select class="form-control" id="positionList" name="position">
+						  <option value="1">교직원</option>
+						  <option value="2">근로 학생</option>
+						</select>
+					</div>
+				</div>
+			  	<div class="modal-body">
 				  <div class="form-group">
 					<label for="type-name" class="col-form-label">수정 하실 이름을 입력해주세요!</label>
-					<input type="text" class="form-control" id="update-text" placeholder="항목 이름을 작성해주세요.">
+					<input type="text" class="form-control" id="update-text" placeholder="관리자 이름을 작성해주세요." name="updateEmpName">
 				  </div>
-				</form>
-			  </div>
+			  	</div>
 			  <div class="modal-footer">
+				 <input type="hidden" id="empIdToken" name="empid" value="">
 				<button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
-				<button type="button" class="btn btn-primary" id="updateBtn" onClick="updateName('#update-text')">수정하기</button>
+				<button type="submit" class="btn btn-primary" id="updateBtn">수정하기</button>
 			  </div>
 			</div>
 		  </div>
+		</form>
 	</div>
     <div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
         <div class="c-sidebar-brand d-lg-down-none">
@@ -124,72 +139,24 @@
                 <i class="cil-hamburger-menu"></i>
             </button>
             <ul class="c-header-nav ml-auto mr-4">
-                <li class="c-header-nav-item d-md-down-none mx-2"><a class="c-header-nav-link" href="#" style="background:red;">
-                        <svg class="c-icon">
-                            <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-bell"></use>
-                        </svg></a></li>
-                <li class="c-header-nav-item d-md-down-none mx-2"><a class="c-header-nav-link" href="#" style="background:red;">
-                        <svg class="c-icon">
-                            <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-list-rich"></use>
-                        </svg></a></li>
-                <li class="c-header-nav-item d-md-down-none mx-2"><a class="c-header-nav-link" href="#" style="background:red;">
-                        <svg class="c-icon">
-                            <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-envelope-open"></use>
-                        </svg></a></li>
-                <!--<li class="c-header-nav-item dropdown"><a class="c-header-nav-link" data-toggle="dropdown" href="#"
+                <li class="c-header-nav-item dropdown"><a class="c-header-nav-link" data-toggle="dropdown" href="#"
                         role="button" aria-haspopup="true" aria-expanded="false">
-                        <div class="c-avatar"><img class="c-avatar-img" src="assets/img/avatars/6.jpg"
-                                alt="user@gmail.com"></div>
+                        <div class="c-avatar"><i class="cil-user"></i></div>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right pt-0">
-                        <div class="dropdown-header bg-light py-2"><strong>Account</strong></div><a
-                            class="dropdown-item" href="#">
-                            <svg class="c-icon mr-2">
-                                <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-bell"></use>
-                            </svg> Updates<span class="badge badge-info ml-auto">42</span></a><a class="dropdown-item"
-                            href="#">
-                            <svg class="c-icon mr-2">
-                                <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-envelope-open"></use>
-                            </svg> Messages<span class="badge badge-success ml-auto">42</span></a><a
-                            class="dropdown-item" href="#">
-                            <svg class="c-icon mr-2">
-                                <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-task"></use>
-                            </svg> Tasks<span class="badge badge-danger ml-auto">42</span></a><a class="dropdown-item"
-                            href="#">
-                            <svg class="c-icon mr-2">
-                                <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-comment-square"></use>
-                            </svg> Comments<span class="badge badge-warning ml-auto">42</span></a>
-                        <div class="dropdown-header bg-light py-2"><strong>Settings</strong></div><a
-                            class="dropdown-item" href="#">
-                            <svg class="c-icon mr-2">
-                                <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-user"></use>
-                            </svg> Profile</a><a class="dropdown-item" href="#">
-                            <svg class="c-icon mr-2">
-                                <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-settings"></use>
-                            </svg> Settings</a><a class="dropdown-item" href="#">
-                            <svg class="c-icon mr-2">
-                                <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-credit-card"></use>
-                            </svg> Payments<span class="badge badge-secondary ml-auto">42</span></a><a
-                            class="dropdown-item" href="#">
-                            <svg class="c-icon mr-2">
-                                <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-file"></use>
-                            </svg> Projects<span class="badge badge-primary ml-auto">42</span></a>
-                        <div class="dropdown-divider"></div><a class="dropdown-item" href="#">
-                            <svg class="c-icon mr-2">
-                                <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-lock-locked"></use>
-                            </svg> Lock Account</a><a class="dropdown-item" href="/user/logout">
-                            <svg class="c-icon mr-2">
-                                <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-account-logout"></use>
-                            </svg> Logout</a>
-                    </div>
-                </li>-->
+                        <div class="dropdown-header bg-light py-2"><strong>계정</strong></div>
+                            <a class="dropdown-item" href="/admin/logout">
+                            <i class="cil-account-logout pr_10"></i> 로그아웃</a>
+							<a class="dropdown-item" href="/admin/changePassword">
+                            <i class="cil-dialpad pr_10"></i> 비밀번호 변경</a>
+					</div></li>
             </ul>
             <div class="c-subheader px-3">
                 <!-- Breadcrumb-->
                 <ol class="breadcrumb border-0 m-0">
                     <li class="breadcrumb-item">Home</li>
                     <li class="breadcrumb-item"><a href="#">Admin</a></li>
-                    <li class="breadcrumb-item active">Dashboard</li>
+                    <li class="breadcrumb-item active">Setting</li>
                     <!-- Breadcrumb Menu-->
                 </ol>
             </div>
@@ -202,29 +169,35 @@
                             <div class="card-body">
                                 <div class="m-auto" style="width:80%;">
                                     <div class="m-auto" style="width:85%;">
-                                        <h4 class="card-title">상담항목 수정/삭제</h4>
-                                        <div class="btn-group" role="group" style="width:inherit">
-                                            <button id="btnGroupDrop1" type="button"
-                                                class="btn-lg btn-secondary  dropdown-toggle" data-toggle="dropdown"
-                                                aria-expanded="false" style="width:inherit;">
-                                                <p class="dropTitle">자가진단</p>
-                                            </button>
-                                            <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="width:inherit;">
-												<% types.forEach(function(v,i){%>
-												<li class="list-group-item dropdown-item custom-list-item">
-                                                    <%= v.typename%>
-                                                    <div class="text-right custom-btn-position">
-                                                        <button class="btn btn-outline-success" data-toggle="modal" data-target="#updateModal"
-																id="showUpdateModalBtn" onClick="giveName(`<%=v.typename%>`)">v</button>
-                                                        <button class="btn btn-outline-danger" data-toggle="modal" data-target="#deleteModal"
-																id="showDeleteModalBtn" onClick="setChoiceType(`<%=v.typename%>`)">X</button>
-                                                    </div>
-                                                </li>
-												<% }) %>
-                                            </div>
-                                        </div>
+                                        <h4 class="card-title">관리자 계정 설정</h4>
+                                        <table class="table">
+                                            <thead>
+                                              <tr>
+                                                <th scope="col">아이디</th>
+                                                <th scope="col">이름</th>
+                                                <th scope="col">권한</th>
+                                                <th scope="col">설정</th>
+                                              </tr>
+                                            </thead>
+                                            <tbody>
+												<%result.forEach(function(v,i){%>
+													<tr>
+														<th scope="row"><%=v.empid%></th>
+														<td><%=v.empname%></td>
+														<td>
+															<%=v.positionno===1 ? '교직원' : '근로학생'%>
+														</td>
+														<td>
+															<button type="button" class="btn btn-success" data-toggle="modal" data-target="#updateModal" 
+																	onClick="giveInformation('<%=v.empname%>','<%=v.positionno%>','<%=v.empid%>')">수정</button>
+															<button type="button" class="btn btn-danger ml-1" data-toggle="modal" data-target="#deleteModal"
+																	onClick="checkDelete('<%=v.empid%>')">삭제</button>
+														</td>
+												  	</tr>
+												<%})%>
+                                            </tbody>
+                                          </table>
                                     </div>
-
                                 </div>
                             </div>
                         </div>
@@ -238,7 +211,7 @@
         </div>
     </div>
     <script>
-		let choiceType="";
+		let checkId="";
 		
 		const setChoiceType=(chType)=>{
 			choiceType=chType;
@@ -247,16 +220,21 @@
 		function exitModal(e){
 			
 		}
+		function checkDelete(id){
+			checkId=id;
+			$('#deleteError').text('');
+			document.querySelector('#delete-type').value='';
+		}
 		
 		function deleteCheck(deleteType){
-			const updateItem=$(deleteType).val();
-			if(deleteItem===choiceType){
+			const deleteItem=$(deleteType).val();
+			if(deleteItem===checkId){
 				$.ajax({
 							type:'POST',
 							dataType:'json',
-							url:'./removeFormItem',
+							url:'./deleteCounselor',
 							async:true,
-							data:{"formItem" : item},
+							data:{"deleteId" : checkId},
 							success:function(data){
 								if(data==='ok'){
 									window.location.reload();
@@ -266,31 +244,13 @@
 				item="";
 			}else{
 				$('#deleteError').css('color','#f05454');
-				$('#deleteError').text('삭제하시려는 항목의 이름이 달라요!');
+				$('#deleteError').text('삭제하시려는 아이디가 달라요!');
 			}
-			
 		}
-		function updateName(updateType){
-			const sendObject={
-				item:$(updateType).val(),
-				pastItem:$('#update-name').val(),
-			}
-			$.ajax({
-				type:'POST',
-				dateType:'json',
-				url:'./updateFormItem',
-				async:true,
-				data:{"formItem":JSON.stringify(sendObject)},
-				success:function(data){
-					if(data==='ok'){
-						window.location.reload();
-					}
-				}
-			});
-		}
-		function giveData(str){
-			document.querySelector('#update-name').value=str;
-			document.querySelector('#update-text').value='';
+		function giveInformation(name,position,id){
+			document.querySelector('#update-name').value=name;
+			$("#positionList").val(position).prop("selected", true);
+			document.querySelector('#empIdToken').value=id;
 		}
     </script>
     <script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>

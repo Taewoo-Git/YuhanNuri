@@ -138,9 +138,9 @@
 		</style>
 	</head>
 	<body class="container">
-		<div class="row" style="height:60px;">
-			<div class="col ml-3 align-self-center">
-				<label style="font-size:150%;">마이페이지</label>
+		<div class="row" style="height:60px; margin-bottom:20px;">
+			<div class="col align-self-center">
+				<label style="font-size:180%;">마이페이지</label>
 			</div>
 		</div>
 		<div class="row">
@@ -160,28 +160,76 @@
 		</div>
 		<div class="tab-content">
 			<div class="tab-pane fade" style="padding:0rem!important;" id="reservation">
-
-				<table class="table table-borderless" style="margin-top:30px; border-top:1px solid #dee2e6; border-bottom:1px solid #dee2e6;">
-					<tr>
-						<th scope="row">상담유형</th>
-						<td>심리검사</td>
-					</tr>
-					<tr>
-						<th rowspan="3" scope="row">검사유형</th>
-						<td>MBTI</td>
-					</tr>
-					<tr>
-						<td>TCI</td>
-					</tr>
-					<tr>
-						<td>성격 5요인 검사</td>
-					</tr>
-					<tr>
-						<th scope="row">접수현황</th>
-						<td style="color:green;">접수완료</td>
-					</tr>
+				<%if(reservationBoard.length===0){%>
+				<div align=center style="margin-top:15%">예약한 내역이 없습니다!</div>
+				<%}else{%>
+				
+				<table class="table table-borderless mt-3" style="border-bottom:1px solid #dee2e6;">
+					
+					<%if(isReservationType === 1){%>
+						<tr>
+							<th scope="row" style="width:45%;">상담유형</th>
+							<td><%=reservationBoard[0].typename%></td>
+						</tr>
+						<tr>
+							<th scope="row">상담사명</th>
+							<td><%=reservationBoard[0].empname%></td>
+						</tr>
+						<tr>
+							<th scope="row">예약날짜</th>
+							<td><%let dateArr = reservationBoard[0].date.split('-'); %>
+								<%=dateArr[0]+"년 "%><%=dateArr[1]+"월 "%><%=dateArr[2]+"일"%>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">시작시간</th>
+							<td><%if(reservationBoard[0].starttime < 12){%>
+									오전 <%=reservationBoard[0].starttime%>시
+								<%}else{%>
+									오후 <%=reservationBoard[0].starttime - 12%>시	
+								<%}%>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">접수현황</th>
+							<%if(reservationBoard[0].status === 0){%>
+								<td style="color:red;">접수중</td>
+							<%}else{%>
+								<td style="color:green;">접수완료</td>
+							<%}%>
+						</tr>
+					<%}else{%>
+							<tr>
+								<th scope="row" style="width:45%;">상담유형</th>
+								<td>심리검사</td>
+							</tr>
+							<tr>
+								<th scope="row">검사목록</th>
+								<td>
+								<%for(let i=0; i<reservationBoard.length; i++){%>
+									<%=reservationBoard[i].testname%><br/>
+								<%}%>
+								</td>
+							</tr>
+							<tr>
+								<th scope="row">접수현황</th>
+								<%if(reservationBoard[0].status === 0){%>
+									<td style="color:red;">접수중</td>
+								<%}else{%>
+									<td style="color:green;">접수완료</td>
+								<%}%>
+							</tr>
+					<%}%>
 				</table>
-				<input type="button" class="btn btn-primary pull-right" value="취 소" style="padding:.300rem .60rem">
+				<form method="POST">
+					<%if(reservationBoard[0].status === 0){%>
+						<input type="hidden" name="btnCancelReservation" value="<%=reservationBoard[0].serialno%>">
+						<input type="submit" class="btn btn-primary pull-right" value="취 소" style="padding:.300rem .60rem">
+					<%}%>
+				</form>
+					
+				<%}%>
+				
 			</div>
 			<div class="tab-pane fade" style="padding:0rem!important;" id="question">
 				<%if(questions.length===0){%>
@@ -199,7 +247,18 @@
 							<tr>
 								<td colspan="3" style="padding:0 !important">
 									<div id="collapse<%=i%>" class="collapse in p-3">
-										<%=v.answer%>
+										<h5>
+											내용
+										</h5>
+										<p>
+											<%= v.content%>
+										</p>
+										<h5>
+											답글
+										</h5>
+										<p>
+											<%=v.answer%>
+										</p>
 									</div>
 								</td>
 							</tr>
@@ -224,8 +283,7 @@
 		
 		<script src="/socket.io/socket.io.js"></script>
 		<script>
-			$(function() {
-				
+			$(function() {				
 				if(location.search.includes("chatting")) {
 					$("#chatting").addClass("show active");
 					$("#chat").addClass("active");
@@ -239,7 +297,7 @@
 				
 				const myname = "<%= stuName %>";
 				const mycode = "<%= stuCode %>";
-				const empno = "<%= empno %>";
+				const empid = "<%= empid %>";
 				
 				const socket = io('/chat');
 				
@@ -261,7 +319,7 @@
 				socket.emit("join", {
 					name: myname,
 					code: mycode,
-					empno: empno
+					empid: empid
 				});
 				
 				socket.on("msg", function(data) {
@@ -366,7 +424,7 @@
 			
 			function setHeight() {
 				let top = document.getElementsByClassName("row");
-				$("#chatting").height(window.innerHeight - (top[0].clientHeight + top[1].clientHeight));
+				$("#chatting").height(window.innerHeight - (top[0].clientHeight + top[1].clientHeight) - 20);
 			}
 	
 			// xss 취약점 막는 함수, php의 htmlspecialcharacter 과 같은 함수
@@ -379,14 +437,6 @@
 					"'": '&#039;'
 				};
 				return str.replace(/[&<>"']/g, function(m) { return map[m]; });
-			}
-			
-			if(Notification.permission === "granted"){
-				
-			} else if(Notification.permission !== "denied"){
-				Notification.requestPermission().then(auth=>{
-					
-				});
 			}
 		</script>
 	</body>

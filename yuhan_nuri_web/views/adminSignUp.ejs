@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- CoreUI CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
+    <title>유한누리 어드민</title>	
+	<script src="https://code.jquery.com/jquery-latest.min.js"></script>
+	<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
+	<style>
+		.pr_10{
+			padding-right:10px;
+		}
+		.pr_30{
+			padding-right:30px;
+		}
+	</style>
+</head>
+<body class="c-app">
+    <div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
+        <div class="c-sidebar-brand d-lg-down-none">
+            <svg class="c-sidebar-brand-full" width="118" height="46" alt="CoreUI Logo">
+                <use xlink:href="assets/brand/coreui.svg#full"></use>
+            </svg>
+            <svg class="c-sidebar-brand-minimized" width="46" height="46" alt="CoreUI Logo">
+                <use xlink:href="assets/brand/coreui.svg#signet"></use>
+            </svg>
+        </div>
+                <%- include ('adminNav'); -%>
+        <button class="c-sidebar-minimizer c-class-toggler" type="button" data-target="_parent"
+            data-class="c-sidebar-minimized"></button>
+    </div>
+    <div class="c-wrapper c-fixed-components">
+        <header class="c-header c-header-light c-header-fixed c-header-with-subheader">
+            <button class="c-header-toggler c-class-toggler d-lg-none mfe-auto" type="button" data-target="#sidebar"
+                data-class="c-sidebar-show">
+                <i class="cil-hamburger-menu"></i>
+            </button><a class="c-header-brand d-lg-none" href="#">
+                <i class="cil-hamburger-menu"></i></a>
+            <button class="c-header-toggler c-class-toggler mfs-3 d-md-down-none" type="button" data-target="#sidebar"
+                data-class="c-sidebar-lg-show" responsive="true">
+                <i class="cil-hamburger-menu"></i>
+            </button>
+			<ul class="c-header-nav ml-auto mr-4">
+                <li class="c-header-nav-item dropdown"><a class="c-header-nav-link" data-toggle="dropdown" href="#"
+                        role="button" aria-haspopup="true" aria-expanded="false">
+                        <div class="c-avatar"><i class="cil-user"></i></div>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right pt-0">
+                        <div class="dropdown-header bg-light py-2"><strong>계정</strong></div>
+                            <a class="dropdown-item" href="/admin/logout">
+                            <i class="cil-account-logout pr_10"></i> 로그아웃</a>
+							<a class="dropdown-item" href="/admin/changePassword">
+                            <i class="cil-dialpad pr_10"></i> 비밀번호 변경</a>
+                </li>
+            </ul>
+            <div class="c-subheader px-3">
+                <ol class="breadcrumb border-0 m-0">
+                    <li class="breadcrumb-item"><a href="/admin">Home</a></li>
+                    <li class="breadcrumb-item active">총 예약 리스트</li>
+                </ol>
+            </div>
+        </header>
+        <div class="c-body">
+            <main class="c-main">
+                <div class="container-fluid">
+                    <div class="fade-in">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="m-auto" style="width:80%;">
+                                    <div class="m-auto" style="width:85%;">
+                                        <h4 class="card-title">관리자 등록</h4>
+                                        <form action="/admin/signUp" method="POST">
+                                          <div class="form-group">
+                                            <label for="exampleInputEmail1">이름</label>
+                                            <input type="text" class="form-control" id="exampleInputEmail1" aria-describedby="empIdHelp" 
+												   placeholder="이름을 입력해주세요." name="name" required>
+                                            <small id="empIdHelp" class="form-text text-muted"></small>
+                                          </div>
+                                          <div class="form-group">
+                                            <label for="exampleInputID">아이디</label>
+                                            <input type="text" class="form-control" id="exampleInputID" aria-describedby="empIdHelp"
+												   placeholder="아이디를 입력해주세요." name="id" required>
+                                            <div class="form-check">
+                                              <input class="form-check-input" type="checkbox" id="defaultCheck1" name="isEmp" value="true">
+                                              <label class="form-check-label" for="defaultCheck1">
+                                                교직원이신가요?
+                                              </label>
+                                            </div>
+                                          </div>
+                                          <div class="form-group">
+                                            <label for="exampleInputPassword1">패스워드</label>
+                                            <input type="password" class="form-control" id="exampleInputPassword1"
+                                            placeholder="패스워드를 입력해주세요." name="password" required>
+                                          </div>
+                                          <input type="submit" class="btn btn-primary float-right" value="등록">
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+            <footer class="c-footer">
+                <div><a href="https://coreui.io">CoreUI</a> &copy; 2020 creativeLabs.</div>
+                <div class="ml-auto">Powered by&nbsp;<a href="https://coreui.io/">CoreUI</a></div>
+            </footer>
+        </div>
+    </div>
+	<script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
+</body>
+</html>
+

@@ -63,11 +63,11 @@ flutter:
     - assets/sad_face.png
     - assets/social_media.png
     - assets/team_success.png
-    - assets/home.ico
-    - assets/question.ico
-    - assets/reservation.ico
-    - assets/mypage.ico
+    - assets/question.png
+    - assets/mypage.png
     - assets/nuri.png
+    - assets/reservation.png
+    - assets/home.png
     
     #   - images/a_dot_ham.jpeg
 

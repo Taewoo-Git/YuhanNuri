@@ -8,9 +8,19 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:vibration/vibration.dart';
+import 'package:url_launcher/url_launcher.dart'; // 패키지
 
 final FirebaseMessaging fcm = FirebaseMessaging();
 CookieManager cm;
+
+//0 : 홈화면, 1 : 예약, 2 : 문의, 3 : 마페, 4 : 만족도
+const urls = [
+  'https://yuhannuri.run.goorm.io/',
+  'https://yuhannuri.run.goorm.io/user/reservation',
+  'https://yuhannuri.run.goorm.io/user/question',
+  'https://yuhannuri.run.goorm.io/user/mypage',
+  'https://yuhannuri.run.goorm.io/user/mypage?satification=1'
+];
 
 class YuhanNuri extends StatefulWidget {
   final String cookie;
@@ -47,7 +57,6 @@ class YuhanNuriState extends State<YuhanNuri> {
 
   void initState() {
     super.initState();
-
     fcm.configure(onMessage: (Map<String, dynamic> message) async {
       // 앱이 켜져있을때는 페이지 안바꿈.
     }, onResume: (Map<String, dynamic> message) async {
@@ -72,6 +81,12 @@ class YuhanNuriState extends State<YuhanNuri> {
                 "\$('#reservation').removeClass('active show');" +
                 "\$('#question').addClass('active show');");
       });
+    } else if (msg == 'satification') {
+      Timer(Duration(milliseconds: 850), () {
+        navBarState = globalKey.currentState;
+        navBarState.setPage(3);
+        _webViewController.loadUrl(url: urls[4], headers: header);
+      });
     }
   }
 
@@ -87,26 +102,40 @@ class YuhanNuriState extends State<YuhanNuri> {
             debugShowCheckedModeBanner: false,
             home: WillPopScope(
                 child: Scaffold(
+                  // appBar: new AppBar(
+                  //   title: Text(
+                  //     "유한누리",
+                  //     style: TextStyle(fontFamily: "jua"),
+                  //   ),
+                  //   leading: Image(
+                  //     image: AssetImage('assets/logo.png'),
+                  //   ),
+                  // ),
                   body: Center(
                       child: SafeArea(
                           child: InAppWebView(
                     initialOptions: InAppWebViewGroupOptions(
                         crossPlatform: InAppWebViewOptions(
-                      debuggingEnabled: true,
-                      supportZoom: false,
-                    )),
+                            debuggingEnabled: true, supportZoom: false)),
+                    initialUrl: urls[0],
+                    initialHeaders: header,
+                    onLoadStart: (_webViewController, String url) {
+                      if (!urls.contains(url)) {
+                        _webViewController.stopLoading();
+                        launch(url, forceWebView: false);
+                        navBarState = globalKey.currentState;
+                        navBarState.setPage(0);
+                      }
+                    },
                     onWebViewCreated: (InAppWebViewController controller) {
                       _webViewController = controller;
-                      // url로드전에 cookie 지워주지 않으면 cookie 안먹는 경우 있음
                       cm.deleteAllCookies();
-                      _webViewController.loadUrl(
-                          url: 'https://yuhannuri.run.goorm.io',
-                          headers: header);
+                      _webViewController.loadUrl(url: urls[0], headers: header);
                       KeyboardVisibility.onChange.listen((bool visible) async {
                         if (visible) {
                           //키보드 올라왔을때
-                          if (await _webViewController.getUrl() ==
-                              'https://yuhannuri.run.goorm.io/user/mypage') {
+                          if (await _webViewController.getUrl() == urls[3]) {
+                            //'https://yuhannuri.run.goorm.io/user/mypage'
                             // 마이페이지 ( 채팅 )
                             Future.delayed(
                                 Duration(milliseconds: 300),
@@ -114,7 +143,8 @@ class YuhanNuriState extends State<YuhanNuri> {
                                     await _webViewController.evaluateJavascript(
                                         source: 'setHeight();'));
                           } else if (await _webViewController.getUrl() ==
-                              "https://yuhannuri.run.goorm.io/user/question") {
+                              urls[2]) {
+                            //"https://yuhannuri.run.goorm.io/user/question"
                             // 문의페이지면 아무것도안함
                           } else {
                             // 다른페이지 ( 예약페이지 등)
@@ -124,8 +154,8 @@ class YuhanNuriState extends State<YuhanNuri> {
                           }
                         } else {
                           //키보드가 내려갈때
-                          if (await _webViewController.getUrl() ==
-                              'https://yuhannuri.run.goorm.io/user/mypage') {
+                          if (await _webViewController.getUrl() == urls[3]) {
+                            //'https://yuhannuri.run.goorm.io/user/mypage'
                             //마이페이지 ( 채팅 ) 이면
                             Future.delayed(
                                 Duration(milliseconds: 300),
@@ -162,26 +192,21 @@ class YuhanNuriState extends State<YuhanNuri> {
                     index: 0,
                     backgroundColor: Colors.blueAccent[100],
                     items: <Widget>[
-                      // Icon(Icons.home, size: 25),
-                      // Icon(Icons.date_range, size: 25),
-                      // Icon(Icons.feedback, size: 25),
-                      // //Icon(Icons.headset_mic, size: 25),
-                      // Icon(Icons.person, size: 25),
                       new Image.asset(
                         'assets/home.png',
-                        scale: 1,
+                        scale: 1.3,
                       ),
                       new Image.asset(
                         'assets/reservation.png',
-                        scale: 1,
+                        scale: 1.3,
                       ),
                       new Image.asset(
                         'assets/question.png',
-                        scale: 1,
+                        scale: 1.3,
                       ),
                       new Image.asset(
                         'assets/mypage.png',
-                        scale: 1,
+                        scale: 1.3,
                       ),
                     ],
                     animationDuration:
@@ -191,25 +216,19 @@ class YuhanNuriState extends State<YuhanNuri> {
                       switch (navigationIndex) {
                         case 0:
                           _webViewController.loadUrl(
-                              url: 'https://yuhannuri.run.goorm.io',
-                              headers: header);
+                              url: urls[0], headers: header);
                           break;
                         case 1:
                           _webViewController.loadUrl(
-                              url:
-                                  'https://yuhannuri.run.goorm.io/user/reservation',
-                              headers: header);
+                              url: urls[1], headers: header);
                           break;
                         case 2:
                           _webViewController.loadUrl(
-                              url:
-                                  'https://yuhannuri.run.goorm.io/user/question',
-                              headers: header);
+                              url: urls[2], headers: header);
                           break;
                         case 3:
                           _webViewController.loadUrl(
-                              url: 'https://yuhannuri.run.goorm.io/user/mypage',
-                              headers: header);
+                              url: urls[3], headers: header);
                           break;
                         default:
                           break;
@@ -220,8 +239,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                   ),
                 ),
                 onWillPop: () async {
-                  if (await _webViewController.getUrl() ==
-                      "https://yuhannuri.run.goorm.io/") {
+                  if (await _webViewController.getUrl() == urls[0]) {
                     DateTime now = DateTime.now();
                     if (currentBackPressTime == null ||
                         now.difference(currentBackPressTime) >

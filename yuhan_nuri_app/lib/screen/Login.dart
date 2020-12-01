@@ -230,7 +230,7 @@ class _LoginState extends State<Login> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  '유한 누리',
+                  '유한누리',
                   style: TextStyle(
                       fontFamily: 'jua',
                       color: Color(0xFF3C3C3C),

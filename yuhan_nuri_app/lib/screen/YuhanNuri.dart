@@ -162,10 +162,27 @@ class YuhanNuriState extends State<YuhanNuri> {
                     index: 0,
                     backgroundColor: Colors.blueAccent[100],
                     items: <Widget>[
-                      new Image.asset('assets/home.ico'),
-                      new Image.asset('assets/reservation.ico'),
-                      new Image.asset('assets/question.ico'),
-                      new Image.asset('assets/mypage.ico'),
+                      // Icon(Icons.home, size: 25),
+                      // Icon(Icons.date_range, size: 25),
+                      // Icon(Icons.feedback, size: 25),
+                      // //Icon(Icons.headset_mic, size: 25),
+                      // Icon(Icons.person, size: 25),
+                      new Image.asset(
+                        'assets/home.png',
+                        scale: 1,
+                      ),
+                      new Image.asset(
+                        'assets/reservation.png',
+                        scale: 1,
+                      ),
+                      new Image.asset(
+                        'assets/question.png',
+                        scale: 1,
+                      ),
+                      new Image.asset(
+                        'assets/mypage.png',
+                        scale: 1,
+                      ),
                     ],
                     animationDuration:
                         const Duration(milliseconds: 300), // trainsition 설정

@@ -48,24 +48,10 @@ class _LoginState extends State<Login> {
     setProgressDialog();
   }
 
-  //progressDialog 초기화
   setProgressDialog() async {
     progressDialog =
         new ProgressDialog(context, type: ProgressDialogType.Normal);
     progressDialog.style(message: '잠시만 기다려주세요...');
-    //progressDialog 커스텀하는 방법
-    // progressDialog.style(
-    //       message: 'Please wait...',
-    //       borderRadius: 10.0,
-    //       backgroundColor: Colors.white,
-    //       progressWidget: CircularProgressIndicator(),
-    //       elevation: 10.0,
-    //       insetAnimCurve: Curves.easeInOut,
-    //       progressTextStyle: TextStyle(
-    //           color: Colors.black, fontSize: 13.0, fontWeight: FontWeight.w400),
-    //       messageTextStyle: TextStyle(
-    //           color: Colors.black, fontSize: 19.0, fontWeight: FontWeight.w600),
-    //     );
   }
 
   Widget buildId(BuildContext context) {
@@ -167,7 +153,6 @@ class _LoginState extends State<Login> {
         onPressed: () => {portalLogin(userID, userPassword, isAutoLogin)},
         padding: EdgeInsets.all(15),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-        // color: Colors.white,
         color: Color(0xFF0275D8),
         child: Text('로그인',
             style: TextStyle(
@@ -202,7 +187,6 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        //body: _buildLayoutContainer(context)
         body: AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: GestureDetector(
@@ -212,19 +196,8 @@ class _LoginState extends State<Login> {
           width: double.infinity,
           decoration: BoxDecoration(
             color: Color(0xFFF0F0F0),
-            // gradient: LinearGradient(
-            //   begin: Alignment.topCenter,
-            //   end:Alignment.bottomCenter,
-            //   colors: [
-            //     Color(0xFFF0F0F0),
-            //     //Color(0xFFF5F5F5),
-            //     Color(0xFFD9EDFF),
-            //     Color(0xFFAFD9FE)
-            //   ]
-            // )
           ),
           child: SingleChildScrollView(
-            //physics: AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.symmetric(horizontal: 25, vertical: 120),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -254,7 +227,6 @@ class _LoginState extends State<Login> {
   }
 
   portalLogin(String userID, String userPassword, bool isAutoLogin) async {
-    // 로그인 루틴 시작하면서 dialog 띄움
     progressDialog.show();
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -283,10 +255,8 @@ class _LoginState extends State<Login> {
       return;
     }
     if (res.statusCode == 200) {
-      // 응답의 헤더에서 cookie값 가져와서 저장
       Cookie cookie = Cookie.fromSetCookieValue(res.headers['set-cookie']);
       if (isAutoLogin) {
-        // 만료일자(30일 후)세팅, 쿠키값 저장, 만료일자 저장
         DateTime dateTime = cookie.expires.add(new Duration(days: 30));
         prefs.setString('cookie', cookie.toString());
         prefs.setString('expires', dateTime.toString());

@@ -21,9 +21,7 @@ class Splash extends StatefulWidget {
 }
 
 class SplashState extends State<Splash> {
-  // 앱이 처음 실행되는지 체크
   checkFirstSeen() async {
-    // 간단한 값을 어플리케이션에 파일 형태로 저장하는 클래스
     SharedPreferences prefs = await SharedPreferences.getInstance();
     // 봤는지 확인하는 변수
     bool _seen = (prefs.getBool('seen') ?? false);
@@ -79,13 +77,11 @@ class SplashState extends State<Splash> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Container(
-              //child: Image.asset("assets/logo.png"),
               child: new Image(
                 image: AssetImage("assets/logo.png"),
               ),
               padding: EdgeInsets.only(bottom: 10.0, left: 90.0, right: 90.0),
             ),
-            //Padding(padding: EdgeInsets.only(top: 10.0)),
             Container(
               child: new Image(
                 image: AssetImage("assets/nuri.png"),
@@ -93,7 +89,6 @@ class SplashState extends State<Splash> {
               padding: EdgeInsets.only(
                   top: 10.0, bottom: 50.0, left: 70.0, right: 70.0),
             ),
-
             Padding(padding: EdgeInsets.only(top: 30.0)),
             CircularProgressIndicator(
               backgroundColor: Color(0xFFFFFFFF),

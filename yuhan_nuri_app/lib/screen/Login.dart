@@ -5,10 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:yuhan_nuri_app/screen/YuhanNuri.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:progress_dialog/progress_dialog.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:oktoast/oktoast.dart';
-
-final FirebaseMessaging fcm = FirebaseMessaging();
 
 String userID = "";
 String userPassword = "";
@@ -230,8 +227,6 @@ class _LoginState extends State<Login> {
     progressDialog.show();
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    print(
-        'userID: $userID, userPassword: $userPassword, autoLogin: $isAutoLogin');
 
     http.Response res = await http.Client().post(
       Uri.parse('https://yuhannuri.run.goorm.io/user/mobile'),

@@ -10,7 +10,7 @@ import 'package:oktoast/oktoast.dart';
 import 'package:vibration/vibration.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_phoenix/flutter_phoenix.dart';
+//import 'package:flutter_phoenix/flutter_phoenix.dart';
 
 final FirebaseMessaging fcm = FirebaseMessaging();
 CookieManager cm;
@@ -130,7 +130,6 @@ class YuhanNuriState extends State<YuhanNuri> {
                     initialUrl: urls[0],
                     initialHeaders: header,
                     onLoadStart: (_webViewController, String url) {
-                      print(url);
                       if (!urls.contains(url)) {
                         _webViewController.stopLoading();
                         launch(url, forceWebView: false);
@@ -184,7 +183,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                           // 웹뷰 JavaScript와 통신하는 핸들러
                           handlerName:
                               'PageHandler', // 해당 핸들러를 웹뷰에서 호출( 예약완료 버튼클릭 )할 시  메인으로 돌아감
-                          callback: (args) {
+                          callback: (args) async {
                             if (args[0].toString() == "replaceMain") {
                               Future.delayed(Duration(milliseconds: 300), () {
                                 navBarState = globalKey.currentState;
@@ -194,7 +193,11 @@ class YuhanNuriState extends State<YuhanNuri> {
                               navBarState = globalKey.currentState;
                               navBarState.setPage(3);
                             } else if (args[0].toString() == "Restart") {
-                              Phoenix.rebirth(context);
+                              // SharedPreferences prefs =
+                              //     await SharedPreferences.getInstance();
+                              // prefs.remove('expires');
+                              // prefs.remove('cookie');
+                              // Phoenix.rebirth(context);
                             }
                           });
                     },

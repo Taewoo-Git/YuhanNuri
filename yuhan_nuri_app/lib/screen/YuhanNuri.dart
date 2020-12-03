@@ -10,6 +10,7 @@ import 'package:oktoast/oktoast.dart';
 import 'package:vibration/vibration.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 
 final FirebaseMessaging fcm = FirebaseMessaging();
 CookieManager cm;
@@ -115,38 +116,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                       IconButton(
                         icon: Icon(Icons.logout),
                         onPressed: () {
-                          showDialog(
-                              context: context,
-                              builder: (context) {
-                                return AlertDialog(
-                                    title: Text('로그아웃'),
-                                    actions: [
-                                      RaisedButton(
-                                        child: Text('예'),
-                                        color: Color(0xFF0275D7),
-                                        animationDuration:
-                                            Duration(milliseconds: 1000),
-                                        onPressed: () async {
-                                          SharedPreferences prefs =
-                                              await SharedPreferences
-                                                  .getInstance();
-                                          prefs.remove('expires');
-                                          prefs.remove('cookie');
-                                          SystemChannels.platform.invokeMethod(
-                                              'SystemNavigator.pop');
-                                        },
-                                      ),
-                                      RaisedButton(
-                                        child: Text('아니오'),
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                      ),
-                                    ],
-                                    content: Container(
-                                      child: Text('자동 로그인을 해제한 후 종료합니다.'),
-                                    ));
-                              });
+                          showLogoutButtonDialog(context);
                         },
                       )
                     ],
@@ -182,9 +152,6 @@ class YuhanNuriState extends State<YuhanNuri> {
                                 () async =>
                                     await _webViewController.evaluateJavascript(
                                         source: 'setHeight();'));
-                          } else if (await _webViewController.getUrl() ==
-                              urls[2]) {
-                            // 문의페이지면 아무것도안함
                           } else {
                             // 다른페이지 ( 예약페이지 등)
                             Future.delayed(
@@ -226,6 +193,8 @@ class YuhanNuriState extends State<YuhanNuri> {
                             } else if (args[0].toString() == "replaceMypage") {
                               navBarState = globalKey.currentState;
                               navBarState.setPage(3);
+                            } else if (args[0].toString() == "Restart") {
+                              Phoenix.rebirth(context);
                             }
                           });
                     },
@@ -294,7 +263,6 @@ class YuhanNuriState extends State<YuhanNuri> {
                       // 전에 back 버튼을 누른적이 없거나
                       // back 버튼을 눌렀을때의 시간과 전에 back버튼을 눌렀을때의 차이가 2초를 넘었으면
                       currentBackPressTime = now;
-                      print(await fcm.getToken());
                       showToast("뒤로가기 버튼을 한번 더      \n 클릭하면 종료합니다.");
                       return Future.value(false); // 종료 안함.
                     }
@@ -317,8 +285,10 @@ class YuhanNuriState extends State<YuhanNuri> {
   }
 
   showBackButtonDialog(BuildContext context) {
-    Widget continueButton = FlatButton(
+    Widget continueButton = RaisedButton(
       child: Text("예"),
+      color: Color(0xFF0275D7),
+      elevation: 5,
       onPressed: () {
         Navigator.pop(context);
         navBarState = globalKey.currentState;
@@ -326,8 +296,9 @@ class YuhanNuriState extends State<YuhanNuri> {
       },
     );
 
-    Widget cancelButton = FlatButton(
+    Widget cancelButton = RaisedButton(
       child: Text("아니오"),
+      elevation: 5,
       onPressed: () {
         Navigator.pop(context);
       },
@@ -336,6 +307,44 @@ class YuhanNuriState extends State<YuhanNuri> {
     AlertDialog alert = AlertDialog(
       title: Text("유한누리"),
       content: Text("현재 채팅이 활성화되어있습니다. \n홈 화면으로 돌아가시겠습니까?"),
+      actions: [
+        continueButton,
+        cancelButton,
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  showLogoutButtonDialog(BuildContext context) {
+    Widget continueButton = RaisedButton(
+      child: Text("예"),
+      color: Color(0xFF0275D7),
+      elevation: 5,
+      onPressed: () async {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.remove('expires');
+        prefs.remove('cookie');
+        SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+      },
+    );
+
+    Widget cancelButton = RaisedButton(
+      child: Text("아니오"),
+      elevation: 5,
+      onPressed: () {
+        Navigator.pop(context);
+      },
+    );
+
+    AlertDialog alert = AlertDialog(
+      title: Text("유한누리"),
+      content: Text("자동 로그인을 해제한 후\n종료합니다"),
       actions: [
         continueButton,
         cancelButton,

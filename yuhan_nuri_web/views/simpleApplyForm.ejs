@@ -12,7 +12,7 @@
 		/>
 		<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
 
-		<title>유한누리 관리자 | 간단신청서</title>
+		<title>유한누리 상담사 페이지</title>
 		<script src="https://code.jquery.com/jquery-latest.min.js"></script>
 		<style>
         .toggle_wrap {
@@ -70,14 +70,6 @@
 		  </div>
 		</div>
 		<div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show c-sidebar-unfoldable" id="sidebar">
-			<div class="c-sidebar-brand d-lg-down-none">
-				<svg class="c-sidebar-brand-full" width="118" height="46" alt="CoreUI Logo">
-					<use xlink:href="assets/brand/coreui.svg#full"></use>
-				</svg>
-				<svg class="c-sidebar-brand-minimized" width="46" height="46" alt="CoreUI Logo">
-					<use xlink:href="assets/brand/coreui.svg#signet"></use>
-				</svg>
-			</div>
 			<%- include ('adminNav'); -%>
 			<button
 				class="c-sidebar-minimizer c-class-toggler"
@@ -108,6 +100,7 @@
                             <i class="cil-account-logout pr_10"></i> 로그아웃</a>
 							<a class="dropdown-item" href="/admin/changePassword">
                             <i class="cil-dialpad pr_10"></i> 비밀번호 변경</a>
+					</div>
                 </li>
             </ul>
 				<div class="c-subheader px-3">
@@ -133,11 +126,11 @@
 									<div class="card-body" id="card_id_<%=v.askno%>">
 										<div class="input-group mb-3">
 											<div class="input-group-prepend">
-												<span class="input-group-text" id="question">질문</span>
+												<span class="input-group-text" id="question">질 문</span>
 											</div>
 											<input type="text" class="form-control" placeholder="Question" aria-label="question" 
 											 oninput="updateQuestion(card_id_<%=v.askno%>,this)" value="<%=v.ask%>">
-											<button type="button" class="btn btn-secondary ml-2" onclick="deleteCard(card_id_<%=v.askno%>,this,<%=v.askno%>)">질문삭제</button>
+											<button type="button" class="btn btn-danger ml-2" onclick="deleteCard(card_id_<%=v.askno%>,this,<%=v.askno%>)">질문 삭제</button>
 										</div>
 									<%v.choice.split(',').forEach(function(b,j){%>
 										<div class="form-check">
@@ -153,7 +146,7 @@
 								</div>
 							<div class="form-check mb-3 add_check_btn">
 								<label class="form-check-label">
-									<button type="button" value="add_check" class="add_event_btn_<%=v.askno%> btn btn-secondary"  onclick="addCheck(card_id_<%=v.askno%>)">추가</button>
+									<button type="button" value="add_check" class="add_event_btn_<%=v.askno%> btn btn-primary"  onclick="addCheck(card_id_<%=v.askno%>)">추 가</button>
 								</label>
 							</div>
 						</div>
@@ -163,11 +156,11 @@
 									<div class="card-body" id="card_id_<%=v.askno%>">
 										<div class="input-group mb-3">
 											<div class="input-group-prepend">
-												<span class="input-group-text" id="question">질문</span>
+												<span class="input-group-text" id="question">질 문</span>
 											</div>
 											<input type="text" class="form-control" placeholder="Question" aria-label="question" 
 											 oninput="updateQuestion(card_id_<%=v.askno%>,this)" value="<%=v.ask%>">
-											<button type="button" class="btn btn-secondary ml-2" onclick="deleteCard(card_id_<%=v.askno%>,this,<%=v.askno%>)">질문삭제</button>
+											<button type="button" class="btn btn-danger ml-2" onclick="deleteCard(card_id_<%=v.askno%>,this,<%=v.askno%>)">질문 삭제</button>
 										</div>
 										<%v.choice.split(',').forEach(function(b,j){%>
 										<div class="form-check">
@@ -183,7 +176,7 @@
 									</div>
 									<div class="form-check mb-3">
 										<label class="form-check-label">
-											<button type="button" value="add_check" class="add_event_btn_<%=v.askno%> btn btn-secondary" onclick="addRadio(card_id_<%=v.askno%>)">추가												</button>
+											<button type="button" value="add_check" class="add_event_btn_<%=v.askno%> btn btn-primary" onclick="addRadio(card_id_<%=v.askno%>)">추 가												</button>
 										</label>
 									</div>
 								</div>
@@ -193,11 +186,11 @@
 									<div class="card-body" id="card_id_<%=v.askno%>">
 										<div class="input-group mb-3">
 											<div class="input-group-prepend">
-												<span class="input-group-text" id="question">질문</span>
+												<span class="input-group-text" id="question">질 문</span>
 											</div>
 											<input type="text" class="form-control" placeholder="Question" aria-label="question" 
 											 oninput="updateQuestion(card_id_<%=v.askno%>,this)" value="<%=v.ask%>">
-											<button type="button" class="btn btn-secondary add_event_btn ml-2" onclick="deleteCard(card_id_<%=v.askno%>,this,<%=v.askno%>)">질문삭제</button>
+											<button type="button" class="btn btn-danger add_event_btn ml-2" onclick="deleteCard(card_id_<%=v.askno%>,this,<%=v.askno%>)">질문 삭제</button>
 										</div>
 									</div>
 								</div>
@@ -213,24 +206,24 @@
 							value="add_check_card"
 							class="add_event_btn_ btn btn-secondary add_event_btn"
 						>
-							Check
+							다중 선택
 						</button>
 						<button
 							type="button"
 							value="add_radio_card"
 							class="add_event_btn_ btn btn-secondary add_event_btn"
 						>
-							Radio
+							단일 선택
 						</button>
 						<button
 							type="button"
 							value="add_nomal_card"
 							class="add_event_btn_ btn btn-secondary"
 						>
-							Normal
+							서술형
 						</button>
-						<button type="submit" class="add_event_btn_ btn btn-secondary" value="save">
-							Save
+						<button type="submit" class="add_event_btn_ btn btn-primary" value="save">
+							저 장
 						</button>
 					</div> 
 					<script>
@@ -292,11 +285,11 @@
                         <div class="card-body" id=card_id_${++i}>
                             <div class="input-group mb-3">
                                 <div class="input-group-prepend">
-                                    <span class="input-group-text" id="question">질문</span>
+                                    <span class="input-group-text" id="question">질 문</span>
                                 </div>
                                 <input type="text" class="form-control" placeholder="Question" aria-label="question" 
                                  oninput="updateQuestion(card_id_${i},this)">
-                                <button type="button" class="btn btn-secondary ml-2" onclick="cancelCard(card_id_${i},this)">질문취소</button>
+                                <button type="button" class="btn btn-danger ml-2" onclick="cancelCard(card_id_${i},this)">질문 취소</button>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="defaultCheck1">
@@ -310,7 +303,7 @@
                         </div>
                         <div class="form-check mb-3 add_check_btn">
                             <label class="form-check-label">
-                                <button type="button" value="add_check" class="add_event_btn_${i} btn btn-secondary"  onclick=addCheck(card_id_${i})>추가</button>
+                                <button type="button" value="add_check" class="add_event_btn_${i} btn btn-primary"  onclick=addCheck(card_id_${i})>추 가</button>
                             </label>
                         </div>
                     </div>`);
@@ -332,11 +325,11 @@
                         <div class="card-body" id=card_id_${++i}>
                             <div class="input-group mb-3">
                                 <div class="input-group-prepend">
-                                    <span class="input-group-text" id="question">질문</span>
+                                    <span class="input-group-text" id="question">질 문</span>
                                 </div>
                                 <input type="text" class="form-control" placeholder="Question" aria-label="question" 
                                  oninput="updateQuestion(card_id_${i},this)">
-                                <button type="button" class="btn btn-secondary ml-2" onclick="cancelCard(card_id_${i},this)">질문취소</button>
+                                <button type="button" class="btn btn-danger ml-2" onclick="cancelCard(card_id_${i},this)">질문 취소</button>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="radio_${i}" id="exampleRadios_${i}" value="option1">
@@ -350,7 +343,7 @@
                         </div>
                         <div class="form-check mb-3">
                             <label class="form-check-label">
-                                <button type="button" value="add_check" class="add_event_btn_${i} btn btn-secondary" onclick=addRadio(card_id_${i})>추가</button>
+                                <button type="button" value="add_check" class="add_event_btn_${i} btn btn-primary" onclick=addRadio(card_id_${i})>추 가</button>
                             </label>
                         </div>
                     </div>`);
@@ -372,14 +365,14 @@
                     <div class="card-body" id=card_id_${++i}>
                         <div class="input-group mb-3">
                             <div class="input-group-prepend">
-                                <span class="input-group-text" id="question">질문</span>
+                                <span class="input-group-text" id="question">질 문</span>
                             </div>
                             <input type="text" class="form-control" placeholder="Question" aria-label="question" 
                              oninput="updateQuestion(card_id_${i},this)">
-                            <button type="button" class="btn btn-secondary add_event_btn" onclick="cancelCard(card_id_${i},this)">질문취소</button>
+                            <button type="button" class="btn btn-danger add_event_btn" onclick="cancelCard(card_id_${i},this)">질문 취소</button>
                         </div>
                         <div class="toggle_normal_wrap">
-                            <pre class="float-left font-size-15">필수 </pre>
+                            <pre class="float-left font-size-15">필 수 </pre>
                             <label class="float-right c-switch c-switch-3d c-switch-primary addbtn-side-vertical-match">
                                 <input type="checkbox" class="c-switch-input" onchange="isRequired(card_id_${i},this)">
                                 <span class="c-switch-slider"></span>
@@ -403,11 +396,11 @@
                                     <div class="card-body" id=card_id_${++i}>
                                         <div class="input-group mb-3">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text" id="question">질문</span>
+                                                <span class="input-group-text" id="question">질 문</span>
                                             </div>
                                             <input type="text" class="form-control" placeholder="Question" aria-label="question" 
                                              oninput="updateQuestion(card_id_${i},this)">
-                                            <button type="button" class="btn btn-secondary" onclick="cancelCard(card_id_${i},this)">질문취소</button>
+                                            <button type="button" class="btn btn-secondary" onclick="cancelCard(card_id_${i},this)">질문 취소</button>
                                         </div>
                                         
                                         <div class="form-check">
@@ -422,10 +415,10 @@
                                     </div>
                                     <div class="form-check mb-3">
                                         <label class="form-check-label">
-                                            <button type="button" value="add_check" class="add_event_btn_${i} btn btn-secondary" onclick=addGrid(card_id_${i})>추가</button>
+                                            <button type="button" value="add_check" class="add_event_btn_${i} btn btn-primary" onclick=addGrid(card_id_${i})>추 가</button>
                                         </label>
                                         <div class="toggle_wrap">
-                                            <pre class="float-left font-size-15">필수 </pre>
+                                            <pre class="float-left font-size-15">필 수 </pre>
                                             <label class="float-right c-switch c-switch-3d c-switch-primary addbtn-side-vertical-match">
                                                 <input type="checkbox" class="c-switch-input" onchange="isRequired(card_id_${i},this)">
                                                 <span class="c-switch-slider"></span>
@@ -444,7 +437,6 @@
 										async: true,
 										data: { sendAjax: JSON.stringify(sendObject) },
 										success: function (data) {
-											console.log('success', data);
 											if (data.state === 'ok') {
 											$('.c-main').prepend(`<div class="alert alert-success alert-dismissible fade show" role="alert">
 											  <strong>저장 성공!</strong> 성공적으로 저장이 되었어요!
@@ -462,10 +454,8 @@
 										}
 										},
 									});
-									console.info('send',sendObject);
 									break;
 								default:
-									console.error('error!');
 									break;
 							}
 						});

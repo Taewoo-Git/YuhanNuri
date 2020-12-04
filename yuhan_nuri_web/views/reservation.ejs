@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>예약 페이지</title>
+		<title>유한누리 예약 페이지</title>
 		<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
 		
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -60,12 +60,13 @@
 			.btnClass + label{ 
 				display: inline-block; 
 				cursor: pointer; 
-				line-height: 20px; 
+				line-height: 23px; 
 				padding-left: 26px; 
-				background: url('/res/imgs/check-off.png') left/18px no-repeat; 
+				background: url('/res/imgs/check-off.png') left/20px no-repeat;
 			}
 			.btnClass:checked + label {
 				background-image: url('/res/imgs/check-on.png');
+				color:#0275d8;
 			}
 			.btnMentalClass{
 				display: inline-block;
@@ -73,7 +74,7 @@
 				line-height: 22px;
 				padding-left: 18px;
 				border:none;
-				background: url('/res/imgs/btnMentalDes-normal.png')  left/22px no-repeat;
+				background: url('/res/imgs/btnMentalDes-normal.png')  left/20px no-repeat;
 				outline:none;
 			}
 			.btnMentalClass:hover{
@@ -82,7 +83,7 @@
 				line-height: 22px;
 				padding-left: 18px;
 				border:none;
-				background: url('/res/imgs/btnMentalDes-overlay.png')  left/22px no-repeat;
+				background: url('/res/imgs/btnMentalDes-overlay.png')  left/20px no-repeat;
 			}
 			.form-nametag {
 				font-size : 18px;
@@ -204,8 +205,8 @@
 	
 	<body>
 		<div class="container-fluid">
-			<div class="row" style="height:60px; margin-bottom:20px;">
-				<div class="col align-self-center">
+			<div class="row" style="height:50px; margin-bottom:20px;">
+				<div class="col mt-2 align-self-center">
 					<label style="font-size:180%;">예약</label>
 				</div>
 			</div>
@@ -214,18 +215,18 @@
                 
 				<div class="tab-pane fade show active" id="applicationTab">
 					<div class="row" style="height: 60px;">
-						<div class="fade-text col align-self-center text-center">
-							<label>무엇이 고민인가요?</label>
+						<div class="fade-text col align-self-center text-center" style="color:#1a1a1a;">
+							<label>무엇을 원하시나요?</label>
 						</div>
 					</div>
 					
 					<div class="row align-self-center" style="height: 40px; margin-bottom:40px;">
 						<div class="fade-app col text-center align-self-center">
 							<input type="radio" id="appMental" name="btnApp" class="btnClass">
-							<label for="appMental" class="mr-4">심리검사</label>
+							<label for="appMental" class="mr-4" style="font-size:130%;">심리검사</label>
 
 							<input type="radio" id="appConsult" name="btnApp" class="btnClass">
-							<label for="appConsult">상담예약</label>
+							<label for="appConsult" style="font-size:130%;">상담예약</label>
 						</div>
 					</div>
 					
@@ -403,6 +404,7 @@
 						<label><b>시간</b></label>
 						<div class="row formTime" id="possibleTime">
 						</div>
+						<label>※ 상담시간 : 1회당 50분</label>
 					</div>
 					
 					<div class="form-group text-right" style="margin-top:50px; margin-bottom:0!important; display:none;" id="divSecondNext"> 

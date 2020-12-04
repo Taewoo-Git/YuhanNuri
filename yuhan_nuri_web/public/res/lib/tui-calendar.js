@@ -5352,6 +5352,7 @@ function FloatingLayer(options, container) {
     layerContainer = document.createElement('div');
     layerContainer.style.display = 'none';
     layerContainer.style.position = 'absolute';
+	
     domutil.addClass(layerContainer, config.classname('floating-layer'));
     container.appendChild(layerContainer);
 
@@ -5422,7 +5423,12 @@ FloatingLayer.prototype.isVisible = function() {
  * @param {number} y - y coordinate of layer
  */
 FloatingLayer.prototype.setPosition = function(x, y) {
-    domutil.setPosition(this.container, x, y);
+	if(y < 0){
+		domutil.setPosition(this.container, x+50, 50);
+	}else{
+		domutil.setPosition(this.container, x, y);
+	}
+    
 };
 
 /**
@@ -6285,6 +6291,7 @@ TZDate.prototype.toUTCString = function() {
  * @returns {Date}
  */
 TZDate.prototype.toDate = function() {
+	this.setMinutes(0);
     return this._date;
 };
 

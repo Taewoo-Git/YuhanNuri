@@ -7,17 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- CoreUI CSS -->
     <link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
-    <title>유한누리 어드민</title>	
+    <title>유한누리 상담사 페이지</title>
 	<script src="https://code.jquery.com/jquery-latest.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
-	<script src="/lib/paragraph.js"></script>
-	<!-- <script src="https://cdn.jsdelivr.net/npm/@editorjs/paragraph@latest"></script> -->
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/list@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/embed@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/simple-image@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/image@latest"></script>
 	<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
 	<style>
 		.fixed_save_btn{
@@ -32,9 +23,13 @@
 		.pr_30{
 			padding-right:30px;
 		}
+		.tox-tinymce-aux{
+			width:0px !important;
+		}
 	</style>
 </head>
 <body class="c-app">
+	
 	<script>
 		$('#add_type_button').click(function(e){
 							$.ajax({
@@ -75,14 +70,6 @@
 		  </div>
 		</div>
     <div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
-        <div class="c-sidebar-brand d-lg-down-none">
-            <svg class="c-sidebar-brand-full" width="118" height="46" alt="CoreUI Logo">
-                <use xlink:href="assets/brand/coreui.svg#full"></use>
-            </svg>
-            <svg class="c-sidebar-brand-minimized" width="46" height="46" alt="CoreUI Logo">
-                <use xlink:href="assets/brand/coreui.svg#signet"></use>
-            </svg>
-        </div>
          <%- include ('adminNav'); -%>
         <button class="c-sidebar-minimizer c-class-toggler" type="button" data-target="_parent"
             data-class="c-sidebar-minimized"></button>
@@ -116,26 +103,23 @@
                 <ol class="breadcrumb border-0 m-0">
                     <li class="breadcrumb-item">Home</li>
                     <li class="breadcrumb-item">양식 항목</li>
-                    <li class="breadcrumb-item active"><%=type%></li>
+                    <li class="breadcrumb-item active"><%=type[1]%></li>
                     <!-- Breadcrumb Menu-->
                 </ol>
             </div>
         </header>
+		
         <div class="c-body">
             <main class="c-main">
                 <div class="container-fluid">
                     <div class="fade-in">
                         <div class="card">
                             <div class="card-body">
-                                <div id="editorjs">
-									
-								</div>
-								<button id="saveBtn" class="fixed_save_btn btn btn-secondary">
-									저장
-								</button>
+								<textarea class="tinymce" id="textEditor"></textarea>
                             </div>
                         </div>
                     </div>
+					
                 </div>
             </main>
             <footer class="c-footer">
@@ -143,66 +127,70 @@
                 <div class="ml-auto">Powered by&nbsp;<a href="https://coreui.io/">CoreUI</a></div>
             </footer>
         </div>
+		
     </div>
+	<script src="/lib/tinymce_5.6.1/tinymce/js/tinymce/tinymce.min.js"></script>
 	<script>
-		const ImageTool = window.ImageTool;
-		const editData=[<%result.forEach(function(v,i){%>
-					<%-JSON.stringify(v)%>,
-			 	<%})%>];
-            const editor = new EditorJS({
-                holderId: 'editorjs',
-                tools: {
-					paragraph:{
-						class:Paragraph,
-					},
-                    header: {
-                        class: Header,
-                        inlineToolbar: ['link']
-                    },
-                    list: {
-                        class: List,
-                        inlineToolbar: [
-                            'link',
-                            'bold',
-                        ]
-                    },
-                    embed: {
-                        class: Embed,
-                        inlineToolbar: false,
-                        config: {
-                            services: {
-                                youtube: true,
-                                coub: true
-                            }
-                        }
-                    },
-                    image: {
-                        class: ImageTool,
-                        config: {
-                            endpoints: {
-                                byFile: 'https://yuhannuri.run.goorm.io/admin/uploadFile',
-                            },
-							captionPlaceholder:"이미지 설명",
-                        }
-                    },
-                },
-				data:{
-					time:new Date(),
-					blocks: editData,
-				}
-            }
-        );
-		let saveBtn = document.querySelector('#saveBtn');
-            saveBtn.addEventListener('click', async function () {
-                try {
-                    await editor.save().then((outputData) => {
-						$(function () {
-								$.ajax({
+		tinymce.init({
+			selector: "textarea.tinymce",
+			
+			language:"ko_KR",
+
+			height: 800,
+
+			statubar: true,
+
+			plugins: [
+				"advlist autolink link lists charmap print preview hr anchor pagebreak",
+				"searchreplace visualblocks visualchars fullscreen insertdatetime nonbreaking",
+				"table contextmenu directionality emoticons paste textcolor save"
+			],
+
+			/* toolbar */
+			toolbar: "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link | print preview  fullpage | forecolor backcolor emoticons save",
+
+			/* style */
+			style_formats: [
+				{title: "Headers", items: [
+					{title: "Header 1", format: "h1"},
+					{title: "Header 2", format: "h2"},
+					{title: "Header 3", format: "h3"},
+					{title: "Header 4", format: "h4"},
+					{title: "Header 5", format: "h5"},
+					{title: "Header 6", format: "h6"}
+				]},
+				{title: "Inline", items: [
+					{title: "Bold", icon: "bold", format: "bold"},
+					{title: "Italic", icon: "italic", format: "italic"},
+					{title: "Underline", icon: "underline", format: "underline"},
+					{title: "Strikethrough", icon: "strikethrough", format: "strikethrough"},
+					{title: "Superscript", icon: "superscript", format: "superscript"},
+					{title: "Subscript", icon: "subscript", format: "subscript"},
+				]},
+				{title: "Blocks", items: [
+					{title: "Paragraph", format: "p"},
+					{title: "Blockquote", format: "blockquote"},
+					{title: "Div", format: "div"},
+					{title: "Pre", format: "pre"}
+				]},
+				{title: "Alignment", items: [
+					{title: "Left", icon: "alignleft", format: "alignleft"},
+					{title: "Center", icon: "aligncenter", format: "aligncenter"},
+					{title: "Right", icon: "alignright", format: "alignright"},
+					{title: "Justify", icon: "alignjustify", format: "alignjustify"}
+				]}
+			],
+			init_instance_callback : function(editor) {
+    			editor.setContent(`<%-result%>`);
+  			},
+			save_onsavecallback: function () {
+				let content=tinymce.get("textEditor").getContent();
+				$.ajax({
 								type: "POST",
 								dataType: "json",
-								url: '../saveBoard/<%=type%>',
+								url: '../saveBoard/<%=type[0]%>',
 								async: true,
-								data: { "sendAjax" : JSON.stringify(outputData.blocks) },
+								data: { "sendAjax" : content },
 								success: function (data) { 
 										if (data.state === 'ok') {
 										$('.c-main').prepend(`<div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -221,12 +209,8 @@
 									}
 								}
 							});
-						});
-                    });
-                } catch (error) {
-                    console.log('Saving failed', error);
-                }
-            });
+			}
+		});
 	</script>
 	<script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
 </body>

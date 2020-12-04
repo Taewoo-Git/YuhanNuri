@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>메인 페이지</title>
+		<title>유한누리 문의 페이지</title>
 		<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
 		
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -64,14 +64,14 @@
 	<body>
 		<form method="POST" >
 			<div class="container-fluid">
-				<div class="row" style="height:60px;">
-					<div class="col ml-3 align-self-center">
-						<label style="font-size:150%;">문의</label>
+				<div class="row" style="height:50px;">
+					<div class="col mt-2 align-self-center">
+						<label style="font-size:180%;">문의</label>
 					</div>
 				</div>
 				<div class="row" style="height:60px; margin-bottom:30px;">
 					<div class="fade-text col align-self-center text-center">
-						<label>고민을 말해주세요.</label>
+						<label>어떤 도움이 필요하세요?</label>
 					</div>
 				</div>
 				
@@ -104,6 +104,8 @@
 					if(!$('#questionTitle').val() == ""){
 						if(!$('#questionText').val() == ""){
 							alert("문의가 작성되었습니다.");
+							window.flutter_inappwebview
+                      .callHandler('PageHandler', 'replaceMain');
 						}
 					}
 				});

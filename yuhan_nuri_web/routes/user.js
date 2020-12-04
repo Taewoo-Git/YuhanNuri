@@ -21,7 +21,7 @@ router.post('/', function(req, res,next) { //POST /user
     const password = req.body.password; // 사용자 패스워드
 	const isAutoLogin = req.body.isAutoLogin; // 자동 로그인 여부
 	
-	let adminCheckSql = "SELECT empid, empname, emppwd FROM Counselor WHERE empid = ?" // 관리자 계정인지 체크하는 함수
+	let adminCheckSql = "SELECT * FROM Counselor WHERE empid = ?" // 관리자 계정인지 체크하는 함수
 
 	connection.execute(adminCheckSql, [userId], (err, rows) => {
 		if(err) {
@@ -32,22 +32,20 @@ router.post('/', function(req, res,next) { //POST /user
 			bcrypt.compare(password,rows[0].emppwd).then(function(result){
 				if(result){
 					let adminInfo = {
-						empid : rows[0].empid,
-						empname : rows[0].empname
+						empid: rows[0].empid,
+						empname: rows[0].empname,
+						author: rows[0].positionno
 					};
 					req.session.adminInfo = adminInfo; // 사용자 정보를 세션으로 저장
 					
 					res.redirect('/admin');
 				}else{
-					const error = new Error('로그인 정보가 잘못되었습니다.');
-					error.status = 404;
-					next(error);
+					res.send("<script>alert('로그인 정보가 잘못되었습니다.'); window.location.href = '/';</script>");
 				}
 			});
 		}
-		else res.redirect('/');
+		else res.send("<script>alert('로그인 정보가 잘못되었습니다.'); window.location.href = '/';</script>");
 	});
-	
 });
 
 router.get('/logout', function(req, res) { //GET /user/logout
@@ -67,7 +65,6 @@ router.get('/auto', function(req, res) { //GET /user/auto
 				stuCode: result[0].stuno,
 				stuName: result[0].stuname,
 			};
-
 			req.session.userInfo = userInfo;
 			res.redirect('/');
 		}
@@ -93,12 +90,10 @@ router.post('/mobile', function(req, res) { //POST /user/mobile
 		}
 		
 		if(userInfo != null) {
-			let selectQuery = "select * from User where stuno=?;"
-
-			let updateQuery = "update User set stuname=?, birth=?, major=?, phonenum=?, addr=?, email=?, token=? where stuno=?;"
-	
+			let selectQuery = "select * from User where stuno=?;";
+			let updateQuery = "update User set stuname=?, birth=?, major=?, phonenum=?, addr=?, email=?, token=? where stuno=?;";
 			let insertQuery = "insert into User(stuno, stuname, birth, major, phonenum, addr, email, token)" +
-							  "values(?, ?, ?, ?, ?, ?, ?, ?);"
+							  "values(?, ?, ?, ?, ?, ?, ?, ?);";
 			
 			let updateParam = [userInfo.stuName, userInfo.stuBirth, userInfo.stuMajor, userInfo.stuPhoneNum, userInfo.stuAddr, userInfo.stuEmail, userToken, userInfo.stuCode];
 			
@@ -119,7 +114,7 @@ router.post('/mobile', function(req, res) { //POST /user/mobile
 					}
 				}
 			});
-		}		
+		}
 		res.json(userInfo);
 	}, function(error) {
 		console.error(error);
@@ -143,15 +138,54 @@ router.post('/question',function (req, res, next) { //POST /user/question
 		if(err){
 			console.error(err);
 			next(err);
-		}else {
+		}
+		else {
 			console.info("문의 입력 완료")
 		}
 		res.redirect('/');
 	});
 });
 
+router.get('/satisfaction', isUserLoggedIn,function (req, res) { //GET /user/satisfaction
+	let stuno = req.session.userInfo.stuCode;
+	let selectTestAsk = "SELECT DISTINCT a.askno, a.ask, t.choicetypename, (SELECT GROUP_CONCAT(choice SEPARATOR '|') FROM ChoiceList WHERE askno=a.askno) AS 'choices' " +
+						"FROM AskList a, ChoiceType t WHERE a.typeno=3 AND a.choicetypeno = t.choicetypeno AND a.use='Y';";
+	let selectReservationNo = "SELECT serialno FROM Reservation WHERE stuno = ? AND research = 0 LIMIT 1;";
+	
+	connection.execute(selectReservationNo, [stuno], (err, result) => {
+		if(err) console.error(err);
+		else {
+			connection.execute(selectTestAsk, [], (aErr, aResult) => {
+				if(aErr) console.error(aErr);
+				else {
+					res.render('satisfaction', {serial: result, testAsk: aResult});
+				}
+			});
+		}
+	});
+});
+
+router.post('/satisfaction',function (req, res, next) { //POST /user/satisfaction
+	let insertAnswerLogResearch = "INSERT INTO AnswerLog(serialno, askno, choiceanswer) VALUES(?, ?, ?);";
+	let updateReservationResearch = "UPDATE Reservation SET research = 1 WHERE serialno = ?;";
+	let dataList = JSON.parse(req.body.Fulldata);
+	
+	for(let i=0; i<dataList.length; i++) {
+		connection.execute(insertAnswerLogResearch, [req.body.reservationNo, dataList[i].question, dataList[i].answer], (err) => {
+			if(err) console.error(err);
+		});
+	}
+	
+	connection.execute(updateReservationResearch, [req.body.reservationNo], (upErr) => {
+		if(upErr) console.error(upErr);
+		else{
+			res.send("<script>window.location.href = '/user/mypage';</script>");
+		}
+	});
+});
+
 router.get('/reservation', function (req, res) { //GET /user/reservation
-	let selectReservation = "SELECT COUNT(*) AS cnt FROM Reservation WHERE stuno=? AND finished=0 LIMIT 1;";
+	let selectReservation = "SELECT COUNT(*) AS cnt FROM Reservation WHERE stuno=? AND research=0 LIMIT 1;";
 	
     let selectUserInfo = "SELECT * FROM User WHERE stuno=?;";
 	
@@ -163,7 +197,6 @@ router.get('/reservation', function (req, res) { //GET /user/reservation
 	
 	let selectPsyTestList = "SELECT * FROM PsyTestList p WHERE p.use='Y';";
 	
-	//res.render('reservation', {result:questionResult, mentalResult:result, stuInfo: });
 	connection.execute(selectReservation, [req.session.userInfo.stuCode], (selectReservationErr, result) => {
 		if(result[0].cnt == 0) {
 			connection.execute(selectUserInfo, [req.session.userInfo.stuCode], (userInfoErr, userInfoResult) => {
@@ -195,16 +228,16 @@ router.get('/reservation', function (req, res) { //GET /user/reservation
 
 router.get('/mypage',isUserLoggedIn, function (req, res) { //GET /user/mypage	
 	let reservationSelect = 'SELECT date, starttime, status, empid FROM Reservation ' +
-							'WHERE typeno=1 AND stuno=? order by date desc';
+							'WHERE typeno=1 AND stuno=? AND finished=0 order by date desc, starttime desc';
 	let questionSelect='SELECT * from QuestionBoard where stuno=?';
-	let reservationCheckSelect = 'SELECT * From Reservation WHERE stuno =? AND finished = 0';
-	let reservationStatusConsultSelect = 'SELECT t1.typename, t2.empname, t3.serialno, t3.date, t3.starttime, t3.status FROM '+
-		'ConsultType t1, Counselor t2, Reservation t3 WHERE t3.typeno = t1.typeno AND t3.empid = t2.empid AND t3.stuno = ? AND t3.finished = 0';
-	let reservationStatusPsyTestSelect = 'SELECT t1.serialno, t1.status, t3.testname FROM Reservation t1, PsyTest t2, PsyTestList t3 WHERE t1.finished = 0 '+
+	let reservationCheckSelect = 'SELECT * From Reservation WHERE stuno =? AND research = 0';
+	let reservationStatusConsultSelect = 'SELECT t1.typename, t2.empname, t3.serialno, t3.date, t3.starttime, t3.status, t3.finished, t3.research FROM '+
+		'ConsultType t1, Counselor t2, Reservation t3 WHERE t3.typeno = t1.typeno AND t3.empid = t2.empid AND t3.stuno = ? AND t3.research = 0';
+	let reservationStatusPsyTestSelect = 'SELECT t1.serialno, t1.status, t1.finished, t1.research, t3.testname FROM Reservation t1, PsyTest t2, PsyTestList t3 WHERE t1.research = 0 '+
 		'AND t1.stuno = ? AND t1.serialno = t2.serialno AND t2.testno = t3.testno;';
 	
 	let isAnswerList=[];
-	let empno = '';
+	let empid = '';
 	let isChatting;	// 0: "예약된 채팅상담이 없습니다."
 					// 1: 채팅창 제공
 					// 2: "예약 접수를 기다리고 있습니다."
@@ -222,7 +255,7 @@ router.get('/mypage',isUserLoggedIn, function (req, res) { //GET /user/mypage
 					if(now == rsv) {
 						if(result[0].starttime === Number(moment().format('HH'))) {
 							isChatting = 1;
-							empno = result[0].empno;
+							empid = result[0].empid;
 						}
 						else isChatting = 3;
 					}
@@ -233,8 +266,6 @@ router.get('/mypage',isUserLoggedIn, function (req, res) { //GET /user/mypage
 			}
 		}
 	});
-	
-	
 	
 	connection.execute(questionSelect,[req.session.userInfo.stuCode],(err,rows)=>{
 		if(err){
@@ -259,8 +290,8 @@ router.get('/mypage',isUserLoggedIn, function (req, res) { //GET /user/mypage
 									res.render('mypage', {
 										stuName: req.session.userInfo.stuName,
 										stuCode: req.session.userInfo.stuCode,
-										empid: 'emp100001', //empid,
-										isChatting: 1, //isChatting,
+										empid: empid,
+										isChatting: isChatting,
 										questions:rows,
 										isAnswerList:isAnswerList,
 										isReservationType:0,
@@ -276,8 +307,8 @@ router.get('/mypage',isUserLoggedIn, function (req, res) { //GET /user/mypage
 									res.render('mypage', {
 										stuName: req.session.userInfo.stuName,
 										stuCode: req.session.userInfo.stuCode,
-										empid: 'emp100001', //empid,
-										isChatting: 1, //isChatting,
+										empid: empid,
+										isChatting: isChatting,
 										questions:rows,
 										isAnswerList:isAnswerList,
 										isReservationType:1,
@@ -291,8 +322,8 @@ router.get('/mypage',isUserLoggedIn, function (req, res) { //GET /user/mypage
 						res.render('mypage', {
 							stuName: req.session.userInfo.stuName,
 							stuCode: req.session.userInfo.stuCode,
-							empid: 'emp100001', //empid,
-							isChatting: 1, //isChatting,
+							empid: empid,
+							isChatting: isChatting,
 							questions:rows,
 							isAnswerList:isAnswerList,
 							isReservationType:2,
@@ -301,7 +332,6 @@ router.get('/mypage',isUserLoggedIn, function (req, res) { //GET /user/mypage
 					}
 				}
 			});
-			
 		}
 	});
 });
@@ -309,7 +339,7 @@ router.get('/mypage',isUserLoggedIn, function (req, res) { //GET /user/mypage
 router.post('/mypage',function (req, res, next) { //POST /user/question
 	let userReservationNum = req.body.btnCancelReservation;
 	let reservationStatusSelect = 'SELECT status, finished FROM Reservation WHERE serialno = ?';
-	let reservationCancelSql = 'UPDATE Reservation SET status = 1, finished = 1 WHERE serialno = ?';
+	let reservationCancelSql = 'UPDATE Reservation SET status = 1, finished = 1, research = 1 WHERE serialno = ?';
 	
 	connection.execute(reservationStatusSelect, [userReservationNum], (err, result) => {
 		if(err) console.error(err);
@@ -333,18 +363,17 @@ let getUserInfo = function(userId, password) {
 		let tempInfo = []; // 임시 배열
 		let userInfo = null; // 사용자 정보
 		let url = 'http://portal.yuhan.ac.kr/user/loginProcess.face?userId=' + userId + '&password=' + password; // 로그인 세션 URL
-
+		
 		cheerio.set('browser', 'chrome'); // 브라우저 설정
 		cheerio.fetch(url)
-		.then(function(result) {
+			.then(function(result) {
 			if(result.response.cookies.EnviewSessionId)
 				return cheerio.fetch('http://m.yuhan.ac.kr/bachelor/bcUserInfoR.jsp'); // 사용자 정보 URL
 		})
-		.then(function(result) {
+			.then(function(result) {
 			result.$('td').each(function(index, element) {
 				tempInfo.push(result.$(this).text().trim()); // 사용자 정보 임시 저장
 			});
-
 			userInfo = {
 				stuCode: tempInfo[0],
 				stuName: tempInfo[1],
@@ -354,13 +383,12 @@ let getUserInfo = function(userId, password) {
 				stuEmail: tempInfo[6],
 				stuPhoneNum: tempInfo[5]
 			};
-
 			resolve(userInfo);
 		})
-		.catch(function(err) {
+			.catch(function(err) {
 			reject("Login Fail");
 		})
-		.finally(function() {
+			.finally(function() {
 			cheerio.reset(); // cheerio 초기화 → 로그인 세션 중복 해결
 		});
 	});

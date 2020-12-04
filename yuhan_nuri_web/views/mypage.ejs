@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>마이페이지</title>
+		<title>유한누리 마이페이지</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -138,8 +138,8 @@
 		</style>
 	</head>
 	<body class="container">
-		<div class="row" style="height:60px; margin-bottom:20px;">
-			<div class="col align-self-center">
+		<div class="row" style="height:50px; margin-bottom:20px;">
+			<div class="col mt-2 align-self-center">
 				<label style="font-size:180%;">마이페이지</label>
 			</div>
 		</div>
@@ -169,67 +169,72 @@
 					<%if(isReservationType === 1){%>
 						<tr>
 							<th scope="row" style="width:45%;">상담유형</th>
-							<td><%=reservationBoard[0].typename%></td>
+							<td style="color:#5a5a5a;"><%=reservationBoard[0].typename%></td>
 						</tr>
 						<tr>
 							<th scope="row">상담사명</th>
-							<td><%=reservationBoard[0].empname%></td>
+							<td style="color:#5a5a5a;"><%=reservationBoard[0].empname%></td>
 						</tr>
 						<tr>
 							<th scope="row">예약날짜</th>
-							<td><%let dateArr = reservationBoard[0].date.split('-'); %>
+							<td style="color:#5a5a5a;"><%let dateArr = reservationBoard[0].date.split('-'); %>
 								<%=dateArr[0]+"년 "%><%=dateArr[1]+"월 "%><%=dateArr[2]+"일"%>
 							</td>
 						</tr>
 						<tr>
 							<th scope="row">시작시간</th>
-							<td><%if(reservationBoard[0].starttime < 12){%>
+							<td style="color:#5a5a5a;"><%if(reservationBoard[0].starttime < 12){%>
 									오전 <%=reservationBoard[0].starttime%>시
 								<%}else{%>
 									오후 <%=reservationBoard[0].starttime - 12%>시	
 								<%}%>
 							</td>
 						</tr>
-						<tr>
+						<tr style="height:65px;">
 							<th scope="row">접수현황</th>
-							<%if(reservationBoard[0].status === 0){%>
-								<td style="color:red;">접수중</td>
-							<%}else{%>
-								<td style="color:green;">접수완료</td>
+							<%if(reservationBoard[0].status === 0 && reservationBoard[0].finished === 0 && reservationBoard[0].research === 0){%>
+								<td><label style="color:red; margin:0px;">접수 중</label>&nbsp;<label style="font-size:80%; color:gray;">(확정 시 '완료'로 변경됨)</label></td>
+							<%}else if(reservationBoard[0].status === 1 && reservationBoard[0].finished === 0 && reservationBoard[0].research === 0){%>
+								<td style="color:green;">접수 완료</td>
+							<%}else if(reservationBoard[0].status === 1 && reservationBoard[0].finished === 1 && reservationBoard[0].research === 0){%>
+								<td style="color:green;">상담 완료</td>
 							<%}%>
 						</tr>
 					<%}else{%>
 							<tr>
 								<th scope="row" style="width:45%;">상담유형</th>
-								<td>심리검사</td>
+								<td style="color:#5a5a5a;">심리검사</td>
 							</tr>
 							<tr>
 								<th scope="row">검사목록</th>
-								<td>
+								<td style="color:#5a5a5a;">
 								<%for(let i=0; i<reservationBoard.length; i++){%>
 									<%=reservationBoard[i].testname%><br/>
 								<%}%>
 								</td>
 							</tr>
-							<tr>
+							<tr style="height:65px;">
 								<th scope="row">접수현황</th>
-								<%if(reservationBoard[0].status === 0){%>
-									<td style="color:red;">접수중</td>
-								<%}else{%>
-									<td style="color:green;">접수완료</td>
-								<%}%>
+								<%if(reservationBoard[0].status === 0 && reservationBoard[0].finished === 0 && reservationBoard[0].research === 0){%>
+								<td><label style="color:red; margin:0px;">접수 중</label>&nbsp;<label style="font-size:80%; color:gray;">(확정 시 '완료'로 변경됨)</label></td>
+							<%}else if(reservationBoard[0].status === 1 && reservationBoard[0].finished === 0 && reservationBoard[0].research === 0){%>
+								<td style="color:green;">접수 완료</td>
+							<%}else if(reservationBoard[0].status === 1 && reservationBoard[0].finished === 1 && reservationBoard[0].research === 0){%>
+								<td style="color:green;">접수 완료</td>
+							<%}%>
 							</tr>
 					<%}%>
 				</table>
 				<form method="POST">
 					<%if(reservationBoard[0].status === 0){%>
-						<input type="hidden" name="btnCancelReservation" value="<%=reservationBoard[0].serialno%>">
-						<input type="submit" class="btn btn-primary pull-right" value="취 소" style="padding:.300rem .60rem">
+						<input type="hidden" id="cancelSerialno" name="btnCancelReservation" value="<%=reservationBoard[0].serialno%>">
+						<input type="submit" id="cancelSubmit" class="btn btn-primary pull-right" value="취 소" style="padding:.300rem .60rem">
 					<%}%>
 				</form>
-					
+					<%if(reservationBoard[0].status === 1 && reservationBoard[0].finished === 1 && reservationBoard[0].research === 0){%>
+						<input type="button" class="btn btn-success pull-right" onclick = "location.href = '/user/satisfaction'" value="만족도 조사">
+					<%}%>
 				<%}%>
-				
 			</div>
 			<div class="tab-pane fade" style="padding:0rem!important;" id="question">
 				<%if(questions.length===0){%>
@@ -240,23 +245,23 @@
 						<%questions.forEach(function(v,i){%>
 						<%if(isAnswerList[i]==='완료'){%>
 							<tr style="height:50px;"  data-toggle="collapse" href="#collapse<%=i%>">
-								<td style='width: 20%; color:green; font-size: 0.9em;'>완료</td>
+								<td style='width: 20%; color:green; font-size: 0.9em;'>완 료</td>
 								<td align=center style="font-size: 0.9em; width: 50%;"><%=v.title%></td>
 								<td align=right style="font-size: 0.9em; width:20%;"><%=v.date%></td>
 							</tr>	
 							<tr>
-								<td colspan="3" style="padding:0 !important">
+								<td colspan="3" style="padding:0 !important;">
 									<div id="collapse<%=i%>" class="collapse in p-3">
-										<h5>
-											내용
+										<h5 >
+											<label style="margin:0px;">내 용</label>
 										</h5>
-										<p>
+										<p class="mb-5" style="color:#5a5a5a;">
 											<%= v.content%>
 										</p>
 										<h5>
-											답글
+											<label style="margin:0px;">답 글</label>
 										</h5>
-										<p>
+										<p style="color:#5a5a5a;">
 											<%=v.answer%>
 										</p>
 									</div>
@@ -278,12 +283,25 @@
 				<div class='align_spinner' id='chattingLoad'>
 					<div class='spinner-border text-primary'></div>
 				</div>
+				<a id="waitingMsg" style="position:absolute; display:none; text-align:center; top:57%;
+										  transform:translateY(-50%); left:50%; transform:translateX(-50%);">
+					상담 대기 중입니다. <br/>
+					잠시만 기다려 주세요.
+				</a>
 			</div>
 		</div>
 		
 		<script src="/socket.io/socket.io.js"></script>
 		<script>
-			$(function() {				
+			$(function() {
+				if($('#cancelSubmit')) {
+					let cancel = io('/reaction');
+					
+					$('#cancelSubmit').click(function(e) {
+						cancel.emit('cancel', $('#cancelSerialno').val());
+					});
+				}
+				
 				if(location.search.includes("chatting")) {
 					$("#chatting").addClass("show active");
 					$("#chat").addClass("active");
@@ -298,44 +316,6 @@
 				const myname = "<%= stuName %>";
 				const mycode = "<%= stuCode %>";
 				const empid = "<%= empid %>";
-				
-				const socket = io('/chat');
-				
-				const chattingElm = "<div class='card' id='chattingCard'>" +
-							"<div id='bodyChat' class='card-body msg_card_body'>" +
-							"</div>" +
-							"<div class='card-footer' style='padding:0!important;'>" +
-								"<div class='input-group'>" +
-									"<input type='text' id='msgForm' class='form-control type_msg' style='border-radius:0!important;'" +
-									" placeholder='메시지 전송...'/>" +
-										
-									"<div id='btnSend' class='input-group-append' style='border-radius:0!important;'>" +
-										"<span class='input-group-text send_btn'><i class='fa fa-paper-plane text-primary'></i></span>" +
-									"</div>" +
-								"</div>" +
-							"</div>" +
-						"</div>";
-				
-				socket.emit("join", {
-					name: myname,
-					code: mycode,
-					empid: empid
-				});
-				
-				socket.on("msg", function(data) {
-					$("#bodyChat").append(
-						"<div class='d-flex justify-content-start mb-5 mt-2'>" +
-							"<div class='msg_cotainer'>" +
-								"<span class='msg_name'>" + data.name + " 선생님 </span>" +
-								escapeHtml(data.msg) +
-							"</div>" +
-							"<div class='msg_time'>" +
-								new Date().getHours() + ":" + ("00" + new Date().getMinutes()).slice(-2) +
-							"</div>" +
-						"</div>"
-					);
-					$("#bodyChat").scrollTop($("#bodyChat")[0].scrollHeight);
-				});
 				
 				<% if(isChatting === 0) { %>
 						$("#chatting").append(`
@@ -354,38 +334,131 @@
 							location.replace(location.origin+location.pathname+"?chatting");
 						});
 				<% } else if(isChatting === 1) { %>
-						setHeight();
+						const socket = io('/chat');
+						let isInit = 0;
+				
+						$("#waitingMsg").css('display', 'block');
+				
+						socket.emit("waiting", {
+							name: myname,
+							code: mycode,
+							empid: empid
+						});
+				
+						socket.on("okay", function(chatlog) {
+							if(isInit === 0) {
+								isInit = 1;
+								$("#waitingMsg").css('display', 'none');
+								
+								socket.emit("join");
 
-						$("#chatting").append(chattingElm);
+								$("#chattingLoad").remove();
+								$("#chatting").append(`
+									<div class='card' id='chattingCard'>
+										<div id='bodyChat' class='card-body msg_card_body'>
+										</div>
+										<div class='card-footer' style='padding:0!important;'>
+											<div class='input-group'>
+												<input type='text' id='msgForm' class='form-control type_msg' style='border-radius:0!important;'
+												 placeholder='메시지 전송...'/>
 
-						$("#chattingLoad").remove();
+												<div id='btnSend' class='input-group-append' style='border-radius:0!important;'>
+													<span class='input-group-text send_btn'><i class='fa fa-paper-plane text-primary'></i></span>
+												</div>
+											</div>
+										</div>
+									</div>
+								`);
+								
+								if(chatlog != null) {
+									let log = chatlog.split('\n');
+									for(let i=0; i<log.length-1; i++) {
+										if(log[i].includes('학생')) {
+											$("#bodyChat").append(
+												"<div class='d-flex justify-content-end mb-5 mt-2'>" +
+													"<div class='msg_time_send'>" +
+														log[i].split('： ')[1].split(' （')[1].split('시 ')[0] + ":" + log[i].split('： ')[1].split(' （')[1].split('시')[1].split('분')[0] +
+													"</div>" +
+													"<div class='bg-primary msg_cotainer_send'>" +
+														"<span class='msg_name_send'>Me</span>" +
+														escapeHtml(log[i].split('： ')[1].split(' （')[0]) +
+													"</div>" +
+												"</div>"
+											);
+										}
+										else {
+											$("#bodyChat").append(
+												"<div class='d-flex justify-content-start mb-5 mt-2'>" +
+													"<div class='msg_cotainer'>" +
+														"<span class='msg_name'>" + log[i].split('： ')[0] + " </span>" +
+														escapeHtml(log[i].split('： ')[1].split(' （')[0]) +
+													"</div>" +
+													"<div class='msg_time'>" +
+														log[i].split('： ')[1].split(' （')[1].split('시 ')[0] + ":" + log[i].split('： ')[1].split(' （')[1].split('시')[1].split('분')[0] +
+													"</div>" +
+												"</div>"
+											);
+										}
+									}
+								}
+								
 
-						$('#msgForm').focus();
+								$('#btnSend').click(function(e) {
+									if($("#msgForm").val() != "") {
+										socket.emit("msg", $("#msgForm").val());
+										$("#bodyChat").append(
+											"<div class='d-flex justify-content-end mb-5 mt-2'>" +
+												"<div class='msg_time_send'>" +
+													new Date().getHours() + ":" + ("00" + new Date().getMinutes()).slice(-2) +
+												"</div>" +
+												"<div class='bg-primary msg_cotainer_send'>" +
+													"<span class='msg_name_send'>Me</span>" +
+													escapeHtml($('#msgForm').val()) +
+												"</div>" +
+											"</div>"
+										);
+										$("#bodyChat").scrollTop($("#bodyChat")[0].scrollHeight);
+										$('#msgForm').val("");
+										$('#msgForm').focus();
+									}
+									else {
+										$('#msgForm').focus();
+									}
+								});
 
-						$('#btnSend').click(function(e) {
-							if($("#msgForm").val() != "") {
-								socket.emit("msg", $("#msgForm").val());
-								$("#bodyChat").append(
-									"<div class='d-flex justify-content-end mb-5 mt-2'>" +
-										"<div class='msg_time_send'>" +
-											new Date().getHours() + ":" + ("00" + new Date().getMinutes()).slice(-2) +
-										"</div>" +
-										"<div class='bg-primary msg_cotainer_send'>" +
-											"<span class='msg_name_send'>Me</span>" +
-											escapeHtml($('#msgForm').val()) +
-										"</div>" +
-									"</div>"
-								);
-								$("#bodyChat").scrollTop($("#bodyChat")[0].scrollHeight);
-								$('#msgForm').val("");
+								$("#msgForm").keydown(function(key) {
+									if (key.keyCode == 13) $('#btnSend').click();
+								});
+
+								socket.on("msg", function(data) {
+									$("#bodyChat").append(
+										"<div class='d-flex justify-content-start mb-5 mt-2'>" +
+											"<div class='msg_cotainer'>" +
+												"<span class='msg_name'>" + data.name + " 선생님 </span>" +
+												escapeHtml(data.msg) +
+											"</div>" +
+											"<div class='msg_time'>" +
+												new Date().getHours() + ":" + ("00" + new Date().getMinutes()).slice(-2) +
+											"</div>" +
+										"</div>"
+									);
+									$("#bodyChat").scrollTop($("#bodyChat")[0].scrollHeight);
+								});
+								
+								socket.on("finish", function(data) {
+									socket.disconnect();
+									
+									alert("상담사에 의해 채팅이 종료되었습니다.");
+									
+									window.flutter_inappwebview
+										.callHandler('PageHandler', 'replaceMain');
+								});
 							}
 							else {
-								$('#msgForm').focus();
+								socket.emit("join");
 							}
-						});
-
-						$("#msgForm").keydown(function(key) {
-							if (key.keyCode == 13) $('#btnSend').click();
+							
+							setHeight();
 						});
 				<% } else if(isChatting === 2) { %>
 						$("#chatting").append(`
@@ -425,6 +498,7 @@
 			function setHeight() {
 				let top = document.getElementsByClassName("row");
 				$("#chatting").height(window.innerHeight - (top[0].clientHeight + top[1].clientHeight) - 20);
+				$("#bodyChat").scrollTop($("#bodyChat")[0].scrollHeight);
 			}
 	
 			// xss 취약점 막는 함수, php의 htmlspecialcharacter 과 같은 함수

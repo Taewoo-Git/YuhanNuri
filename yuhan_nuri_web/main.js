@@ -12,7 +12,13 @@ const helmet=require('helmet');
 const userRouter = require('./routes/user');
 const adminRouter = require('./routes/admin');
 
+const {deleteOneMonth} = require('./routes/admin');
+const {consultTodayPush,consultTomorrowPush} = require('./routes/fcm');
+
 const cookieParser = require('cookie-parser');
+
+const schedule = require('node-schedule');
+const moment=require('moment');
 
 const db = require('./public/res/js/database.js')();
 const connection = db.init();
@@ -27,8 +33,8 @@ app.set('view engine', 'ejs');
 app.engine('html', require('ejs').renderFile);
 
 app.use(express.static(__dirname + '/public'));
-app.use('/uploads',express.static(path.join(__dirname, 'uploads')));
 app.use('/style',express.static(path.join(__dirname, '/public/res/css')));
+app.use('/images',express.static(path.join(__dirname,'/public/res/imgs')));
 app.use('/lib',express.static(path.join(__dirname, '/public/res/lib')));
 
 app.use(express.json());
@@ -53,29 +59,30 @@ if(process.env.NODE_ENV==='production'){
 app.use('/user', userRouter);
 app.use('/admin', adminRouter);
 
-
 const server = app.listen(port, () => {
     console.log('Listening on port ' + port + '\n');
+	deleteOneMonth;
+	consultTodayPush;
+	consultTomorrowPush;
 });
 
 const io = require(__dirname + '/public/res/js/socket.js')(server); // socket.js파일에 server를 미들웨어로 사용
 
 app.get('/', function (req, res) {
-	//console.info("isAutoLogin: " + req.signedCookies.isAutoLogin);
 	let selectHomeBoard = "select  * from HomeBoard";
 
 	if(req.session.userInfo){
 		connection.execute(selectHomeBoard,(err,rows)=>{
 			if(err){
 				console.error(err);
-			}else{
+			}
+			else{
 				res.render('main',{
 					data:rows
 				});
 			}
-		})
+		});
 	}
-	
 	else if(req.signedCookies.isAutoLogin != undefined) res.redirect('/user/auto');
 	else res.render('login');
 });
@@ -83,7 +90,7 @@ app.get('/', function (req, res) {
 app.use((req,res,next)=>{
 	const error=new Error(`${req.method} ${decodeURIComponent(req.url)}는 존재하지 않는 페이지 입니다!`);
 	error.status=404;
-	next(error); 
+	next(error);
 });
 
 app.use((err,req,res,next)=>{

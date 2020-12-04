@@ -397,25 +397,15 @@ router.post("/getConsultApplyForm", isAllAdminLoggedIn, function(req,res, next) 
 });
 
 router.get("/chat",isOnlyAdminLoggedIn, (req, res,next) => {
-	const sql_findTypes="select type from EditTest";
-	let types=[];
-	connection.execute(sql_findTypes,(err,rows)=>{
-		if(err){
-			console.error(err);
-			next(err);
-		}
-		if(rows.length==0){
-			next(err);
-		}else{
-			types=rows;
-		}
-		res.render('chattingForm', {
-			types: types,
-			empid: req.session.adminInfo.empid,
-			empname: req.session.adminInfo.empname
-		});
-		
+	
+	
+	res.render('chattingForm', {
+
+		empid: req.session.adminInfo.empid,
+		empname: req.session.adminInfo.empname
 	});
+		
+	
 });
 
 router.post("/addType",isAllAdminLoggedIn,function(req, res, next){
@@ -443,20 +433,9 @@ router.post("/addType",isAllAdminLoggedIn,function(req, res, next){
 });
 
 router.get("/schedule",isAllAdminLoggedIn,function(req,res,next){ //GET /admin/adminTest
-	const sql_findTypes="select type from EditTest";
-	let types=[];
-	connection.execute(sql_findTypes,(err,rows)=>{
-		if(err){
-			console.error(err);
-			next(err);
-		}
-		if(rows.length==0){
-			next(err);
-		}else{
-			types=rows;
-		}
-		res.render('adminCalendar',{types:types});
-	});
+	
+	res.render('adminCalendar');
+	
 });
 
 
@@ -483,16 +462,6 @@ router.post('/uploadFile',isAllAdminLoggedIn,function(req,res){
 	});
 });
 
-router.get('/appTest',isAllAdminLoggedIn,function(req,res,next){ // 공지사항 출력결과 확인 테스트
-	const sql_selectEditData = "SELECT * FROM EditTest";
-	connection.execute(sql_selectEditData,(err,rows)=>{
-		if(err){
-			next(err);
-			console.error(err);
-		}
-		res.render('applicationTest',{data:rows});
-	});
-});
 
 router.get('/logout',isAllAdminLoggedIn, function(req, res) { //GET /user/logout
     req.session.destroy();
@@ -1144,12 +1113,6 @@ router.get('/getUserChatLog/:serialNo',isOnlyAdminLoggedIn,(req,res,next)=>{
 
 router.get('/getSimpleApplyFormPDF/:serialNo',isAllAdminLoggedIn,(req,res,next)=>{
 	const serialNo=decodeURIComponent(req.params.serialNo);
-	const sql_selectMental = "SELECT a.serialno, a.stuno, a.stuname, a.gender, a.birth, a.email, a.date, " +
-				  "GROUP_CONCAT(b.ask SEPARATOR '|') AS 'asks', GROUP_CONCAT(c.choiceanswer SEPARATOR '|') AS 'answers', " +
-				  "(SELECT GROUP_CONCAT(testname) FROM PsyTestList list, " +
-				  "(SELECT testno FROM PsyTest WHERE serialno=?) psy WHERE psy.testno = list.testno) AS 'testnames' " +
-				  "FROM SimpleApplyForm a, AskList b, AnswerLog c " +
-				  "WHERE a.serialno=? and a.serialno=c.serialno and c.askno=b.askno;";
 	const sql_selectConsultApply = "SELECT a.serialno, a.stuno, a.stuname, a.gender, a.birth, a.email, a.date, " +
 				  "GROUP_CONCAT(b.ask SEPARATOR '|') AS 'asks', " +
 				  "GROUP_CONCAT(c.choiceanswer SEPARATOR '|') AS 'answers', " +
@@ -1168,8 +1131,9 @@ router.get('/getSimpleApplyFormPDF/:serialNo',isAllAdminLoggedIn,(req,res,next)=
 		}else{
 			let asks=ConsultRows[0].asks.split("|");
 			let answers=ConsultRows[0].answers.split("|");
-			let cheknames=ConsultRows[0].checknames.split("|");
-			let scores=ConsultRows[0].scores.split("|");
+			
+			let cheknames=ConsultRows[0].checknames===null ? [] : ConsultRows[0].checknames.split("|");
+			let scores=ConsultRows[0].scores===null ? [] : ConsultRows[0].scores.split("|");
 			for(let i=0; i<scores.length; i++){
 				switch (parseInt(scores[i])) {
 					case 1 :

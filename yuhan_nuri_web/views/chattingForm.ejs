@@ -208,9 +208,9 @@
 			<div class="c-body"> <!-- bbody -->
 				<main class="c-main">
 					<div class="container-fluid" style="height:70vh!important;">
-						<div class='card' id='chattingCard' style="position:relative; height:inherit; margin:0!important; float:left"> 
-							<div id='bodyChat' class='card-body msg_card_body'>
-								<a id="saveLog" style="position:absolute; bottom:12%; right:5%; cursor:dafault; color:lightgray;"> 채팅 내역 저장 </a>	
+						<div class='card' id='chattingCard' style="height:inherit; margin:0!important; float:left"> 
+							<div id='bodyChat' class='card-body msg_card_body' style="position:relative;">
+								<a id="saveLog" style="position:absolute; bottom:3%; right:5%; cursor:dafault; color:lightgray;"> 채팅 내역 저장 </a>	
 							</div> 
 							<div class='card-footer' style='padding:0!important;'> 
 								<div class='input-group'> 
@@ -283,7 +283,7 @@
 				socket.on("waiting", function(stuname) {
 					if($('#stuAlert')) $('#stuAlert').remove();
 					$("#bodyChat").append(`
-						<div id="waitingAlert" style="display:none; position:absolute; bottom:12%; background-color:white;">
+						<div id="waitingAlert" style="display:none; position:absolute; bottom:3%; background-color:white;">
 							${stuname} 학생, 상담 대기 중
 							<button id="waitingBtn" class="btn btn-light btn-sm" style="margin-top:-4px; margin-left:5px;"> 수락 </button>
 						</div>
@@ -315,7 +315,7 @@
 					currentSerialNo = data.stuinfo.serialno;
 					
 					$("#bodyChat").append(`
-						<div id='stuAlert' style="position:absolute; bottom:12%; display:block;">
+						<div id='stuAlert' style="position:absolute; bottom:3%; display:block;">
 							${data.stuinfo.name} 학생과 상담 중
 							<button id="closeChatBtn" class="btn btn-danger btn-sm" style="margin-top:-4px; margin-left:5px;"> 종료 </button>
 						</div>

@@ -15,8 +15,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 final FirebaseMessaging fcm = FirebaseMessaging();
 CookieManager cm;
 
-// [0] 메인 , [1] 예약 , [2] 문의 , [3] 마이페이지 , [4] 만족도조사페이지 , [5]  채팅
-// urls 배열 외의 외부url을 로드할 시 webview가 아닌 기기의 브라우저(크롬,사파리)를 이용해 로드 (하이퍼링크 등)
+// [0] 메인, [1] 예약, [2] 문의, [3] 마이페이지, [4] 만족도조사페이지, [5] 채팅
+// urls 배열 외의 외부url을 로드할 시 webview가 아닌 기기의 브라우저(크롬, 사파리)를 이용해 로드(하이퍼링크 등)
 const urls = [
   'https://yuhannuri.run.goorm.io/',
   'https://yuhannuri.run.goorm.io/user/reservation',
@@ -50,8 +50,8 @@ class _DummyState extends State<YuhanNuri> {
 class YuhanNuriState extends State<YuhanNuri> {
   InAppWebViewController _webViewController;
   DateTime currentBackPressTime;
-  Map<String, String> header; // 전달받은 Cookie객체를 string과 합쳐서 header만듦
-  GlobalKey globalKey = new GlobalKey(); //네비게이션 바 외부에서 접근가능하게 해줄 Key변수
+  Map<String, String> header; // 전달받은 Cookie 객체를 string과 합쳐서 header 만듦
+  GlobalKey globalKey = new GlobalKey(); // 내비게이션 바 외부에서 접근 가능하게 해줄 Key 변수
   CurvedNavigationBarState navBarState;
   final FirebaseMessaging fcm = FirebaseMessaging();
 
@@ -143,16 +143,16 @@ class YuhanNuriState extends State<YuhanNuri> {
                       _webViewController.loadUrl(url: urls[0], headers: header);
                       KeyboardVisibility.onChange.listen((bool visible) async {
                         if (visible) {
-                          //키보드 올라왔을때
+                          // 키보드 올라왔을때
                           if (await _webViewController.getUrl() == urls[3]) {
-                            // 마이페이지 ( 채팅 )
+                            // 마이페이지(채팅)
                             Future.delayed(
                                 Duration(milliseconds: 300),
                                 () async =>
                                     await _webViewController.evaluateJavascript(
                                         source: 'setHeight();'));
                           } else {
-                            // 다른페이지 ( 예약페이지 등)
+                            // 다른페이지(예약페이지 등)
                             Future.delayed(
                                 Duration(milliseconds: 300),
                                 () async =>
@@ -161,9 +161,9 @@ class YuhanNuriState extends State<YuhanNuri> {
                                             'document.activeElement.scrollIntoView( {block: "center"})')); // 해당 텍스트박스를 화면에 나오게
                           }
                         } else {
-                          //키보드가 내려갈때
+                          // 키보드가 내려갈때
                           if (await _webViewController.getUrl() == urls[3]) {
-                            //마이페이지 ( 채팅 ) 이면
+                            // 마이페이지(채팅) 이면
                             Future.delayed(
                                 Duration(milliseconds: 300),
                                 () async =>
@@ -171,18 +171,18 @@ class YuhanNuriState extends State<YuhanNuri> {
                                         source: 'setHeight();'));
                             await _webViewController.evaluateJavascript(
                                 source:
-                                    'document.activeElement.blur()'); //해당 텍스트박스의 포커싱을 지움
+                                    'document.activeElement.blur()'); // 해당 텍스트박스의 포커싱을 지움
                           } else {
                             await _webViewController.evaluateJavascript(
                                 source:
-                                    'document.activeElement.blur()'); //해당 텍스트박스의 포커싱을 지움
+                                    'document.activeElement.blur()'); // 해당 텍스트박스의 포커싱을 지움
                           }
                         }
                       });
                       _webViewController.addJavaScriptHandler(
                           // 웹뷰 JavaScript와 통신하는 핸들러
                           handlerName:
-                              'PageHandler', // 해당 핸들러를 웹뷰에서 호출( 예약완료 버튼클릭 )할 시  메인으로 돌아감
+                              'PageHandler', // 해당 핸들러를 웹뷰에서 호출(예약 완료 버튼 클릭)할 시 메인으로 돌아감
                           callback: (args) async {
                             if (args[0].toString() == "replaceMain") {
                               Future.delayed(Duration(milliseconds: 300), () {
@@ -264,14 +264,14 @@ class YuhanNuriState extends State<YuhanNuri> {
                         now.difference(currentBackPressTime) >
                             Duration(seconds: 2)) {
                       // 전에 back 버튼을 누른적이 없거나
-                      // back 버튼을 눌렀을때의 시간과 전에 back버튼을 눌렀을때의 차이가 2초를 넘었으면
+                      // back 버튼을 눌렀을 때의 시간과 전에 back 버튼을 눌렀을 때의 차이가 2초를 넘었으면
                       currentBackPressTime = now;
-                      showToast("뒤로가기 버튼을 한번 더      \n 클릭하면 종료합니다.");
+                      showToast("뒤로 가기 버튼을 한 번 더      \n 클릭하면 종료합니다.");
                       return Future.value(false); // 종료 안함.
                     }
-                    return Future.value(true); // if문이 거짓일때는 바로 종료
+                    return Future.value(true); // if문이 거짓일 때는 바로 종료
                   }
-                  //마이페이지에서 채팅창이 활성화되어있는지
+                  // 마이페이지에서 채팅 창이 활성화되어있는지
                   bool isChatting = await _webViewController.evaluateJavascript(
                       source:
                           'if(document.getElementById("chattingCard") != null) true;' +

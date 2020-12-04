@@ -75,7 +75,9 @@ class _LoginState extends State<Login> {
         Text(
           '아이디',
           style: TextStyle(
-              color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+              color: Colors.blueGrey[300],
+              fontSize: 13,
+              fontWeight: FontWeight.bold),
         ),
         SizedBox(
           height: 10,
@@ -84,7 +86,7 @@ class _LoginState extends State<Login> {
           alignment: Alignment.centerLeft,
           decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(7),
+              borderRadius: BorderRadius.circular(5),
               boxShadow: [
                 BoxShadow(
                     color: Colors.black26, blurRadius: 6, offset: Offset(0, 2))
@@ -118,7 +120,9 @@ class _LoginState extends State<Login> {
         Text(
           '비밀번호',
           style: TextStyle(
-              color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+              color: Colors.blueGrey[300],
+              fontSize: 13,
+              fontWeight: FontWeight.bold),
         ),
         SizedBox(
           height: 10,
@@ -127,7 +131,7 @@ class _LoginState extends State<Login> {
           alignment: Alignment.centerLeft,
           decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(7),
+              borderRadius: BorderRadius.circular(5),
               boxShadow: [
                 BoxShadow(
                     color: Colors.black26, blurRadius: 6, offset: Offset(0, 2))
@@ -162,7 +166,7 @@ class _LoginState extends State<Login> {
         elevation: 5,
         onPressed: () => {portalLogin(userID, userPassword, isAutoLogin)},
         padding: EdgeInsets.all(15),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
         // color: Colors.white,
         color: Color(0xFF0275D8),
         child: Text('로그인',
@@ -182,7 +186,8 @@ class _LoginState extends State<Login> {
       activeColor: Colors.white,
       title: Text(
         'Remember',
-        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        style:
+            TextStyle(color: Colors.blueGrey[300], fontWeight: FontWeight.bold),
       ),
       value: isAutoLogin,
       onChanged: (bool newValue) {

@@ -43,24 +43,24 @@
 				<% for(let i=0; i<testAsk.length; i++){ %>
 					<div class="form-group">
 						<div class="form-group form-question">
-							<label id="mentalAsk<%=i%>"><b><%= testAsk[i].ask %></b></label><br/>
-							<input type="hidden" value="<%=testAsk[i].askno%>" id="mentalAskVal<%=i%>"/>
+							<label id="satisfaction<%=i%>"><b><%= unescape(testAsk[i].ask) %></b></label><br/>
+							<input type="hidden" value="<%=testAsk[i].askno%>" id="satisfactionVal<%=i%>"/>
 						<% if(testAsk[i].choicetypename === "Radio"){ %>
 							<% for(let j=0; j<testAsk[i].choices.split('|').length; j++){ %>
-							<input type="radio" class="from-input mb-4" name="mentalAskAnswer<%=i%>"
+							<input type="radio" class="from-input mb-4" name="satisfactionAnswer<%=i%>"
 								   id="<%= 'mentalAnswer'+i+j %>" value="<%= testAsk[i].choices.split('|')[j] %>">
-							<label for="<%= 'mentalAnswer'+i+j %>"><%= testAsk[i].choices.split('|')[j] %></label><br/>
+							<label for="<%= 'mentalAnswer'+i+j %>"><%= unescape(testAsk[i].choices.split('|')[j]) %></label><br/>
 							<% } %>
 						<% } %>
 						<% if(testAsk[i].choicetypename === "Check"){ %>
 							<% for(let j=0; j<testAsk[i].choices.split('|').length; j++){ %>
-							<input type="checkbox" class="from-input mb-4" name="mentalAskAnswer<%=i%>"
+							<input type="checkbox" class="from-input mb-4" name="satisfactionAnswer<%=i%>"
 								   id="<%= 'mentalAnswer'+i+j %>" value="<%= testAsk[i].choices.split('|')[j] %>">
-							<label for="<%= 'mentalAnswer'+i+j %>"><%= testAsk[i].choices.split('|')[j] %></label><br/>
+							<label for="<%= 'mentalAnswer'+i+j %>"><%= unescape(testAsk[i].choices.split('|')[j]) %></label><br/>
 							<% } %>
 						<% } %>
 						<% if(testAsk[i].choicetypename === "Normal"){ %>
-							<textarea class="form-control mb-4" placeholder="자유롭게 작성해 주세요." name="mentalAskAnswer<%=i%>"
+							<textarea class="form-control mb-4" placeholder="자유롭게 작성해 주세요." name="satisfactionAnswer<%=i%>"
 									  id="<%= 'mentalAnswer'+i %>" style="resize:none;"></textarea>
 						<% } %>
 						</div>
@@ -90,42 +90,42 @@
 				for(let i=0; i < <%= testAsk.length %>; i++) {
 					let temp = {}
 
-					let what_type = document.getElementsByName("mentalAskAnswer"+i)[0].type;
+					let what_type = document.getElementsByName("satisfactionAnswer"+i)[0].type;
 					if(what_type === 'radio') {
-						let checkAnswer = $('input[name=mentalAskAnswer'+i+']:checked').val();
-						if(checkAnswer != undefined) temp.answer = $('input[name=mentalAskAnswer'+i+']:checked').val();
+						let checkAnswer = $('input[name=satisfactionAnswer'+i+']:checked').val();
+						if(checkAnswer != undefined) temp.answer = $('input[name=satisfactionAnswer'+i+']:checked').val();
 						else {
 							alert('답변하지 않은 질문이 있습니다.');
-							$('input[name=mentalAskAnswer'+i+']').focus();
+							$('input[name=satisfactionAnswer'+i+']').focus();
 							dynamic.length = 0;
 							return null;
 						}
 					}
 					else if(what_type === 'checkbox') {
 						let checkAnswer = [];
-						$('input:checkbox[name=mentalAskAnswer'+i+']:checked').each(function() {
+						$('input:checkbox[name=satisfactionAnswer'+i+']:checked').each(function() {
 							checkAnswer.push($(this).val());
 						});
 
 						if(checkAnswer.length !== 0) temp.answer = checkAnswer.toString();
 						else {
 							alert('답변하지 않은 질문이 있습니다.');
-							$('input:checkbox[name=mentalAskAnswer'+i+']').focus();
+							$('input:checkbox[name=satisfactionAnswer'+i+']').focus();
 							dynamic.length = 0;
 							return null;
 						}
 					}
 					else if(what_type === 'textarea') {
-						let txt = $('[name=mentalAskAnswer'+i+']').val();
-						if(txt !== "") temp.answer = $('[name=mentalAskAnswer'+i+']').val();
+						let txt = $('[name=satisfactionAnswer'+i+']').val();
+						if(txt !== "") temp.answer = $('[name=satisfactionAnswer'+i+']').val();
 						else {
 							alert('답변하지 않은 질문이 있습니다.');
-							$('[name=mentalAskAnswer'+i+']').focus();
+							$('[name=satisfactionAnswer'+i+']').focus();
 							dynamic.length = 0;
 							return null;
 						}
 					}
-					temp.question = $('#mentalAskVal'+i).val();
+					temp.question = $('#satisfactionVal'+i).val();
 					dynamic.push(temp);
 				}
 				return dynamic;

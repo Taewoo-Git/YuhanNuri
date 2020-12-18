@@ -90,7 +90,7 @@
     </header>
     <div class="c-body">
         <main class="c-main">
-            <div class="container-fluid">
+            <div class="container-fluid" style="width:70%!important;">
                 <div class="fade-in">
                     <div class="card">
 						<div class="card-body">
@@ -121,10 +121,10 @@
                                 </li>
                             </ul>
 							<% result.forEach(function(v,i){%>
-								<div class="input-group mb-3" style="width:65%; margin:0 auto;" id="ask_<%=v.checkno%>">
-									<input type="text" class="form-control" placeholder="질문을 입력해주세요."
+								<div class="input-group mb-3" style="width:75%; margin:0 auto;" id="ask_<%=v.checkno%>">
+									<input type="text" class="form-control questionField" placeholder="질문을 입력해주세요." readonly style="background-color:white!important;"
 										aria-label="Example text with button addOn1" aria-describedby="button-addon1" oninput="updateAsk(ask_<%=v.checkno%>,this)"
-										   value="<%=v.checkname%>">
+										   value="<%=unescape(v.checkname)%>">
 									<div class="input-group-append">
 										<button class="btn btn-outline-secondary remove_event_btn" type="button"
 											id="button-removeOn2" style="color:#f05454;" onClick="removeAsk(ask_<%=v.checkno%>,<%=v.checkno%>)">X</button>
@@ -133,7 +133,7 @@
 							<%})%>
                         </div>
 						<div class="btn-group-vertical position-fixed fixed_btn_position">
-					<button type="button" class="btn btn-secondary" onClick=addAsk('#askList')>
+					<button type="button" class="btn btn-secondary" onClick="addAsk('#askList')">
 						질문 추가
 					</button>
 					<button class="btn btn-primary" value="save" onClick="saveList()">
@@ -159,14 +159,16 @@
 			},
 			<%});%>];
         function addAsk(e) {
-            $(e).append(`<div class="input-group mb-3" style="width:65%; margin:0 auto;" id="ask_${++i}">
-                                <input type="text" class="form-control" placeholder="질문을 입력해주세요."
-                                    aria-label="Example text with button addon" aria-describedby="button-addon1" oninput=updateAsk(ask_${i},this)>
-                                <div class="input-group-append">
-                                    <button class="btn btn-outline-secondary" type="button" id="button-addon2"
-                                        style="color:#f05454;" onClick=removeAsk(ask_${i},${i})>X</button>
-                                </div>
-                            </div>`);
+            $(e).append(`
+				<div class="input-group mb-3" style="width:75%; margin:0 auto;" id="ask_${++i}">
+					<input type="text" class="form-control checkTitle" placeholder="질문을 입력해주세요." style="background-color:white!important;"
+						aria-label="Example text with button addon" aria-describedby="button-addon1" oninput=updateAsk(ask_${i},this)>
+					<div class="input-group-append">
+						<button class="btn btn-outline-secondary" type="button" id="button-addon2"
+							style="color:#f05454;" onClick=removeAsk(ask_${i},${i})>X</button>
+					</div>
+				</div>
+			`);
             askList.push({ id: `ask_${i}`, ask: '' });
 			cur_i = i;
         }
@@ -185,47 +187,69 @@
 				$.ajax({
 					type:'POST',
 					dataType:'json',
-					url:'../noUseSelfCheck',
+					url:'./noUseSelfCheck',
 					async:true,
 					data:{"noUse" : askno},
 					success:function(data){
-						window.location.reload();
-						}
-					});
+					}
+				});
             	$(me).remove();
 			}
         }
         function updateAsk(parent,me) {
             const findMyIndex = askList.findIndex((v) => v.id === parent.id);
-            askList[findMyIndex].ask = me.value;
+            askList[findMyIndex].ask = overidingEscape(me.value);
         }
 		function saveList(){
 			$.ajax({
-					type: 'POST',
-					dataType: 'json',
-					url: './saveSelfCheckList',
-					async: true,
-					data: { sendAjax: JSON.stringify(askList) },
-					success: function (data) {
-						if (data.state === 'ok') {
-							$('.c-main').prepend(`<div class="alert alert-success alert-dismissible fade show" role="alert">
-							  <strong>저장 성공!</strong> 성공적으로 저장이 되었어요!
-							  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-								<span aria-hidden="true">&times;</span>
-							  </button>
-							</div>`);
-						}else{
-							$('.c-main').prepend(`<div class="alert alert-danger alert-dismissible fade show" role="alert">
-							  <strong>저장 실패!</strong> 이런! 다시 한번 더 확인 해보아요!
-							  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-								<span aria-hidden="true">&times;</span>
-							  </button>
-							</div>`);
-						}
-					},
-				});
+				type: 'POST',
+				dataType: 'json',
+				url: './saveSelfCheckList',
+				async: true,
+				data: { sendAjax: JSON.stringify(askList) },
+				success: function (data) {
+					if (data.state === 'ok') {
+						$('.c-main').prepend(`<div class="alert alert-success alert-dismissible fade show successAlert" role="alert">
+						  <strong>저장 완료!</strong> 질문이 정상적으로 저장되었습니다.
+						  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						  </button>
+						</div>`);
+						
+						$('.checkTitle').each(function(index, item){ 
+							$(item).prop('readonly', true);
+						});
+						
+						$(window).scrollTop(0);
+						
+						$('.successAlert').eq(0).fadeOut(3000);
+					}
+					else{
+						$('.c-main').prepend(`<div class="alert alert-danger alert-dismissible fade show failAlert" role="alert">
+						  <strong>저장 실패!</strong> 다시 한번 확인해 주세요.
+						  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						  </button>
+						</div>`);
+						
+						$(window).scrollTop(0);
+						
+						$('.failAlert').eq(0).fadeOut(3000);
+					}
+				},
+			});
 		}
-        
+		
+		function overidingEscape(str) {
+			var map = {
+				'&': escape('&'),
+				'<': escape('<'),
+				'>': escape('>'),
+				'"': escape('"'),
+				"'": escape('\'')
+			};
+			return str.replace(/[&<>"']/g, function(m) { return map[m]; });
+		}
     </script>
     <script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
 </body>

@@ -44,12 +44,11 @@ exports.deleteOneMonth = ()=> {
 	deleteRule.dayOfWeek = [0, new schedule.Range(0,6)];
 	deleteRule.hour= 00;
 	deleteRule.minute= 00;
-	const sql_deleteQuestionAfterOneMonth="delete from QuestionBoard where answerdate<=?"; // 현재 날짜에서 30일 이전의 문의 데이터를 지웁니다.
-	const sql_deleteSimpleApplyFormAfterOneMonth="delete from SimpleApplyForm where date <= ?"; // 현재 날짜에서 30일 이전의 상담 신청서 데이터를 지웁니다.
+	const sql_deleteQuestionAfterOneMonth="delete from QuestionBoard where answerdate<=?"; // 하루에 한번 현재 날짜에서 30일 이전의 문의 데이터를 지웁니다.
+	const sql_deleteSimpleApplyFormAfterOneMonth="delete from SimpleApplyForm where date <= ?"; // 하루에 한번 현재 날짜에서 30일 이전의 상담 신청서 데이터를 지웁니다.
 	const sql_test1 = "select * from QuestionBoard where answerdate <= ?";
 	const sql_test2= "select * from SimpleApplyForm where date <= ?";
-	let testRule='10 * * * * *'; // 10초에 한번 실행됩니다.
-	schedule.scheduleJob(deleteRule, function(){ // 한 번 밖에 실행이 되지 않음
+	schedule.scheduleJob(deleteRule, function(){ 
 		connection.execute(sql_deleteQuestionAfterOneMonth, [moment().subtract(1, 'months').format("YYYY-MM-DD")], (err, rows) => {
 			if(err){
 				console.error(err);
@@ -97,12 +96,13 @@ router.post("/readReservedSchedule", isAllAdminLoggedIn, function(req, res, next
 	let maxid = 0;
 	let empid = req.session.adminInfo.empid;
 	
-	
-	
 	connection.execute(sql_maxIdInSchedule, (err, rows) => {
 		if(err) console.error(err);
 		else{
-			maxid = rows[0].maxIdValue;
+			if(rows.length > 0){
+				maxid = rows[0].maxIdValue;
+			}
+			
 			connection.execute(sql_readReservedSchedule, [empid], (err, rows) => {
 				if(err) console.error(err);
 				else{
@@ -254,9 +254,7 @@ router.post("/createSchedule", isAllAdminLoggedIn,function(req, res, next){
 	if(startIndex != endIndex){
 		res.json({state : "isDiffDate"});
 	}else{
-		console.info("sql data");
-		console.info(empid, data.calendarId, data.title, data.category, start, end, location);
-	
+		
 		connection.execute(sql_getAlreadyScheduled, [startIndex], (err, row) => {
 			if(err){
 				console.error(err);
@@ -438,7 +436,6 @@ router.get("/schedule",isAllAdminLoggedIn,function(req,res,next){ //GET /admin/a
 	
 });
 
-
 router.get("/settings",isOnlyAdminLoggedIn,function(req,res,next){
 	const sql_selectCounselor="select empid,empname,positionno from Counselor";
 	connection.execute(sql_selectCounselor,(err,rows)=>{
@@ -451,8 +448,6 @@ router.get("/settings",isOnlyAdminLoggedIn,function(req,res,next){
 	});
 });
 
-
-
 router.post('/uploadFile',isAllAdminLoggedIn,function(req,res){
 	res.json({
 		"success":1,
@@ -461,7 +456,6 @@ router.post('/uploadFile',isAllAdminLoggedIn,function(req,res){
 		},
 	});
 });
-
 
 router.get('/logout',isAllAdminLoggedIn, function(req, res) { //GET /user/logout
     req.session.destroy();
@@ -577,10 +571,10 @@ router.post("/saveBoard/:type",isAllAdminLoggedIn,function(req,res,next){
 	const sendAjax=req.body.sendAjax;
 	const paramType=decodeURIComponent(req.params.type);
 	const sql_saveBoard = "update HomeBoard set empid=?,date=CURDATE(),content=? where no=?";
-	const testEmp='emp100001';
+	const empId=req.session.adminInfo.empid;
 	
 	const secureXSSContent = sanitizeHtml(sendAjax);
-	connection.execute(sql_saveBoard,[testEmp,secureXSSContent,paramType],(err,rows)=>{
+	connection.execute(sql_saveBoard,[empId,secureXSSContent,paramType],(err,rows)=>{
 		if(err){
 			console.error(err);
 			next(err);
@@ -593,7 +587,7 @@ router.post("/saveBoard/:type",isAllAdminLoggedIn,function(req,res,next){
 router.get("/form/:type",isAllAdminLoggedIn,function(req,res,next){
 	const sql_checkMaxAskCount = "select MAX(askno) as maxAskNo from AskList where typeno=?";
     const sql_findFormTypes="select typeno from AskType";
-    const sql_checkType = "select typename from AskType where typeno=?";
+    const sql_checkType = "select * from AskType where typeno=?";
     const sql_findFiveConceptForm = "select ask from AskList where typeno=3";
     const sql_findThreeConceptForm = "select *,(select GROUP_CONCAT(choice) from ChoiceList where askno=a.askno) as choice from AskList a where typeno=? AND a.use = 'Y'";
 	let type="";
@@ -601,7 +595,7 @@ router.get("/form/:type",isAllAdminLoggedIn,function(req,res,next){
 	let max=0;
 	const paramType=decodeURIComponent(req.params.type);
 	
-    //상담,심리는 3문항 심리검사 5문항
+    //상담, 심리는 3문항 / 심리검사 5문항
 	connection.execute(sql_checkMaxAskCount,[paramType],(err,rows)=>{
         if(err){
             console.error(err);
@@ -618,7 +612,7 @@ router.get("/form/:type",isAllAdminLoggedIn,function(req,res,next){
         if(rows.length===0){
             next(err);
         }else{
-            type=rows[0].typename;
+            type=rows[0];
         }
     });
 
@@ -633,55 +627,93 @@ router.get("/form/:type",isAllAdminLoggedIn,function(req,res,next){
     }
 });
 
-router.post('/saveForm/:type',isAllAdminLoggedIn,function(req,res,next){ //ajax로 Save버튼을 누를 경우
+router.post('/saveForm/:type',isAllAdminLoggedIn,function(req,res,next){ 
     const sendObject = JSON.parse(req.body.sendAjax);
-    let max;
-    const sql_checkMaxAskCount = "select MAX(askno) as maxAskNo from AskList";
-    const sql_insertThreeOrFiveConceptAsk = "insert into AskList(askno,typeno,choicetypeno,ask,AskList.use) values(?,?,?,?,'Y')";
-    const sql_noUseThreeOrFiveConceptAsk = "update AskList set AskList.use = 'N' where askno < ? and typeno = ?";
-    const sql_insertThreeConceptChoice = "insert into ChoiceList(askno,typeno,choice) values(?,?,?)";
-
-    connection.execute(sql_checkMaxAskCount,(err,rows)=>{
-        if(err){
-            console.error(err);
-            next(err);
-        }else{
-            max=rows[0].maxAskNo;
-			connection.execute(sql_noUseThreeOrFiveConceptAsk,[Number(max+1),req.params.type],(err,rows)=>{ //된거 같아용!!!!
-				if(err){
-					console.error(err);
-					next(err);
-				}
-			});
-        }
-    });
 	
-	if(req.params.type === '1' || req.params.type === '2' || req.params.type==='3'){ // 3문항
-		sendObject.forEach(function(v,i){
-			let tempAskNo = v.id.split('card_id_')[1];
-			let tempType=0;
+	const paramType = req.params.type;
+	
+	const insertAskList = "INSERT INTO AskList(typeno, choicetypeno, ask) SELECT ?,?,? FROM dual " +
+						  "WHERE NOT EXISTS(SELECT * FROM AskList WHERE typeno=? AND ask=? AND AskList.use='Y')";
+	
+	const insertChoiceList = "INSERT INTO ChoiceList(askno,typeno,choice) VALUES(?, ?, ?)" ;
+	
+	const selectAskList = "SELECT askno FROM AskList WHERE typeno=? AND ask=? AND AskList.use='Y'";
+	
+	const selectChoiceList = "SELECT choiceno, choice FROM ChoiceList WHERE askno=? AND typeno=?"
+	
+	const updateChoiceList = "UPDATE ChoiceList SET choice=? WHERE choice!=? AND choiceno=?";
+	
+	const deleteChoiceList = "DELETE FROM ChoiceList WHERE askno=? AND choiceno NOT IN (SELECT * FROM (SELECT choiceno FROM ChoiceList WHERE askno=? LIMIT ?) temp)";
+		
+	if(paramType === '1' || paramType === '2' || paramType==='3'){ 
+		sendObject.forEach(function(v, i){
+			let tempType = 0;
 			
 			if(v.type === 'radio'){
 				tempType = 1;
 			}else if(v.type === 'check'){
 				tempType = 2;
-			}else if(v.type==='normal'){
+			}else if(v.type === 'normal'){
 				tempType = 3;
 			}
 			
-			connection.execute(sql_insertThreeOrFiveConceptAsk,[(max+i)+1,req.params.type,tempType,v.question],(err,rows)=>{
-				if(err){
-					console.error(err);
-					next(err);
-				}else{
-					if(v.askList===undefined){
-
-					}else{
-						v.askList.forEach(function(b,j){
-							connection.execute(sql_insertThreeConceptChoice,[(max+i)+1,tempType,b.ask],(err,rows)=>{
-								if(err){
-									console.error(err);
-									next(err);
+			connection.execute(insertAskList,[paramType, tempType, v.question, paramType, v.question],(insertAskListErr, insertAskListRows)=>{
+				if(insertAskListErr){
+					console.error(insertAskListErr);
+					next(insertAskListErr);
+				}
+				else if(insertAskListRows.insertId === 0){
+					connection.execute(selectAskList,[paramType, v.question],(selectAskListErr, selectAskListRows)=>{
+						if(selectAskListErr){
+							console.error(selectAskListErr);
+							next(selectAskListErr);
+						}
+						else{
+							if(v.askList !== undefined){
+								v.askList.forEach(function(b, j){
+									connection.execute(selectChoiceList,[selectAskListRows[0].askno, paramType],(selectChoiceListErr, selectChoiceListRows)=>{
+										if(selectChoiceListErr){
+											console.error(selectChoiceListErr);
+											next(selectChoiceListErr);
+										}
+										else if(selectChoiceListRows[j] == undefined){
+											connection.execute(insertChoiceList,[selectAskListRows[0].askno, paramType, b.ask],(insertChoiceListErr, insertChoiceListRows)=>{
+												if(insertChoiceListErr){
+													console.error(insertChoiceListErr);
+													next(insertChoiceListErr);
+												}
+											});
+										}
+										else{
+											connection.execute(updateChoiceList,[b.ask, b.ask, selectChoiceListRows[j].choiceno],(updateChoiceListErr, updateChoiceListRows)=>{
+												if(updateChoiceListErr){
+													console.error(updateChoiceListErr);
+													next(updateChoiceListErr);
+												}
+											});
+										}
+									});
+								});
+								
+								connection.execute(deleteChoiceList,[selectAskListRows[0].askno, selectAskListRows[0].askno, v.askList.length],(deleteChoiceListtErr, deleteChoiceListRows)=>{
+									if(deleteChoiceListtErr){
+										console.error(deleteChoiceListtErr);
+										next(deleteChoiceListtErr);
+									}
+								});
+							}
+							
+							
+						}
+					});
+				}
+				else{
+					if(v.askList !== undefined){
+						v.askList.forEach(function(b, j){
+							connection.execute(insertChoiceList,[insertAskListRows.insertId, paramType, b.ask],(insertChoiceListErr, insertChoiceListRows)=>{
+								if(insertChoiceListErr){
+									console.error(insertChoiceListErr);
+									next(insertChoiceListErr);
 								}
 							});
 						});
@@ -693,10 +725,10 @@ router.post('/saveForm/:type',isAllAdminLoggedIn,function(req,res,next){ //ajax�
 	}
 });
 
-
-router.post('/noUseAsk',isAllAdminLoggedIn,function(req,res,next){ //ajax로 질문삭제 버튼을 누를 경우
+router.post('/noUseAsk',isAllAdminLoggedIn,function(req,res,next){
 	let data = req.body.noUse;
-    const sql_noUseAsk = "update AskList set AskList.use = 'N' where askno = ?";
+    const sql_noUseAsk = "UPDATE AskList SET AskList.use = 'N' WHERE askno=(SELECT * FROM (SELECT askno FROM AskList WHERE askno=?) temp)";
+	
     connection.execute(sql_noUseAsk,[data],(err,rows)=>{
         if(err){
             console.error(err);
@@ -764,9 +796,14 @@ router.get('/selfCheckForm',isAllAdminLoggedIn,(req,res,next)=>{
 			console.error(err);
 			next(err);
 		}else{
-			max=rows[0].maxCheckNo;
+			
+			if(rows[0].maxCheckNo != null){
+				max=rows[0].maxCheckNo;
+			}
+			
 		}
 	});
+	
 	connection.execute(sql_selectSelfCheckList,(err,rows)=>{
 		if(err){
 			console.error(err);
@@ -779,7 +816,7 @@ router.get('/selfCheckForm',isAllAdminLoggedIn,(req,res,next)=>{
 
 router.post('/noUseSelfCheck',isAllAdminLoggedIn,(req,res,next)=>{
 	let data = req.body.noUse;
-	const sql_noUseSelfCheck = "update SelfChekList set SelfChekList.use = 'N' where checkno = ?";
+	const sql_noUseSelfCheck = "update SelfCheckList set SelfCheckList.use = 'N' where checkno = ?";
 	
 	connection.execute(sql_noUseSelfCheck,[data],(err,rows)=>{
 		if(err){
@@ -791,34 +828,40 @@ router.post('/noUseSelfCheck',isAllAdminLoggedIn,(req,res,next)=>{
 
 router.post('/saveSelfCheckList',isAllAdminLoggedIn,(req,res,next)=>{
 	const sendObject = JSON.parse(req.body.sendAjax);
-	let max;
+	let max = 0;
 	const sql_checkMaxSelfCheckCount = "select MAX(checkno) as maxCheckNo from SelfCheckList";
-	const sql_noUseSelfCheck = "update SelfCheckList set SelfCheckList.use = 'N' where checkno < ?";
-	const sql_insertSelfCheck = "insert into SelfCheckList(checkname,SelfCheckList.use) values(?,'Y')";
-
+	const sql_insertSelfCheck = "INSERT INTO SelfCheckList(checkname, SelfCheckList.use) SELECT ?, 'Y' FROM DUAL " +
+		  						"WHERE NOT EXISTS(SELECT * FROM SelfCheckList WHERE checkname = ? AND SelfCheckList.use='Y')";
+	const sql_checkChanged = "SELECT checkname FROM SelfCheckList WHERE checkno = ?";
+	const sql_noUseSelfCheck = "UPDATE SelfCheckList SET SelfCheckList.use = 'N' WHERE checkno = ?";
+	
 	connection.execute(sql_checkMaxSelfCheckCount,(err,rows)=>{
         if(err){
             console.error(err);
             next(err);
         }else{
-            max=rows[0].maxCheckNo;
-			connection.execute(sql_noUseSelfCheck,[Number(max+1)],(err,rows)=>{
-				if(err){
-					console.error(err);
-					next(err);
-				}
-			});
+			if(rows[0].maxCheckNo != null){
+				max=rows[0].maxCheckNo;
+			}
+          	
         }
     });
 	
 	sendObject.forEach(function(v,i){
-		connection.execute(sql_insertSelfCheck,[v.ask],(err,rows)=>{
+		
+		// 아예 초기 입력 값이 공백이면 Insert 추가 안함
+		if(v.ask == ""){
+			return;
+		}
+		
+		connection.execute(sql_insertSelfCheck,[v.ask, v.ask],(err,rows) => { 
 			if(err){
 				console.error(err);
 				next(err);
 			}
 		});
 	});
+	
 	res.json({state:'ok'});
 });
 
@@ -905,7 +948,7 @@ router.get('/getMyReservationHistory',isAllAdminLoggedIn,(req,res,next)=>{
 		  "FROM Reservation reserv JOIN SimpleApplyForm simple ON reserv.serialno = simple.serialno JOIN ConsultType contype ON reserv.typeno = contype.typeno " +
 		  "WHERE NOT reserv.typeno IS NULL AND reserv.empid=? AND reserv.status=1";
 	
-	const fileName=`유한대학교 상담 심리 센터 상담 내역 ${new Date().getFullYear()}_${new Date().getMonth()+1}월.xlsx`;
+	const fileName=`유한대학교 학생상담센터 상담 내역 ${new Date().getFullYear()}_${new Date().getMonth()+1}월.xlsx`;
 	
 	PsyTestWorksheet.columns=[
 		{header:'학번',key:"stuno",width:10},
@@ -971,6 +1014,82 @@ router.get('/getMyReservationHistory',isAllAdminLoggedIn,(req,res,next)=>{
 	});
 });
 
+router.get('/getSatisfactionResult', isAllAdminLoggedIn, (req, res, next) => {
+	const workbook = new excel.Workbook();
+	const satisfactionWorkSheet = workbook.addWorksheet("만족도 조사 결과");
+	
+	const sql_getSatisfationResult = "SELECT Reservation.stuno, Counselor.empname, SimpleApplyForm.stuname, SimpleApplyForm.birth, SimpleApplyForm.email, Reservation.date, " + 
+		  "ConsultType.typename, Reservation.serialno, AskList.ask, AnswerLog.choiceanswer " + 
+		  "FROM Reservation JOIN SimpleApplyForm ON Reservation.serialno = SimpleApplyForm.serialno LEFT JOIN ConsultType ON Reservation.typeno = ConsultType.typeno LEFT JOIN Counselor ON " + 
+		  "Reservation.empid = Counselor.empid JOIN AnswerLog ON Reservation.serialno = AnswerLog.serialno JOIN AskList ON AnswerLog.askno = AskList.askno " +
+		  "WHERE AskList.typeno = 3 GROUP BY Reservation.stuno, Counselor.empname, SimpleApplyForm.stuname, SimpleApplyForm.birth, SimpleApplyForm.email, Reservation.date, " +
+		  "ConsultType.typename, AnswerLog.serialno, AskList.ask;";
+	
+	const fileName = `유한대학교 학생상담센터 만족도 조사 내역 ${new Date().getFullYear()}_${new Date().getMonth() + 1}월.xlsx`;
+	satisfactionWorkSheet.columns = [
+		{header: '학번', key:"stuno", width:10},
+		{header: '상담사명', key:"empname", width:10},
+		{header: '학생이름', key:"stuname", width:10},
+		{header: '생년월일', key:"birth", width:10},
+		{header: '이메일', key:"email", width:20},
+		{header: '예약일', key:"date", width:10},
+		{header: '상담유형', key:"typename", width:10},
+		{header: '질문', key:"ask", width:30},
+		{header: '답변', key:"choiceanswer", width:50}
+	];
+	
+	connection.execute(sql_getSatisfationResult, (err, rows) =>{
+		if(err) console.error(err);
+		else{
+			if(rows.length===0){
+				res.send("<script>alert('접수된 내역이 없습니다.'); window.location.href = '/admin/';</script>");
+			}else{
+				let oldSerialno = 0;
+				
+				rows.forEach((row, index) => {
+					if(oldSerialno !== row.serialno) {
+						if(row.typename === null){
+							row.typename = "심리검사";
+							row.date = "-";
+						}
+						
+						oldSerialno = row.serialno;
+						delete row.serialno;
+						
+						satisfactionWorkSheet.addRow(row);
+					}
+					else {
+						row.stuno = "";
+						row.empname = "";
+						row.stuname = "";
+						row.birth = "";
+						row.email = "";
+						row.date = "";
+						row.typename = "";
+						
+						delete row.serialno;
+						
+						satisfactionWorkSheet.addRow(row);
+					}
+				});
+				
+				workbook.xlsx.writeFile(fileName).then(() => {
+					res.download(path.join(__dirname,"/../"+fileName), fileName, function(err) {
+						if (err) {
+							console.log(err);
+						}
+						else {
+							fs.unlink(fileName, function(){
+								
+							});
+						}
+					});
+				});
+			}
+		}
+	});
+});
+
 router.get('/getAllReservationHistory',isAllAdminLoggedIn,(req,res,next)=>{
 	let empid = req.session.adminInfo.empid;
 	
@@ -983,7 +1102,9 @@ router.get('/getAllReservationHistory',isAllAdminLoggedIn,(req,res,next)=>{
 	const sql_selectReservationLog="SELECT  reserv.stuno, reserv.typeno, simple.stuname, contype.typename,reserv.agree,reserv.finished, simple.date " +
 		  "FROM Reservation reserv JOIN SimpleApplyForm simple ON reserv.serialno = simple.serialno JOIN ConsultType contype ON reserv.typeno = contype.typeno " +
 		  "WHERE NOT reserv.typeno IS NULL AND reserv.status=1";
-	const fileName=`유한대학교 상담 심리 센터 전체 상담 내역 ${new Date().getFullYear()}_${new Date().getMonth()+1}월.xlsx`;
+	
+	const fileName=`유한대학교 학생상담센터 전체 상담 내역 ${new Date().getFullYear()}_${new Date().getMonth()+1}월.xlsx`;
+	
 	PsyTestWorksheet.columns=[
 		{header:'학번',key:"stuno",width:10},
 		{header:'이름',key:'stuname',width:10},
@@ -1051,7 +1172,7 @@ router.get('/getAllChatLog',isOnlyAdminLoggedIn,(req,res,next)=>{
 	const sql_selectAllChatLog="select * from ConsultLog";
 	const workbook = new excel.Workbook();
 	const ChatLogWorksheet = workbook.addWorksheet("전체 채팅 내역");
-	const fileName=`유한대학교 상담 심리 센터 전체 채팅 내역 ${new Date().getFullYear()}_${new Date().getMonth()+1}월.xlsx`;
+	const fileName=`유한대학교 학생상담센터 전체 채팅 내역 ${new Date().getFullYear()}_${new Date().getMonth()+1}월.xlsx`;
 	ChatLogWorksheet.columns=[
 		{header:'상담일련번호',key:'serialno',width:10},
 		{header:'채팅 내역',key:'chatlog',width:100},
@@ -1084,7 +1205,7 @@ router.get('/getUserChatLog/:serialNo',isOnlyAdminLoggedIn,(req,res,next)=>{
 	const sql_selectAllChatLog="select * from ConsultLog where serialno=?";
 	const workbook = new excel.Workbook();
 	const ChatLogWorksheet = workbook.addWorksheet("채팅 내역");
-	const fileName=`유한대학교 상담 심리 센터 채팅 내역 ${new Date().getFullYear()}_${new Date().getMonth()+1}월_${serialNo}.xlsx`;
+	const fileName=`유한대학교 학생상담센터 채팅 내역 ${new Date().getFullYear()}_${new Date().getMonth()+1}월_${serialNo}.xlsx`;
 	ChatLogWorksheet.columns=[
 		{header:'상담일련번호',key:'serialno',width:10},
 		{header:'채팅 내역',key:'chatlog',width:100},

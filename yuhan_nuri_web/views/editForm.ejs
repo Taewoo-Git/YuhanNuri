@@ -29,21 +29,19 @@
 	</style>
 </head>
 <body class="c-app">
-	
 	<script>
 		$('#add_type_button').click(function(e){
-							$.ajax({
-								type:'POST',
-								dataType:'json',
-								url:'../addType',
-								async:true,
-								data:{"add_type" : $('#type-name').val()},
-								success:function(data){
-									
-									window.location.reload();
-								}
-							})
-						});
+			$.ajax({
+				type:'POST',
+				dataType:'json',
+				url:'../addType',
+				async:true,
+				data:{"add_type" : $('#type-name').val()},
+				success:function(data){
+					window.location.reload();
+				}
+			})
+		});
 	</script>
 	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
 		  <div class="modal-dialog" role="document">
@@ -186,29 +184,37 @@
 			save_onsavecallback: function () {
 				let content=tinymce.get("textEditor").getContent();
 				$.ajax({
-								type: "POST",
-								dataType: "json",
-								url: '../saveBoard/<%=type[0]%>',
-								async: true,
-								data: { "sendAjax" : content },
-								success: function (data) { 
-										if (data.state === 'ok') {
-										$('.c-main').prepend(`<div class="alert alert-success alert-dismissible fade show" role="alert">
-										  <strong>저장 성공!</strong> 성공적으로 저장이 되었어요!
-										  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-											<span aria-hidden="true">&times;</span>
-										  </button>
-										</div>`);
-									}else{
-										$('.c-main').prepend(`<div class="alert alert-danger alert-dismissible fade show" role="alert">
-										  <strong>저장 실패!</strong> 이런! 다시 한번 더 확인 해보아요!
-										  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-											<span aria-hidden="true">&times;</span>
-										  </button>
-										</div>`);
-									}
-								}
-							});
+					type: "POST",
+					dataType: "json",
+					url: '../saveBoard/<%=type[0]%>',
+					async: true,
+					data: { "sendAjax" : content },
+					success: function (data) { 
+						if (data.state === 'ok') {
+							$('.c-main').prepend(`<div class="alert alert-success alert-dismissible fade show successAlert" role="alert">
+							  <strong>저장 완료!</strong> 게시물이 정상적으로 저장되었습니다.
+							  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							  </button>
+							</div>`);
+
+							$(window).scrollTop(0);
+
+							$('.successAlert').eq(0).fadeOut(3000);
+						}else{
+							$('.c-main').prepend(`<div class="alert alert-danger alert-dismissible fade show failAlert" role="alert">
+							  <strong>저장 실패!</strong> 다시 한번 확인해 주세요.
+							  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							  </button>
+							</div>`);
+
+							$(window).scrollTop(0);
+
+							$('.failAlert').eq(0).fadeOut(3000);
+						}
+					}
+				});
 			}
 		});
 	</script>

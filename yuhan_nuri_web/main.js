@@ -45,7 +45,7 @@ app.use(cookieParser('vaCzbAVeMy9pT7Uw'));
 
 if(process.env.NODE_ENV==='production'){
 	app.use(helmet());
-	// helmet 미들웨어에는 이런 기능들을 통해 보안을 설정 합니다. 어느정도 타협해야하는 보안 수준이 있다면 말씀해 주시면 빼도록 하겠습니다 - 성준
+	// helmet 미들웨어에는 이런 기능들을 통해 보안을 설정 합니다. 어느정도 타협해야하는 보안 수준이 있다면 말씀해 주시면 빼도록 하겠습니다
 	// csp: Content-Security-Policy 헤더 설정. XSS(Cross-site scripting) 공격 및 기타 교차 사이트 인젝션 예방.
 	// hidePoweredBy: X-Powered-By 헤더 제거.
 	// hpkp: Public Key Pinning 헤더 추가. 위조된 인증서를 이용한 중간자 공격 방지.

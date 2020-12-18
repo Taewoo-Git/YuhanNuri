@@ -86,10 +86,12 @@ module.exports = (server) => {
 											});
 										}
 										
-										for(let i=0; i<recvData.selfcheckCode.split(',').length; i++) {
-											connection.execute(insertSelfCheck, [serialno, recvData.selfcheckCode.split(',')[i], recvData.selfcheckNum.split(',')[i]], (insertSelfCheckErr) => {
-												if(insertSelfCheckErr) console.error(insertSelfCheckErr);
-											});
+										if(recvData.selfcheckCode !== "") {
+											for(let i=0; i<recvData.selfcheckCode.split(',').length; i++) {
+												connection.execute(insertSelfCheck, [serialno, recvData.selfcheckCode.split(',')[i], recvData.selfcheckNum.split(',')[i]], (insertSelfCheckErr) => {
+													if(insertSelfCheckErr) console.error(insertSelfCheckErr);
+												});
+											}
 										}
 										
 										socket.emit('initComplete');

@@ -35,8 +35,6 @@
 			});
 		});
 		
-		
-		
 		$(function () {
 			$('#save_ReservationLog').click(function(e){
 				
@@ -219,7 +217,7 @@
 						for(let i=0; i<data.asks.split('|').length; i++) {
 							$('#modalPart').append(`
 								<div class="form-group">
-									<label class="col-form-label"><b>${data.asks.split('|')[i]}</b></label>
+									<label class="col-form-label"><b>${unescape(data.asks.split('|')[i])}</b></label>
 									<label class="form-control">${data.answers.split('|')[i]}</label>
 								</div>
 							`);
@@ -288,7 +286,7 @@
 						for(let i=0; i<data.asks.split('|').length; i++) {
 							$('#modalPart').append(`
 								<div class="form-group">
-									<label class="col-form-label"><b>${data.asks.split('|')[i]}</b></label>
+									<label class="col-form-label"><b>${unescape(data.asks.split('|')[i])}</b></label>
 									<label class="form-control">${data.answers.split('|')[i]}</label>
 								</div>
 							`);

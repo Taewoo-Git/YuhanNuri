@@ -45,7 +45,7 @@ exports.consultTomorrowPush = ()=> {
 						token: fcm_target_token,
 						notification: {
 							title: '유한누리', 
-							body: '상담 하루 전 입니다!',
+							body: '상담 하루 전입니다.',
 						},
 						data: {
 							click_action: 'FLUTTER_NOTIFICATION_CLICK',
@@ -107,7 +107,7 @@ exports.consultTodayPush = ()=> {
 						token: fcm_target_token,
 						notification: {
 							title: '유한누리', 
-							body: '오늘 상담 예약이 있습니다 !!' ,
+							body: '오늘 상담 예약이 있습니다.' ,
 						},
 						data: {
 							data: {
@@ -140,7 +140,7 @@ exports.answerPush = (tokenno)=>{
 				token : fcm_target_token,
 				notification : {
 		 			title: '유한누리', 
-					body: '문의하신 글에 답변이 달렸습니다.',
+					body: '문의하신 글에 답변이 작성되었습니다.',
 				},
 				data : {
 					click_action: 'FLUTTER_NOTIFICATION_CLICK',
@@ -169,7 +169,7 @@ exports.satisfactionPush = (satisfactionNo)=>{
 				token: fcm_target_token,
 				notification: {
 		 			title: '유한누리', 
-					body: '만족도조사에 참여해주세요!',
+					body: '만족도 조사에 참여해 주세요.',
 				},
 				data: {
 					click_action: 'FLUTTER_NOTIFICATION_CLICK',

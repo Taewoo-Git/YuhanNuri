@@ -288,20 +288,20 @@
 							<% for(let i=0; i<consultAsk.length; i++){ %>
 							<div class="form-group">
 								<div class="form-group form-question">
-									<label id="consultAsk<%=i%>"><b><%= consultAsk[i].ask %></b></label><br/>
+									<label id="consultAsk<%=i%>"><b><%= unescape(consultAsk[i].ask) %></b></label><br/>
 									<input type="hidden" value="<%=consultAsk[i].askno%>" id="consultAskVal<%=i%>"/>
 								<% if(consultAsk[i].choicetypename === "Radio"){ %>
 									<% for(let j=0; j<consultAsk[i].choices.split('|').length; j++){ %>
 									<input type="radio" class="from-input mb-4" name="consultAskAnswer<%=i%>"
 										   id="<%= 'consultAnswer'+i+j %>" value="<%= consultAsk[i].choices.split('|')[j] %>">
-									<label for="<%= 'consultAnswer'+i+j %>"><%= consultAsk[i].choices.split('|')[j] %></label><br/>
+									<label for="<%= 'consultAnswer'+i+j %>"><%= unescape(consultAsk[i].choices.split('|')[j]) %></label><br/>
 									<% } %>
 								<% } %>
 								<% if(consultAsk[i].choicetypename === "Check"){ %>
 									<% for(let j=0; j<consultAsk[i].choices.split('|').length; j++){ %>
 									<input type="checkbox" class="from-input mb-4" name="consultAskAnswer<%=i%>"
 										   id="<%= 'consultAnswer'+i+j %>" value="<%= consultAsk[i].choices.split('|')[j] %>">
-									<label for="<%= 'consultAnswer'+i+j %>"><%= consultAsk[i].choices.split('|')[j] %></label><br/>
+									<label for="<%= 'consultAnswer'+i+j %>"><%= unescape(consultAsk[i].choices.split('|')[j]) %></label><br/>
 									<% } %>
 								<% } %>
 								<% if(consultAsk[i].choicetypename === "Normal"){ %>
@@ -317,20 +317,20 @@
 							<% for(let i=0; i<testAsk.length; i++){ %>
 							<div class="form-group">
 								<div class="form-group form-question">
-									<label id="mentalAsk<%=i%>"><b><%= testAsk[i].ask %></b></label><br/>
+									<label id="mentalAsk<%=i%>"><b><%= unescape(testAsk[i].ask) %></b></label><br/>
 									<input type="hidden" value="<%=testAsk[i].askno%>" id="mentalAskVal<%=i%>"/>
 								<% if(testAsk[i].choicetypename === "Radio"){ %>
 									<% for(let j=0; j<testAsk[i].choices.split('|').length; j++){ %>
 									<input type="radio" class="from-input mb-4" name="mentalAskAnswer<%=i%>"
 										   id="<%= 'mentalAnswer'+i+j %>" value="<%= testAsk[i].choices.split('|')[j] %>">
-									<label for="<%= 'mentalAnswer'+i+j %>"><%= testAsk[i].choices.split('|')[j] %></label><br/>
+									<label for="<%= 'mentalAnswer'+i+j %>"><%= unescape(testAsk[i].choices.split('|')[j]) %></label><br/>
 									<% } %>
 								<% } %>
 								<% if(testAsk[i].choicetypename === "Check"){ %>
 									<% for(let j=0; j<testAsk[i].choices.split('|').length; j++){ %>
 									<input type="checkbox" class="from-input mb-4" name="mentalAskAnswer<%=i%>"
 										   id="<%= 'mentalAnswer'+i+j %>" value="<%= testAsk[i].choices.split('|')[j] %>">
-									<label for="<%= 'mentalAnswer'+i+j %>"><%= testAsk[i].choices.split('|')[j] %></label><br/>
+									<label for="<%= 'mentalAnswer'+i+j %>"><%= unescape(testAsk[i].choices.split('|')[j]) %></label><br/>
 									<% } %>
 								<% } %>
 								<% if(testAsk[i].choicetypename === "Normal"){ %>
@@ -534,7 +534,7 @@
 							stuAnswer: temp,
 							psyTestList: selectPsyTestList.toString()
 						}
-
+						$("#btnFirstNext").attr("disabled", true); 
 						socket.emit('initPrivacy');
 					}
 				}
@@ -550,7 +550,7 @@
 							stuEmail: $('#userEmail').val(),
 							stuAnswer: temp
 						}
-
+						$("#btnFirstNext").attr("disabled", true);
 						socket.emit('initReservation');
 					}
 				}
@@ -568,6 +568,7 @@
 						$("input:checkbox[name=agreebox]").each(function() {
 							this.checked = true;
 						});
+						$('#btnComplete').focus();
 					}
 				});
 
@@ -576,6 +577,8 @@
 						agreebox1.checked = true;
 						agreebox2.checked = true;
 						$("input:checkbox[id='agreebox3']").prop("checked", true);
+						
+						$('#btnComplete').focus();
 					}
 					else{
 						agreebox1.checked = false;
@@ -625,7 +628,7 @@
 					else {
 						if(countDate.getDate() == 1 && cnt != 0) {
 							$('#possibleDate').append(`
-								<div class="col btnDate" id="btnDate${countDate.getDate()}">${tomorrow.getMonth()+2}.${countDate.getDate()}</div>
+								<div class="col btnDate" id="btnDate${countDate.getDate()}">${tomorrow.getMonth()+2 == 13 ? 1 : tomorrow.getMonth()+2}.${countDate.getDate()}</div>
 							`);
 						}
 						else {
@@ -633,7 +636,6 @@
 								<div class="col btnDate" id="btnDate${countDate.getDate()}">${countDate.getDate()}</div>
 							`);
 						}
-						
 						cnt = cnt + 1;
 					}
 				}
@@ -838,7 +840,7 @@
 					$('#divisionSelfcheck').append(`
 						<div class="row selfcheck-subject">
 							<div class="col align-self-center text-center">
-								<label name="selfcheck"><b>${list[i].checkname}</b></label>
+								<label name="selfcheck"><b>${unescape(list[i].checkname)}</b></label>
 								<input type="hidden" value="${list[i].checkno}" id="selfcheckCode${i}"/>
 							</div>
 						</div>

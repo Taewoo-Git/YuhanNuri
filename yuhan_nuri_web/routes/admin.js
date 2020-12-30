@@ -23,12 +23,6 @@ const moment = require("moment");
 require('moment-timezone'); 
 moment.tz.setDefault("Asia/Seoul");
 
-try{
-	fs.accessSync('uploads');
-}catch(error){
-	fs.mkdirSync('uploads');
-}
-
 let deleteRule = new schedule.RecurrenceRule();
 deleteRule.dayOfWeek = [0, new schedule.Range(0,6)];
 deleteRule.hour= 00;
@@ -413,7 +407,6 @@ router.post("/addType",isAllAdminLoggedIn,function(req, res, next){
 	const newTypename = req.body.add_type;
 	
 	connection.execute(sql_selectName, [newTypename], (err, rows) => {
-		console.info('냥',rows);
 		if(rows.length != 0){
 			res.json('used Type');
 		}
@@ -431,9 +424,7 @@ router.post("/addType",isAllAdminLoggedIn,function(req, res, next){
 });
 
 router.get("/schedule",isAllAdminLoggedIn,function(req,res,next){ //GET /admin/adminTest
-	
 	res.render('adminCalendar');
-	
 });
 
 router.get("/settings",isOnlyAdminLoggedIn,function(req,res,next){

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "유한누리, 학생 상담 어플리케이션",
   "main": "main.js",
-  "author": "IT소프트웨어공학과",
+  "author": "유한대학교 IT소프트웨어공학과",
   "license": "MIT",
   "dependencies": {
     "bcrypt": "^5.0.0",
@@ -17,6 +17,7 @@
     "express-session": "^1.17.1",
     "firebase-admin": "^9.2.0",
     "helmet": "^4.2.0",
+    "https": "^1.0.0",
     "moment": "^2.27.0",
     "moment-timezone": "^0.5.31",
     "mysql2": "^2.1.0",

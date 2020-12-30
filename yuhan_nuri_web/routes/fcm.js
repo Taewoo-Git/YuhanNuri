@@ -7,20 +7,19 @@ const sql_whoispost = "SELECT User.token FROM Reservation, User WHERE Reservatio
 const sql_AcceptedToken= "SELECT token FROM User WHERE stuno = (select stuno FROM Reservation WHERE serialno = ?)"; 
 const sql_notifyAnswer = "SELECT token FROM User WHERE stuno = (select stuno FROM QuestionBoard WHERE no =?)";
 const sql_satisfaction = "SELECT token FROM User WHERE stuno = (select stuno FROM Reservation WHERE serialno = ?)";	
-
 const fcm_admin = require('firebase-admin');
+
 var serviceAccount = require('../serviceAccountCredentials.json');
 fcm_admin.initializeApp({
 	credential: fcm_admin.credential.cert(serviceAccount),
 });
 
 const schedule = require('node-schedule');
-var rule = new schedule.RecurrenceRule();
-rule.dayOfWeek = [0, new schedule.Range(0,6)];
-rule.hour= 18;
-rule.minute= 00;
 
-const testRule=new Date()+30;
+var everule = new schedule.RecurrenceRule();
+everule.dayOfWeek = [0, new schedule.Range(0,6)];
+everule.hour= 18;
+everule.minute= 00;
 
 var todayRule = new schedule.RecurrenceRule();
 todayRule.dayOfWeek = [0, new schedule.Range(0,6)];
@@ -32,7 +31,7 @@ require('moment-timezone');
 moment.tz.setDefault("Asia/Seoul");
 
 exports.consultTomorrowPush = ()=> {
-	schedule.scheduleJob(rule, function(){
+	schedule.scheduleJob(everule, function(){
 		connection.execute(sql_whoispost, [moment().add(1, 'd').format("YYYY-MM-DD")], (err, rows) => {
 			if(err){
 				console.error(err);

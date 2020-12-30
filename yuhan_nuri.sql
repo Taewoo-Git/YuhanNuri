@@ -157,21 +157,6 @@ CREATE TABLE IF NOT EXISTS `HomeBoard` (
 /*!40000 ALTER TABLE `HomeBoard` DISABLE KEYS */;
 /*!40000 ALTER TABLE `HomeBoard` ENABLE KEYS */;
 
--- 테이블 yuhan_nuri.NoticeBoard 구조 내보내기
-CREATE TABLE IF NOT EXISTS `NoticeBoard` (
-  `no` varchar(12) NOT NULL,
-  `date` date NOT NULL,
-  `title` varchar(100) NOT NULL,
-  `content` text NOT NULL,
-  `file` mediumblob,
-  `empno` char(9) DEFAULT NULL,
-  PRIMARY KEY (`no`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- 테이블 데이터 yuhan_nuri.NoticeBoard:~0 rows (대략적) 내보내기
-/*!40000 ALTER TABLE `NoticeBoard` DISABLE KEYS */;
-/*!40000 ALTER TABLE `NoticeBoard` ENABLE KEYS */;
-
 -- 테이블 yuhan_nuri.PositionType 구조 내보내기
 CREATE TABLE IF NOT EXISTS `PositionType` (
   `positionno` int(11) NOT NULL AUTO_INCREMENT,

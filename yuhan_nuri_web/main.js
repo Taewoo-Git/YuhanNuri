@@ -1,7 +1,8 @@
-const port = 3000;
+const port = 80;
 
 const express = require('express');
 const app = express();
+const https = require('https');
 
 const session = require('express-session');
 const dotenv = require('dotenv');
@@ -60,7 +61,8 @@ app.use('/user', userRouter);
 app.use('/admin', adminRouter);
 
 const server = app.listen(port, () => {
-    console.log('Listening on port ' + port + '\n');
+    console.log('Listening on port ' + port);
+	
 	deleteOneMonth;
 	consultTodayPush;
 	consultTomorrowPush;

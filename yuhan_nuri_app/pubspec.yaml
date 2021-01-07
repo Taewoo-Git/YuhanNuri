@@ -63,6 +63,7 @@ flutter:
     - assets/sad_face.png
     - assets/social_media.png
     - assets/team_success.png
+<<<<<<< HEAD
     - assets/question.png
     - assets/mypage.png
     - assets/nuri.png
@@ -70,6 +71,10 @@ flutter:
     - assets/home.png
     
     #   - images/a_dot_ham.jpeg
+=======
+    - assets/nuri.png
+  #   - images/a_dot_ham.jpeg
+>>>>>>> ee3be0c708ef3042e985b1b9508f9e01face6189
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

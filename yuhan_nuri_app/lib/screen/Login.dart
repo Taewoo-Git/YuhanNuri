@@ -253,6 +253,10 @@ class _LoginState extends State<Login> {
     ));
   }
 
+  
+
+
+
   portalLogin(String userID, String userPassword, bool isAutoLogin) async {
     // 로그인 루틴 시작하면서 dialog 띄움
     progressDialog.show();

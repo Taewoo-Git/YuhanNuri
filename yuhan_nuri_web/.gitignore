@@ -1,6 +1,4 @@
-database.js
 .env
 /node_modules
 serviceAccountCredentials.json
-/uploads
 

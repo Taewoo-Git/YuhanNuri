@@ -1,512 +1,405 @@
 <!DOCTYPE html>
 <html lang="en">
-<!-- 관리자 스케줄 달력 -->
-<head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- CoreUI CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
-    <title>유한누리 어드민</title>	
-	<link rel="stylesheet" type="text/css" href="/res/css/tui-calendar.css" />
-    <link rel="stylesheet" type="text/css" href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css" />
-    <link rel="stylesheet" type="text/css" href="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.css" />
-    <script src="https://uicdn.toast.com/tui.code-snippet/v1.5.2/tui-code-snippet.min.js"></script>
-    <script src="/lib/tui-time-picker.js"></script>
-    <script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.min.js"></script>
-	<script src="/lib/tui-calendar.js"></script>
-	<script src="https://code.jquery.com/jquery-latest.min.js"></script>
-	<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
-	<style>
-		.pr_10{
-			padding-right:10px;
-		}
-		.pr_30{
-			padding-right:30px;
-		}
-	</style>
-</head>
-<body class="c-app">
-	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-		  <div class="modal-dialog" role="document">
-			<div class="modal-content">
-			  <div class="modal-header">
-				<h5 class="modal-title" id="exampleModalLabel">항목 추가</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-				  <span aria-hidden="true">&times;</span>
-				</button>
-			  </div>
-			  <div class="modal-body">
-				<form>
-				  <div class="form-group">
-					<label for="type-name" class="col-form-label">항목 이름:</label>
-					<input type="text" class="form-control" id="type-name" placeholder="항목이름을 작성해주세요.">
+	<!-- 관리자 스케줄 달력 -->
+	<head>
+		<!-- Required meta tags -->
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<!-- CoreUI CSS -->
+		<link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
+		<title>유한누리 상담사 페이지</title>	
+		<link rel="stylesheet" type="text/css" href="/res/css/tui-calendar.css" />
+		<link rel="stylesheet" type="text/css" href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css" />
+		<link rel="stylesheet" type="text/css" href="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.css" />
+		<script src="https://uicdn.toast.com/tui.code-snippet/v1.5.2/tui-code-snippet.min.js"></script>
+		<script src="/lib/tui-time-picker.js"></script>
+		<script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.min.js"></script>
+		<script src="/lib/tui-calendar.js"></script>
+		<script src="https://code.jquery.com/jquery-latest.min.js"></script>
+		<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
+		<style>
+			.pr_10{
+				padding-right:10px;
+			}
+			.pr_30{
+				padding-right:30px;
+			}
+		</style>
+	</head>
+	<body class="c-app">
+		<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			  <div class="modal-dialog" role="document">
+				<div class="modal-content">
+				  <div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLabel">항목 추가</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					  <span aria-hidden="true">&times;</span>
+					</button>
 				  </div>
-				</form>
-			  </div>
-			  <div class="modal-footer">
-				<button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
-				<button type="button" class="btn btn-primary" id="add_type_button">추가하기</button>
+				  <div class="modal-body">
+					<form>
+					  <div class="form-group">
+						<label for="type-name" class="col-form-label">항목 이름:</label>
+						<input type="text" class="form-control" id="type-name" placeholder="항목이름을 작성해주세요.">
+					  </div>
+					</form>
+				  </div>
+				  <div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+					<button type="button" class="btn btn-primary" id="add_type_button">추가하기</button>
+				  </div>
+				</div>
 			  </div>
 			</div>
-		  </div>
+			<script>
+				$('#add_type_button').click(function(e){
+								$.ajax({
+									type:'POST',
+									dataType:'json',
+									url:'../addType',
+									async:true,
+									data:{"add_type" : $('#type-name').val()},
+									success:function(data){
+										window.location.reload();
+									}
+								})
+							});
+					$(function () {
+					$('button.reser-btn').click(function(e) {
+							$.ajax({
+							type: "POST",
+							dataType: "json",
+							url: "./accessReservation",
+							async: true,
+							data: { "sendAjax" : $(`#${e.target.id}`).val() },
+							success: function (data) { 
+								window.location.reload();
+							}
+						});
+
+					});
+				});
+			</script>
+		<div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
+			<%- include ('adminNav'); -%>
+			<button class="c-sidebar-minimizer c-class-toggler" type="button" data-target="_parent"
+				data-class="c-sidebar-minimized"></button>
+		</div>
+		<div class="c-wrapper c-fixed-components">
+			<header class="c-header c-header-light c-header-fixed c-header-with-subheader">
+				<button class="c-header-toggler c-class-toggler d-lg-none mfe-auto" type="button" data-target="#sidebar"
+					data-class="c-sidebar-show">
+					<i class="cil-hamburger-menu"></i>
+				</button><a class="c-header-brand d-lg-none" href="#">
+					<i class="cil-hamburger-menu"></i></a>
+				<button class="c-header-toggler c-class-toggler mfs-3 d-md-down-none" type="button" data-target="#sidebar"
+					data-class="c-sidebar-lg-show" responsive="true">
+					<i class="cil-hamburger-menu"></i>
+				</button>
+				<ul class="c-header-nav ml-auto mr-4">
+					<li class="c-header-nav-item dropdown"><a class="c-header-nav-link" data-toggle="dropdown" href="#"
+							role="button" aria-haspopup="true" aria-expanded="false">
+							<div class="c-avatar"><i class="cil-user"></i></div>
+						</a>
+						<div class="dropdown-menu dropdown-menu-right pt-0">
+							<div class="dropdown-header bg-light py-2"><strong>계정</strong></div>
+								<a class="dropdown-item" href="/admin/logout">
+								<i class="cil-account-logout pr_10"></i> 로그아웃</a>
+								<a class="dropdown-item" href="/admin/changePassword">
+								<i class="cil-dialpad pr_10"></i> 비밀번호 변경</a>
+						</div>
+					</li>
+				</ul>
+				<div class="c-subheader px-3">
+					<!-- Breadcrumb-->
+					<ol class="breadcrumb border-0 m-0">
+						<li class="breadcrumb-item"><a href="/admin">Home</a></li>
+						<li class="breadcrumb-item active">스케줄</li>
+						<!-- Breadcrumb Menu-->
+					</ol>
+				</div>
+			</header>
+			<div class="c-body">
+				<main class="c-main">
+					<div class="container-fluid">
+						<div class="fade-in">
+							<div class="date-view" style="display : inline-block">
+								<h2 id='date'></h2>
+							</div>
+							<div class="ctrlBtns" style="display : inline-block; float : right;">
+								<button id="nowBtn" class="btn btn-outline-primary">Today</button>
+								<button id="prevBtn" class="btn btn-outline-primary"><i class="cil-chevron-left"></i></button>
+								<button id="nextBtn" class="btn btn-outline-primary"><i class="cil-chevron-right"></i></button>
+							</div>
+							<div id="calendar" style="height: 800px;"></div>
+						</div>
+					</div>
+				</main>
+				<footer class="c-footer">
+					<div><a href="https://coreui.io">CoreUI</a> &copy; 2020 creativeLabs.</div>
+					<div class="ml-auto">Powered by&nbsp;<a href="https://coreui.io/">CoreUI</a></div>
+				</footer>
+			</div>
 		</div>
 		<script>
-			$('#add_type_button').click(function(e){
-							$.ajax({
-								type:'POST',
-								dataType:'json',
-								url:'../addType',
-								async:true,
-								data:{"add_type" : $('#type-name').val()},
-								success:function(data){
-									
-									window.location.reload();
-								}
-							})
-						});
-				$(function () {
-				$('button.reser-btn').click(function(e) {
-						$.ajax({
-						type: "POST",
-						dataType: "json",
-						url: "./accessReservation",
-						async: true,
-						data: { "sendAjax" : $(`#${e.target.id}`).val() },
-						success: function (data) { 
-							window.location.reload();
-						}
+			const container = document.getElementById('calendar');
+
+			const options = {
+				defaultView: 'month',
+				useCreationPopup: true,
+				useDetailPopup: true,
+			}
+			var Calendar = tui.Calendar;
+
+			const calendar = new Calendar(container, options);
+			const nowBtn = document.getElementById('nowBtn');
+			const prevBtn = document.getElementById('prevBtn');
+			const nextBtn = document.getElementById('nextBtn');
+			const dayViewBtn = document.getElementById('dayViewBtn');
+			const weekViewBtn = document.getElementById('weekViewBtn');
+			const monthViewBtn = document.getElementById('monthViewBtn');
+			const date = document.getElementById('date');
+
+			date.textContent = `${calendar.getDate().getFullYear()}-${calendar.getDate().getMonth() + 1}`;
+
+			calendar.setCalendars([
+				{
+					id: 'Reservation',
+					name: '예약',
+					color: '#01FF30',
+					bgColor: '#01FF30',
+					dragBgColor: '#01FF30',
+					borderColor: '#01FF30'
+				},
+
+				{
+					id: 'Meeting',
+					name: '회의',
+					color: '#ffffff',
+					bgColor: '#03bd9e',
+					dragBgColor: '#03bd9e',
+					borderColor: '#03bd9e'
+				},
+
+				{
+					id: 'Reserved',
+					name: '예약됨',
+					color: '#f361dc',
+					bgColor: '#f361dc',
+					dragBgColor: '#f361dc',
+					borderColor: '#f361dc'
+				}
+				,
+				{
+					id: 'Finished',
+					name: '종료',
+					color: '#000000',
+					bgColor: '#000000',
+					dragBgColor: '#000000',
+					borderColor: '#000000'
+				}
+			]); //캘린더 종류 등록
+
+			// 캘린더 내용 DB에서 읽어서 캘린터에 설정	
+			$.ajax({
+				type : "POST",
+				dataType : "json",
+				url : "./readMySchedule",
+				async : true,
+				data : {},
+				success : function(data){
+					let mySchedules = [];
+
+					data.schedules.forEach((row) => {
+						delete row.empid;
+						row.id = row.scheduleno;
+
+						mySchedules.push(row);
 					});
-
-				});
+					calendar.createSchedules(mySchedules);
+				}
 			});
-		</script>
-    <div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
-        <div class="c-sidebar-brand d-lg-down-none">
-            <svg class="c-sidebar-brand-full" width="118" height="46" alt="CoreUI Logo">
-                <use xlink:href="assets/brand/coreui.svg#full"></use>
-            </svg>
-            <svg class="c-sidebar-brand-minimized" width="46" height="46" alt="CoreUI Logo">
-                <use xlink:href="assets/brand/coreui.svg#signet"></use>
-            </svg>
-        </div>
-		<%- include ('adminNav'); -%>
-        <button class="c-sidebar-minimizer c-class-toggler" type="button" data-target="_parent"
-            data-class="c-sidebar-minimized"></button>
-    </div>
-    <div class="c-wrapper c-fixed-components">
-        <header class="c-header c-header-light c-header-fixed c-header-with-subheader">
-            <button class="c-header-toggler c-class-toggler d-lg-none mfe-auto" type="button" data-target="#sidebar"
-                data-class="c-sidebar-show">
-                <i class="cil-hamburger-menu"></i>
-            </button><a class="c-header-brand d-lg-none" href="#">
-                <i class="cil-hamburger-menu"></i></a>
-            <button class="c-header-toggler c-class-toggler mfs-3 d-md-down-none" type="button" data-target="#sidebar"
-                data-class="c-sidebar-lg-show" responsive="true">
-                <i class="cil-hamburger-menu"></i>
-            </button>
-			<ul class="c-header-nav ml-auto mr-4">
-                <li class="c-header-nav-item dropdown"><a class="c-header-nav-link" data-toggle="dropdown" href="#"
-                        role="button" aria-haspopup="true" aria-expanded="false">
-                        <div class="c-avatar"><i class="cil-user"></i></div>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right pt-0">
-                        <div class="dropdown-header bg-light py-2"><strong>계정</strong></div>
-                            <a class="dropdown-item" href="/admin/logout">
-                            <i class="cil-account-logout pr_10"></i> 로그아웃</a>
-							<a class="dropdown-item" href="/admin/changePassword">
-                            <i class="cil-dialpad pr_10"></i> 비밀번호 변경</a>
-                </li>
-            </ul>
-            <div class="c-subheader px-3">
-                <!-- Breadcrumb-->
-                <ol class="breadcrumb border-0 m-0">
-                    <li class="breadcrumb-item"><a href="/admin">Home</a></li>
-                    <li class="breadcrumb-item active">스케줄</li>
-                    <!-- Breadcrumb Menu-->
-                </ol>
-            </div>
-        </header>
-        <div class="c-body">
-            <main class="c-main">
-                <div class="container-fluid">
-                    <div class="fade-in">
-						<h2 id='date'></h2>
-						<button id="nowBtn">오늘</button>
-						<button id="prevBtn">이전</button>
-						<button id="nextBtn">다음</button>
-						<button id="dayViewBtn">일간</button>
-						<button id="weekViewBtn">주간</button>
-						<button id="monthViewBtn">월간</button>
-						<div id="calendar" style="height: 800px;"></div>
-                    </div>
-                </div>
-            </main>
-            <footer class="c-footer">
-                <div><a href="https://coreui.io">CoreUI</a> &copy; 2020 creativeLabs.</div>
-                <div class="ml-auto">Powered by&nbsp;<a href="https://coreui.io/">CoreUI</a></div>
-            </footer>
-        </div>
-    </div>
-	<script>
-		const container = document.getElementById('calendar');
 
-		const options = {
-			defaultView: 'month',
-			useCreationPopup: true,
-			useDetailPopup: true,
-		}
-		var Calendar = tui.Calendar;
-		
-
-		const calendar = new Calendar(container, options);
-		const nowBtn = document.getElementById('nowBtn');
-		const prevBtn = document.getElementById('prevBtn');
-		const nextBtn = document.getElementById('nextBtn');
-		const dayViewBtn = document.getElementById('dayViewBtn');
-		const weekViewBtn = document.getElementById('weekViewBtn');
-		const monthViewBtn = document.getElementById('monthViewBtn');
-		const date = document.getElementById('date');
-		
-		
-
-		date.textContent = `${calendar.getDate().getFullYear()}-${calendar.getDate().getMonth() + 1}`;
-
-		// calendar._controller.schedules.items //전체 스케줄 뽑는 방법
-
-		calendar.setCalendars([
-			{
-				id: 'Reservation',
-				name: '예약',
-				color: '#ffffff',
-				bgColor: '#ff5583',
-				dragBgColor: '#ff5583',
-				borderColor: '#ff5583'
-			},
-			
-			{
-				id: 'Meeting',
-				name: '회의',
-				color: '#ffffff',
-				bgColor: '#03bd9e',
-				dragBgColor: '#03bd9e',
-				borderColor: '#03bd9e'
-			},
-			
-			{
-				id: 'Reserved',
-				name: '예약됨',
-				color: '#ff0000',
-				bgColor: '#f361dc',
-				dragBgColor: '#6b66ff',
-				borderColor: '#6b66ff'
-			}
-		]); //캘린더 종류 등록
-
-		
-		// 캘린더 내용 DB에서 읽어서 캘린터에 설정	
-		$.ajax({
-			type : "POST",
-			dataType : "json",
-			url : "./readMySchedule",
-			async : true,
-			data : {},
-			success : function(data){
-				
-				let mySchedules = [];
-				
-				console.info(data.schedules);
-
-				data.schedules.forEach((row) => {
-					delete row.empid;
-					console.info(row);
-					row.id = row.scheduleno;
-					/*
-					row.start = row.start.replace(".000Z", "");
-					row.end = row.end.replace(".000Z", "");
-					*/
-					
-					mySchedules.push(row);
-				});
-				
-				console.info(mySchedules);
-				calendar.createSchedules(mySchedules);
-				
-
-			}
-
-		});
-
-		
-		$.ajax({
-			type: "POST",
-			datatype : "json",
-			url : "./readReservedSchedule",
-			async : true,
-			data : {},
-			success : function(data){
-				
-				let reservedSchedules = [];
-				console.info(data);
-				
-				data.reserved.forEach((row, index) => {
-					delete row.empid;
-					delete row.scheduleno;
-					row.category = 'time';
-					reservedSchedules.push(row);
-				});
-				
-				
-				calendar.createSchedules(reservedSchedules);
-				
-			}
-		});
-		
-		
-		/*
-		calendar.createSchedules([
-			{
-				id: '1',
-				calendarId: 'Reservation', // 등록된 캘린더 종류에 따른 id값 매핑
-				title: '예약 가능',
-				category: 'time',              // 일반 일정
-				start: '2020-10-01T10:00:00',
-				end: '2020-10-02T10:00:00'
-			},
-			{
-				id: '2',
-				calendarId: 'Vacation',
-				title: '여름 휴가',
-				category: 'time',
-				start: '2020-10-03T10:00:00',
-				end: '2020-10-04T10:00:00',
-			},
-			{
-				id: '3',
-				calendarId: 'Meeting',
-				title: '상담사간 회의',
-				category: 'time',
-				start: '2019-11-27T13:00:00',
-				end: '2019-11-27T14:00:00'
-			},
-			{
-				id: '4',
-				calendarId: 'Vacation',
-				title: '겨울 휴가',
-				category: 'allday',              // 종일 일정
-				start: '2020-10-26',
-				end: '2020-10-30',
-				color: '#ffffff',
-				bgColor: '#ff4040',              // 일정 색상을 직접 지정할 수 있어요
-				dragBgColor: '#ff4040',
-				borderColor: '#ff4040'
-			}
-		]);
-		*/
-		
-		// calendar.createSchedules(mySchedules);
-
-		calendar.on('beforeCreateSchedule', scheduleData => {
-			const schedule = { // 해당 객체의 형태로 db를 구성해야 할 것 같음
-				calendarId: scheduleData.calendarId,
-			
-				title: scheduleData.title,
-			
-				start: scheduleData.start,
-				end: scheduleData.end,
-				category: scheduleData.isAllDay ? 'allday' : 'time',
-				location: scheduleData.location,            
-			};
-
-			console.info(schedule);
-			let sendAjax = {
-				
-				calendarId : schedule.calendarId,
-				title : schedule.title,
-				start : schedule.start._date.toString(),
-				end : schedule.end._date.toString(),
-				category : schedule.category,
-				location : schedule.location
-			};
-			
-			
-			console.info(sendAjax);
-			
-			
-			if(schedule.calendarId === "Reserved"){
-				
-				console.info("error : 예약 건 확인 유형은 등록할 수 없습니다.");
-				alert("예약 건 확인 유형은 등록할 수 없습니다.");
-				return;
-			}
-			
-			
 			$.ajax({
 				type: "POST",
-				dataType: "json",
-				url: "./createSchedule",
-				async: true,
-				data: { "sendAjax" : JSON.stringify(sendAjax) },
-				success: function (data) { 	
-					console.info(data);
-					if(data.state === "ok"){
-						console.info("info : 스케줄 추가가 완료되었습니다.");
-						
-						alert("스케줄 추가가 완료되었습니다.");
-						calendar.createSchedules([schedule]);
-						window.location.reload();
-					}else if(data.state === "isDiffDate"){
-						alert("예약 가능 일정 추가는 날짜가 같아야 합니다.");
-						console.info(" error : 예약 가능 일정은 Date가 다르면 안됩니다.");
-					}
-					
-					
-					/*
-					if(data.state === "error : date different"){
-					
-					}
-					*/
-				}
-			});
-			
-			
-			// console.info(sendAjax);
-			// alert('일정 생성 완료');
-		});
-		
-		
-		
-		
-		calendar.on('beforeUpdateSchedule', event => {
-			const { schedule, changes } = event;
-			console.info(changes); // 변경 사항 및 state 는 계속 변경됨
-			console.info("schedule");
-			console.info(schedule); 
-			
-			if(schedule.calendarId === "Reserved"){
-				
-				console.info("error : 예약 건 확인 스케줄은 수정할 수 없습니다.");
-				alert("예약 건 확인 스케줄은 수정할 수 없습니다.");
-				return;
-			}
-			
-			
-			
-			let sendAjax = {
-				id : schedule.id,
-				changes : changes,
-				schedule : schedule
-			}
-			
-			$.ajax({
-				type : "POST",
-				dataType : "json",
-				url : "./updateSchedule",
+				datatype : "json",
+				url : "./readReservedSchedule",
 				async : true,
-				data : {"sendAjax" : JSON.stringify(sendAjax)},
+				data : {},
 				success : function(data){
-					console.info(data);
-					if(data.state === "ok"){
-						alert("스케줄 수정이 완료되었습니다.");
-						console.info("info : 스케줄 수정이 완료되었습니다.");
-						calendar.updateSchedule(schedule.id, schedule.calendarId, changes);
-					}else if(data.state === "can't update"){
-						alert("예약 건이 있어 수정이 되지 않습니다.");
-						console.info("error : 예약 건이 있어 수정이 되지 않습니다.");
-					}else if(data.state === "can't update : diff date"){
-						alert("서로 다른 날짜로 수정은 안됩니다.");
-						console.info("서로 다른 날짜로 수정은 안됩니다.");
-					}
-					
-					/*
-					else if(data.state === "can't update other calendarId"){
-						console.info("error : 예약 수락 건에 대한 스케줄이라 삭제가 되지 않습니다.");
-					}
-					*/
-					
-				}
-				
-			});
-			
-		
-			
-		});
-		calendar.on('beforeDeleteSchedule', scheduleData => {
-			const { schedule } = scheduleData;
-			
-			
-			if(schedule.calendarId === "Reserved"){
-				
-				console.info("error : 예약 건 확인 스케줄은 삭제할 수 없습니다.");
-				alert("예약 건 확인 스케줄은 삭제할 수 없습니다.");
-				return;
-			}
-			
-			
-			let sendAjax = {
-				id : schedule.id
-			}
-			
-			$.ajax({
-				type : "POST",
-				dataType : "json",
-				url : "./deleteSchedule",
-				async : true,
-				data : {"sendAjax" : JSON.stringify(sendAjax)},
-				success : function(data){
-					// console.info(data.state);
-					/*
-					
-					*/
-					
-					
-					if(data.state === "can't delete : already Accept"){
-						alert("이미 예약이 수락되어있어 삭제가 불가능 합니다.");
-						console.info("error : 이미 예약이 수락되어있어 삭제가 불가능 합니다.");
-					}
-					else if(data.state === "can't delete : is not counselor's included schedule"){
-						alert("예약일정 스케줄만 삭제가 가능합니다.");
-						console.info("error : 예약일정 스케줄만 삭제가 가능합니다.");
-					}
-					else if(data.state === "ok"){
-						alert("스케줄 삭제가 완료되었습니다.");
-						console.info("info : 스케줄 삭제가 완료되었습니다.");
-						calendar.deleteSchedule(schedule.id, schedule.calendarId);
-					}
-					
+					let reservedSchedules = [];
+
+					data.reserved.forEach((row, index) => {
+						delete row.empid;
+						delete row.scheduleno;
+						row.category = 'time';
+						reservedSchedules.push(row);
+					});
+
+					calendar.createSchedules(reservedSchedules);
 				}
 			});
 
-			
-		});
-		nowBtn.addEventListener('click', () => {
-			calendar.today();
-			date.textContent = `${calendar.getDate().getFullYear()}-${calendar.getDate().getMonth() + 1}`;
-		})
-		prevBtn.addEventListener('click', () => {
-			calendar.prev();
-			date.textContent = `${calendar.getDate().getFullYear()}-${calendar.getDate().getMonth() + 1}`;
-		});
+			calendar.on('beforeCreateSchedule', scheduleData => {
+				const schedule = { // 해당 객체의 형태로 db를 구성해야 할 것 같음
+					calendarId: scheduleData.calendarId,
 
-		nextBtn.addEventListener('click', () => {
-			calendar.next();
-			date.textContent = `${calendar.getDate().getFullYear()}-${calendar.getDate().getMonth() + 1}`;
-		});
+					title: scheduleData.title,
 
-		dayViewBtn.addEventListener('click', () => {
-			calendar.changeView('day', true);
-		});
+					start: scheduleData.start,
+					end: scheduleData.end,
+					category: scheduleData.isAllDay ? 'allday' : 'time',
+					location: scheduleData.location,            
+				};
 
-		weekViewBtn.addEventListener('click', () => {
-			calendar.changeView('week', true);
-		});
+				let sendAjax = {
 
-		monthViewBtn.addEventListener('click', () => {
-			calendar.changeView('month', true);
-		});
-	</script>
-   <script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
-</body>
+					calendarId : schedule.calendarId,
+					title : schedule.title,
+					start : schedule.start._date.toString(),
+					end : schedule.end._date.toString(),
+					category : schedule.category,
+					location : schedule.location
+				};
 
+				if(schedule.calendarId == "Reserved" || schedule.calendarId == "Finished"){
+					alert("예약 건 관련 유형은 등록할 수 없습니다.");
+					return;
+				}
+
+				$.ajax({
+					type: "POST",
+					dataType: "json",
+					url: "./createSchedule",
+					async: true,
+					data: { "sendAjax" : JSON.stringify(sendAjax) },
+					success: function (data) { 	
+						if(data.state === "ok"){
+							alert("스케줄 추가가 완료되었습니다.");
+							calendar.createSchedules([schedule]);
+							window.location.reload();
+						}else if(data.state === "isDiffDate"){
+							alert("예약 가능 일정 추가는 날짜가 같아야 합니다.");
+						}else if(data.state === "Duplicate Schedule"){
+							alert("이미 시간이 겹치는 스케줄이 존재합니다.");
+						}
+					}
+				});
+
+			});
+
+			calendar.on('beforeUpdateSchedule', event => {
+				const { schedule, changes } = event;
+
+				if(schedule.calendarId == "Reserved" || schedule.calendarId == "Finished"){
+					alert("예약 건 관련 스케줄은 수정할 수 없습니다.");
+					return;
+				}
+
+				if(changes.hasOwnProperty("start") && changes.hasOwnProperty("end")){
+					if((changes.end._date.getDate() != changes.start._date.getDate()) || (changes.end._date.getMonth() != changes.start._date.getMonth())){
+					   alert("날짜를 다르게 수정할 수 없습니다.");
+					   return;
+					}
+				}
+
+				if(changes.hasOwnProperty("start")){
+					if((schedule.end._date.getDate() != changes.start._date.getDate()) || (schedule.end._date.getMonth() != changes.start._date.getMonth())){
+					   alert("날짜를 다르게 수정할 수 없습니다.");
+					   return;
+					}
+				}
+
+				if(changes.hasOwnProperty("end")){
+					if((schedule.start._date.getDate() != changes.end._date.getDate()) || (schedule.start._date.getMonth() != changes.end._date.getMonth())){
+						alert("날짜를 다르게 수정할 수 없습니다.");
+						return;
+					}
+				}
+
+				let sendAjax = {
+					id : schedule.id,
+					changes : changes,
+					schedule : schedule
+				}
+
+				if('state' in changes){
+					delete changes['state'];
+				}
+				let changeCnt = Object.keys(changes).length;
+
+				if(changeCnt > 0){
+					$.ajax({
+						type : "POST",
+						dataType : "json",
+						url : "./updateSchedule",
+						async : true,
+						data : {"sendAjax" : JSON.stringify(sendAjax)},
+						success : function(data){
+							if(data.state === "ok"){
+								alert("스케줄 수정이 완료되었습니다.");
+								calendar.updateSchedule(schedule.id, schedule.calendarId, changes);
+							}
+							else if(data.state === "can't update"){
+								alert("예약 건이 있어 수정이 되지 않습니다.");
+							}
+						}
+					});
+				}
+				else{
+					alert("스케줄 변경 사항이 없습니다.");
+					return;
+				}
+			});
+
+			calendar.on('beforeDeleteSchedule', scheduleData => {
+				const { schedule } = scheduleData;
+
+				if(schedule.calendarId == "Reserved" || schedule.calendarId == "Finished"){
+					alert("예약 건 관련 스케줄은 삭제할 수 없습니다.");
+					return;
+				}
+
+				let sendAjax = {
+					id : schedule.id
+				}
+
+				$.ajax({
+					type : "POST",
+					dataType : "json",
+					url : "./deleteSchedule",
+					async : true,
+					data : {"sendAjax" : JSON.stringify(sendAjax)},
+					success : function(data){
+						if(data.state === "can't delete : already Accept"){
+							alert("이미 예약이 있어 삭제가 불가능 합니다.");
+						}
+						else if(data.state === "can't delete : is not counselor's included schedule"){
+							alert("상담사님이 추가한 스케줄만 삭제가 가능합니다.");
+						}
+						else if(data.state === "ok"){
+							alert("스케줄 삭제가 완료되었습니다.");
+							calendar.deleteSchedule(schedule.id, schedule.calendarId);
+						}
+					}
+				});
+			});
+
+			nowBtn.addEventListener('click', () => {
+				calendar.today();
+				date.textContent = `${calendar.getDate().getFullYear()}-${calendar.getDate().getMonth() + 1}`;
+			});
+
+			prevBtn.addEventListener('click', () => {
+				calendar.prev();
+				date.textContent = `${calendar.getDate().getFullYear()}-${calendar.getDate().getMonth() + 1}`;
+			});
+
+			nextBtn.addEventListener('click', () => {
+				calendar.next();
+				date.textContent = `${calendar.getDate().getFullYear()}-${calendar.getDate().getMonth() + 1}`;
+			});
+		</script>
+		<script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>	
+	</body>
 </html>
-

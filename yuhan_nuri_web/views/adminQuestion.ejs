@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- CoreUI CSS -->
     <link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
-    <title>유한누리 어드민</title>	
+    <title>유한누리 상담사 페이지</title>	
 	<script src="https://code.jquery.com/jquery-latest.min.js"></script>
 	<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
 	<style>
@@ -49,14 +49,6 @@
   </div>
 </div>
     <div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
-        <div class="c-sidebar-brand d-lg-down-none">
-            <svg class="c-sidebar-brand-full" width="118" height="46" alt="CoreUI Logo">
-                <use xlink:href="assets/brand/coreui.svg#full"></use>
-            </svg>
-            <svg class="c-sidebar-brand-minimized" width="46" height="46" alt="CoreUI Logo">
-                <use xlink:href="assets/brand/coreui.svg#signet"></use>
-            </svg>
-        </div>
                 <%- include ('adminNav'); -%>
         <button class="c-sidebar-minimizer c-class-toggler" type="button" data-target="_parent"
             data-class="c-sidebar-minimized"></button>
@@ -83,6 +75,7 @@
                             <i class="cil-account-logout pr_10"></i> 로그아웃</a>
 							<a class="dropdown-item" href="/admin/changePassword">
                             <i class="cil-dialpad pr_10"></i> 비밀번호 변경</a>
+					</div>
                 </li>
             </ul>
             <div class="c-subheader px-3">
@@ -105,11 +98,18 @@
                                 </div>
 							</div>
 								<% selectList.forEach(function(val,i){ %>
-								<div class="card-body list-group-item">
-                                    <h5 class="card-title">학번: <%=val.stuno%></h5>
-									<p class="card-text">제목: <%= val.title %></p>
-									<p class="card-text">문의 유형: <%= val.type %></p>
-									<p class="card-text" id="ques_content">내용: <%= val.content%></p>
+								<div class="card-body list-group-item border-left-0 border-right-0">
+                                    <h5 class="card-title mb-5">학번 : <%=val.stuno%>
+									&nbsp;&nbsp;&nbsp;&nbsp;이름 : <b><%=val.stuname %></b>
+									&nbsp;&nbsp;&nbsp;&nbsp;질문 일자 : <%let dateArr = val.date.split('-');%><%=dateArr[0]+"년 "+dateArr[1]+"월 "+dateArr[2]+"일"%>
+									&nbsp;&nbsp;&nbsp;&nbsp;연락처 : <%=val.phonenum %>
+									</h5>
+									<label style="font-size:120%;"><b>제 목</b></label>
+									<p class="card-text mb-4"><%= val.title %></p>
+									<label style="font-size:120%;"><b>문의 유형</b></label>
+									<p class="card-text mb-4"><%= val.type %></p>
+									<label style="font-size:120%;"><b>내 용</b></label>
+									<p class="card-text" id="ques_content"><%= val.content%></p>
 									<button type="button" class="btn btn-primary float-right " data-toggle="modal" data-target="#exampleModal"
 											onClick="giveData(<%=val.no%>)">답변하기</button>
                                 </div>

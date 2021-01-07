@@ -8,9 +8,26 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:vibration/vibration.dart';
+<<<<<<< HEAD
+=======
+import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+//import 'package:flutter_phoenix/flutter_phoenix.dart';
+>>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
 
 final FirebaseMessaging fcm = FirebaseMessaging();
 CookieManager cm;
+
+// [0] 메인, [1] 예약, [2] 문의, [3] 마이페이지, [4] 만족도조사페이지, [5] 채팅
+// urls 배열 외의 외부url을 로드할 시 webview가 아닌 기기의 브라우저(크롬, 사파리)를 이용해 로드(하이퍼링크 등)
+const urls = [
+  'https://yuhannuri.run.goorm.io/',
+  'https://yuhannuri.run.goorm.io/user/reservation',
+  'https://yuhannuri.run.goorm.io/user/question',
+  'https://yuhannuri.run.goorm.io/user/mypage',
+  'https://yuhannuri.run.goorm.io/user/satisfaction',
+  'https://yuhannuri.run.goorm.io/user/mypage?chatting',
+];
 
 class YuhanNuri extends StatefulWidget {
   final String cookie;
@@ -36,8 +53,8 @@ class _DummyState extends State<YuhanNuri> {
 class YuhanNuriState extends State<YuhanNuri> {
   InAppWebViewController _webViewController;
   DateTime currentBackPressTime;
-  Map<String, String> header; // 전달받은 Cookie객체를 string과 합쳐서 header만듦
-  GlobalKey globalKey = new GlobalKey(); //네비게이션 바 외부에서 접근가능하게 해줄 Key변수
+  Map<String, String> header; // 전달받은 Cookie 객체를 string과 합쳐서 header 만듦
+  GlobalKey globalKey = new GlobalKey(); // 내비게이션 바 외부에서 접근 가능하게 해줄 Key 변수
   CurvedNavigationBarState navBarState;
   final FirebaseMessaging fcm = FirebaseMessaging();
 
@@ -47,6 +64,7 @@ class YuhanNuriState extends State<YuhanNuri> {
 
   void initState() {
     super.initState();
+<<<<<<< HEAD
 
     fcm.configure(onMessage: (Map<String, dynamic> message) async {
       // 앱이 켜져있을때는 페이지 안바꿈.
@@ -57,15 +75,37 @@ class YuhanNuriState extends State<YuhanNuri> {
         gotoPage(message['data']['page']);
       });
     });
+=======
+    fcm.configure(
+        onMessage: (Map<String, dynamic> message) async {},
+        onResume: (Map<String, dynamic> message) async {
+          gotoPage(message['data']['page']);
+        },
+        onLaunch: (Map<String, dynamic> message) async {
+          Timer(Duration(milliseconds: 1500), () {
+            gotoPage(message['data']['page']);
+          });
+        });
+>>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
 
     cm = new CookieManager();
   }
 
   void gotoPage(String msg) {
+<<<<<<< HEAD
     navBarState = globalKey.currentState;
     navBarState.setPage(3);
     if (msg == "question") {
       Timer(Duration(milliseconds: 850), () {
+=======
+    if (msg == "mypage" || msg == "satisfaction") {
+      navBarState = globalKey.currentState;
+      navBarState.setPage(3);
+    } else if (msg == "question") {
+      navBarState = globalKey.currentState;
+      navBarState.setPage(3);
+      Timer(Duration(milliseconds: 500), () {
+>>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
         _webViewController.evaluateJavascript(
             source: "\$('#reserv').removeClass('active'); " +
                 "\$('#quest').addClass('active');" +
@@ -87,46 +127,66 @@ class YuhanNuriState extends State<YuhanNuri> {
             debugShowCheckedModeBanner: false,
             home: WillPopScope(
                 child: Scaffold(
+                  appBar: AppBar(
+                    title: Container(
+                      child: Image(
+                        image: AssetImage('assets/nuri.png'),
+                        fit: BoxFit.fill,
+                        height: 22,
+                      ),
+                    ),
+                    actions: <Widget>[
+                      IconButton(
+                        icon: Icon(Icons.logout),
+                        onPressed: () {
+                          showLogoutButtonDialog(context);
+                        },
+                      )
+                    ],
+                  ),
                   body: Center(
                       child: SafeArea(
                           child: InAppWebView(
                     initialOptions: InAppWebViewGroupOptions(
                         crossPlatform: InAppWebViewOptions(
-                      debuggingEnabled: true,
-                      supportZoom: false,
-                    )),
+                            debuggingEnabled: true, supportZoom: false)),
+                    initialUrl: urls[0],
+                    initialHeaders: header,
+                    onLoadStart: (_webViewController, String url) {
+                      if (!urls.contains(url)) {
+                        _webViewController.stopLoading();
+                        launch(url, forceWebView: false);
+                        navBarState = globalKey.currentState;
+                        navBarState.setPage(0);
+                      }
+                    },
                     onWebViewCreated: (InAppWebViewController controller) {
                       _webViewController = controller;
-                      // url로드전에 cookie 지워주지 않으면 cookie 안먹는 경우 있음
                       cm.deleteAllCookies();
-                      _webViewController.loadUrl(
-                          url: 'https://yuhannuri.run.goorm.io',
-                          headers: header);
+                      _webViewController.loadUrl(url: urls[0], headers: header);
                       KeyboardVisibility.onChange.listen((bool visible) async {
                         if (visible) {
-                          //키보드 올라왔을때
-                          if (await _webViewController.getUrl() ==
-                              'https://yuhannuri.run.goorm.io/user/mypage') {
-                            // 마이페이지 ( 채팅 )
+                          // 키보드 올라왔을때
+                          if (await _webViewController.getUrl() == urls[3]) {
+                            // 마이페이지(채팅)
                             Future.delayed(
                                 Duration(milliseconds: 300),
                                 () async =>
                                     await _webViewController.evaluateJavascript(
                                         source: 'setHeight();'));
-                          } else if (await _webViewController.getUrl() ==
-                              "https://yuhannuri.run.goorm.io/user/question") {
-                            // 문의페이지면 아무것도안함
                           } else {
-                            // 다른페이지 ( 예약페이지 등)
-                            await _webViewController.evaluateJavascript(
-                                source:
-                                    'document.activeElement.scrollIntoView( {block: "center"})'); // 해당 텍스트박스를 화면에 나오게
+                            // 다른페이지(예약페이지 등)
+                            Future.delayed(
+                                Duration(milliseconds: 300),
+                                () async =>
+                                    await _webViewController.evaluateJavascript(
+                                        source:
+                                            'document.activeElement.scrollIntoView( {block: "center"})')); // 해당 텍스트박스를 화면에 나오게
                           }
                         } else {
-                          //키보드가 내려갈때
-                          if (await _webViewController.getUrl() ==
-                              'https://yuhannuri.run.goorm.io/user/mypage') {
-                            //마이페이지 ( 채팅 ) 이면
+                          // 키보드가 내려갈때
+                          if (await _webViewController.getUrl() == urls[3]) {
+                            // 마이페이지(채팅) 이면
                             Future.delayed(
                                 Duration(milliseconds: 300),
                                 () async =>
@@ -134,17 +194,18 @@ class YuhanNuriState extends State<YuhanNuri> {
                                         source: 'setHeight();'));
                             await _webViewController.evaluateJavascript(
                                 source:
-                                    'document.activeElement.blur()'); //해당 텍스트박스의 포커싱을 지움
+                                    'document.activeElement.blur()'); // 해당 텍스트박스의 포커싱을 지움
                           } else {
                             await _webViewController.evaluateJavascript(
                                 source:
-                                    'document.activeElement.blur()'); //해당 텍스트박스의 포커싱을 지움
+                                    'document.activeElement.blur()'); // 해당 텍스트박스의 포커싱을 지움
                           }
                         }
                       });
                       _webViewController.addJavaScriptHandler(
                           // 웹뷰 JavaScript와 통신하는 핸들러
                           handlerName:
+<<<<<<< HEAD
                               'PageHandler', // 해당 핸들러를 웹뷰에서 호출( 예약완료 버튼클릭 )할 시  메인으로 돌아감
                           callback: (args) {
                             if (args[0].toString() == "replaceMain") {
@@ -153,6 +214,24 @@ class YuhanNuriState extends State<YuhanNuri> {
                             } else if (args[0].toString() == "replaceMypage") {
                               navBarState = globalKey.currentState;
                               navBarState.setPage(3);
+=======
+                              'PageHandler', // 해당 핸들러를 웹뷰에서 호출(예약 완료 버튼 클릭)할 시 메인으로 돌아감
+                          callback: (args) async {
+                            if (args[0].toString() == "replaceMain") {
+                              Future.delayed(Duration(milliseconds: 300), () {
+                                navBarState = globalKey.currentState;
+                                navBarState.setPage(0);
+                              });
+                            } else if (args[0].toString() == "replaceMypage") {
+                              navBarState = globalKey.currentState;
+                              navBarState.setPage(3);
+                            } else if (args[0].toString() == "Restart") {
+                              // SharedPreferences prefs =
+                              //     await SharedPreferences.getInstance();
+                              // prefs.remove('expires');
+                              // prefs.remove('cookie');
+                              // Phoenix.rebirth(context);
+>>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
                             }
                           });
                     },
@@ -162,6 +241,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                     index: 0,
                     backgroundColor: Colors.blueAccent[100],
                     items: <Widget>[
+<<<<<<< HEAD
                       // Icon(Icons.home, size: 25),
                       // Icon(Icons.date_range, size: 25),
                       // Icon(Icons.feedback, size: 25),
@@ -182,6 +262,27 @@ class YuhanNuriState extends State<YuhanNuri> {
                       new Image.asset(
                         'assets/mypage.png',
                         scale: 1,
+=======
+                      Image(
+                        image: AssetImage('assets/home.png'),
+                        fit: BoxFit.cover,
+                        height: 30,
+                      ),
+                      Image(
+                        image: AssetImage('assets/reservation.png'),
+                        fit: BoxFit.cover,
+                        height: 30,
+                      ),
+                      Image(
+                        image: AssetImage('assets/question.png'),
+                        fit: BoxFit.cover,
+                        height: 30,
+                      ),
+                      Image(
+                        image: AssetImage('assets/mypage.png'),
+                        fit: BoxFit.cover,
+                        height: 30,
+>>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
                       ),
                     ],
                     animationDuration:
@@ -191,25 +292,19 @@ class YuhanNuriState extends State<YuhanNuri> {
                       switch (navigationIndex) {
                         case 0:
                           _webViewController.loadUrl(
-                              url: 'https://yuhannuri.run.goorm.io',
-                              headers: header);
+                              url: urls[0], headers: header);
                           break;
                         case 1:
                           _webViewController.loadUrl(
-                              url:
-                                  'https://yuhannuri.run.goorm.io/user/reservation',
-                              headers: header);
+                              url: urls[1], headers: header);
                           break;
                         case 2:
                           _webViewController.loadUrl(
-                              url:
-                                  'https://yuhannuri.run.goorm.io/user/question',
-                              headers: header);
+                              url: urls[2], headers: header);
                           break;
                         case 3:
                           _webViewController.loadUrl(
-                              url: 'https://yuhannuri.run.goorm.io/user/mypage',
-                              headers: header);
+                              url: urls[3], headers: header);
                           break;
                         default:
                           break;
@@ -220,22 +315,20 @@ class YuhanNuriState extends State<YuhanNuri> {
                   ),
                 ),
                 onWillPop: () async {
-                  if (await _webViewController.getUrl() ==
-                      "https://yuhannuri.run.goorm.io/") {
+                  if (await _webViewController.getUrl() == urls[0]) {
                     DateTime now = DateTime.now();
                     if (currentBackPressTime == null ||
                         now.difference(currentBackPressTime) >
                             Duration(seconds: 2)) {
                       // 전에 back 버튼을 누른적이 없거나
-                      // back 버튼을 눌렀을때의 시간과 전에 back버튼을 눌렀을때의 차이가 2초를 넘었으면
+                      // back 버튼을 눌렀을 때의 시간과 전에 back 버튼을 눌렀을 때의 차이가 2초를 넘었으면
                       currentBackPressTime = now;
-                      print(await fcm.getToken());
-                      showToast("뒤로가기 버튼을 한번 더      \n 클릭하면 종료합니다.");
+                      showToast("뒤로 가기 버튼을 한 번 더      \n 클릭하면 종료합니다.");
                       return Future.value(false); // 종료 안함.
                     }
-                    return Future.value(true); // if문이 거짓일때는 바로 종료
+                    return Future.value(true); // if문이 거짓일 때는 바로 종료
                   }
-                  //마이페이지에서 채팅창이 활성화되어있는지
+                  // 마이페이지에서 채팅 창이 활성화되어있는지
                   bool isChatting = await _webViewController.evaluateJavascript(
                       source:
                           'if(document.getElementById("chattingCard") != null) true;' +
@@ -252,8 +345,10 @@ class YuhanNuriState extends State<YuhanNuri> {
   }
 
   showBackButtonDialog(BuildContext context) {
-    Widget continueButton = FlatButton(
+    Widget continueButton = RaisedButton(
       child: Text("예"),
+      color: Color(0xFF0275D7),
+      elevation: 5,
       onPressed: () {
         Navigator.pop(context);
         navBarState = globalKey.currentState;
@@ -261,10 +356,10 @@ class YuhanNuriState extends State<YuhanNuri> {
       },
     );
 
-    Widget cancelButton = FlatButton(
+    Widget cancelButton = RaisedButton(
       child: Text("아니오"),
+      elevation: 5,
       onPressed: () {
-        //  Navigator.of(context).pop();
         Navigator.pop(context);
       },
     );
@@ -272,6 +367,48 @@ class YuhanNuriState extends State<YuhanNuri> {
     AlertDialog alert = AlertDialog(
       title: Text("유한누리"),
       content: Text("현재 채팅이 활성화되어있습니다. \n홈 화면으로 돌아가시겠습니까?"),
+      actions: [
+        continueButton,
+        cancelButton,
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  showLogoutButtonDialog(BuildContext context) {
+    Widget continueButton = RaisedButton(
+      child: Text("예"),
+      color: Color(0xFF0275D7),
+      elevation: 5,
+      onPressed: () async {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.remove('expires');
+        prefs.remove('cookie');
+        SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+      },
+    );
+
+    Widget cancelButton = RaisedButton(
+      child: Text("아니오"),
+      elevation: 5,
+      onPressed: () {
+        Navigator.pop(context);
+      },
+    );
+
+    AlertDialog alert = AlertDialog(
+      title: Text("유한누리"),
+<<<<<<< HEAD
+      content: Text("현재 채팅이 활성화되어있습니다. \n홈 화면으로 돌아가시겠습니까?"),
+=======
+      content: Text("자동 로그인을 해제한 후\n종료합니다"),
+>>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
       actions: [
         continueButton,
         cancelButton,

@@ -20,7 +20,6 @@ class IntroduceScreen extends StatefulWidget {
 class IntroduceScreenState extends State<IntroduceScreen> {
   final introKey = GlobalKey<IntroductionScreenState>();
 
-  // 인트로 확인했을 때 실행
   void _onIntroEnd(context) {
     runApp(LoginApp());
   }
@@ -32,6 +31,7 @@ class IntroduceScreenState extends State<IntroduceScreen> {
           fontSize: 35.0,
           fontWeight: FontWeight.w700,
           fontFamily: 'jua',
+<<<<<<< HEAD
           color: Color(0xFF303030)), //tile font size, weight and color
       bodyTextStyle: TextStyle(
           fontSize: 19.0, color: Color(0xFFC7C7C7), fontFamily: 'jua'),
@@ -55,6 +55,17 @@ class IntroduceScreenState extends State<IntroduceScreen> {
       ), //show linear gradient background of page
     );
     // 각각 페이지들을 배열처럼 저장
+=======
+          color: Color(0xFF303030)),
+      bodyTextStyle: TextStyle(
+          fontSize: 19.0, color: Color(0xFFC7C7C7), fontFamily: 'jua'),
+      descriptionPadding: EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 16.0),
+      imagePadding: EdgeInsets.all(20),
+      boxDecoration: BoxDecoration(
+        color: Colors.white,
+      ),
+    );
+>>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
     return IntroductionScreen(
       key: introKey,
       pages: [
@@ -88,7 +99,10 @@ class IntroduceScreenState extends State<IntroduceScreen> {
       showSkipButton: true,
       skipFlex: 0,
       nextFlex: 0,
+<<<<<<< HEAD
       // skip: const Text('Skip'),
+=======
+>>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
       skip: Text(
         'Skip',
         style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),

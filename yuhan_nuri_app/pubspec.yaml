@@ -42,8 +42,15 @@ dev_dependencies:
   introduction_screen: ^1.0.7
   flutter_inappwebview: ^4.0.0+4
   progress_dialog: ^1.2.4
+<<<<<<< HEAD
   oktoast : ^ 2.3.2
   vibration: ^1.4.0
+=======
+  oktoast : ^ 2.3.2 
+  vibration: ^1.4.0
+  url_launcher: 5.4.11
+  flutter_phoenix: "^0.1.0"
+>>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -64,6 +71,9 @@ flutter:
     - assets/social_media.png
     - assets/team_success.png
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
     - assets/question.png
     - assets/mypage.png
     - assets/nuri.png
@@ -71,10 +81,13 @@ flutter:
     - assets/home.png
     
     #   - images/a_dot_ham.jpeg
+<<<<<<< HEAD
 =======
     - assets/nuri.png
   #   - images/a_dot_ham.jpeg
 >>>>>>> ee3be0c708ef3042e985b1b9508f9e01face6189
+=======
+>>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

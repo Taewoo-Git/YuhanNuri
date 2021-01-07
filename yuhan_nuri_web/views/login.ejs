@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>유한누리 로그인</title>
+		<title>유한누리 상담사 로그인</title>
 		<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
 		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
 			  integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z"
@@ -15,22 +15,32 @@
 				integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
 				crossorigin="anonymous">
 		</script>
+		
 	</head>
-	<body class="mx-auto" style="width:30%; padding-top:5%;">
+	<body class="mx-auto" style="width:30%; padding-top:5%; background:#fafbfc;">
+		
 		<form method="post" action="/user">
+			
 			<div class="form-group">
-				<label><b>ID</b></label>
-				<input type="text" class="form-control" placeholder="Enter ID" name="userId" required>
+				<div class="text-center mb-5">
+					<img src="/images/logo.png"  style="max-width : 400px; max-height: 400px; width: auto; height: auto; margin-bottom:40px;">	
+				</div>
+				<label><b>아이디</b></label>
+				<input type="text" class="form-control mb-4" placeholder="Enter ID" name="userId" required>
 			</div>
 			<div class="form-group">
-				<label><b>Password</b></label>
-				<input type="password" class="form-control" placeholder="Enter Password" name="password" required>
+				<label><b>비밀번호</b></label>
+				<input type="password" class="form-control mb-4" placeholder="Enter Password" name="password" required>
 			</div>
 			<div class="form-group form-check">
 				<input type="checkbox" class="form-check-input" name="isAutoLogin" id="isAutoLogin">
 				<label class="form-check-label" for="isAutoLogin">자동 로그인</label>
+				<button type="submit" class="btn btn-primary float-right">로그인</button>	
 			</div>
-			<button type="submit" class="btn btn-primary">Login</button>	
 		</form>  
+		<script>
+			window.flutter_inappwebview
+				.callHandler('PageHandler', 'Restart');
+		</script>
 	</body>
 </html>

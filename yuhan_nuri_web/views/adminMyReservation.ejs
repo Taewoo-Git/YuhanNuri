@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- CoreUI CSS -->
     <link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
-    <title>유한누리 어드민</title>	
+    <title>유한누리 상담사 페이지</title>	
 	<script src="https://code.jquery.com/jquery-latest.min.js"></script>
 	<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
 	<style>
@@ -34,6 +34,21 @@
 				});
 			});
 		});
+		
+		$(function () {
+			$('#save_ReservationLog').click(function(e){
+				
+				location.href='./getMyReservationHistory';
+				
+			});
+		});
+		
+		$(function () {
+			$('#save_all_ReservationLog').click(function(e){
+				
+				location.href='./getAllReservationHistory';
+			});
+		});
 	</script>
 </head>
 <body class="c-app">
@@ -45,14 +60,6 @@
 		</div>
 	</div>
     <div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
-		<div class="c-sidebar-brand d-lg-down-none">
-			<svg class="c-sidebar-brand-full" width="118" height="46" alt="CoreUI Logo">
-				<use xlink:href="assets/brand/coreui.svg#full"></use>
-			</svg>
-			<svg class="c-sidebar-brand-minimized" width="46" height="46" alt="CoreUI Logo">
-				<use xlink:href="assets/brand/coreui.svg#signet"></use>
-            </svg>
-        </div>
 		<%- include ('adminNav'); -%>
 		<button class="c-sidebar-minimizer c-class-toggler" type="button" data-target="_parent"
 				data-class="c-sidebar-minimized"></button>
@@ -99,28 +106,53 @@
                                 <div class="d-flex justify-content-between">
                                     <div>
                                         <h4 class="card-title mb-0">내 예약 리스트</h4>
-                                        <div class="text-muted"><%= `${new Date().getFullYear()}-${new Date().getMonth()+1}-${new Date().getDate()}`%></div>
+                                        <div class="text-muted">
+											<%= `${new Date().getFullYear()}년 ${new Date().getMonth()+1}월 ${new Date().getDate()}일`%>
+											&nbsp;&nbsp;
+											<% 
+												let dayArr = ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'];
+											%>
+											<%= dayArr[new Date().getDay()] %>
+											
+										</div>
+										
                                     </div>
+									<div class="float-right align-self-center">
+											
+										<button class="btn btn-outline-success mr-2" id="save_ReservationLog">내 예약 내역 저장</button>
+										<button class="btn btn-outline-danger" id="save_all_ReservationLog">
+											전체 예약 내역 저장
+										</button>
+									</div>
                                 </div>
                             </div>
 							<% myReservation.forEach(function(val,i){ %>
 							<% if(val.typename == undefined){ %>
-							<div class="card-body list-group-item">
-								<h5 class="card-title"><b>학번 : </b> <%=val.stuno%></h5>
-								<p class="card-text"><b>상담 유형 : </b> 심리검사</p>
+							<div class="card-body list-group-item border-left-0 border-right-0">
+								<h5 class="card-title">학번 :  <%=val.stuno%>
+									&nbsp;&nbsp;&nbsp;&nbsp;이름 : <b><%=val.stuname %></b>
+									&nbsp;&nbsp;&nbsp;&nbsp;연락처 : <%=val.phonenum %>
+								
+								</h5>
+								<p class="card-text mb-2"><b>상담 유형 : </b> 심리검사 &nbsp;&nbsp;&nbsp;&nbsp; <b>상담 일자 :</b> <%= val.date %></p>
 								<div class="float-right">
 									<button class="btn btn-info check-btn mr-2 showModalMental" id="check-register-btn-<%=i%>" value="<%= val.no%>"  data-toggle="modal"
 											data-target="#exampleModal">신청서 확인</button>
 								</div>
 							</div>
 							<% } else { %>
-							<div class="card-body list-group-item">
-								<h5 class="card-title"><b>학번 :</b> <%=val.stuno%></h5>
-								<p class="card-text"><b>상담 유형 :</b> <%= val.typename%> &nbsp;&nbsp;&nbsp;&nbsp; <b>상담 시간 :</b> <%= val.starttime %> 시</p>
+							<div class="card-body list-group-item border-left-0 border-right-0">
+								<h5 class="card-title">학번 : <%=val.stuno%>
+									&nbsp;&nbsp;&nbsp;&nbsp;이름 : <b><%=val.stuname %></b>
+									&nbsp;&nbsp;&nbsp;&nbsp;연락처 : <%=val.phonenum %>
+								</h5>
+								<p class="card-text mb-2"><b>상담 유형 :</b> <%= val.typename%> &nbsp;&nbsp;&nbsp;&nbsp;
+									<b>상담 일자 : </b><%let dateArr = val.date.split('-'); %><%=dateArr[0]+"년 "%><%=dateArr[1]+"월 "%><%=dateArr[2]+"일"%> &nbsp;&nbsp;&nbsp;&nbsp;
+									<b>상담 시간 :</b> <%= val.starttime %> 시</p>
 								<div class="float-right">
 									<button class="btn btn-info check-btn mr-2 showModalConsult" id="check-register-btn-<%=i%>" value="<%= val.no%>" data-toggle="modal"
 											data-target="#exampleModal">신청서 확인</button>
-									<button class="btn btn-danger finished-btn" id="finish-btn-<%=i%>" value="<%= val.no%>">종료</button>
+									<button class="btn btn-danger finished-btn" id="finish-btn-<%=i%>" value="<%= val.no%>">종결</button>
 								</div>
 							</div>
 							<% } %>
@@ -147,6 +179,7 @@
 				success:function(data) {
 					$('#applyModal').empty();
 					$('#applyModal').append(`
+						
 						<div class="modal-header">
 							<h5 class="modal-title" id="exampleModalLabel">신청서 확인</h5>
 							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -184,7 +217,7 @@
 						for(let i=0; i<data.asks.split('|').length; i++) {
 							$('#modalPart').append(`
 								<div class="form-group">
-									<label class="col-form-label"><b>${data.asks.split('|')[i]}</b></label>
+									<label class="col-form-label"><b>${unescape(data.asks.split('|')[i])}</b></label>
 									<label class="form-control">${data.answers.split('|')[i]}</label>
 								</div>
 							`);
@@ -198,6 +231,7 @@
 					`);
 					$('#applyModal').append(`
 						<div class="modal-footer">
+							<button type="button" class="btn btn-info" data-dismiss="modal" id="print_pdf" value= "${data.serialno}" onclick="location.href = './getSimpleApplyFormPDF/' + ${data.serialno}">신청서 인쇄</button>
 							<button type="button" class="btn btn-danger" data-dismiss="modal">닫기</button>
 						</div>
 					`);
@@ -252,7 +286,7 @@
 						for(let i=0; i<data.asks.split('|').length; i++) {
 							$('#modalPart').append(`
 								<div class="form-group">
-									<label class="col-form-label"><b>${data.asks.split('|')[i]}</b></label>
+									<label class="col-form-label"><b>${unescape(data.asks.split('|')[i])}</b></label>
 									<label class="form-control">${data.answers.split('|')[i]}</label>
 								</div>
 							`);
@@ -288,6 +322,7 @@
 					}
 					$('#applyModal').append(`
 						<div class="modal-footer">
+							<button type="button" class="btn btn-info" data-dismiss="modal" id="print_pdf" value= "${data.serialno}" onclick="location.href = './getSimpleApplyFormPDF/' + ${data.serialno}">신청서 인쇄</button>
 							<button type="button" class="btn btn-danger" data-dismiss="modal">닫기</button>
 						</div>
 					`);

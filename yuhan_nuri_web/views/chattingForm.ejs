@@ -10,15 +10,21 @@
 			href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css"
 			crossorigin="anonymous"
 		/>
-		
+		<link rel="stylesheet" type="text/css" href="/res/css/tui-calendar.css" />
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
 			  integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU"
 			  crossorigin="anonymous">
 		
-		<title>유한누리 관리자 | 채팅 상담</title>
+		<title>유한누리 상담사 페이지</title>
+		<script src="https://uicdn.toast.com/tui.code-snippet/v1.5.2/tui-code-snippet.min.js"></script>
+		<script src="/lib/tui-calendar.js"></script>
 		<script src="https://code.jquery.com/jquery-latest.min.js"></script>
 		<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
 		<style>
+			#date{
+				font-size : 25px;
+				
+			}
 			.toggle_wrap {
 				float: right;
 				margin-right: 1.25rem;
@@ -38,7 +44,9 @@
 				font-size: 15px;
 			}
 			.card{
-				width: 100%;
+				/* width: 100%; */
+				width:48%;
+				margin:0 auto;
 				background-color: rgba(0,0,0,0);
             	border-radius: 0.5em!important;
 				border: 0!important;
@@ -70,7 +78,8 @@
                 outline:0px !important;
             }
             .send_btn{
-				width: 10vw;
+				/* width: 10vw; */
+				width:3vw;
 				padding-right: 1.3rem;
 				background-color: #0275d8 !important;
                 border: 0 !important;
@@ -136,13 +145,7 @@
             }
             .msg_head{
                 position: relative;
-            }			
-			.chat_alert{
-				width: 100%;
-				margin-top: auto;
-                margin-bottom: 3rem;
-				text-align: center;
-			}
+            }
 			.msg_card_body::-webkit-scrollbar{
 				width:7px;
 			}
@@ -159,39 +162,7 @@
     	</style>
 	</head>
 	<body class="c-app">
-		<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-		  <div class="modal-dialog" role="document">
-			<div class="modal-content">
-			  <div class="modal-header">
-				<h5 class="modal-title" id="exampleModalLabel">항목 추가</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-				  <span aria-hidden="true">&times;</span>
-				</button>
-			  </div>
-			  <div class="modal-body">
-				<form>
-				  <div class="form-group">
-					<label for="type-name" class="col-form-label">항목 이름:</label>
-					<input type="text" class="form-control" id="type-name" placeholder="항목이름을 작성해주세요.">
-				  </div>
-				</form>
-			  </div>
-			  <div class="modal-footer">
-				<button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
-				<button type="button" class="btn btn-primary" id="add_type_button">추가하기</button>
-			  </div>
-			</div>
-		  </div>
-		</div>
 		<div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show c-sidebar-unfoldable" id="sidebar">
-			<div class="c-sidebar-brand d-lg-down-none">
-				<svg class="c-sidebar-brand-full" width="118" height="46" alt="CoreUI Logo">
-					<use xlink:href="assets/brand/coreui.svg#full"></use>
-				</svg>
-				<svg class="c-sidebar-brand-minimized" width="46" height="46" alt="CoreUI Logo">
-					<use xlink:href="assets/brand/coreui.svg#signet"></use>
-				</svg>
-			</div>
 			<%- include ('adminNav'); -%>
 			<button
 				class="c-sidebar-minimizer c-class-toggler"
@@ -237,8 +208,9 @@
 			<div class="c-body"> <!-- bbody -->
 				<main class="c-main">
 					<div class="container-fluid" style="height:70vh!important;">
-						<div class='card' id='chattingCard' style="height:inherit;"> 
-							<div id='bodyChat' class='card-body msg_card_body'> 
+						<div class='card' id='chattingCard' style="height:inherit; margin:0!important; float:left"> 
+							<div id='bodyChat' class='card-body msg_card_body' style="position:relative;">
+								<a id="saveLog" style="position:absolute; bottom:3%; right:5%; cursor:dafault; color:lightgray;"> 채팅 내역 저장 </a>	
 							</div> 
 							<div class='card-footer' style='padding:0!important;'> 
 								<div class='input-group'> 
@@ -251,6 +223,25 @@
 									</div> 
 								</div> 
 							</div> 
+						</div>
+						<div class='card ml-2' id='dailyCalendarCard' style="height:inherit; float:right; overflow : hidden; ">
+							
+							<div class="row mb-1 justify-content-between">
+								<div class="date-area ml-3 float-left">
+									<h2><span id="date"></span></h2>
+								</div>
+								
+								<div class="mr-4 float-right">
+									<button id="nowBtn" class="btn btn-outline-primary">Today</button>
+									<button id="prevBtn" class="btn btn-outline-primary"><i class="cil-chevron-left"></i></button>
+									<button id="nextBtn" class="btn btn-outline-primary"><i class="cil-chevron-right"></i></button>
+								
+								
+								</div>
+							</div>
+							
+							
+							<div id="calendar"></div>
 						</div>
 					</div>
 				</main>
@@ -265,83 +256,375 @@
 		<script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
 		<script src="/socket.io/socket.io.js"></script>
 		<script>
-			
-			// xss 취약점 막는 함수, php의 htmlspecialcharacter 과 같은 함수
-			function escapeHtml(str) {
-				var map = {
-					'&': '&amp;',
-					'<': '&lt;',
-					'>': '&gt;',
-					'"': '&quot;',
-					"'": '&#039;'
-				};
-				return str.replace(/[&<>"']/g, function(m) { return map[m]; });
-			}
-			
 			$(function() {
+				// xss 취약점 막는 함수, php의 htmlspecialcharacter 과 같은 함수
+				function escapeHtml(str) {
+					var map = {
+						'&': '&amp;',
+						'<': '&lt;',
+						'>': '&gt;',
+						'"': '&quot;',
+						"'": '&#039;'
+					};
+					return str.replace(/[&<>"']/g, function(m) { return map[m]; });
+				}
+				
 				const empid = "<%= empid %>";
 				const empname = "<%= empname %>";
+				let serialNum = "";
 				
 				let socket = io('/chat');
+				
+				let isProgress = false;
+				
+				let currentStuCode = "";
+				let currentSerialNo = 0;
+				
+				socket.on("waiting", function(stuname) {
+					if($('#stuAlert')) $('#stuAlert').remove();
+					$("#bodyChat").append(`
+						<div id="waitingAlert" style="display:none; position:absolute; bottom:3%; background-color:white;">
+							${stuname} 학생, 상담 대기 중
+							<button id="waitingBtn" class="btn btn-light btn-sm" style="margin-top:-4px; margin-left:5px;"> 수락 </button>
+						</div>
+					`);
+					
+					$('#waitingAlert').fadeIn();
+					
+					$("#waitingBtn").click(function(e) {
+						if(isProgress) {
+							if(confirm("기존의 상담 중인 학생이 있습니다, 상담을 종료하시겠습니까?")) {
+								socket.emit('finish');
+								location.reload(true);
+							}
+						}
+						else {
+							isProgress = true;
+							socket.emit('okay');
+							$("#waitingAlert").remove();
+						}
+					});
+				});
 				
 				socket.emit("open", {
 					empid: empid,
 					empname: empname
 				});
 				
-				$('#btnSend').click(function(e) {
-					if($("#msgForm").val() != "") {
-						socket.emit("msg", $("#msgForm").val());
-						$("#bodyChat").append(
-							"<div class='d-flex justify-content-end mb-5 mt-2'>" +
-								"<div class='msg_time_send'>" +
-									new Date().getHours() + ":" + ("00" + new Date().getMinutes()).slice(-2) +
-								"</div>" +
-								"<div class='msg_cotainer_send'>" +
-									"<span class='msg_name_send'>Me</span>" +
-									escapeHtml($('#msgForm').val()) +
-								"</div>" +
-							"</div>"
-						);
-						$("#bodyChat").scrollTop($("#bodyChat")[0].scrollHeight);
-						$('#msgForm').val("");
-					}
-					else {
-						$('#msgForm').focus();
-					}
-				});
+				socket.on("join", function(data) {
+					currentSerialNo = data.stuinfo.serialno;
+					
+					$("#bodyChat").append(`
+						<div id='stuAlert' style="position:absolute; bottom:3%; display:block;">
+							${data.stuinfo.name} 학생과 상담 중
+							<button id="closeChatBtn" class="btn btn-danger btn-sm" style="margin-top:-4px; margin-left:5px;"> 종료 </button>
+						</div>
+					`);
+					
+					$('#closeChatBtn').click(function(e) {
+						socket.emit('finish');
+						location.reload(true);
+					});
+					
+					if(data.chatlog != null) {
+						let log = data.chatlog.split('\n');
+						for(let i=0; i<log.length-1; i++) {
+							if(log[i].includes('학생')) {
+								$("#bodyChat").append(`
+									<div class='d-flex justify-content-start mb-5 mt-2'>
+										<div class='msg_cotainer'>
+											<span class='msg_name' style='cursor:pointer;'> ${data.stuinfo.name} 학생 </span>
+											${escapeHtml(log[i].split('： ')[1].split(' （')[0])}
+										</div>
+										<div class='msg_time'>
+											${log[i].split('： ')[1].split(' （')[1].split('시 ')[0]} : ${log[i].split('： ')[1].split(' （')[1].split('시')[1].split('분')[0]}
+										</div>
 
-				$("#msgForm").keydown(function(key) {
-					if (key.keyCode == 13) $('#btnSend').click();
+										<div class='stuInfo' style='display:none; position:absolute; height:140px; width:210px; background-color:#3c4b64;
+																	border-radius:5px; padding:7px; line-height:30px; z-index:999;'>
+											<div style='position:absolute; color:white'>
+												<table>
+													<tr>
+														<td style='width:70px; font-weight:bold;'>
+															학번
+														</td>
+														<td>
+															${data.stuinfo.code}
+														</td>
+													</tr>
+													<tr>
+														<td style='width:70px; font-weight:bold;'>
+															학과
+														</td>
+														<td>
+															${data.stuinfo.major}
+														</td>
+													</tr>
+													<tr>
+														<td style='width:70px; font-weight:bold;'>
+															전화번호
+														</td>
+														<td>
+															${data.stuinfo.phone}
+														</td>
+													</tr>
+													<tr>
+														<td style='width:70px; font-weight:bold;'>
+															생년월일
+														</td>
+														<td>
+															${data.stuinfo.birth}
+														</td>
+													</tr>
+												</table>
+											</div>
+										</div>
+									</div>
+								`);
+
+								$('.msg_name').unbind('click');
+								$('.msg_name').click(function(e) {
+									if($(this).parents(['.d-flex']).children('.stuInfo').is(':visible') == true) {
+										$(this).parents(['.d-flex']).children('.stuInfo').slideToggle();
+									}
+									else {
+										$('.stuInfo:visible').each(function (index, item) {
+											$(this).hide();
+										});
+										$(this).parents(['.d-flex']).children('.stuInfo').slideToggle();
+										$(this).parents(['.d-flex']).children('.stuInfo').offset({top: $(this).offset().top + 23, left: $(this).offset().left - 3});
+									}
+								});
+							}
+							else {
+								$("#bodyChat").append(`
+									<div class='d-flex justify-content-end mb-5 mt-2'>
+										<div class='msg_time_send'>
+											${log[i].split('： ')[1].split(' （')[1].split('시 ')[0]} : ${log[i].split('： ')[1].split(' （')[1].split('시')[1].split('분')[0]}
+										</div>
+										<div class='msg_cotainer_send'>
+											<span class='msg_name_send'>Me</span>
+											${escapeHtml(log[i].split('： ')[1].split(' （')[0])}
+										</div>
+									</div>
+								`);
+							}
+						}
+					}
+					
+					$("#bodyChat").scrollTop($("#bodyChat")[0].scrollHeight);
+					
+					$("#saveLog").css('cursor', 'pointer');
+					$("#saveLog").css('color', 'black');
+					$("#saveLog").click(function(e) {
+						location.href=`/admin/getUserChatLog/${currentSerialNo}`;
+					});
+					
+					$('#btnSend').click(function(e) {
+						let myMessage = $('#msgForm').val();
+						socket.emit('logging', {
+							empid: empid,
+							stuno: data.stuinfo.code,
+							log: `${empname} 선생님： ${escapeHtml(myMessage)} （${new Date().getHours()}시 ${("00" + new Date().getMinutes()).slice(-2)}분） \n`
+						});
+
+						if($("#msgForm").val() != "") {
+							socket.emit("msg", $("#msgForm").val());
+							$("#bodyChat").append(
+								"<div class='d-flex justify-content-end mb-5 mt-2'>" +
+									"<div class='msg_time_send'>" +
+										new Date().getHours() + ":" + ("00" + new Date().getMinutes()).slice(-2) +
+									"</div>" +
+									"<div class='msg_cotainer_send'>" +
+										"<span class='msg_name_send'>Me</span>" +
+										escapeHtml(myMessage) +
+									"</div>" +
+								"</div>"
+							);
+							$("#bodyChat").scrollTop($("#bodyChat")[0].scrollHeight);
+							$('#msgForm').val("");
+						}
+						else {
+							$('#msgForm').focus();
+						}
+					});
+					
+					$("#msgForm").keydown(function(key) {
+						if (key.keyCode == 13) $('#btnSend').click();
+					});
 				});
 				
 				socket.on("msg", function(data) {
-					$("#bodyChat").append(
-						"<div class='d-flex justify-content-start mb-5 mt-2'>" +
-							"<div class='msg_cotainer'>" +
-								"<span class='msg_name'>" + data.name + " 학생 </span>" +
-								escapeHtml(data.msg) +
-							"</div>" +
-							"<div class='msg_time'>" +
-								new Date().getHours() + ":" + ("00" + new Date().getMinutes()).slice(-2) +
-							"</div>" +
-						"</div>"
-					);
-					$("#bodyChat").scrollTop($("#bodyChat")[0].scrollHeight);
-				});
-				
-				socket.on("join", function(data) {
+					socket.emit('logging', {
+						empid: empid,
+						stuno: data.stuno,
+						log: `${data.name} 학생： ${escapeHtml(data.msg)} （${new Date().getHours()}시 ${("00" + new Date().getMinutes()).slice(-2)}분） \n`
+					});
+					
 					$("#bodyChat").append(`
-						<div class="chat_alert"><b>${data.name} 학생이 참가하였습니다.</b></div>
+						<div class='d-flex justify-content-start mb-5 mt-2'>
+							<div class='msg_cotainer'>
+								<span class='msg_name' style='cursor:pointer;'> ${data.name} 학생 </span>
+								${escapeHtml(data.msg)}
+							</div>
+							<div class='msg_time'>
+								${new Date().getHours()} : ${("00" + new Date().getMinutes()).slice(-2)}
+							</div>
+
+							<div class='stuInfo' style='display:none; position:absolute; height:140px; width:210px; background-color:#3c4b64;
+														border-radius:5px; padding:7px; line-height:30px; z-index:999;'>
+								<div style='position:absolute; color:white'>
+									<table>
+										<tr>
+											<td style='width:70px; font-weight:bold;'>
+												학번
+											</td>
+											<td>
+												${data.stuno}
+											</td>
+										</tr>
+										<tr>
+											<td style='width:70px; font-weight:bold;'>
+												학과
+											</td>
+											<td>
+												${data.major}
+											</td>
+										</tr>
+										<tr>
+											<td style='width:70px; font-weight:bold;'>
+												전화번호
+											</td>
+											<td>
+												${data.phone}
+											</td>
+										</tr>
+										<tr>
+											<td style='width:70px; font-weight:bold;'>
+												생년월일
+											</td>
+											<td>
+												${data.birth}
+											</td>
+										</tr>
+									</table>
+								</div>
+							</div>
+						</div>
 					`);
 					$("#bodyChat").scrollTop($("#bodyChat")[0].scrollHeight);
+					
+					$('.msg_name').unbind('click');
+					$('.msg_name').click(function(e) {
+						$('.stuInfo:visible').each(function (index, item) {
+							$(this).hide();
+						});
+						$(this).parents(['.d-flex']).children('.stuInfo').slideToggle();
+						$(this).parents(['.d-flex']).children('.stuInfo').offset({top: $(this).offset().top + 23, left: $(this).offset().left - 3});
+					});
 				});
 				
 				socket.on("exit", function(data) {
-					$("#bodyChat").append(`
-						<div class="chat_alert"><b>${data.name} 학생이 퇴장하였습니다.</b></div>
-					`);
-					$("#bodyChat").scrollTop($("#bodyChat")[0].scrollHeight);
+					if(isProgress) {
+						alert("학생에 의해 채팅이 종료되었습니다.");
+						location.reload(true);
+					}
+				});
+				
+				$("#bodyChat").on('mousewheel',function(e){
+					$('.stuInfo:visible').each(function (index, item) {
+						$(this).hide();
+					});
+				});
+				
+				$("#bodyChat").on('scroll', function(e) {
+					$('.stuInfo:visible').each(function (index, item) {
+						$(this).offset({top: $(this).parents(['.d-flex']).children('.msg_cotainer').children('.msg_name').offset().top + 23,
+										left: $(this).parents(['.d-flex']).children('.msg_cotainer').children('.msg_name').offset().left - 3});
+					});
+				});
+				
+				/*스케줄 캘린더 부분*/
+				
+				const container = document.getElementById('calendar');
+			
+				const options = {
+					defaultView : 'day',
+					taskView : false,
+					useDetailPopup : true
+				}
+
+				var Calendar = tui.Calendar;
+
+				const calendar = new Calendar(container, options);
+
+				const nowBtn = document.getElementById('nowBtn');
+				const prevBtn = document.getElementById('prevBtn');
+				const nextBtn = document.getElementById('nextBtn');
+
+				const date = document.getElementById('date');
+
+				calendar.setCalendars([
+					{
+						id: 'Reserved',
+						name: '예약됨',
+						color: '#000000',
+						bgColor: '#A9E2F3',
+						dragBgColor: '#A9E2F3',
+						borderColor: '#2E9AFE'
+					},
+					{
+						id: 'Finished',
+						name: '종료',
+						bgColor: '#848484',
+						color: '#ffffff',
+						dragBgColor: '#848484',
+						borderColor: '#848484'
+					}
+				]); //캘린더 종류 등록
+
+				$.ajax({
+					type: "POST",
+					datatype : "json",
+					url : "./readReservedSchedule",
+					async : true,
+					data : {},
+					success : function(data){
+						let reservedSchedules = [];
+
+						data.reserved.forEach((row, index) => {
+							delete row.empid;
+							delete row.scheduleno;
+							row.category = 'time';
+							reservedSchedules.push(row);
+						});
+						calendar.createSchedules(reservedSchedules);
+					}
+				});
+
+				calendar.on('beforeUpdateSchedule', event => {
+					alert("예약건 확인 스케줄은 수정할 수 없습니다.");
+				});
+
+				calendar.on('beforeDeleteSchedule', () =>{
+					alert("예약건 확인 스케줄은 삭제할 수 없습니다.");
+				});
+
+				date.textContent = `${calendar.getDate().getFullYear()}-${calendar.getDate().getMonth() + 1}`;
+
+				nowBtn.addEventListener('click', () => {
+					calendar.today();
+					date.textContent = `${calendar.getDate().getFullYear()}-${calendar.getDate().getMonth() + 1}`;
+				});
+
+				prevBtn.addEventListener('click', () => {
+					calendar.prev();
+					date.textContent = `${calendar.getDate().getFullYear()}-${calendar.getDate().getMonth() + 1}`;
+				});
+
+				nextBtn.addEventListener('click', () => {
+					calendar.next();
+					date.textContent = `${calendar.getDate().getFullYear()}-${calendar.getDate().getMonth() + 1}`;
 				});
 			});
 		</script>

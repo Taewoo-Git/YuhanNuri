@@ -5,14 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:yuhan_nuri_app/screen/YuhanNuri.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:progress_dialog/progress_dialog.dart';
-<<<<<<< HEAD
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:oktoast/oktoast.dart';
-
-final FirebaseMessaging fcm = FirebaseMessaging();
-=======
-import 'package:oktoast/oktoast.dart';
->>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
 
 String userID = "";
 String userPassword = "";
@@ -157,10 +150,6 @@ class _LoginState extends State<Login> {
         onPressed: () => {portalLogin(userID, userPassword, isAutoLogin)},
         padding: EdgeInsets.all(15),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-<<<<<<< HEAD
-        // color: Colors.white,
-=======
->>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
         color: Color(0xFF0275D8),
         child: Text('로그인',
             style: TextStyle(
@@ -195,10 +184,6 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-<<<<<<< HEAD
-        //body: _buildLayoutContainer(context)
-=======
->>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
         body: AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: GestureDetector(
@@ -208,24 +193,8 @@ class _LoginState extends State<Login> {
           width: double.infinity,
           decoration: BoxDecoration(
             color: Color(0xFFF0F0F0),
-<<<<<<< HEAD
-            // gradient: LinearGradient(
-            //   begin: Alignment.topCenter,
-            //   end:Alignment.bottomCenter,
-            //   colors: [
-            //     Color(0xFFF0F0F0),
-            //     //Color(0xFFF5F5F5),
-            //     Color(0xFFD9EDFF),
-            //     Color(0xFFAFD9FE)
-            //   ]
-            // )
           ),
           child: SingleChildScrollView(
-            //physics: AlwaysScrollableScrollPhysics(),
-=======
-          ),
-          child: SingleChildScrollView(
->>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
             padding: EdgeInsets.symmetric(horizontal: 25, vertical: 120),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -254,13 +223,6 @@ class _LoginState extends State<Login> {
     ));
   }
 
-<<<<<<< HEAD
-  
-
-
-
-=======
->>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
   portalLogin(String userID, String userPassword, bool isAutoLogin) async {
     progressDialog.show();
 

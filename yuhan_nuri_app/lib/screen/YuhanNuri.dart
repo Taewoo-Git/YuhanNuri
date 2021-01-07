@@ -8,12 +8,9 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:vibration/vibration.dart';
-<<<<<<< HEAD
-=======
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 //import 'package:flutter_phoenix/flutter_phoenix.dart';
->>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
 
 final FirebaseMessaging fcm = FirebaseMessaging();
 CookieManager cm;
@@ -64,18 +61,6 @@ class YuhanNuriState extends State<YuhanNuri> {
 
   void initState() {
     super.initState();
-<<<<<<< HEAD
-
-    fcm.configure(onMessage: (Map<String, dynamic> message) async {
-      // 앱이 켜져있을때는 페이지 안바꿈.
-    }, onResume: (Map<String, dynamic> message) async {
-      gotoPage(message['data']['page']);
-    }, onLaunch: (Map<String, dynamic> message) async {
-      Timer(Duration(milliseconds: 1500), () {
-        gotoPage(message['data']['page']);
-      });
-    });
-=======
     fcm.configure(
         onMessage: (Map<String, dynamic> message) async {},
         onResume: (Map<String, dynamic> message) async {
@@ -86,18 +71,11 @@ class YuhanNuriState extends State<YuhanNuri> {
             gotoPage(message['data']['page']);
           });
         });
->>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
 
     cm = new CookieManager();
   }
 
   void gotoPage(String msg) {
-<<<<<<< HEAD
-    navBarState = globalKey.currentState;
-    navBarState.setPage(3);
-    if (msg == "question") {
-      Timer(Duration(milliseconds: 850), () {
-=======
     if (msg == "mypage" || msg == "satisfaction") {
       navBarState = globalKey.currentState;
       navBarState.setPage(3);
@@ -105,7 +83,6 @@ class YuhanNuriState extends State<YuhanNuri> {
       navBarState = globalKey.currentState;
       navBarState.setPage(3);
       Timer(Duration(milliseconds: 500), () {
->>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
         _webViewController.evaluateJavascript(
             source: "\$('#reserv').removeClass('active'); " +
                 "\$('#quest').addClass('active');" +
@@ -205,16 +182,6 @@ class YuhanNuriState extends State<YuhanNuri> {
                       _webViewController.addJavaScriptHandler(
                           // 웹뷰 JavaScript와 통신하는 핸들러
                           handlerName:
-<<<<<<< HEAD
-                              'PageHandler', // 해당 핸들러를 웹뷰에서 호출( 예약완료 버튼클릭 )할 시  메인으로 돌아감
-                          callback: (args) {
-                            if (args[0].toString() == "replaceMain") {
-                              navBarState = globalKey.currentState;
-                              navBarState.setPage(0);
-                            } else if (args[0].toString() == "replaceMypage") {
-                              navBarState = globalKey.currentState;
-                              navBarState.setPage(3);
-=======
                               'PageHandler', // 해당 핸들러를 웹뷰에서 호출(예약 완료 버튼 클릭)할 시 메인으로 돌아감
                           callback: (args) async {
                             if (args[0].toString() == "replaceMain") {
@@ -231,7 +198,6 @@ class YuhanNuriState extends State<YuhanNuri> {
                               // prefs.remove('expires');
                               // prefs.remove('cookie');
                               // Phoenix.rebirth(context);
->>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
                             }
                           });
                     },
@@ -241,28 +207,6 @@ class YuhanNuriState extends State<YuhanNuri> {
                     index: 0,
                     backgroundColor: Colors.blueAccent[100],
                     items: <Widget>[
-<<<<<<< HEAD
-                      // Icon(Icons.home, size: 25),
-                      // Icon(Icons.date_range, size: 25),
-                      // Icon(Icons.feedback, size: 25),
-                      // //Icon(Icons.headset_mic, size: 25),
-                      // Icon(Icons.person, size: 25),
-                      new Image.asset(
-                        'assets/home.png',
-                        scale: 1,
-                      ),
-                      new Image.asset(
-                        'assets/reservation.png',
-                        scale: 1,
-                      ),
-                      new Image.asset(
-                        'assets/question.png',
-                        scale: 1,
-                      ),
-                      new Image.asset(
-                        'assets/mypage.png',
-                        scale: 1,
-=======
                       Image(
                         image: AssetImage('assets/home.png'),
                         fit: BoxFit.cover,
@@ -282,7 +226,6 @@ class YuhanNuriState extends State<YuhanNuri> {
                         image: AssetImage('assets/mypage.png'),
                         fit: BoxFit.cover,
                         height: 30,
->>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
                       ),
                     ],
                     animationDuration:
@@ -404,11 +347,7 @@ class YuhanNuriState extends State<YuhanNuri> {
 
     AlertDialog alert = AlertDialog(
       title: Text("유한누리"),
-<<<<<<< HEAD
-      content: Text("현재 채팅이 활성화되어있습니다. \n홈 화면으로 돌아가시겠습니까?"),
-=======
       content: Text("자동 로그인을 해제한 후\n종료합니다"),
->>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
       actions: [
         continueButton,
         cancelButton,

@@ -22,7 +22,9 @@ class Splash extends StatefulWidget {
 }
 
 class SplashState extends State<Splash> {
+  // 앱이 처음 실행되는지 체크
   checkFirstSeen() async {
+    // 간단한 값을 어플리케이션에 파일 형태로 저장하는 클래스
     SharedPreferences prefs = await SharedPreferences.getInstance();
     // 봤는지 확인하는 변수
     bool _seen = (prefs.getBool('seen') ?? false);
@@ -60,11 +62,6 @@ class SplashState extends State<Splash> {
                 cookie: cookieParam,
               )));
     } else {
-<<<<<<< HEAD
-<<<<<<< HEAD
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => LoginApp()));
-=======
       // Navigator.of(context).pushReplacement(
       //     MaterialPageRoute(builder: (BuildContext context) => LoginApp()));
 
@@ -72,11 +69,6 @@ class SplashState extends State<Splash> {
         builder: (context) => LoginApp()
       )
     );
->>>>>>> ee3be0c708ef3042e985b1b9508f9e01face6189
-=======
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => LoginApp()));
->>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
     }
   }
 
@@ -84,17 +76,6 @@ class SplashState extends State<Splash> {
   void initState() {
     super.initState();
     new Timer(new Duration(milliseconds: 3000), () => {checkFirstSeen()});
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
-  }
-
-  splashScreen(BuildContext context) {
-    return Scaffold(
-      body: Center(
-<<<<<<< HEAD
-=======
 
   }
 
@@ -103,27 +84,17 @@ class SplashState extends State<Splash> {
     return Scaffold(
       body: Center(
         
->>>>>>> ee3be0c708ef3042e985b1b9508f9e01face6189
-=======
->>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Container(
-<<<<<<< HEAD
               //child: Image.asset("assets/logo.png"),
-<<<<<<< HEAD
-=======
->>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
               child: new Image(
                 image: AssetImage("assets/logo.png"),
               ),
               padding: EdgeInsets.only(bottom: 10.0, left: 90.0, right: 90.0),
             ),
-<<<<<<< HEAD
             //Padding(padding: EdgeInsets.only(top: 10.0)),
-=======
->>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
             Container(
               child: new Image(
                 image: AssetImage("assets/nuri.png"),
@@ -131,61 +102,23 @@ class SplashState extends State<Splash> {
               padding: EdgeInsets.only(
                   top: 10.0, bottom: 50.0, left: 70.0, right: 70.0),
             ),
-<<<<<<< HEAD
 
-=======
-              child : new Image(
-                image: AssetImage("assets/logo.png"),
-                
-             ),padding: EdgeInsets.only(bottom: 10.0,left: 90.0,right: 90.0),
-            ),
-            //Padding(padding: EdgeInsets.only(top: 10.0)),
-            Container(
-              child : new Image(
-                image: AssetImage("assets/nuri.png"),       
-              ),padding: EdgeInsets.only(top: 10.0,bottom: 50.0,left: 70.0,right: 70.0),
-            ),
-          
->>>>>>> ee3be0c708ef3042e985b1b9508f9e01face6189
-=======
->>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
             Padding(padding: EdgeInsets.only(top: 30.0)),
             CircularProgressIndicator(
               backgroundColor: Color(0xFFFFFFFF),
               strokeWidth: 3,
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
             )
           ],
         ),
       ),
       backgroundColor: Color(0xFF0275D7),
-<<<<<<< HEAD
-=======
-           )
-         ],
-       ),
-      ),backgroundColor: Color(0xFF0275D7),
->>>>>>> ee3be0c708ef3042e985b1b9508f9e01face6189
-=======
->>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-<<<<<<< HEAD
-<<<<<<< HEAD
       body: splashScreen(context),
-=======
-      body:splashScreen(context),
->>>>>>> ee3be0c708ef3042e985b1b9508f9e01face6189
-=======
-      body: splashScreen(context),
->>>>>>> d5e1921118181df6b06715d6a34248f0f9d4eb5d
     );
   }
 

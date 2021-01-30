@@ -18,12 +18,12 @@ CookieManager cm;
 // [0] 메인, [1] 예약, [2] 문의, [3] 마이페이지, [4] 만족도조사페이지, [5] 채팅
 // urls 배열 외의 외부url을 로드할 시 webview가 아닌 기기의 브라우저(크롬, 사파리)를 이용해 로드(하이퍼링크 등)
 const urls = [
-  'https://yuhannuri.run.goorm.io/',
-  'https://yuhannuri.run.goorm.io/user/reservation',
-  'https://yuhannuri.run.goorm.io/user/question',
-  'https://yuhannuri.run.goorm.io/user/mypage',
-  'https://yuhannuri.run.goorm.io/user/satisfaction',
-  'https://yuhannuri.run.goorm.io/user/mypage?chatting',
+  'http://counsel.yuhan.ac.kr/',
+  'http://counsel.yuhan.ac.kr/user/reservation',
+  'http://counsel.yuhan.ac.kr/user/question',
+  'http://counsel.yuhan.ac.kr/user/mypage',
+  'http://counsel.yuhan.ac.kr/user/satisfaction',
+  'http://counsel.yuhan.ac.kr/user/mypage?chatting',
 ];
 
 class YuhanNuri extends StatefulWidget {

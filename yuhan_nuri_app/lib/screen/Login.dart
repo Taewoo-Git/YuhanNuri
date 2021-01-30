@@ -229,7 +229,7 @@ class _LoginState extends State<Login> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     http.Response res = await http.Client().post(
-      Uri.parse('https://yuhannuri.run.goorm.io/user/mobile'),
+      Uri.parse('http://counsel.yuhan.ac.kr/user/mobile'),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
         'Accept': 'application/json; charset=utf-8',
@@ -241,6 +241,10 @@ class _LoginState extends State<Login> {
         'myToken': await fcm.getToken()
       },
     );
+
+    print(res.statusCode);
+    print(res.body);
+
     if (res.body == "null") {
       FocusManager.instance.primaryFocus.unfocus();
       progressDialog.hide();
@@ -251,6 +255,7 @@ class _LoginState extends State<Login> {
     }
     if (res.statusCode == 200) {
       Cookie cookie = Cookie.fromSetCookieValue(res.headers['set-cookie']);
+
       if (isAutoLogin) {
         DateTime dateTime = cookie.expires.add(new Duration(days: 30));
         prefs.setString('cookie', cookie.toString());

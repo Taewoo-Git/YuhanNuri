@@ -20,6 +20,10 @@ module.exports = (server) => {
 		socket.on('cancel', function(serialno) {
 			reaction.emit('cancel', serialno);
 		});
+		
+		socket.on('confirm', function(serialno) {
+			reaction.emit('confirm', serialno);
+		});
 	});
 	
 	io.of('/reservation').on('connection', function(socket) {

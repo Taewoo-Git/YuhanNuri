@@ -9,7 +9,8 @@ const sanitizeHtml=require('sanitize-html');
 const bcrypt=require('bcrypt');
 
 const fs = require('fs');
-const path=require('path');
+const path = require('path');
+const multer = require('multer');
 
 const schedule = require('node-schedule');
 const pdfDocument = require('pdfkit');
@@ -28,35 +29,33 @@ deleteRule.dayOfWeek = [0, new schedule.Range(0,6)];
 deleteRule.hour= 00;
 deleteRule.minute= 00;
 
+const logger = require('../public/res/js/logger.js');
+const logTimeFormat = "YYYY-MM-DD HH:mm:ss";
+
 router.use(function(req, res, next) {
      res.locals.adminInfo = req.session.adminInfo;
      next();
 });
 
-exports.deleteOneMonth = ()=> { 
-	let deleteRule = new schedule.RecurrenceRule();
-	deleteRule.dayOfWeek = [0, new schedule.Range(0,6)];
-	deleteRule.hour= 00;
-	deleteRule.minute= 00;
-	const sql_deleteQuestionAfterOneMonth="delete from QuestionBoard where answerdate<=?"; // 하루에 한번 현재 날짜에서 30일 이전의 문의 데이터를 지웁니다.
-	const sql_deleteSimpleApplyFormAfterOneMonth="delete from SimpleApplyForm where date <= ?"; // 하루에 한번 현재 날짜에서 30일 이전의 상담 신청서 데이터를 지웁니다.
-	const sql_test1 = "select * from QuestionBoard where answerdate <= ?";
-	const sql_test2= "select * from SimpleApplyForm where date <= ?";
-	schedule.scheduleJob(deleteRule, function(){ 
-		connection.execute(sql_deleteQuestionAfterOneMonth, [moment().subtract(1, 'months').format("YYYY-MM-DD")], (err, rows) => {
-			if(err){
-				console.error(err);
-				next(err);
-			}
-		});
-		connection.execute(sql_deleteSimpleApplyFormAfterOneMonth, [moment().subtract(1, 'months').format("YYYY-MM-DD")], (err, rows) => {
-			if(err){
-				console.error(err);
-				next(err);
-			}
-		});
-	});
+try{
+	fs.readdirSync('uploads');
+} catch (error) {
+	console.error('uploads 폴더를 생성합니다!');
+	fs.mkdirSync('uploads');
 }
+const upload = multer({
+	storage: multer.diskStorage({
+		destination(req, file, cb) {
+			cb(null,'uploads/');
+		},
+		filename(req,file,cb) {
+			const ext = path.extname(file.originalname);
+			cb(null,path.basename(file.originalname,ext) + Date.now() + ext);
+		},
+	}),
+	limits: {fileSize : 5 * 1024 * 1024}, 
+})
+
 
 router.get("/",isAllAdminLoggedIn,function(req,res,next){ //GET /admin
 	const getReservationData = "SELECT User.stuname as stuname, User.phonenum as phonenum, reserv.serialno as no, " +
@@ -64,17 +63,37 @@ router.get("/",isAllAdminLoggedIn,function(req,res,next){ //GET /admin
 		  "FROM User JOIN Reservation reserv ON User.stuno = reserv.stuno LEFT JOIN ConsultType consult ON reserv.typeno = consult.typeno " +
 		  "WHERE reserv.status = 0 AND (reserv.empid = ? OR reserv.empid IS NULL) ORDER BY no;";
 	
+	const getReservationData_forWorkstu = "SELECT User.stuname as stuname, User.phonenum as phonenum, reserv.serialno as no, " +
+		  "reserv.stuno as stuno, consult.typename as typename, reserv.starttime as starttime, reserv.date as date " +  
+		  "FROM User JOIN Reservation reserv ON User.stuno = reserv.stuno LEFT JOIN ConsultType consult ON reserv.typeno = consult.typeno " +
+		  "WHERE reserv.status = 0 ORDER BY no;";
+	
+	let author = req.session.adminInfo.author;
 	let empid = req.session.adminInfo.empid;
 	
-	connection.execute(getReservationData, [empid], (err,rows) => {
+	if(author === 1){
+		connection.execute(getReservationData, [empid], (err,rows) => {
 		
-		if(err) {
-			console.error(err);
-			next(err);
-		}else{
-			res.render('admin', {getReservation: rows});	
-		}
-	});
+			if(err) {
+				console.error(err);
+				next(err);
+			}else{
+				res.render('admin', {getReservation: rows});	
+			}
+		});
+	}
+	else{
+		connection.execute(getReservationData_forWorkstu, (err,rows) => {
+		
+			if(err) {
+				console.error(err);
+				next(err);
+			}else{
+				res.render('admin', {getReservation: rows});	
+			}
+		});
+	}
+	
 });
 
 router.post("/readReservedSchedule", isAllAdminLoggedIn, function(req, res, next){	
@@ -82,6 +101,14 @@ router.post("/readReservedSchedule", isAllAdminLoggedIn, function(req, res, next
 		  "reserv.starttime as starttime, reserv.date as date " +
 		  "FROM Reservation reserv JOIN User user ON reserv.stuno = user.stuno JOIN ConsultType consulttype ON reserv.typeno = consulttype.typeno " +
 		  "WHERE reserv.empid = ? AND reserv.status = 1";
+	
+	
+	const sql_readReservedSchedule_forWorkstu = "SELECT consulttype.typename as typename, user.stuno as stuno, user.stuname as stuname, reserv.date as date, reserv.finished as finished, reserv.empid, " +
+		  "reserv.starttime as starttime, reserv.date as date, Counselor.empname as empname " +
+		  "FROM Reservation reserv JOIN User user ON reserv.stuno = user.stuno JOIN ConsultType consulttype ON reserv.typeno = consulttype.typeno JOIN Counselor ON reserv.empid = Counselor.empid " +
+		  "WHERE reserv.status = 1";
+	
+	let sql_getReservedSchedule = "";
 	
 	// 수락이 된 것만 스케줄에 표시가 됨
 	const sql_maxIdInSchedule = "SELECT MAX(scheduleno) as maxIdValue FROM Schedule";
@@ -97,7 +124,13 @@ router.post("/readReservedSchedule", isAllAdminLoggedIn, function(req, res, next
 				maxid = rows[0].maxIdValue;
 			}
 			
-			connection.execute(sql_readReservedSchedule, [empid], (err, rows) => {
+			if(req.session.adminInfo.author === 1){
+				sql_getReservedSchedule = sql_readReservedSchedule;
+			}else{
+				sql_getReservedSchedule = sql_readReservedSchedule_forWorkstu;
+			}
+			
+			connection.execute(sql_getReservedSchedule, [empid], (err, rows) => {
 				if(err) console.error(err);
 				else{
 					rows.forEach((row, index, arr) => {
@@ -108,30 +141,60 @@ router.post("/readReservedSchedule", isAllAdminLoggedIn, function(req, res, next
 						}else{
 							row.calendarId = "Reserved";
 						}
-						row.title = `${row.starttime}시 ${row.stuname} 학생 ${row.typename}`;
 						
-						row.start = row.date + "T" + row.starttime + ":00:00";
-						row.end = row.date + "T" + (row.starttime + 1) + ":00:00";
+						if(req.session.adminInfo.author === 1){
+							row.title = `${row.starttime}시 ${row.stuname} 학생 ${row.typename}`;
+						}
+						else{
+							row.title = `${row.starttime}시 ${row.stuname} 학생 ${row.typename} - ${row.empname} 선생님`;
+						}
+
+						if(row.starttime / 10 >= 1){
+							row.start = row.date + "T" + row.starttime + ":00:00";
+							row.end = row.date + "T" + (row.starttime + 1) + ":00:00";
+						}else{
+							row.start = row.date + "T" + "0" + row.starttime + ":00:00";
+							row.end = row.date + "T" + (row.starttime + 1) + ":00:00";
+						}
+
 					});
 					rows = rows.filter(row => row.date != null);
-					
+
 					res.json({reserved : rows});	
 				}
 			});
+			
 		}
 	});
 });
 
 // 관리자 계정에 따라 자신의 스케줄을 가져옴.
 router.post("/readMySchedule", isAllAdminLoggedIn,function(req, res, next){
-	const sql_readMySchedule = "SELECT * FROM Schedule WHERE empid = ?";
+	const sql_readMySchedule = "SELECT scheduleno, Schedule.empid, calendarId, title, category, start, end, location, empname FROM Schedule JOIN Counselor ON" + 
+	" Schedule.empid = Counselor.empid WHERE Schedule.empid = ?";
+	const sql_readAllCounselorSchedule_forWorkstu = "SELECT scheduleno, Schedule.empid, calendarId, title, category, start, end, location, empname FROM Schedule JOIN Counselor ON Schedule.empid = Counselor.empid";
+	
 	let empid =  req.session.adminInfo.empid;
 	
-	connection.execute(sql_readMySchedule, [empid], (err, rows) => {
-		if(rows.length > 0){
-			res.json({schedules : rows});	
-		}
-	});
+	if(req.session.adminInfo.author === 2){
+		connection.execute(sql_readAllCounselorSchedule_forWorkstu, [empid], (err, rows) => {
+			if(rows.length > 0){
+				rows.forEach((row, index) => {
+					if(row.hasOwnProperty("empname")){
+						row.title = row.title + " - " + row.empname + " 선생님";
+					}
+				});
+				res.json({schedules : rows});	
+			}
+		});
+	}else{
+		connection.execute(sql_readMySchedule, [empid], (err, rows) => {
+			if(rows.length > 0){
+				res.json({schedules : rows});	
+			}
+		});
+	}
+	
 });
 
 // 자신의 스케줄을 변경하는 부분
@@ -150,7 +213,7 @@ router.post("/updateSchedule", isAllAdminLoggedIn,function(req, res, next){
 			next(err);
 		}else{
 			if(rows.length > 0){
-				res.json({state : "can't update"}); // 이미
+				res.json({state : "can't update"});
 			}else{
 				if(data.changes.hasOwnProperty("start")){
 					data.changes.start = moment(new Date(data.changes.start._date)).format(datetime_format);
@@ -186,11 +249,11 @@ router.post("/updateSchedule", isAllAdminLoggedIn,function(req, res, next){
 // 스케줄 삭제
 router.post("/deleteSchedule",isAllAdminLoggedIn, function(req, res, next){
 	let data = JSON.parse(req.body.sendAjax);
-	
+	let session_empid = req.session.adminInfo.empid;
 	// 예약, 회의, 휴가의 경우 스케줄 삭제가 가능
 	// 이외 스케줄 삭제가 불가능, DB에 없는 스케줄 ID 값이기 때문
 	
-	const sql_isCanDelete = "SELECT * FROM Reservation WHERE date = ?";
+	const sql_isCanDelete = "SELECT * FROM Reservation WHERE date = ? AND empid = ?";
 	const sql_deleteSchedule = "DELETE FROM Schedule WHERE scheduleno = ?";
 	const sql_isOnSchedule = "SELECT DATE(start) as start FROM Schedule WHERE scheduleno = ?";
 	
@@ -203,7 +266,7 @@ router.post("/deleteSchedule",isAllAdminLoggedIn, function(req, res, next){
 				let reservedStart = schedule_rows[0].start;
 				
 				// 예약 스케줄에 해당 날짜가 있으면
-				connection.execute(sql_isCanDelete, [reservedStart], (err, usedSchedule_rows) => {   
+				connection.execute(sql_isCanDelete, [reservedStart, session_empid], (err, usedSchedule_rows) => {   
 					if(err){
 						console.error(err);
 						next(err);
@@ -230,7 +293,7 @@ router.post("/deleteSchedule",isAllAdminLoggedIn, function(req, res, next){
 // 스케줄을 새로 생성하는 부분
 router.post("/createSchedule", isAllAdminLoggedIn,function(req, res, next){
 	const sql_createSchedule = "INSERT INTO Schedule(empid, calendarId, title, category, start, end, location) VALUES (?, ?, ?, ?, ?, ?, ?)";
-	const sql_getAlreadyScheduled = "SELECT HOUR(start) as start, HOUR(end) as end FROM Schedule WHERE DATE(start) = ?";
+	const sql_getAlreadyScheduled = "SELECT HOUR(start) as start, HOUR(end) as end FROM Schedule WHERE DATE(start) = ? AND empid = ?";
 	const datetime_format = "YYYY-MM-DD HH:mm:ss";
 	const date_format = "YYYY-MM-DD";
 	let scheduled_hour = [];
@@ -242,14 +305,14 @@ router.post("/createSchedule", isAllAdminLoggedIn,function(req, res, next){
 	let startIndex = moment(new Date(data.start)).format(date_format);
 	let endIndex = moment(new Date(data.end)).format(date_format);
 	let location = "";
-	
+	let session_empid = req.session.adminInfo.empid;
 	if(data.location != undefined) location = data.location;
 	
 	if(startIndex != endIndex){
 		res.json({state : "isDiffDate"});
 	}else{
 		
-		connection.execute(sql_getAlreadyScheduled, [startIndex], (err, row) => {
+		connection.execute(sql_getAlreadyScheduled, [startIndex, session_empid], (err, row) => {
 			if(err){
 				console.error(err);
 				next(err);
@@ -428,7 +491,7 @@ router.get("/schedule",isAllAdminLoggedIn,function(req,res,next){ //GET /admin/a
 });
 
 router.get("/settings",isOnlyAdminLoggedIn,function(req,res,next){
-	const sql_selectCounselor="select empid,empname,positionno from Counselor";
+	const sql_selectCounselor="select empid,empname,positionno from Counselor where Counselor.use = 'Y'";
 	connection.execute(sql_selectCounselor,(err,rows)=>{
 		if(err){
 			console.error(err);
@@ -439,13 +502,17 @@ router.get("/settings",isOnlyAdminLoggedIn,function(req,res,next){
 	});
 });
 
-router.post('/uploadFile',isAllAdminLoggedIn,function(req,res){
+router.post('/uploadFile',isAllAdminLoggedIn,upload.single('file'),function(req,res){
+	console.log(req.file);
 	res.json({
-		"success":1,
-		"file":{
-			"url":"/"+req.file.path.toString(),
-		},
+		"location": "/"+req.file.path.toString(),
 	});
+	// res.json({
+	// 	"success":1,
+	// 	"file":{
+	// 		"url":"/"+req.file.path.toString(),
+	// 	},
+	// });
 });
 
 router.get('/logout',isAllAdminLoggedIn, function(req, res) { //GET /user/logout
@@ -464,6 +531,121 @@ router.get('/question',isAllAdminLoggedIn,function(req,res){
 		}else{
 			selectList=rows;
 			res.render('adminQuestion',{selectList:selectList});
+		}
+	});
+});
+
+router.get('/questionAnswer/:page/',isAllAdminLoggedIn,function(req,res){
+	const questionAnswerSql = 'SELECT t1.no, t1.title, t1.empname, t1.date, t2.stuname FROM QuestionBoard t1, User t2 WHERE t1.stuno = t2.stuno AND t1.empname IS NOT NULL;';
+	const page = req.params.page;
+	connection.execute(questionAnswerSql,(err,rows)=>{
+		if(err){
+			console.error(err);
+		}else{
+			res.render('adminAnswer',{answerList:rows, page:page, length:rows.length-1, page_num:10, check:'no'});
+		}
+	});
+});
+router.get('/questionAnswer/:page/:type/:search',isAllAdminLoggedIn,function(req,res){
+	var answerSearchSql = '';
+	let page = req.params.page;
+	let type = req.params.type;
+	let search = req.params.search;
+	let check = 'yes';
+	if(type == 1){
+		answerSearchSql = "SELECT t1.no, t1.title, t1.empname, t1.date, t2.stuname FROM QuestionBoard t1, User t2 WHERE t1.stuno = t2.stuno AND t1.empname IS NOT NULL AND title LIKE '%"+search+"%'";
+	}else if(type == 2){
+		answerSearchSql = "SELECT t1.no, t1.title, t1.empname, t1.date, t2.stuname FROM QuestionBoard t1, User t2 WHERE t1.stuno = t2.stuno AND t1.empname IS NOT NULL AND stuname LIKE '%"+search+"%'";
+	}else if(type == 3){
+		answerSearchSql = "SELECT t1.no, t1.title, t1.empname, t1.date, t2.stuname FROM QuestionBoard t1, User t2 WHERE t1.stuno = t2.stuno AND t1.empname IS NOT NULL AND empname LIKE '%"+search+"%'";
+	}else{
+		answerSearchSql = "SELECT t1.no, t1.title, t1.empname, t1.date, t2.stuname FROM QuestionBoard t1, User t2 WHERE t1.stuno = t2.stuno AND t1.empname IS NOT NULL;";
+		page = 1;
+		check = 'no';
+	}
+	connection.execute(answerSearchSql,(err,rows)=>{
+		if(err){
+			console.error(err);
+		}else{
+			if(check == 'yes'){
+				res.render('adminAnswer',{answerList:rows, page:page, length:rows.length-1, page_num:10, check:'yes', type:type, search:search});
+			}else{
+				res.render('adminAnswer',{answerList:rows, page:page, length:rows.length-1, page_num:10, check:'no'});
+			}
+		}
+	});
+});
+router.get('/psychologicalType',isAllAdminLoggedIn,function(req,res){
+	const psychologicalTypeSql = "SELECT * FROM PsyTestList a WHERE a.use = 'Y';";
+	connection.execute(psychologicalTypeSql,(err,rows)=>{
+		if(err){
+			console.error(err);
+		}else{
+			res.render('adminPsychologicalType',{testList:rows});
+		}
+	});
+});
+
+router.post('/psychologicalType/:type',isAllAdminLoggedIn,function(req,res){
+	let type = req.params.type;
+	var updateTypeSql;
+	var recvData;
+	if(type == 1){
+		updateTypeSql = "UPDATE PsyTestList a SET a.use = 'N' WHERE testno = ?;";
+		recvData = req.body.ajaxData;
+		connection.execute(updateTypeSql,[recvData],(err,rows)=>{
+			if(err){
+				console.error(err);
+			}else{
+				res.send({check:'success'});
+			}
+		});
+	}else if(type == 2){
+		recvData = JSON.parse(req.body.ajaxData);
+		updateTypeSql = "UPDATE PsyTestList SET testname = '"+recvData.context+"', description = '"+recvData.text+"' WHERE testno = ?;";
+		let recvNo = recvData.no;
+		connection.execute(updateTypeSql,[recvNo],(err,rows)=>{
+			if(err){
+				console.error(err);
+			}else{
+			}
+		});
+	}else{
+		recvData = JSON.parse(req.body.ajaxData);
+		updateTypeSql = "INSERT INTO PsyTestList (testname, description) VALUES ('"+recvData.context+"','"+recvData.text+"')";
+		connection.execute(updateTypeSql,(err,rows)=>{
+			if(err){
+				console.error(err);
+			}else{
+				res.send({check:'success'});
+			}
+		});
+	}
+});
+
+router.get('/answerCheck/:no',isAllAdminLoggedIn,function(req,res){
+	const answerCheckSql = 'SELECT t1.*, t2.stuname, t2.phonenum FROM QuestionBoard t1, User t2 WHERE t1.stuno = t2.stuno AND t1.no = ?;';
+	const no = req.params.no;
+	connection.execute(answerCheckSql,[no],(err,rows)=>{
+		if(err){
+			console.error(err);
+		}else{
+			res.render('adminAnswerCheck',{answerCheckList:rows, answerNo:no});
+		}
+	});
+});
+
+router.post('/answerCheck/:no',isAllAdminLoggedIn,function(req,res){
+	const no = req.params.no;
+	let recvData = JSON.parse(req.body.ajaxData);
+	let nowMoment = moment().format("YYYYMMDD");
+	var updateAnswerSql = "UPDATE QuestionBoard SET answer = ?, empname = ?, answerdate = ? WHERE no = ?;";
+	
+	connection.execute(updateAnswerSql,[recvData.context, req.session.adminInfo.empname, nowMoment, no],(err,rows)=>{
+		if(err){
+			console.error(err);
+		}else{
+			res.send({check:'success'});
 		}
 	});
 });
@@ -563,8 +745,9 @@ router.post("/saveBoard/:type",isAllAdminLoggedIn,function(req,res,next){
 	const paramType=decodeURIComponent(req.params.type);
 	const sql_saveBoard = "update HomeBoard set empid=?,date=CURDATE(),content=? where no=?";
 	const empId=req.session.adminInfo.empid;
-	
-	const secureXSSContent = sanitizeHtml(sendAjax);
+	const secureXSSContent = sanitizeHtml(sendAjax,{
+		allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img'])
+	});
 	connection.execute(sql_saveBoard,[empId,secureXSSContent,paramType],(err,rows)=>{
 		if(err){
 			console.error(err);
@@ -725,7 +908,21 @@ router.post('/noUseAsk',isAllAdminLoggedIn,function(req,res,next){
             console.error(err);
             next(err);
         }
-    })
+    });
+});
+
+router.get('/recovery/:id',isOnlyAdminLoggedIn,function(req,res,next){
+	const updateAccountUse="update Counselor set Counselor.use = 'Y' where empid=? and Counselor.use = 'N'";
+	
+	connection.execute(updateAccountUse, [req.params.id], (err,rows)=>{
+		if(err){
+			console.error(err);
+			next(err);
+		}
+		else {
+			res.send("<script>alert('정상적으로 복구되었습니다.'); window.location.href = '/admin/signUp';</script>");
+		}
+	});
 });
 
 router.get('/signUp',isOnlyAdminLoggedIn,function(req,res,next){
@@ -734,7 +931,7 @@ router.get('/signUp',isOnlyAdminLoggedIn,function(req,res,next){
 
 router.post('/signUp',isOnlyAdminLoggedIn,(req,res,next)=>{
 	const sql_addCounselor="insert into Counselor(empid,emppwd,empname,positionno) values(?,?,?,?)";
-	const sql_checkEmpId="select empid from Counselor where empid=?";
+	const sql_checkEmpId="select empid, Counselor.use isUse from Counselor where empid=?";
 	const empId=req.body.id.trim();
 	const empPwd=req.body.password.trim();
 	const isEmp=req.body.isEmp ? true : false;
@@ -751,7 +948,7 @@ router.post('/signUp',isOnlyAdminLoggedIn,(req,res,next)=>{
 						console.error(err);
 						next(err);
 					}else{
-						if(isEmp){ // 교직원 1
+						if(isEmp){
 							connection.execute(sql_addCounselor,[empId,hashPwd,empName,1],(err,rows)=>{
 								if(err){
 									console.error(err);
@@ -770,8 +967,24 @@ router.post('/signUp',isOnlyAdminLoggedIn,(req,res,next)=>{
 						}
 					}
 				});
+				logger.user(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empid} -> ${empId} 등록.`);
 			}else{
-				res.send("<script>alert('이미 있는 아이디입니다!'); window.location.href = '/admin/signUp';</script>");
+				if(rows[0].isUse === 'Y') {
+					res.send("<script>alert('이미 존재하는 아이디입니다.'); window.location.href = '/admin/signUp';</script>");
+				}
+				else {
+					res.send(`
+						<script>
+							let isRecovery = confirm("삭제된 계정입니다, 복구하시겠습니까?");
+							if(isRecovery == true){
+							  window.location.href = '/admin/recovery/${empId}';
+							}
+							else if(isRecovery == false){
+							  window.location.href = '/admin/signUp';
+							}
+						</script>
+					`);
+				}
 			}
 		}
 	});
@@ -787,11 +1000,9 @@ router.get('/selfCheckForm',isAllAdminLoggedIn,(req,res,next)=>{
 			console.error(err);
 			next(err);
 		}else{
-			
 			if(rows[0].maxCheckNo != null){
 				max=rows[0].maxCheckNo;
 			}
-			
 		}
 	});
 	
@@ -867,19 +1078,21 @@ router.post('/updateCounselor',isOnlyAdminLoggedIn,(req,res,next)=>{
 			next(err);
 		}else{
 			res.send("<script>window.location.href = '/admin/settings';</script>");
+			logger.user(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empid} -> ${updateId} 수정.`);
 		}
 	});
 });
 
 router.post('/deleteCounselor',isOnlyAdminLoggedIn,(req,res,next)=>{
 	const delEmpId=req.body.deleteId;
-	const sql_deleteCounselor="delete from Counselor where empid = ?";
-	connection.execute(sql_deleteCounselor,[delEmpId],(err,rows)=>{
+	const updateAccountUse="update Counselor set Counselor.use = 'N' where empid=?";
+	connection.execute(updateAccountUse,[delEmpId],(err,rows)=>{
 		if(err){
 			console.error(err);
 			next(err);
 		}else{
 			res.json('ok');
+			logger.user(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empid} -> ${delEmpId} 삭제.`);
 		}
 	});
 });
@@ -914,12 +1127,13 @@ router.post('/updatePassword',isAllAdminLoggedIn,(req,res,next)=>{
 									next(err);
 								}
 							});
-							res.send("<script>alert('비밀번호가 변경되었습니다! 다시 로그인 해주세요!'); window.location.href = '/admin/logout';</script>");
+							res.send("<script>alert('패스워드가 정상적으로 변경되었습니다. \n재 로그인을 부탁드립니다.'); window.location.href = '/admin/logout';</script>");
 						}
 					});
 				}else{
-					res.send("<script>alert('현재 비밀번호와 다릅니다!'); window.location.href = '/admin/changePassword';</script>");
+					res.send("<script>alert('현재 패스워드가 일치하지 않습니다.'); window.location.href = '/admin/changePassword';</script>");
 				}
+				
 			});
 		}
 	});
@@ -939,7 +1153,7 @@ router.get('/getMyReservationHistory',isAllAdminLoggedIn,(req,res,next)=>{
 		  "FROM Reservation reserv JOIN SimpleApplyForm simple ON reserv.serialno = simple.serialno JOIN ConsultType contype ON reserv.typeno = contype.typeno " +
 		  "WHERE NOT reserv.typeno IS NULL AND reserv.empid=? AND reserv.status=1";
 	
-	const fileName=`유한대학교 학생상담센터 상담 내역 ${new Date().getFullYear()}_${new Date().getMonth()+1}월.xlsx`;
+	const fileName=`유한대학교 학생상담센터 상담 내역.xlsx`;
 	
 	PsyTestWorksheet.columns=[
 		{header:'학번',key:"stuno",width:10},
@@ -1007,17 +1221,19 @@ router.get('/getMyReservationHistory',isAllAdminLoggedIn,(req,res,next)=>{
 
 router.get('/getSatisfactionResult', isAllAdminLoggedIn, (req, res, next) => {
 	const workbook = new excel.Workbook();
-	const satisfactionWorkSheet = workbook.addWorksheet("만족도 조사 결과");
+	const satisfactionWorkSheet = workbook.addWorksheet("만족도조사 결과");
 	
 	const sql_getSatisfationResult = "SELECT Reservation.stuno, Counselor.empname, SimpleApplyForm.stuname, SimpleApplyForm.birth, SimpleApplyForm.email, Reservation.date, " + 
-		  "ConsultType.typename, Reservation.serialno, AskList.ask, AnswerLog.choiceanswer " + 
+		  "Reservation.researchdatetime, ConsultType.typename, Reservation.serialno, AskList.ask, AnswerLog.choiceanswer " + 
 		  "FROM Reservation JOIN SimpleApplyForm ON Reservation.serialno = SimpleApplyForm.serialno LEFT JOIN ConsultType ON Reservation.typeno = ConsultType.typeno LEFT JOIN Counselor ON " + 
 		  "Reservation.empid = Counselor.empid JOIN AnswerLog ON Reservation.serialno = AnswerLog.serialno JOIN AskList ON AnswerLog.askno = AskList.askno " +
 		  "WHERE AskList.typeno = 3 GROUP BY Reservation.stuno, Counselor.empname, SimpleApplyForm.stuname, SimpleApplyForm.birth, SimpleApplyForm.email, Reservation.date, " +
-		  "ConsultType.typename, AnswerLog.serialno, AskList.ask;";
+		  "ConsultType.typename, AnswerLog.serialno, AskList.ask ORDER BY Reservation.researchdatetime;";
 	
-	const fileName = `유한대학교 학생상담센터 만족도 조사 내역 ${new Date().getFullYear()}_${new Date().getMonth() + 1}월.xlsx`;
+	//const fileName = `유한대학교 학생상담센터 만족도 조사 내역 ${new Date().getFullYear()}_${new Date().getMonth() + 1}월.xlsx`;
+	const fileName = `유한대학교 학생상담센터 만족도조사 내역.xlsx`;
 	satisfactionWorkSheet.columns = [
+		{header: '작성일', key: "researchdatetime", width : 20},
 		{header: '학번', key:"stuno", width:10},
 		{header: '상담사명', key:"empname", width:10},
 		{header: '학생이름', key:"stuname", width:10},
@@ -1028,6 +1244,15 @@ router.get('/getSatisfactionResult', isAllAdminLoggedIn, (req, res, next) => {
 		{header: '질문', key:"ask", width:30},
 		{header: '답변', key:"choiceanswer", width:50}
 	];
+	let rangeColumn = ['A1','B1','C1','D1','E1','F1','G1','H1','I1','J1'];
+	rangeColumn.forEach((item, index) => {
+		satisfactionWorkSheet.getCell(item).fill = {
+			type : 'pattern',
+			pattern : 'solid',
+			fgColor : {argb :  'FFFFFF00'}
+		};	
+	});
+	
 	
 	connection.execute(sql_getSatisfationResult, (err, rows) =>{
 		if(err) console.error(err);
@@ -1050,6 +1275,7 @@ router.get('/getSatisfactionResult', isAllAdminLoggedIn, (req, res, next) => {
 						satisfactionWorkSheet.addRow(row);
 					}
 					else {
+						row.researchdatetime = "";
 						row.stuno = "";
 						row.empname = "";
 						row.stuname = "";
@@ -1094,7 +1320,7 @@ router.get('/getAllReservationHistory',isAllAdminLoggedIn,(req,res,next)=>{
 		  "FROM Reservation reserv JOIN SimpleApplyForm simple ON reserv.serialno = simple.serialno JOIN ConsultType contype ON reserv.typeno = contype.typeno " +
 		  "WHERE NOT reserv.typeno IS NULL AND reserv.status=1";
 	
-	const fileName=`유한대학교 학생상담센터 전체 상담 내역 ${new Date().getFullYear()}_${new Date().getMonth()+1}월.xlsx`;
+	const fileName=`유한대학교 학생상담센터 전체 상담 내역.xlsx`;
 	
 	PsyTestWorksheet.columns=[
 		{header:'학번',key:"stuno",width:10},
@@ -1163,7 +1389,7 @@ router.get('/getAllChatLog',isOnlyAdminLoggedIn,(req,res,next)=>{
 	const sql_selectAllChatLog="select * from ConsultLog";
 	const workbook = new excel.Workbook();
 	const ChatLogWorksheet = workbook.addWorksheet("전체 채팅 내역");
-	const fileName=`유한대학교 학생상담센터 전체 채팅 내역 ${new Date().getFullYear()}_${new Date().getMonth()+1}월.xlsx`;
+	const fileName=`유한대학교 학생상담센터 전체 채팅 내역.xlsx`;
 	ChatLogWorksheet.columns=[
 		{header:'상담일련번호',key:'serialno',width:10},
 		{header:'채팅 내역',key:'chatlog',width:100},
@@ -1225,93 +1451,216 @@ router.get('/getUserChatLog/:serialNo',isOnlyAdminLoggedIn,(req,res,next)=>{
 
 router.get('/getSimpleApplyFormPDF/:serialNo',isAllAdminLoggedIn,(req,res,next)=>{
 	const serialNo=decodeURIComponent(req.params.serialNo);
-	const sql_selectConsultApply = "SELECT a.serialno, a.stuno, a.stuname, a.gender, a.birth, a.email, a.date, " +
+	const sql_selectConsultApply = "SELECT a.serialno, a.stuno, a.stuname, User.phonenum, a.gender, a.birth, a.email, a.date, " +
 				  "GROUP_CONCAT(b.ask SEPARATOR '|') AS 'asks', " +
 				  "GROUP_CONCAT(c.choiceanswer SEPARATOR '|') AS 'answers', " +
 				  "selfcheck.checknames, selfcheck.scores " +
-				  "FROM SimpleApplyForm a, AskList b, AnswerLog c, " +
+				  "FROM SimpleApplyForm a, AskList b, AnswerLog c, User,  " +
 				  "(SELECT GROUP_CONCAT(list.checkname SEPARATOR '|') AS 'checknames', " +
 				  "GROUP_CONCAT(self.score SEPARATOR '|') AS 'scores' " +
 				  "FROM SelfCheckList list, SelfCheck self " +
 				  "WHERE self.serialno=? and self.checkno=list.checkno) selfcheck " +
-				  "WHERE a.serialno=? and a.serialno=c.serialno and c.askno=b.askno;";
+				  "WHERE a.serialno=? and a.serialno=c.serialno and c.askno=b.askno and User.stuno = a.stuno";
 	
-	connection.execute(sql_selectConsultApply,[serialNo,serialNo],(err,ConsultRows)=>{
+	const sql_getApplyType = "SELECT Reservation.serialno, ConsultType.typename FROM Reservation LEFT JOIN ConsultType ON Reservation.typeno = ConsultType.typeno WHERE Reservation.serialno = ?";
+	
+	const sql_getPsyList = "SELECT GROUP_CONCAT(PsyTestList.testname SEPARATOR ', ') AS testnames FROM PsyTest JOIN PsyTestList ON PsyTest.testno = PsyTestList.testno WHERE PsyTest.serialno = ?";
+	
+	
+	connection.execute(sql_getApplyType, [serialNo], (err, typeRows) => {
 		if(err){
 			console.error(err);
 			next(err);
 		}else{
-			let asks=ConsultRows[0].asks.split("|");
-			let answers=ConsultRows[0].answers.split("|");
+			let applyType = typeRows[0].typename === null ? "심리검사" :  typeRows[0].typename;
 			
-			let cheknames=ConsultRows[0].checknames===null ? [] : ConsultRows[0].checknames.split("|");
-			let scores=ConsultRows[0].scores===null ? [] : ConsultRows[0].scores.split("|");
-			for(let i=0; i<scores.length; i++){
-				switch (parseInt(scores[i])) {
-					case 1 :
-						scores[i] = "매우 나쁨";
-						break;
-					case 2 :
-						scores[i] = "나쁨";
-						break;
-					case 3 :
-						scores[i] = "보통";
-						break;
-					case 4 :
-						scores[i] = "좋음";
-						break;
-					case 5 :
-						scores[i] = "매우 좋음";
-						break;
-				}
-			}
-			let AllAsks=asks.concat(cheknames);
-			let AllAnswers=answers.concat(scores);
-
-			let fileName=`${ConsultRows[0].serialno}.pdf`;
-			const doc = new pdfDocument({compress:false});
-			let pdfFile = path.join(__dirname, `/../${ConsultRows[0].serialno}.pdf`);
-			var pdfStream = fs.createWriteStream(pdfFile);
-			doc.font(path.join(__dirname,'/../public/res/font/NANUMGOTHIC.TTF'));
-
-			doc
-				.fontSize(15)
-				.text('간단신청서', { align: 'center' }); // x, y 좌표
-			doc
-				.fontSize(10)
-				.text(`${ConsultRows[0].stuno}_${ConsultRows[0].stuname}`, { align: 'right' });
-			let pointX=100;
-			let pointY=150;
-			AllAsks.forEach(function (v, i) {
-				if((i+1)%10===0){
-					doc.addPage()
-				}
-				if(pointY>=600){
-					pointY-=500;
-				}
-				pointY+=50;
-				doc
-					.fontSize(10)
-					.text(`Q${i+1} ${AllAsks[i]} \n`, pointX, pointY,{align:'left'});
-				doc
-					.fontSize(8)
-					.text('\n\n'+AllAnswers[i] + '\n', pointX, pointY),{align:'left'};
-			});
-			doc.pipe(pdfStream);
-			doc.end();
-			pdfStream.addListener('finish', function() {
-				res.download(pdfFile, `${ConsultRows[0].serialno}.pdf`, function(err) {
-				  if (err) {
+			
+			connection.execute(sql_getPsyList, [serialNo], (err, psyRows) => {
+				if(err){
 					console.error(err);
-				  }else{
-					  fs.unlink(pdfFile, function(){
-						  
-					  });
-				  }
-				});
+					next(err);
+				}else{
+					connection.execute(sql_selectConsultApply,[serialNo,serialNo],(err,ConsultRows)=>{
+						if(err){
+							console.error(err);
+							next(err);
+						}else{
+
+							let asks=ConsultRows[0].asks === null ? [] : ConsultRows[0].asks.split("|");
+
+
+							let answers=ConsultRows[0].answers === null ? [] : ConsultRows[0].answers.split("|");
+
+							let checknames=ConsultRows[0].checknames===null ? [] : ConsultRows[0].checknames.split("|");
+							let scores=ConsultRows[0].scores===null ? [] : ConsultRows[0].scores.split("|");
+							for(let i=0; i<scores.length; i++){
+								switch (parseInt(scores[i])) {
+									case 1 :
+										scores[i] = "매우 나쁨";
+										break;
+									case 2 :
+										scores[i] = "나쁨";
+										break;
+									case 3 :
+										scores[i] = "보통";
+										break;
+									case 4 :
+										scores[i] = "좋음";
+										break;
+									case 5 :
+										scores[i] = "매우 좋음";
+										break;
+								}
+							}
+
+
+
+							let fileName=`${ConsultRows[0].serialno}.pdf`;
+							const doc = new pdfDocument({compress:false});
+							let pdfFile = path.join(__dirname, `/../${ConsultRows[0].serialno}.pdf`);
+							var pdfStream = fs.createWriteStream(pdfFile);
+							doc.font(path.join(__dirname,'/../public/res/font/NANUMGOTHIC.TTF'));
+
+							doc
+								.fontSize(20)
+								.text('간단신청서', { align: 'center' }) // x, y 좌표
+								.moveDown(1.5);
+
+
+							doc.moveTo(70,110)
+								.lineTo(540,110)
+								.stroke();
+
+
+
+							doc
+								.fontSize(12)
+								.text(`신청일자 : ${ConsultRows[0].date}`, { align : 'right'})
+								.moveDown(0.8);
+							doc
+								.fontSize(12)
+								.text(`상담 유형 : ${applyType}`, {align : 'right'})
+								.moveDown(2);
+
+							doc
+								.fontSize(15)
+								.text('인적사항', { align : 'left'})
+								.moveDown(0.8);
+
+							doc
+								.fontSize(10)
+								.text(`학번 : ${ConsultRows[0].stuno}`, { align: 'left' })
+								.moveDown(0.5);
+
+							doc
+								.fontSize(10)
+								.text(`이름 : ${ConsultRows[0].stuname}`, { align : 'left'})
+								.moveDown(0.5);
+							doc
+								.fontSize(10)
+								.text(`성별 : ${ConsultRows[0].gender}`, { align : 'left'})
+								.moveDown(0.5);
+							doc
+								.fontSize(10)
+								.text(`생년월일 : ${ConsultRows[0].birth}`, { align : 'left'})
+								.moveDown(0.5);
+							doc
+								.fontSize(10)
+								.text(`휴대폰번호 : ${ConsultRows[0].phonenum}`, {align : 'left'})
+								.moveDown(0.5);
+
+							doc
+								.fontSize(10)
+								.text(`이메일주소 : ${ConsultRows[0].email}`, {align : 'left'})
+								.moveDown(2);
+
+
+
+							
+							
+							asks.forEach(function (v, i) {
+								
+
+
+								doc
+									.fontSize(10)
+									.text(`질문. ${asks[i]}`, {align:'left'})
+									.moveDown(0.5);
+
+								doc
+									.fontSize(8)
+									.text(answers[i] ,{align:'left'})
+									.moveDown();
+
+
+								if(i === asks.length - 1){
+									doc.moveDown(2);
+								}
+							});
+
+							if(applyType == "심리검사"){
+								doc
+									.fontSize(15)
+									.text('신청 심리검사', { align : 'left'})
+									.moveDown(0.5);
+								
+								doc
+									.fontSize(10)
+									.text(psyRows[0].testnames, {align :'left'})
+									.moveDown(0.5);
+								
+							}else{
+								
+								doc
+									.fontSize(15)
+									.text('자가진단 질문', { align : 'left'})
+									.moveDown(0.8);
+							}
+
+
+							checknames.forEach(function(v, i){
+								
+
+								doc
+									.fontSize(10)
+									.text(`질문. ${checknames[i]}`,{align:'left'})
+									.moveDown(0.5);
+
+								doc
+									.fontSize(8)
+									.text(scores[i],{align:'left'})
+									.moveDown();
+
+
+								if(i === checknames.length - 1){
+									doc.moveDown(2);
+								}
+
+							});
+
+							doc.pipe(pdfStream);
+							doc.end();
+							pdfStream.addListener('finish', function() {
+								res.download(pdfFile, `${ConsultRows[0].serialno}.pdf`, function(err) {
+								  if (err) {
+									console.error(err);
+								  }else{
+									  fs.unlink(pdfFile, function(){
+
+									  });
+								  }
+								});
+							});
+						}
+					});
+				}
 			});
+			
+			
+			
 		}
 	});
+	
 });
 
 module.exports = router;

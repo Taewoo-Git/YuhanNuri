@@ -84,22 +84,12 @@
                 <i class="cil-hamburger-menu"></i>
             </button>
             <ul class="c-header-nav ml-auto mr-4">
-                <li class="c-header-nav-item dropdown"><a class="c-header-nav-link" data-toggle="dropdown" href="#"
-                        role="button" aria-haspopup="true" aria-expanded="false">
-                        <div class="c-avatar"><i class="cil-user"></i></div>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right pt-0">
-                        <div class="dropdown-header bg-light py-2"><strong>계정</strong></div>
-                            <a class="dropdown-item" href="/admin/logout">
-                            <i class="cil-account-logout pr_10"></i> 로그아웃</a>
-							<a class="dropdown-item" href="/admin/changePassword">
-                            <i class="cil-dialpad pr_10"></i> 비밀번호 변경</a>
-					</div></li>
+                <%- include ('adminAccount'); -%>
             </ul>
             <div class="c-subheader px-3">
                 <!-- Breadcrumb-->
                 <ol class="breadcrumb border-0 m-0">
-                    <li class="breadcrumb-item">Home</li>
+                    <li class="breadcrumb-item">예약</li>
                     <li class="breadcrumb-item">양식 항목</li>
                     <li class="breadcrumb-item active"><%=type[1]%></li>
                     <!-- Breadcrumb Menu-->
@@ -141,12 +131,15 @@
 			plugins: [
 				"advlist autolink link lists charmap print preview hr anchor pagebreak",
 				"searchreplace visualblocks visualchars fullscreen insertdatetime nonbreaking",
-				"table contextmenu directionality emoticons paste textcolor save"
+				"table contextmenu directionality emoticons paste textcolor save image"
 			],
 
 			/* toolbar */
-			toolbar: "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link | print preview  fullpage | forecolor backcolor emoticons save",
-
+			toolbar: "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link | print preview  fullpage | forecolor backcolor emoticons save image",
+			
+			
+			images_upload_url: '/admin/uploadFile',
+			
 			/* style */
 			style_formats: [
 				{title: "Headers", items: [

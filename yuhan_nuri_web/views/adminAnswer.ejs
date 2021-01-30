@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- CoreUI CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
+    <title>유한누리 상담사 페이지</title>	
+	<script src="https://code.jquery.com/jquery-latest.min.js"></script>
+	<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
+	<style>
+		.pr_10{
+			padding-right:10px;
+		}
+		.pr_30{
+			padding-right:30px;
+		}
+		.ques_btn{
+			position: relative;
+    		top: -40px;
+		}
+		.btnInput{
+			height:35px;
+			border: 1px solid #d8dbe0;
+		}
+		.btnInput:focus {
+			outline:none;
+		}
+	</style>
+</head>
+<body class="c-app">
+	
+    <div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
+                <%- include ('adminNav'); -%>
+        <button class="c-sidebar-minimizer c-class-toggler" type="button" data-target="_parent"
+            data-class="c-sidebar-minimized"></button>
+    </div>
+    <div class="c-wrapper c-fixed-components">
+        <header class="c-header c-header-light c-header-fixed c-header-with-subheader">
+            <button class="c-header-toggler c-class-toggler d-lg-none mfe-auto" type="button" data-target="#sidebar"
+                data-class="c-sidebar-show">
+                <i class="cil-hamburger-menu"></i>
+            </button><a class="c-header-brand d-lg-none" href="#">
+                <i class="cil-hamburger-menu"></i></a>
+            <button class="c-header-toggler c-class-toggler mfs-3 d-md-down-none" type="button" data-target="#sidebar"
+                data-class="c-sidebar-lg-show" responsive="true">
+                <i class="cil-hamburger-menu"></i>
+            </button>
+			<ul class="c-header-nav ml-auto mr-4">
+                <%- include ('adminAccount'); -%>
+            </ul>
+            <div class="c-subheader px-3">
+                <ol class="breadcrumb border-0 m-0">
+					<li class="breadcrumb-item">문의</li>
+                    <li class="breadcrumb-item active">문의 내역</li>
+                </ol>
+            </div>
+        </header>
+        <div class="c-body">
+            <main class="c-main">
+                <div class="container-fluid">
+                    <div class="fade-in">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 class="card-title mb-0">문의 내역</h4>
+                                    </div>
+                                </div>
+							</div>
+                        </div>
+						<%if(answerList[(page * page_num) - page_num] == null){%>
+								데이터가 존재하지 않습니다.
+						<%}else{%>
+							<table class="table" style="background:white; border-radius:.25rem;">
+								<tr>
+									<th style="text-align:center;">번호</th>
+									<th>제목</th>
+									<th>이름</th>
+									<th>상담사</th>
+									<th>날짜</th>
+								</tr>
+								<%
+									for(var i = (page * page_num) - page_num; i < (page * page_num); i++) {
+									if(i > length){
+										i++;
+									}else{
+										var data = answerList[i];
+									%>
+									<tr>
+										<td style="width:70px; text-align:center;"><%= i + 1 %></td>
+										<td><a href="/admin/answerCheck/<%= data.no %>"><%= data.title %></a></td>
+										<td style="width:120px;"><%= data.stuname %></td>
+										<td style="width:120px;"><%= data.empname %></td>
+										<td style="width:150px;"><%let dateArr = data.date.split('-'); %><%=dateArr[0]+"년 "%><%=dateArr[1]+"월 "%><%=dateArr[2]+"일"%></td>
+									</tr>
+									<% }
+									}
+								%>
+								<tr class="text-center">
+									<td colspan="5">
+										<div style="margin:auto;">
+											<select id="selectType" class="btnInput"
+													style="width:100px; border-radius:.25rem; padding-left:5px;">
+												<option value="1" selected>제목</option>
+												<option value="2">이름</option>
+												<option value="3">상담사</option>
+											</select>
+											<input type="text" id="btnSearchVal" class="btnInput" placeholder="검색어를 입력해주세요."
+												   style="width:300px; border-radius: .25rem; padding-left:7px;"/>
+											<input type="button" class="btn btn-success align-self-top" id="btnSearch" value="검색" style="vertical-align:top;"/>
+										</div>
+										<br/>
+										<%if(check == 'yes'){%>
+											<%for(var j = 0; j < answerList.length / page_num; j++){%>
+												<%if(j+1 == page){%>
+													[<%=j+1%>]
+												<%}else{%>
+												<a href="/admin/questionAnswer/<%= j + 1 %>/<%=type%>/<%=search%>"><%= j + 1 %></a>
+												<%}%>
+											<%}%>
+										<%}else{%>
+											<%for(var j = 0; j < answerList.length / page_num; j++){%>
+												<%if(j+1 == page){%>
+													<b>[<%=j+1%>]</b>
+												<%}else{%>
+												<a href="/admin/questionAnswer/<%= j + 1 %>"><%= j + 1 %></a>
+												<%}%>
+											<%}%>
+										<%}%>
+									</td>
+								</tr>
+							</table>
+						<%}%>
+                    </div>
+                </div>
+            </main>
+            <footer class="c-footer">
+                <div><a href="https://coreui.io">CoreUI</a> &copy; 2020 creativeLabs.</div>
+                <div class="ml-auto">Powered by&nbsp;<a href="https://coreui.io/">CoreUI</a></div>
+            </footer>
+        </div>
+    </div>
+	<script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
+	<script>
+		$('#btnSearch').click(function(e) {
+			if($('#btnSearchVal').val() == ''){
+				alert("검색어를 입력해주세요.");
+			}else{
+				let type = $('#selectType').val();
+				let search = $('#btnSearchVal').val();
+				let searchRequest = "/admin/questionAnswer/1/" + type+"/"+search;
+				location.href = searchRequest;
+			}
+
+		});
+	</script>
+</body>
+
+</html>
+

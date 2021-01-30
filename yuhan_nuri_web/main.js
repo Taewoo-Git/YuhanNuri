@@ -1,4 +1,4 @@
-const port = 80;
+const port = 3000;
 
 const express = require('express');
 const app = express();
@@ -13,7 +13,7 @@ const helmet=require('helmet');
 const userRouter = require('./routes/user');
 const adminRouter = require('./routes/admin');
 
-const {deleteOneMonth} = require('./routes/admin');
+const {deleteOneMonth,deleteFiveYear} = require('./public/res/js/schedule');
 const {consultTodayPush,consultTomorrowPush} = require('./routes/fcm');
 
 const cookieParser = require('cookie-parser');
@@ -37,6 +37,7 @@ app.use(express.static(__dirname + '/public'));
 app.use('/style',express.static(path.join(__dirname, '/public/res/css')));
 app.use('/images',express.static(path.join(__dirname,'/public/res/imgs')));
 app.use('/lib',express.static(path.join(__dirname, '/public/res/lib')));
+app.use('/uploads',express.static(path.join(__dirname,'/uploads')));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -63,9 +64,10 @@ app.use('/admin', adminRouter);
 const server = app.listen(port, () => {
     console.log('Listening on port ' + port);
 	
-	deleteOneMonth;
-	consultTodayPush;
-	consultTomorrowPush;
+	deleteOneMonth();
+	deleteFiveYear();
+	consultTodayPush();
+	consultTomorrowPush();
 });
 
 const io = require(__dirname + '/public/res/js/socket.js')(server); // socket.js파일에 server를 미들웨어로 사용
@@ -90,7 +92,7 @@ app.get('/', function (req, res) {
 });
 
 app.use((req,res,next)=>{
-	const error=new Error(`${req.method} ${decodeURIComponent(req.url)}는 존재하지 않는 페이지 입니다!`);
+	const error=new Error(`${req.method} ${decodeURIComponent(req.url)}는 존재하지 않는 페이지 입니다.`);
 	error.status=404;
 	next(error);
 });

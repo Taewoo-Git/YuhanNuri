@@ -21,7 +21,7 @@ router.post('/', function(req, res,next) { //POST /user
     const password = req.body.password; // 사용자 패스워드
 	const isAutoLogin = req.body.isAutoLogin; // 자동 로그인 여부
 	
-	let adminCheckSql = "SELECT * FROM Counselor WHERE empid = ?" // 관리자 계정인지 체크하는 함수
+	let adminCheckSql = "SELECT * FROM Counselor WHERE empid = ? and Counselor.use='Y'" // 관리자 계정인지 체크하는 함수
 
 	connection.execute(adminCheckSql, [userId], (err, rows) => {
 		if(err) {
@@ -167,8 +167,9 @@ router.get('/satisfaction', isUserLoggedIn,function (req, res) { //GET /user/sat
 
 router.post('/satisfaction',function (req, res, next) { //POST /user/satisfaction
 	let insertAnswerLogResearch = "INSERT INTO AnswerLog(serialno, askno, choiceanswer) VALUES(?, ?, ?);";
-	let updateReservationResearch = "UPDATE Reservation SET research = 1 WHERE serialno = ?;";
+	let updateReservationResearch = "UPDATE Reservation SET research = 1, researchdatetime = ? WHERE serialno = ?;";
 	let dataList = JSON.parse(req.body.Fulldata);
+	let nowDateTime = moment().format("YYYY-MM-DD HH:mm:ss");
 	
 	for(let i=0; i<dataList.length; i++) {
 		connection.execute(insertAnswerLogResearch, [req.body.reservationNo, dataList[i].question, dataList[i].answer], (err) => {
@@ -176,7 +177,7 @@ router.post('/satisfaction',function (req, res, next) { //POST /user/satisfactio
 		});
 	}
 	
-	connection.execute(updateReservationResearch, [req.body.reservationNo], (upErr) => {
+	connection.execute(updateReservationResearch, [nowDateTime, req.body.reservationNo], (upErr) => {
 		if(upErr) console.error(upErr);
 		else{
 			res.send("<script>window.location.href = '/user/mypage';</script>");

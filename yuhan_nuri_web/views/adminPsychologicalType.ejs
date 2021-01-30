@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- CoreUI CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
+    <title>유한누리 상담사 페이지</title>	
+	<script src="https://code.jquery.com/jquery-latest.min.js"></script>
+	<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
+	<style>
+		.dropTitle {
+            float: left;
+            margin: 0 !important;
+            text-align: left;
+            width: 1000px;
+        }
+
+        .custom-list-item {
+            width: 1000px;
+        }
+
+        .custom-btn-position {
+            float: right;
+            margin-top: -7px;
+        }
+
+        .show>.btn-secondary.dropdown-toggle {
+            background-color: #fafbfd !important;
+        }
+
+        .nav-link {
+            padding: .5rem 3rem;
+        }
+		.fixed_btn_position {
+            top: 25%;
+            left: 90%;
+        }
+		.pr_10{
+			padding-right:10px;
+		}
+		.pr_30{
+			padding-right:30px;
+		}
+	</style>
+</head>
+<body class="c-app">
+	
+    <div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
+                <%- include ('adminNav'); -%>
+        <button class="c-sidebar-minimizer c-class-toggler" type="button" data-target="_parent"
+            data-class="c-sidebar-minimized"></button>
+    </div>
+    <div class="c-wrapper c-fixed-components">
+        <header class="c-header c-header-light c-header-fixed c-header-with-subheader">
+            <button class="c-header-toggler c-class-toggler d-lg-none mfe-auto" type="button" data-target="#sidebar"
+                data-class="c-sidebar-show">
+                <i class="cil-hamburger-menu"></i>
+            </button><a class="c-header-brand d-lg-none" href="#">
+                <i class="cil-hamburger-menu"></i></a>
+            <button class="c-header-toggler c-class-toggler mfs-3 d-md-down-none" type="button" data-target="#sidebar"
+                data-class="c-sidebar-lg-show" responsive="true">
+                <i class="cil-hamburger-menu"></i>
+            </button>
+			<ul class="c-header-nav ml-auto mr-4">
+                <%- include ('adminAccount'); -%>
+            </ul>
+            <div class="c-subheader px-3">
+                <ol class="breadcrumb border-0 m-0">
+					<li class="breadcrumb-item">예약</li>
+                    <li class="breadcrumb-item">양식 항목</li>
+                    <li class="breadcrumb-item active">심리검사 유형</li>
+                </ol>
+            </div>
+        </header>
+        <div class="c-body">
+            <main class="c-main">
+            <div class="container-fluid" style="width:70%!important;">
+                <div class="fade-in" id="cardList">
+					<%for(let i=0; i<testList.length;i++){%>
+					<div class="card">
+						<div class="card-body">
+							<div class="d-flex justify-content-between">
+								<div class="input-group mb-3">
+									<div class="input-group-prepend">
+										<span class="input-group-text" id="question">유 형</span>
+									</div>
+									<input type="text" class="form-control" value="<%=testList[i].testname%>" readonly="true"
+										   placeholder="Question" aria-label="question" id="context<%=testList[i].testno%>" style="background-color:white!important;">
+									<button type="button" class="btn btn-danger ml-2" id="delete/<%=testList[i].testno%>" name="btnDelete">유형 삭제</button>
+								</div>
+							</div>
+							<div>
+								<textarea class="form-control pb-4" id="text<%=testList[i].testno%>" readonly="true"><%=testList[i].description%></textarea>
+							</div>
+						</div>
+						<div class="form-check mb-3 add_check_btn">
+							<label class="form-check-label">
+								<input type="button" class="btn btn-primary" value="수 정" id="modify-<%=testList[i].testno%>" name="btnModify"/>
+							</label>
+						</div>
+					</div>
+					<%}%>
+					<div class="card">
+						<div class="btn-group-vertical position-fixed fixed_btn_position">
+							<button type="button" class="btn btn-success" id="btnAdd">
+								유형 추가
+							</button>
+						</div>
+					</div>
+                </div>
+            </div>
+        </main>
+            <footer class="c-footer">
+                <div><a href="https://coreui.io">CoreUI</a> &copy; 2020 creativeLabs.</div>
+                <div class="ml-auto">Powered by&nbsp;<a href="https://coreui.io/">CoreUI</a></div>
+            </footer>
+        </div>
+    </div>
+	<script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
+	<script>
+		 $("button[name=btnDelete]").click(function(e){
+			 let deleteDialog = confirm("정말로 삭제하시겠습니까?");
+			 if(deleteDialog == true){
+				 let idVal = $(this).attr("id").split('/');
+					$.ajax({
+						url: '/admin/psychologicalType/1',
+						dataType: 'json',
+						type: 'POST',
+						data: {ajaxData:idVal[1]},
+						success: function(result) {
+							if(result.check == 'success'){
+								alert('삭제가 완료되었습니다.');
+							window.location.href = '/admin/psychologicalType';
+							}else{
+								alert('이미 삭제되었거나 문제가 발생하였습니다.');
+							window.location.href = '/admin/psychologicalType';
+							}
+						}
+					});
+			 }
+		 });
+		
+		$("input[name=btnModify]").click(function(e){
+			if($(this).val() == '완 료'){
+				let btnIdVal = $(this).attr("id").split('-');
+				$(this).val("수 정");
+				$(this).attr('class','btn btn-primary');
+				$("#context"+btnIdVal[1]).attr("readonly", "true");
+				$("#text"+btnIdVal[1]).attr("readonly", "true");
+				var sendAjaxData = {
+					no : btnIdVal[1],
+					context : $("#context"+btnIdVal[1]).val(),
+					text : $("#text"+btnIdVal[1]).val()
+				};
+				$.ajax({
+					url: '/admin/psychologicalType/2',
+					dataType: 'json',
+					type: 'POST',
+					data: {ajaxData:JSON.stringify(sendAjaxData)},
+					success: function(result) {
+					}
+				});
+			}else{
+				let btnIdVal = $(this).attr("id").split('-');
+				$(this).val("완 료");
+				$(this).attr('class','btn btn-success');
+				$("#context"+btnIdVal[1]).removeAttr("readonly");
+				$("#text"+btnIdVal[1]).removeAttr("readonly");
+			}
+		});
+		
+		$("#btnAdd").click(function(e){
+			$("#btnAdd").attr("disabled", true);
+			$("#cardList").append(`
+				<div class="card" id="newCard">
+					<div class="card-body">
+						<div class="d-flex justify-content-between">
+							<div class="input-group mb-3">
+								<div class="input-group-prepend">
+									<span class="input-group-text" id="question">유 형</span>
+								</div>
+								<input type="text" class="form-control"
+									   placeholder="Question" aria-label="question" id="inputContext" style="background-color:white!important;">
+							</div>
+						</div>
+						<div>
+							<textarea class="form-control pb-4" id="inputText"></textarea>
+						</div>
+					</div>
+					<div class="form-check mb-3 add_check_btn">
+						<label class="form-check-label">
+							<input type="button" class="btn btn-success" value="추 가" id="btnDataAdd" name=""/>
+							<input type="button" class="btn btn-danger" value="취 소" id="btnDataCancel" name=""/>
+						</label>
+					</div>
+				</div>
+			`);
+			let cards = document.getElementsByClassName('card');
+			window.scrollBy(0, cards[cards.length - 1].getBoundingClientRect().bottom);
+		});
+		$('#cardList').on('click', '#btnDataAdd', function() {
+			var sendAjaxData = {
+					context : $("#inputContext").val(),
+					text : $("#inputText").val()
+				};
+				$.ajax({
+					url: '/admin/psychologicalType/3',
+					dataType: 'json',
+					type: 'POST',
+					data: {ajaxData:JSON.stringify(sendAjaxData)},
+					success: function(result) {
+						if(result.check == 'success'){
+							alert('추가가 완료되었습니다.');
+							window.location.href = '/admin/psychologicalType';
+						}else{
+							alert('이미 추가되었거나 문제가 발생하였습니다.');
+							window.location.href = '/admin/psychologicalType';
+						}
+					}
+				});
+		});
+		
+		$('#cardList').on('click', '#btnDataCancel', function() {
+			$("#newCard").remove();
+			$("#btnAdd").attr("disabled", false);
+		});
+	</script>
+</body>
+
+</html>
+

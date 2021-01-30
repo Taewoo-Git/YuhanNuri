@@ -81,34 +81,23 @@
 		<div class="c-wrapper c-fixed-components">
 			<header class="c-header c-header-light c-header-fixed c-header-with-subheader">
 				<button class="c-header-toggler c-class-toggler d-lg-none mfe-auto" type="button" data-target="#sidebar"
-                data-class="c-sidebar-show">
-                <i class="cil-hamburger-menu"></i>
-            </button><a class="c-header-brand d-lg-none" href="#">
-                <i class="cil-hamburger-menu"></i></a>
-            <button class="c-header-toggler c-class-toggler mfs-3 d-md-down-none" type="button" data-target="#sidebar"
-                data-class="c-sidebar-lg-show" responsive="true">
-                <i class="cil-hamburger-menu"></i>
-            </button>
+						data-class="c-sidebar-show">
+					<i class="cil-hamburger-menu"></i>
+				</button><a class="c-header-brand d-lg-none" href="#">
+					<i class="cil-hamburger-menu"></i></a>
+				<button class="c-header-toggler c-class-toggler mfs-3 d-md-down-none" type="button" data-target="#sidebar"
+					data-class="c-sidebar-lg-show" responsive="true">
+					<i class="cil-hamburger-menu"></i>
+				</button>
 				<ul class="c-header-nav ml-auto mr-4">
-                <li class="c-header-nav-item dropdown"><a class="c-header-nav-link" data-toggle="dropdown" href="#"
-                        role="button" aria-haspopup="true" aria-expanded="false">
-                        <div class="c-avatar"><i class="cil-user"></i></div>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right pt-0">
-                        <div class="dropdown-header bg-light py-2"><strong>계정</strong></div>
-                            <a class="dropdown-item" href="/admin/logout">
-                            <i class="cil-account-logout pr_10"></i> 로그아웃</a>
-							<a class="dropdown-item" href="/admin/changePassword">
-                            <i class="cil-dialpad pr_10"></i> 비밀번호 변경</a>
-					</div>
-                </li>
-            </ul>
+					<%- include ('adminAccount'); -%>
+				</ul>
 				<div class="c-subheader px-3">
 					<!-- Breadcrumb-->
 					<ol class="breadcrumb border-0 m-0">
-						<li class="breadcrumb-item"><a href="/admin">Home</a></li>
-						<li class="breadcrumb-item"><a href="#">양식 항목</a></li>
-						<li class="breadcrumb-item active"><%= type.typename%></li>
+						<li class="breadcrumb-item">예약</li>
+						<li class="breadcrumb-item">양식 항목</li>
+						<li class="breadcrumb-item active"><%=type.typename%> 질문</li>
 						<!-- Breadcrumb Menu-->
 					</ol>
 				</div>
@@ -281,7 +270,7 @@
 										$('div').remove('.jumbotron');
 									}
 									$('.col-8').append(`
-											<div class="card">
+										<div class="card">
 											<div class="card-body" id=card_id_${++i}>
 												<div class="input-group mb-3">
 													<div class="input-group-prepend">
@@ -322,7 +311,7 @@
 										$('div').remove('.jumbotron');
 									}
 									$('.col-8').append(`
-											<div class="card">
+										<div class="card">
 											<div class="card-body" id=card_id_${++i}>
 												<div class="input-group mb-3">
 													<div class="input-group-prepend">
@@ -364,22 +353,23 @@
 									}
 									$('.col-8').append(`
 										<div class="card">
-										<div class="card-body" id=card_id_${++i} style="padding-bottom: 5px!important;">
-											<div class="input-group mb-3">
-												<div class="input-group-prepend">
-													<span class="input-group-text" id="question">질 문</span>
+											<div class="card-body" id=card_id_${++i} style="padding-bottom: 5px!important;">
+												<div class="input-group mb-3">
+													<div class="input-group-prepend">
+														<span class="input-group-text" id="question">질 문</span>
+													</div>
+													<input type="text" class="form-control cardTitle" placeholder="Question" aria-label="question" 
+													 oninput="updateQuestion(card_id_${i},this)" style="background-color:white!important;">
+													<button type="button" class="btn btn-danger add_event_btn" onclick="deleteCard(card_id_${i},this,${i})">질문 취소</button>
 												</div>
-												<input type="text" class="form-control cardTitle" placeholder="Question" aria-label="question" 
-												 oninput="updateQuestion(card_id_${i},this)" style="background-color:white!important;">
-												<button type="button" class="btn btn-danger add_event_btn" onclick="deleteCard(card_id_${i},this,${i})">질문 취소</button>
+												<!-- <div class="toggle_normal_wrap">
+													<pre class="float-left font-size-15">필 수 </pre>
+													<label class="float-right c-switch c-switch-3d c-switch-primary addbtn-side-vertical-match">
+														<input type="checkbox" class="c-switch-input" onchange="isRequired(card_id_${i},this)">
+														<span class="c-switch-slider"></span>
+													</label>
+												</div> -->
 											</div>
-											<!-- <div class="toggle_normal_wrap">
-												<pre class="float-left font-size-15">필 수 </pre>
-												<label class="float-right c-switch c-switch-3d c-switch-primary addbtn-side-vertical-match">
-													<input type="checkbox" class="c-switch-input" onchange="isRequired(card_id_${i},this)">
-													<span class="c-switch-slider"></span>
-												</label>
-											</div> -->
 										</div>
 									`);
 									sendObject.push({
@@ -436,6 +426,7 @@
 								default:
 									break;
 							}
+							window.scrollBy(0, document.getElementsByClassName('card')[document.getElementsByClassName('card').length - 1].getBoundingClientRect().bottom);
 						});
 						function deleteCard(parent, me, askno) {
 							--i;

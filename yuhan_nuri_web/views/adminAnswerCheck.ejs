@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- CoreUI CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
+    <title>유한누리 상담사 페이지</title>	
+	<script src="https://code.jquery.com/jquery-latest.min.js"></script>
+	<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
+	<style>
+		.pr_10{
+			padding-right:10px;
+		}
+		.pr_30{
+			padding-right:30px;
+		}
+		.ques_btn{
+			position: relative;
+    		top: -40px;
+		}
+		.form-control[disabled], .form-control[readonly], fieldset[disabled] .form-control {
+   			background-color: white;
+		}
+	</style>
+</head>
+<body class="c-app">
+	
+    <div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
+                <%- include ('adminNav'); -%>
+        <button class="c-sidebar-minimizer c-class-toggler" type="button" data-target="_parent"
+            data-class="c-sidebar-minimized"></button>
+    </div>
+    <div class="c-wrapper c-fixed-components">
+        <header class="c-header c-header-light c-header-fixed c-header-with-subheader">
+            <button class="c-header-toggler c-class-toggler d-lg-none mfe-auto" type="button" data-target="#sidebar"
+                data-class="c-sidebar-show">
+                <i class="cil-hamburger-menu"></i>
+            </button><a class="c-header-brand d-lg-none" href="#">
+                <i class="cil-hamburger-menu"></i></a>
+            <button class="c-header-toggler c-class-toggler mfs-3 d-md-down-none" type="button" data-target="#sidebar"
+                data-class="c-sidebar-lg-show" responsive="true">
+                <i class="cil-hamburger-menu"></i>
+            </button>
+			<ul class="c-header-nav ml-auto mr-4">
+                <%- include ('adminAccount'); -%>
+            </ul>
+            <div class="c-subheader px-3">
+                <ol class="breadcrumb border-0 m-0">
+					<li class="breadcrumb-item">문의</li>
+                    <li class="breadcrumb-item active">문의 내역</li>
+                </ol>
+            </div>
+        </header>
+        <div class="c-body">
+            <main class="c-main">
+                <div class="container-fluid">
+                    <div class="fade-in" style="margin-bottom: 20px;">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 class="card-title mb-0">문의 내역</h4>
+                                    </div>
+                                </div>
+							</div>
+                        </div>
+						<div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div style="width:100%;">
+										<table>
+											<tr>
+												<td style="padding-right:10px;"><b>학번</b></td>
+												<td style="padding-right:30px;"><%=answerCheckList[0].stuno %></td>
+												<td><b>이름</b></td>
+												<td style="padding-right:30px;"><%=answerCheckList[0].stuname %></td>
+												<td style="padding-right:10px;"><b>질문일자</b></td>
+												<td style="padding-right:30px;"><%=answerCheckList[0].date %></td>
+												<td style="padding-right:10px;"><b>연락처</b></td>
+												<td style="padding-right:30px;"><%=answerCheckList[0].phonenum %></td>
+											</tr>
+											<tr>
+												<td><b>유형</b></td>
+												<td><%=answerCheckList[0].type %></td>
+												<td style="padding-right:10px;"><b>상담사</b></td>
+												<td><%=answerCheckList[0].empname %></td>
+												<td><b>답변일자</b></td>
+												<td><%=answerCheckList[0].answerdate %></td>
+											</tr>
+										</table>
+										<hr/>
+										<br/>
+										<h5 style="margin-bottom:15px;">
+											<b><%=answerCheckList[0].title%></b>
+										</h5>
+										<p style="margin-left:10px;">
+											<%=answerCheckList[0].content%>
+										</p>
+										<br/>
+										<h5 style="margin-bottom:15px;">
+											<b>답변</b>
+										</h5>
+										<p>
+											<textarea class="form-control pb-5" readonly="true" id="textAnswer" style="border:none;"><%=answerCheckList[0].answer%></textarea>
+										</p>
+                                    </div>
+                                </div>
+							</div>
+                        </div>
+						<input type="button" class="btn btn-danger" value="답변 수정" id="btnUpdate"/>
+						<input type="button" class="btn btn-success" value="목 록" onClick="location.href='/admin/questionAnswer/1'"/>
+                    </div>
+                </div>
+            </main>
+            <footer class="c-footer">
+                <div><a href="https://coreui.io">CoreUI</a> &copy; 2020 creativeLabs.</div>
+                <div class="ml-auto">Powered by&nbsp;<a href="https://coreui.io/">CoreUI</a></div>
+            </footer>
+        </div>
+    </div>
+	<script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
+	<script>
+		$("#btnUpdate").click(function(e){
+			if($("#btnUpdate").val() == "답변 수정"){
+				$("#textAnswer").removeAttr("readonly");
+				$("#textAnswer").focus();
+				$("#btnUpdate").attr("class", "btn btn-primary");
+				$("#btnUpdate").val("수정 완료");
+				$("#textAnswer").css("border", "1px solid #BDBDBD");
+			}else{
+				var sendAjaxData = {
+					context : $("#textAnswer").val()
+				};
+				$.ajax({
+					url: '/admin/answerCheck/<%=answerNo[0]%>',
+					dataType: 'json',
+					type: 'POST',
+					data: {ajaxData:JSON.stringify(sendAjaxData)},
+					success: function(result) {
+						if(result.check == 'success'){
+							alert('수정이 완료되었습니다.');
+							window.location.href = '/admin/answerCheck/<%=answerNo[0]%>';
+						}else{
+							alert('이미 수정되었거나 문제가 발생하였습니다.');
+							window.location.href = '/admin/answerCheck/<%=answerNo[0]%>';
+						}
+					}
+				});
+			}
+			
+		});
+	</script>
+</body>
+
+</html>
+

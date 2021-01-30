@@ -61,8 +61,8 @@
 			  <div class="modal-body">
 				<form>
 				  <div class="form-group">
-					<label for="type-name" class="col-form-label">다시 한번 더 삭제할 아이디를 입력시켜주세요!</label>
-					<input type="text" class="form-control" id="delete-type" placeholder="다시 한번 더 아이디를 작성해주세요.">
+					<label for="type-name" class="col-form-label">안전한 삭제를 위해 확인 절차가 필요합니다.</label>
+					<input type="text" class="form-control" id="delete-type" placeholder="삭제할 아이디를 입력해 주세요.">
 				  </div>
 					<p id="deleteError"></p>
 				</form>
@@ -87,7 +87,7 @@
 				<div class="modal-body">
 					<div class="form-group">
 						<label for="type-name" class="col-form-label">수정 대상</label>
-						<input type="text" class="form-control" id="update-name" readonly>
+						<input type="text" class="form-control" id="empIdToken" name="empid" readonly>
 					</div>
 				</div>
 				<div class="modal-body">
@@ -101,12 +101,11 @@
 				</div>
 			  	<div class="modal-body">
 				  <div class="form-group">
-					<label for="type-name" class="col-form-label">수정 하실 이름을 입력해주세요!</label>
-					<input type="text" class="form-control" id="update-text" placeholder="관리자 이름을 작성해주세요." name="updateEmpName">
+					<label for="type-name" class="col-form-label">이름을 입력해 주세요.</label>
+					<input type="text" class="form-control" id="update-name" name="updateEmpName" required>
 				  </div>
 			  	</div>
 			  <div class="modal-footer">
-				 <input type="hidden" id="empIdToken" name="empid" value="">
 				<button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
 				<button type="submit" class="btn btn-primary" id="updateBtn">수정하기</button>
 			  </div>
@@ -131,26 +130,15 @@
                 <i class="cil-hamburger-menu"></i>
             </button>
             <ul class="c-header-nav ml-auto mr-4">
-                <li class="c-header-nav-item dropdown"><a class="c-header-nav-link" data-toggle="dropdown" href="#"
-                        role="button" aria-haspopup="true" aria-expanded="false">
-                        <div class="c-avatar"><i class="cil-user"></i></div>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right pt-0">
-                        <div class="dropdown-header bg-light py-2"><strong>계정</strong></div>
-                            <a class="dropdown-item" href="/admin/logout">
-                            <i class="cil-account-logout pr_10"></i> 로그아웃</a>
-							<a class="dropdown-item" href="/admin/changePassword">
-                            <i class="cil-dialpad pr_10"></i> 비밀번호 변경</a>
-					</div></li>
+                <%- include ('adminAccount'); -%>
             </ul>
             <div class="c-subheader px-3">
                 <!-- Breadcrumb-->
                 <ol class="breadcrumb border-0 m-0">
-                    <li class="breadcrumb-item">Home</li>
-                    <li class="breadcrumb-item"><a href="#">Admin</a></li>
-                    <li class="breadcrumb-item active">Setting</li>
-                    <!-- Breadcrumb Menu-->
+					<li class="breadcrumb-item">관리자</li>
+                    <li class="breadcrumb-item active">관리자 계정 관리</li>
                 </ol>
+				<!-- Breadcrumb Menu-->
             </div>
         </header>
         <div class="c-body">
@@ -161,7 +149,7 @@
                             <div class="card-body">
                                 <div class="m-auto" style="width:80%;">
                                     <div class="m-auto" style="width:85%;">
-                                        <h4 class="card-title">관리자 계정 설정</h4>
+                                        <h4 class="card-title">관리자 계정 관리</h4>
                                         <table class="table" style="border-bottom:1px solid #dee2e6">
                                             <thead>
                                               <tr>
@@ -180,10 +168,15 @@
 															<%=v.positionno===1 ? '교직원' : '근로학생'%>
 														</td>
 														<td>
-															<button type="button" class="btn btn-success" data-toggle="modal" data-target="#updateModal" 
+															<% if(v.empid==='admin') { %>
+															<button type="button" class="btn btn-secondary" style="pointer-events: none;" disabled>수정</button>
+															<button type="button" class="btn btn-secondary ml-1" style="pointer-events: none;" disabled>삭제</button>
+															<% }else { %>
+															<button type="button" class="btn btn-success" data-toggle="modal" data-target="#updateModal"
 																	onClick="giveInformation('<%=v.empname%>','<%=v.positionno%>','<%=v.empid%>')">수정</button>
 															<button type="button" class="btn btn-danger ml-1" data-toggle="modal" data-target="#deleteModal"
 																	onClick="checkDelete('<%=v.empid%>')">삭제</button>
+															<% } %>
 														</td>
 												  	</tr>
 												<%})%>
@@ -222,21 +215,21 @@
 			const deleteItem=$(deleteType).val();
 			if(deleteItem===checkId){
 				$.ajax({
-							type:'POST',
-							dataType:'json',
-							url:'./deleteCounselor',
-							async:true,
-							data:{"deleteId" : checkId},
-							success:function(data){
-								if(data==='ok'){
-									window.location.reload();
-								}
-							}
-						})
+					type:'POST',
+					dataType:'json',
+					url:'./deleteCounselor',
+					async:true,
+					data:{"deleteId" : checkId},
+					success:function(data){
+						if(data==='ok'){
+							window.location.reload();
+						}
+					}
+				});
 				item="";
 			}else{
 				$('#deleteError').css('color','#f05454');
-				$('#deleteError').text('삭제하시려는 아이디가 달라요!');
+				$('#deleteError').text('아이디가 일치하지 않습니다.');
 			}
 		}
 		function giveInformation(name,position,id){

@@ -46,7 +46,6 @@
 		}
     </style>
 </head>
-
 <body class="c-app">
     <div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
         <%- include ('adminNav'); -%>
@@ -65,25 +64,14 @@
                 <i class="cil-hamburger-menu"></i>
             </button>
 			<ul class="c-header-nav ml-auto mr-4">
-                <li class="c-header-nav-item dropdown"><a class="c-header-nav-link" data-toggle="dropdown" href="#"
-                        role="button" aria-haspopup="true" aria-expanded="false">
-                        <div class="c-avatar"><i class="cil-user"></i></div>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right pt-0">
-                        <div class="dropdown-header bg-light py-2"><strong>계정</strong></div>
-                            <a class="dropdown-item" href="/admin/logout">
-                            <i class="cil-account-logout pr_10"></i> 로그아웃</a>
-							<a class="dropdown-item" href="/admin/changePassword">
-                            <i class="cil-dialpad pr_10"></i> 비밀번호 변경</a>
-					</div>
-				</li>
+                <%- include ('adminAccount'); -%>
             </ul>
             <div class="c-subheader px-3">
                 <!-- Breadcrumb-->
                 <ol class="breadcrumb border-0 m-0">
-                    <li class="breadcrumb-item"><a href="/admin">Home</a></li>
+                    <li class="breadcrumb-item">예약</li>
                     <li class="breadcrumb-item">양식 항목</li>
-                    <li class="breadcrumb-item active">자가진단</li>
+                    <li class="breadcrumb-item active">자가진단 질문</li>
                     <!-- Breadcrumb Menu-->
                 </ol>
             </div>
@@ -94,13 +82,13 @@
                 <div class="fade-in">
                     <div class="card">
 						<div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <h4 class="card-title mb-0">자가진단 양식</h4>
-                                        <div class="text-muted"><%= `${new Date().getFullYear()}년 ${new Date().getMonth()+1}월 ${new Date().getDate()}일`%></div>
-                                    </div>
-                                </div>
-                            </div>
+							<div class="d-flex justify-content-between">
+								<div>
+									<h4 class="card-title mb-0">자가진단 양식</h4>
+									<div class="text-muted"><%= `${new Date().getFullYear()}년 ${new Date().getMonth()+1}월 ${new Date().getDate()}일`%></div>
+								</div>
+							</div>
+						</div>
                         <div class="card-body list-group-item border-left-0 border-right-0 border-bottom-0" id="askList">
                             <ul class="nav justify-content-center">
                                 <li class="nav-item disabled">
@@ -133,18 +121,16 @@
 							<%})%>
                         </div>
 						<div class="btn-group-vertical position-fixed fixed_btn_position">
-					<button type="button" class="btn btn-secondary" onClick="addAsk('#askList')">
-						질문 추가
-					</button>
-					<button class="btn btn-primary" value="save" onClick="saveList()">
-						저 장
-					</button>
-			</div>
+							<button type="button" class="btn btn-secondary" onClick="addAsk('#askList')">
+								질문 추가
+							</button>
+							<button class="btn btn-primary" value="save" onClick="saveList()">
+								저 장
+							</button>
+						</div>
                     </div>
                 </div>
-				
             </div>
-			
         </main>
     </div>
     </div>
@@ -171,6 +157,9 @@
 			`);
             askList.push({ id: `ask_${i}`, ask: '' });
 			cur_i = i;
+			
+			let asks = document.getElementsByClassName('checkTitle');
+			window.scrollBy(0, asks[asks.length - 1].getBoundingClientRect().bottom);
         }
         function removeAsk(me,askno) {
 			--i;

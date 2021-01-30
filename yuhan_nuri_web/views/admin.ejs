@@ -42,24 +42,14 @@
                 data-class="c-sidebar-lg-show" responsive="true">
                 <i class="cil-hamburger-menu"></i>
             </button>
-            
-			<ul class="c-header-nav ml-auto mr-4">
-                <li class="c-header-nav-item dropdown"><a class="c-header-nav-link" data-toggle="dropdown" href="#"
-                        role="button" aria-haspopup="true" aria-expanded="false">
-                        <div class="c-avatar"><i class="cil-user"></i></div>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right pt-0">
-                        <div class="dropdown-header bg-light py-2"><strong>계정</strong></div>
-                            <a class="dropdown-item" href="/admin/logout">
-                            <i class="cil-account-logout pr_10"></i> 로그아웃</a>
-							<a class="dropdown-item" href="/admin/changePassword">
-								<i class="cil-dialpad pr_10"></i> 비밀번호 변경</a>
-					</div></li>
+            <ul class="c-header-nav ml-auto mr-4">
+                <%- include ('adminAccount'); -%>
             </ul>
             <div class="c-subheader px-3">
                 <ol class="breadcrumb border-0 m-0">
-                    <li class="breadcrumb-item"><a href="/admin">Home</a></li>
-                    <li class="breadcrumb-item active">총 예약 리스트</li>
+					<li class="breadcrumb-item">예약</li>
+                    <li class="breadcrumb-item">예약 리스트</li>
+                    <li class="breadcrumb-item active">예약 대기 리스트</li>
                 </ol>
             </div>
         </header>
@@ -71,9 +61,8 @@
                             <div class="card-body">
                                 <div class="d-flex justify-content-between">
                                     <div>
-                                        <h4 class="card-title mb-0">총 예약 리스트</h4>
+                                        <h4 class="card-title mb-0">예약 대기 리스트</h4>
                                         <div class="text-muted">
-											
 											<%= `${new Date().getFullYear()}년 ${new Date().getMonth()+1}월 ${new Date().getDate()}일`%>
 											&nbsp;&nbsp;
 											<% 
@@ -95,7 +84,10 @@
 										<div class="float-right">
 											<button class="btn btn-info check-btn mr-2 showModalMental btn<%= val.no%>" id="check-register-btn-<%=i%>" value="<%= val.no%>" data-toggle="modal"
 													data-target="#exampleModal">신청서 확인</button>
+											<% if(adminInfo.author === 1) { %>
 											<button class="btn btn-success reser-btn mr-2" id="accept-reservation-btn-<%=i%>" value="<%= val.no%>">확정</button>
+											<button class="btn btn-danger  cancel-btn" id="cancel-btn-<%=i%>" value="<%= val.no%>">취소</button>	
+											<% } %>
 										</div>
 									</div>
 								<% } else { %>
@@ -112,8 +104,10 @@
 										<div class="float-right">
 											<button class="btn btn-info check-btn mr-2 showModalConsult btn<%= val.no%>" id="check-register-btn-<%=i%>" value="<%= val.no%>" data-toggle="modal"
 													data-target="#exampleModal">신청서 확인</button>
+											<% if(adminInfo.author === 1) { %>
 											<button class="btn btn-success  reser-btn mr-2" id="accept-reservation-btn-<%=i%>" value="<%= val.no%>">확정</button>
 											<button class="btn btn-danger  cancel-btn" id="cancel-btn-<%=i%>" value="<%= val.no%>">취소</button>	
+											<% } %>
 										</div>
 										
 									</div>
@@ -131,8 +125,14 @@
     </div>
 	<script src="/socket.io/socket.io.js"></script>
 	<script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
-	<script>		
-		io('/reaction').on('cancel', function(serialno) {
+	<script>
+		const socket = io('/reaction');
+		
+		socket.on('cancel', function(serialno) {
+			if($('.btn'+serialno)) $('.btn'+serialno).parents('.list-group-item').remove();
+		});
+		
+		socket.on('confirm', function(serialno) {
 			if($('.btn'+serialno)) $('.btn'+serialno).parents('.list-group-item').remove();
 		});
 		
@@ -145,14 +145,14 @@
 					url: "./admin/accessReservation",
 					async: true,
 					data: { "sendAjax" : $(`#${e.target.id}`).val() },
-					success: function (data) { 
+					success: function (data) {
+						socket.emit("confirm", $(`#${e.target.id}`).val());
 						window.location.reload();
 					}
 				});
 			});
 		});
-
-		// 왼쪽 탭 메뉴 추가하는 버튼
+		
 		$('button.cancel-btn').click(function(e){
 			$.ajax({
 				type:'POST',
@@ -162,7 +162,7 @@
 				data: { "sendAjax" : $(`#${e.target.id}`).val() },
 				success:function(data){
 					if(data.state === "ok"){
-						
+						socket.emit('cancel', $(`#${e.target.id}`).val());
 						alert("예약이 취소되었습니다.");
 						window.location.reload();
 					}

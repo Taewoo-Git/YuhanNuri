@@ -15,6 +15,30 @@
 		<script src="/lib/tui-time-picker.js"></script>
 		<script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.min.js"></script>
 		<script src="/lib/tui-calendar.js"></script>
+		<%if(adminInfo.author===1){%>
+			<script>
+				
+				const options = {
+					defaultView: 'month',
+					useCreationPopup: true,
+					useDetailPopup: true,
+				}
+			</script>
+		<%} else {%>
+			
+			<script>
+				
+				const options = {
+					defaultView: 'month',
+					useCreationPopup: true,
+					useDetailPopup: true,
+					isReadOnly : true
+					
+				}
+			</script>
+		<%} %>
+		<!-- 상담사, 근로학생 구분 달력 수정 커스텀 -->
+		
 		<script src="https://code.jquery.com/jquery-latest.min.js"></script>
 		<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
 		<style>
@@ -97,23 +121,12 @@
 					<i class="cil-hamburger-menu"></i>
 				</button>
 				<ul class="c-header-nav ml-auto mr-4">
-					<li class="c-header-nav-item dropdown"><a class="c-header-nav-link" data-toggle="dropdown" href="#"
-							role="button" aria-haspopup="true" aria-expanded="false">
-							<div class="c-avatar"><i class="cil-user"></i></div>
-						</a>
-						<div class="dropdown-menu dropdown-menu-right pt-0">
-							<div class="dropdown-header bg-light py-2"><strong>계정</strong></div>
-								<a class="dropdown-item" href="/admin/logout">
-								<i class="cil-account-logout pr_10"></i> 로그아웃</a>
-								<a class="dropdown-item" href="/admin/changePassword">
-								<i class="cil-dialpad pr_10"></i> 비밀번호 변경</a>
-						</div>
-					</li>
+					<%- include ('adminAccount'); -%>
 				</ul>
 				<div class="c-subheader px-3">
 					<!-- Breadcrumb-->
 					<ol class="breadcrumb border-0 m-0">
-						<li class="breadcrumb-item"><a href="/admin">Home</a></li>
+						<li class="breadcrumb-item">예약</li>
 						<li class="breadcrumb-item active">스케줄</li>
 						<!-- Breadcrumb Menu-->
 					</ol>
@@ -123,10 +136,10 @@
 				<main class="c-main">
 					<div class="container-fluid">
 						<div class="fade-in">
-							<div class="date-view" style="display : inline-block">
+							<div class="date-view" style="display:inline-block">
 								<h2 id='date'></h2>
 							</div>
-							<div class="ctrlBtns" style="display : inline-block; float : right;">
+							<div class="ctrlBtns" style="display:inline-block; float:right;">
 								<button id="nowBtn" class="btn btn-outline-primary">Today</button>
 								<button id="prevBtn" class="btn btn-outline-primary"><i class="cil-chevron-left"></i></button>
 								<button id="nextBtn" class="btn btn-outline-primary"><i class="cil-chevron-right"></i></button>
@@ -143,12 +156,7 @@
 		</div>
 		<script>
 			const container = document.getElementById('calendar');
-
-			const options = {
-				defaultView: 'month',
-				useCreationPopup: true,
-				useDetailPopup: true,
-			}
+			
 			var Calendar = tui.Calendar;
 
 			const calendar = new Calendar(container, options);
@@ -239,7 +247,8 @@
 					calendar.createSchedules(reservedSchedules);
 				}
 			});
-
+			
+			
 			calendar.on('beforeCreateSchedule', scheduleData => {
 				const schedule = { // 해당 객체의 형태로 db를 구성해야 할 것 같음
 					calendarId: scheduleData.calendarId,
@@ -287,7 +296,9 @@
 				});
 
 			});
-
+			
+			
+			
 			calendar.on('beforeUpdateSchedule', event => {
 				const { schedule, changes } = event;
 

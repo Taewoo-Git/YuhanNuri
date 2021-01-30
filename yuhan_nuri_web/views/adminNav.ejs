@@ -5,15 +5,14 @@
         <i class="cil-list-rich pr_30"></i>예약 리스트</a>
         <ul class="c-sidebar-nav-dropdown-items">
 			<li class="c-sidebar-nav-item">
-				<a class="c-sidebar-nav-link" href="/admin">
-			<i class="cil-clipboard pr_30"></i>
-			총 예약 리스트</a>
+				<a class="c-sidebar-nav-link" href="/admin">예약 대기 리스트</a>
 			</li>
-			<li class="c-sidebar-nav-item">
-				<a class="c-sidebar-nav-link" href="/admin/myReservation">
-			<i class="cil-clipboard pr_30"></i>
-			내 예약 리스트</a>
-			</li>
+			<%if(adminInfo.author===1){%>
+				<li class="c-sidebar-nav-item">
+					<a class="c-sidebar-nav-link" href="/admin/myReservation">내 예약 리스트</a>
+				</li>
+			<%}%>
+			
         </ul>
     </li>
 	
@@ -22,14 +21,25 @@
 		<i class="cil-calendar pr_30"></i>
 		스케줄</a>
 	</li>
-	<li class="c-sidebar-nav-item">
-	<a class="c-sidebar-nav-link" href="/admin/question">
-		<i class="cil-group pr_30"></i>
-		문의</a>
-	</li>
+	
+	<!-- <li class="c-sidebar-nav-item c-sidebar-nav-dropdown"><a
+            class="c-sidebar-nav-link c-sidebar-nav-dropdown-toggle" href="#">
+        <i class="cil-group pr_30"></i>문의</a>
+        <ul class="c-sidebar-nav-dropdown-items">
+			<li class="c-sidebar-nav-item">
+					<a class="c-sidebar-nav-link" href="/admin/question">
+					문의 목록</a>
+			</li>
+			<li class="c-sidebar-nav-item">
+					<a class="c-sidebar-nav-link" href="/admin/questionAnswer/1">
+					문의 내역</a>
+			</li>
+        </ul>
+    </li> -->
+	
 	<li class="c-sidebar-nav-item c-sidebar-nav-dropdown"><a
             class="c-sidebar-nav-link c-sidebar-nav-dropdown-toggle" href="#">
-        <i class="cil-list-rich pr_30"></i>양식 항목</a>
+        <i class="cil-clipboard pr_30"></i>양식 항목</a>
         <ul class="c-sidebar-nav-dropdown-items">
 			<li class="c-sidebar-nav-item">
 					<a class="c-sidebar-nav-link" href="/admin/board/1" target="_top">
@@ -42,38 +52,59 @@
 					</a>
 			</li>
 			<li class="c-sidebar-nav-item">
-					<a class="c-sidebar-nav-link" href="/admin/form/1" target="_top">
-						 상담예약
+					<a class="c-sidebar-nav-link" href="/admin/psychologicalType" target="_top">
+						 심리검사 유형
 					</a>
 			</li>
 			<li class="c-sidebar-nav-item">
 					<a class="c-sidebar-nav-link" href="/admin/form/2" target="_top">
-						 심리검사예약
+						 심리검사 질문
 					</a>
 			</li>
 			<li class="c-sidebar-nav-item">
-					<a class="c-sidebar-nav-link" href="/admin/form/3" target="_top">
-						만족도조사
+					<a class="c-sidebar-nav-link" href="/admin/form/1" target="_top">
+						 상담예약 질문
 					</a>
 			</li>
 			<li class="c-sidebar-nav-item">
 					<a class="c-sidebar-nav-link" href="/admin/selfCheckForm" target="_top">
-						 자가진단
+						 자가진단 질문
 					</a>
 			</li>
-			
+			<li class="c-sidebar-nav-item">
+					<a class="c-sidebar-nav-link" href="/admin/form/3" target="_top">
+						만족도조사 질문
+					</a>
+			</li>
         </ul>
     </li>
+	<li class="c-sidebar-nav-title">문의</li>
+	<li class="c-sidebar-nav-item">
+		<a class="c-sidebar-nav-link" href="/admin/question" target="_top">
+			<i class="cil-list-rich pr_30"></i>
+				문의 대기 리스트</a>
+		<a class="c-sidebar-nav-link" href="/admin/questionAnswer/1" target="_top">
+			<i class="cil-clipboard pr_30"></i>
+				문의 내역</a>
+	</li>
 	<%if(adminInfo.author===1){%>
 	<li class="c-sidebar-nav-title">채팅</li>
-	<li class="c-sidebar-nav-item c-sidebar-nav-dropdown"><a
+	<li class="c-sidebar-nav-item">
+		<a class="c-sidebar-nav-link" href="/admin/chat" target="_top">
+			<i class="cil-user-plus pr_30"></i>
+				채팅 상담</a>
+		<a class="c-sidebar-nav-link" href="/admin/getAllChatLog" target="_top">
+			<i class="cil-save pr_30"></i>
+				전체 채팅 내역 저장</a>
+	</li>
+	<!-- <li class="c-sidebar-nav-item c-sidebar-nav-dropdown"><a
             class="c-sidebar-nav-link c-sidebar-nav-dropdown-toggle" href="#">
         <i class="cil-list-rich pr_30"></i>채팅 항목</a>
         <ul class="c-sidebar-nav-dropdown-items">
 			<li class="c-sidebar-nav-item">
 				<a class="c-sidebar-nav-link" href="/admin/chat" target="_top">
 					<i class="cil-chat-bubble pr_30"></i>
-					채팅상담</a>
+					채팅 상담</a>
 			</li>	
 			<li class="c-sidebar-nav-item">
 				<a class="c-sidebar-nav-link" href="/admin/getAllChatLog" target="_top">
@@ -81,7 +112,13 @@
 					전체 채팅 내역 저장</a>
 			</li>	
         </ul>
-    </li>
+    </li> -->
+	<li class="c-sidebar-nav-title">만족도조사</li>
+	<li class="c-sidebar-nav-item">
+		<a class="c-sidebar-nav-link" href="/admin/getSatisfactionResult" target="_top">
+			<i class="cil-save pr_30"></i>
+				만족도조사 내역 저장</a>
+	</li>
 	<li class="c-sidebar-nav-title">관리자</li>
 	<li class="c-sidebar-nav-item">
 		<a class="c-sidebar-nav-link" href="/admin/signUp" target="_top">
@@ -89,13 +126,7 @@
 				관리자 등록</a>
 		<a class="c-sidebar-nav-link" href="/admin/settings" target="_top">
 			<i class="cil-people pr_30"></i>
-				관리자 설정</a>
-	</li>
-	<li class="c-sidebar-nav-title">부가 기능</li>
-	<li class="c-sidebar-nav-item">
-		<a class="c-sidebar-nav-link" href="/admin/getSatisfactionResult" target="_top">
-			<i class="cil-save pr_30"></i>
-				만족도조사 내역 저장</a>
+				관리자 계정 관리</a>
 	</li>
 	<%}%>
 </ul>

@@ -73,6 +73,18 @@ class YuhanNuriState extends State<YuhanNuri> {
         });
 
     cm = new CookieManager();
+
+    KeyboardVisibilityController().onChange.listen((bool visible) {
+      if (visible) {
+        // 키보드 올라왔을때
+        _webViewController.evaluateJavascript(
+            source: 'document.activeElement.scrollIntoView({block: "center"})');
+      } else {
+        // 키보드가 내려갈때
+        _webViewController.evaluateJavascript(
+            source: 'document.activeElement.blur()'); // 해당 텍스트박스의 포커싱을 지움
+      }
+    });
   }
 
   void gotoPage(String msg) {
@@ -141,49 +153,11 @@ class YuhanNuriState extends State<YuhanNuri> {
                       _webViewController = controller;
                       cm.deleteAllCookies();
                       _webViewController.loadUrl(url: urls[0], headers: header);
-                      KeyboardVisibility.onChange.listen((bool visible) async {
-                        if (visible) {
-                          // 키보드 올라왔을때
-                          if (await _webViewController.getUrl() == urls[3]) {
-                            // 마이페이지(채팅)
-                            Future.delayed(
-                                Duration(milliseconds: 300),
-                                () async =>
-                                    await _webViewController.evaluateJavascript(
-                                        source: 'setHeight();'));
-                          } else {
-                            // 다른페이지(예약페이지 등)
-                            Future.delayed(
-                                Duration(milliseconds: 300),
-                                () async =>
-                                    await _webViewController.evaluateJavascript(
-                                        source:
-                                            'document.activeElement.scrollIntoView( {block: "center"})')); // 해당 텍스트박스를 화면에 나오게
-                          }
-                        } else {
-                          // 키보드가 내려갈때
-                          if (await _webViewController.getUrl() == urls[3]) {
-                            // 마이페이지(채팅) 이면
-                            Future.delayed(
-                                Duration(milliseconds: 300),
-                                () async =>
-                                    await _webViewController.evaluateJavascript(
-                                        source: 'setHeight();'));
-                            await _webViewController.evaluateJavascript(
-                                source:
-                                    'document.activeElement.blur()'); // 해당 텍스트박스의 포커싱을 지움
-                          } else {
-                            await _webViewController.evaluateJavascript(
-                                source:
-                                    'document.activeElement.blur()'); // 해당 텍스트박스의 포커싱을 지움
-                          }
-                        }
-                      });
                       _webViewController.addJavaScriptHandler(
                           // 웹뷰 JavaScript와 통신하는 핸들러
                           handlerName:
                               'PageHandler', // 해당 핸들러를 웹뷰에서 호출(예약 완료 버튼 클릭)할 시 메인으로 돌아감
-                          callback: (args) async {
+                          callback: (args) {
                             if (args[0].toString() == "replaceMain") {
                               Future.delayed(Duration(milliseconds: 300), () {
                                 navBarState = globalKey.currentState;

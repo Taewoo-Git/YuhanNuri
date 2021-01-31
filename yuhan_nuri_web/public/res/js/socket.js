@@ -248,15 +248,18 @@ module.exports = (server) => {
 			connection.execute(selectSerialno, [waitingStudentCode[socket.myroom], socket.myroom], (err, rows) => {
 				if(err) console.error(err);
 				else {
-					connection.execute(selectLog, [rows[0].serialno], (selectLogErr, selectLogRows) => {
-						if(selectLogErr) console.error(selectLogErr);
-						else if(selectLogRows.length != 0) {
-							socket.broadcast.to(socket.myroom).emit('okay', selectLogRows[0].chatlog);
-						}
-						else {
-							socket.broadcast.to(socket.myroom).emit('okay', null);
-						}
-					});
+					if(rows[0] === undefined) socket.emit('outError');
+					else {
+						connection.execute(selectLog, [rows[0].serialno], (selectLogErr, selectLogRows) => {
+							if(selectLogErr) console.error(selectLogErr);
+							else if(selectLogRows.length != 0) {
+								socket.broadcast.to(socket.myroom).emit('okay', selectLogRows[0].chatlog);
+							}
+							else {
+								socket.broadcast.to(socket.myroom).emit('okay', null);
+							}
+						});
+					}
 				}
 			});
 		});

@@ -3,7 +3,7 @@ const connection = db.init();
 
 db.open(connection,'fcm');
 
-const sql_whoispost = "SELECT User.token FROM Reservation, User WHERE Reservation.date = ? AND User.stuno = Reservation.stuno AND User.status = 1";
+const sql_whoispost = "SELECT User.token FROM Reservation, User WHERE Reservation.date = ? AND User.stuno = Reservation.stuno AND Reservation.status = 1";
 const sql_AcceptedToken= "SELECT token FROM User WHERE stuno = (select stuno FROM Reservation WHERE serialno = ?)"; 
 const sql_notifyAnswer = "SELECT token FROM User WHERE stuno = (select stuno FROM QuestionBoard WHERE no =?)";
 const sql_satisfaction = "SELECT token FROM User WHERE stuno = (select stuno FROM Reservation WHERE serialno = ?)";	
@@ -35,7 +35,7 @@ exports.consultTomorrowPush = ()=> {
 		connection.execute(sql_whoispost, [moment().add(1, 'd').format("YYYY-MM-DD")], (err, rows) => {
 			if(err){
 				console.error(err);
-				next(err);
+				// next(err);
 			}
 			else{
 				for(var i=0; i<rows.length; i++){	
@@ -67,7 +67,7 @@ exports.reservationAcceptPush = (reservationNumber) => {
 	connection.execute(sql_AcceptedToken, [reservationNumber], (err, rows) => {
 		if(err){
 			console.error(err);
-			next(err);
+			// next(err); 
 		}
 		else{
 			const fcm_target_token = rows[0].token;
@@ -97,7 +97,7 @@ exports.consultTodayPush = ()=> {
 		connection.execute(sql_whoispost, [moment().format("YYYY-MM-DD")], (err, rows) => {
 			if(err){
 				console.error(err);
-				next(err);
+				// next(err);
 			}
 			else{
 				for(var i=0; i<rows.length; i++){	
@@ -131,7 +131,7 @@ exports.answerPush = (tokenno)=>{
 	connection.execute(sql_notifyAnswer, [tokenno], (err, rows) => {	
 		if(err){
 			console.error(err);
-			next(err);
+			// next(err);
 		}
 		else{
 			const fcm_target_token = rows[0].token;
@@ -160,7 +160,7 @@ exports.satisfactionPush = (satisfactionNo)=>{
 	connection.execute(sql_satisfaction, [satisfactionNo], (err, rows) => {
 		if(err){
 			console.error(err);
-			next(err);
+			// next(err);
 		}
 		else{
 			const fcm_target_token = rows[0].token;

@@ -13,7 +13,8 @@
 		<link rel="stylesheet" type="text/css" href="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.css" />
 		<script src="https://uicdn.toast.com/tui.code-snippet/v1.5.2/tui-code-snippet.min.js"></script>
 		<script src="/lib/tui-time-picker.js"></script>
-		<script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.min.js"></script>
+		<script src="/lib/tui-date-picker.js"></script>
+		<!--<script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.min.js"></script>-->
 		<script src="/lib/tui-calendar.js"></script>
 		<%if(adminInfo.author===1){%>
 			<script>
@@ -42,6 +43,9 @@
 		<script src="https://code.jquery.com/jquery-latest.min.js"></script>
 		<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
 		<style>
+			.tui-timepicker-row {
+				padding-left: 15px;
+			}
 			.pr_10{
 				padding-right:10px;
 			}
@@ -191,7 +195,7 @@
 
 				{
 					id: 'Reserved',
-					name: '예약됨',
+					name: '상담',
 					color: '#f361dc',
 					bgColor: '#f361dc',
 					dragBgColor: '#f361dc',

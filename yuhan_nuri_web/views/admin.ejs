@@ -76,11 +76,20 @@
 							<% getReservation.forEach(function(val,i){ %>
 								<% if(val.typename == undefined) { %>
 									<div class="card-body list-group-item">
-										<h5 class="card-title">학번 : <%=val.stuno%>
-											&nbsp;&nbsp;&nbsp;&nbsp; 이름 : <b><%=val.stuname %></b>
-											&nbsp;&nbsp;&nbsp;&nbsp; 연락처 : <%=val.phonenum %>
-										</h5>
-										<p class="card-text"><b>상담 유형</b> : 심리검사</p>
+										<table>
+											<tr style="font-size:18px;">
+												<td><b>학번</b></td>
+												<td style="padding-right:30px;"><%=val.stuno%></td>
+												<td style="padding-right:10px;"><b>이름</b></td>
+												<td style="padding-right:30px;"><%=val.stuname %></td>
+												<td style="padding-right:10px;"><b>연락처</b></td>
+												<td><%=val.phonenum %></td>
+											</tr>
+											<tr>
+												<td style="padding-right:10px;"><b>상담 유형</b></td>
+												<td>심리검사</td>
+											</tr>
+										</table>
 										<div class="float-right">
 											<button class="btn btn-info check-btn mr-2 showModalMental btn<%= val.no%>" id="check-register-btn-<%=i%>" value="<%= val.no%>" data-toggle="modal"
 													data-target="#exampleModal">신청서 확인</button>
@@ -92,15 +101,24 @@
 									</div>
 								<% } else { %>
 									<div class="card-body list-group-item">
-										<h5 class="card-title">학번 : <%=val.stuno%>
-											&nbsp;&nbsp;&nbsp;&nbsp; 이름 : <b><%=val.stuname %></b>
-											&nbsp;&nbsp;&nbsp;&nbsp; 연락처 : <%=val.phonenum %>
-										</h5>
-										<p class="card-text">
-											<b>상담 유형 : </b> <%= val.typename%> &nbsp;&nbsp;&nbsp;&nbsp;
-											<b>상담 일자 : </b><%let dateArr = val.date.split('-'); %><%=dateArr[0]+"년 "%><%=dateArr[1]+"월 "%><%=dateArr[2]+"일"%> &nbsp;&nbsp;&nbsp;&nbsp;
-											<b>상담 시간 : </b><%= val.starttime%> 시</p>
-															
+										<table>
+											<tr style="font-size:18px;">
+												<td><b>학번</b></td>
+												<td style="padding-right:30px;"><%=val.stuno%></td>
+												<td><b>이름</b></td>
+												<td><%=val.stuname %></td>
+												<td><b>연락처</b></td>
+												<td><%=val.phonenum %></td>
+											</tr>
+											<tr>
+												<td style="padding-right:10px;"><b>상담 유형</b></td>
+												<td><%= val.typename%></td>
+												<td style="padding-right:10px;"><b>상담 일자</b></td>
+												<td style="padding-right:30px;"><%let dateArr = val.date.split('-'); %><%=dateArr[0]+"년 "%><%=dateArr[1]+"월 "%><%=dateArr[2]+"일"%></td>
+												<td style="padding-right:10px;"><b>상담 시간</b></td>
+												<td><%= val.starttime%>시</td>
+											</tr>
+										</table>
 										<div class="float-right">
 											<button class="btn btn-info check-btn mr-2 showModalConsult btn<%= val.no%>" id="check-register-btn-<%=i%>" value="<%= val.no%>" data-toggle="modal"
 													data-target="#exampleModal">신청서 확인</button>
@@ -126,7 +144,7 @@
 	<script src="/socket.io/socket.io.js"></script>
 	<script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
 	<script>
-		const socket = io('/reaction');
+		const socket = io('/reaction', {transports:['websocket']});
 		
 		socket.on('cancel', function(serialno) {
 			if($('.btn'+serialno)) $('.btn'+serialno).parents('.list-group-item').remove();

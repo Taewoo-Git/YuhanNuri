@@ -119,6 +119,46 @@
     </div>
 	<script src="/lib/tinymce_5.6.1/tinymce/js/tinymce/tinymce.min.js"></script>
 	<script>
+		
+		function image_handler (blobInfo, success, failure, progress) {
+			var image_size = blobInfo.blob().size;
+			var max_size = 5 * 1024 * 1024; // 5MB
+			
+			if( image_size  > max_size ){
+				failure('5MB 미만의 이미지만 삽입이 가능합니다.', { remove : true });
+				return;      
+			}else{
+				var xhr, formData;
+
+				xhr = new XMLHttpRequest();
+				xhr.withCredentials = false;
+				xhr.open('POST', '/admin/uploadFile');
+
+				xhr.onload = function() {
+					var json;
+					
+					if (xhr.status != 200) {
+						failure('HTTP Error: ' + xhr.status);
+						return;
+					}
+					
+					json = JSON.parse(xhr.responseText);
+					
+					if (!json || typeof json.location != 'string') {
+						failure('Invalid JSON: ' + xhr.responseText);
+						return;
+					}
+					
+					success(json.location);
+				};
+
+				formData = new FormData();
+				formData.append('file', blobInfo.blob(), blobInfo.filename());
+
+				xhr.send(formData);
+			}
+		};
+		
 		tinymce.init({
 			selector: "textarea.tinymce",
 			
@@ -127,18 +167,19 @@
 			height: 800,
 
 			statubar: true,
-
+			
 			plugins: [
 				"advlist autolink link lists charmap print preview hr anchor pagebreak",
 				"searchreplace visualblocks visualchars fullscreen insertdatetime nonbreaking",
-				"table contextmenu directionality emoticons paste textcolor save image"
-			],
+				"table contextmenu directionality emoticons paste textcolor image imagetools save"
+			], // advlist
 
 			/* toolbar */
-			toolbar: "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link | print preview  fullpage | forecolor backcolor emoticons save image",
+			toolbar: "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link | print preview  fullpage | forecolor backcolor emoticons  image save" ,
+			// 뒤로 가기 앞으로 가기 | 텍스트 변경 select | 굵게 기울게 | 왼쪽 정렬 가운데 정렬 오른쪽 정렬 양쪽 정렬 | 기호 리스트 숫자 리스트 내어쓰기 들여쓰기
+			// 링크 | 출력 미리보기 풀페이지 | 
 			
-			
-			images_upload_url: '/admin/uploadFile',
+			images_upload_handler: image_handler,
 			
 			/* style */
 			style_formats: [
@@ -210,6 +251,9 @@
 				});
 			}
 		});
+		
+		
+		
 	</script>
 	<script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
 </body>

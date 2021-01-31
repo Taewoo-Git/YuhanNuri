@@ -295,7 +295,7 @@
 		<script>
 			$(function() {
 				if($('#cancelSubmit')) {
-					let cancel = io('/reaction');
+					let cancel = io('/reaction', {transports:['websocket']});
 					
 					$('#cancelSubmit').click(function(e) {
 						cancel.emit('cancel', $('#cancelSerialno').val());
@@ -334,7 +334,8 @@
 							location.replace(location.origin+location.pathname+"?chatting");
 						});
 				<% } else if(isChatting === 1) { %>
-						const socket = io('/chat');
+						const socket = io('/chat', {transports:['websocket']});
+				
 						let isInit = 0;
 				
 						$("#waitingMsg").css('display', 'block');
@@ -495,11 +496,11 @@
 				<% } %>
 			});
 			
-			/*function setHeight() {
+			function setHeight() {
 				let top = document.getElementsByClassName("row");
 				$("#chatting").height(window.innerHeight - (top[0].clientHeight + top[1].clientHeight) - 20);
 				$("#bodyChat").scrollTop($("#bodyChat")[0].scrollHeight);
-			}*/
+			}
 	
 			// xss 취약점 막는 함수, php의 htmlspecialcharacter 과 같은 함수
 			function escapeHtml(str) {

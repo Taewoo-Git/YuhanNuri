@@ -14,12 +14,11 @@
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
 			  integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU"
 			  crossorigin="anonymous">
-		
-		<title>유한누리 상담사 페이지</title>
+		<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
 		<script src="https://uicdn.toast.com/tui.code-snippet/v1.5.2/tui-code-snippet.min.js"></script>
 		<script src="/lib/tui-calendar.js"></script>
 		<script src="https://code.jquery.com/jquery-latest.min.js"></script>
-		<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
+		<title>유한누리 상담사 페이지</title>
 		<style>
 			#date{
 				font-size : 25px;
@@ -199,10 +198,10 @@
 			<div class="c-body"> <!-- bbody -->
 				<main class="c-main">
 					<div class="container-fluid" style="height:70vh!important;">
-						<div class='card' id='chattingCard' style="height:inherit; margin:0!important; float:left"> 
-							<div id='bodyChat' class='card-body msg_card_body' style="position:relative;">
-								<a id="saveLog" style="position:absolute; bottom:3%; right:5%; cursor:dafault; color:lightgray;"> 채팅 내역 저장 </a>	
-							</div> 
+						<div class='card' id='chattingCard' style="height:inherit; margin:0!important; float:left; position:relative;"> 
+							<div id='bodyChat' class='card-body msg_card_body'>
+							</div>
+							<a id="saveLog" style="position:absolute; bottom:90px; right:30px; cursor:dafault; color:lightgray;"> 채팅 내역 저장 </a>	
 							<div class='card-footer' style='padding:0!important;'> 
 								<div class='input-group'> 
 									<input type='text' id='msgForm' class='form-control type_msg' placeholder='메시지 전송...'/> 
@@ -248,6 +247,8 @@
 		<script src="/socket.io/socket.io.js"></script>
 		<script>
 			$(function() {
+				const socket = io('/chat', {transports:['websocket']});
+				
 				// xss 취약점 막는 함수, php의 htmlspecialcharacter 과 같은 함수
 				function escapeHtml(str) {
 					var map = {
@@ -264,8 +265,6 @@
 				const empname = "<%= empname %>";
 				let serialNum = "";
 				
-				let socket = io('/chat');
-				
 				let isProgress = false;
 				
 				let currentStuCode = "";
@@ -273,8 +272,9 @@
 				
 				socket.on("waiting", function(stuname) {
 					if($('#stuAlert')) $('#stuAlert').remove();
+					
 					$("#bodyChat").append(`
-						<div id="waitingAlert" style="display:none; position:absolute; bottom:3%; background-color:white;">
+						<div id="waitingAlert" style="display:none; position:absolute; bottom:85px; left:20px; background-color:white;">
 							${stuname} 학생, 상담 대기 중
 							<button id="waitingBtn" class="btn btn-light btn-sm" style="margin-top:-4px; margin-left:5px;"> 수락 </button>
 						</div>
@@ -297,6 +297,11 @@
 					});
 				});
 				
+				socket.on("outError", function() {
+					isProgress = false;
+					alert("상대 학생이 채팅을 나가 비정상적으로 종료되었습니다.");
+				});
+				
 				socket.emit("open", {
 					empid: empid,
 					empname: empname
@@ -306,7 +311,7 @@
 					currentSerialNo = data.stuinfo.serialno;
 					
 					$("#bodyChat").append(`
-						<div id='stuAlert' style="position:absolute; bottom:3%; display:block;">
+						<div id='stuAlert' style="position:absolute; bottom:85px; left:20px; background-color:white;">
 							${data.stuinfo.name} 학생과 상담 중
 							<button id="closeChatBtn" class="btn btn-danger btn-sm" style="margin-top:-4px; margin-left:5px;"> 종료 </button>
 						</div>
@@ -408,7 +413,7 @@
 					$("#saveLog").css('cursor', 'pointer');
 					$("#saveLog").css('color', 'black');
 					$("#saveLog").click(function(e) {
-						location.href=`/admin/getUserChatLog/${currentSerialNo}`;
+						location.href=`/admin/getUserChatLog/${currentSerialNo}?name=${data.stuinfo.name}`;
 					});
 					
 					$('#btnSend').click(function(e) {

@@ -642,9 +642,12 @@
 				const counselor = data;
 
 				for(let i = 0; i < counselor.length; i++) {
-					$('#counselorList').append(`
-						<option value="${counselor[i].empid}">${counselor[i].empname} 선생님</option>
-					`);
+					if(counselor[i].empid === 'admin') continue;
+					else {
+						$('#counselorList').append(`
+							<option value="${counselor[i].empid}">${counselor[i].empname} 선생님</option>
+						`);
+					}
 				}
 
 				const tomorrow = new Date(new Date().getTime() + 86400000);

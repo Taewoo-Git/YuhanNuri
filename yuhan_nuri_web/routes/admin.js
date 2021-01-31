@@ -38,9 +38,9 @@ router.use(function(req, res, next) {
 });
 
 try{
+	// upload 폴더가 없을 경우 생성
 	fs.readdirSync('uploads');
 } catch (error) {
-	console.error('uploads 폴더를 생성합니다!');
 	fs.mkdirSync('uploads');
 }
 const upload = multer({
@@ -53,9 +53,8 @@ const upload = multer({
 			cb(null,path.basename(file.originalname,ext) + Date.now() + ext);
 		},
 	}),
-	limits: {fileSize : 5 * 1024 * 1024}, 
+	limits: {fileSize : 5 * 1024 * 1024}, // 5MB
 })
-
 
 router.get("/",isAllAdminLoggedIn,function(req,res,next){ //GET /admin
 	const getReservationData = "SELECT User.stuname as stuname, User.phonenum as phonenum, reserv.serialno as no, " +
@@ -452,15 +451,10 @@ router.post("/getConsultApplyForm", isAllAdminLoggedIn, function(req,res, next) 
 });
 
 router.get("/chat",isOnlyAdminLoggedIn, (req, res,next) => {
-	
-	
 	res.render('chattingForm', {
-
 		empid: req.session.adminInfo.empid,
 		empname: req.session.adminInfo.empname
 	});
-		
-	
 });
 
 router.post("/addType",isAllAdminLoggedIn,function(req, res, next){
@@ -502,17 +496,11 @@ router.get("/settings",isOnlyAdminLoggedIn,function(req,res,next){
 	});
 });
 
-router.post('/uploadFile',isAllAdminLoggedIn,upload.single('file'),function(req,res){
-	console.log(req.file);
+
+router.post('/uploadFile',isAllAdminLoggedIn,upload.single('file'),function(req,res,next){
 	res.json({
 		"location": "/"+req.file.path.toString(),
 	});
-	// res.json({
-	// 	"success":1,
-	// 	"file":{
-	// 		"url":"/"+req.file.path.toString(),
-	// 	},
-	// });
 });
 
 router.get('/logout',isAllAdminLoggedIn, function(req, res) { //GET /user/logout
@@ -636,16 +624,12 @@ router.get('/answerCheck/:no',isAllAdminLoggedIn,function(req,res){
 });
 
 router.post('/answerCheck/:no',isAllAdminLoggedIn,function(req,res){
-	const no = req.params.no;
-	let recvData = JSON.parse(req.body.ajaxData);
-	let nowMoment = moment().format("YYYYMMDD");
 	var updateAnswerSql = "UPDATE QuestionBoard SET answer = ?, empname = ?, answerdate = ? WHERE no = ?;";
-	
-	connection.execute(updateAnswerSql,[recvData.context, req.session.adminInfo.empname, nowMoment, no],(err,rows)=>{
+	connection.execute(updateAnswerSql,[req.body.content, req.session.adminInfo.empname, moment().format("YYYYMMDD"), req.params.no],(err,rows)=>{
 		if(err){
 			console.error(err);
 		}else{
-			res.send({check:'success'});
+			res.json({check:'success'});
 		}
 	});
 });
@@ -700,7 +684,6 @@ router.post('/saveQuestion',isAllAdminLoggedIn,function(req,res,next){
 			answerPush(sendNumber);
 			res.json({state:'ok'});
 		}
-		
 	});
 });
 
@@ -746,7 +729,11 @@ router.post("/saveBoard/:type",isAllAdminLoggedIn,function(req,res,next){
 	const sql_saveBoard = "update HomeBoard set empid=?,date=CURDATE(),content=? where no=?";
 	const empId=req.session.adminInfo.empid;
 	const secureXSSContent = sanitizeHtml(sendAjax,{
-		allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img'])
+		allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img']),
+		allowedAttributes: { // 기존 기본 값 a : ['href'],img : ['src']
+			a: ['href'],
+			img:['src', 'width', 'height'] 
+		}
 	});
 	connection.execute(sql_saveBoard,[empId,secureXSSContent,paramType],(err,rows)=>{
 		if(err){
@@ -1419,10 +1406,11 @@ router.get('/getAllChatLog',isOnlyAdminLoggedIn,(req,res,next)=>{
 router.get('/getUserChatLog/:serialNo',isOnlyAdminLoggedIn,(req,res,next)=>{
 	let empid = req.session.adminInfo.empid;
 	const serialNo=decodeURIComponent(req.params.serialNo);
+	const stuName=req.query.name;
 	const sql_selectAllChatLog="select * from ConsultLog where serialno=?";
 	const workbook = new excel.Workbook();
 	const ChatLogWorksheet = workbook.addWorksheet("채팅 내역");
-	const fileName=`유한대학교 학생상담센터 채팅 내역 ${new Date().getFullYear()}_${new Date().getMonth()+1}월_${serialNo}.xlsx`;
+	const fileName=`${stuName}_${moment().format('YYYYMMDD')}_채팅내역.xlsx`;
 	ChatLogWorksheet.columns=[
 		{header:'상담일련번호',key:'serialno',width:10},
 		{header:'채팅 내역',key:'chatlog',width:100},
@@ -1439,7 +1427,7 @@ router.get('/getUserChatLog/:serialNo',isOnlyAdminLoggedIn,(req,res,next)=>{
 					  if (err) {
 						console.error(err); 
 					  }else{
-						fs.unlink(fileName, function(){
+						fs.unlink(fileName, function() {
 						  
 					  	});
 					  }
@@ -1640,8 +1628,11 @@ router.get('/getSimpleApplyFormPDF/:serialNo',isAllAdminLoggedIn,(req,res,next)=
 
 							doc.pipe(pdfStream);
 							doc.end();
+							
+							let pdfFileName = `${ConsultRows[0].stuname}_${ConsultRows[0].stuno}_상담신청서.pdf`;
+							
 							pdfStream.addListener('finish', function() {
-								res.download(pdfFile, `${ConsultRows[0].serialno}.pdf`, function(err) {
+								res.download(pdfFile, pdfFileName, function(err) {
 								  if (err) {
 									console.error(err);
 								  }else{

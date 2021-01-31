@@ -103,9 +103,9 @@
 										<h5 style="margin-bottom:15px;">
 											<b>답변</b>
 										</h5>
-										<p>
-											<textarea class="form-control pb-5" readonly="true" id="textAnswer" style="border:none;"><%=answerCheckList[0].answer%></textarea>
-										</p>
+											<p>
+												<textarea class="form-control pb-5" readonly="true" id="textAnswer" style="border:none;"><%=answerCheckList[0].answer%></textarea>
+											</p>
                                     </div>
                                 </div>
 							</div>
@@ -131,21 +131,18 @@
 				$("#btnUpdate").val("수정 완료");
 				$("#textAnswer").css("border", "1px solid #BDBDBD");
 			}else{
-				var sendAjaxData = {
-					context : $("#textAnswer").val()
-				};
 				$.ajax({
-					url: '/admin/answerCheck/<%=answerNo[0]%>',
+					url: '/admin/answerCheck/<%=answerNo%>',
 					dataType: 'json',
 					type: 'POST',
-					data: {ajaxData:JSON.stringify(sendAjaxData)},
+					data: {content: $("#textAnswer").val()},
 					success: function(result) {
 						if(result.check == 'success'){
 							alert('수정이 완료되었습니다.');
-							window.location.href = '/admin/answerCheck/<%=answerNo[0]%>';
+							window.location.reload(true);
 						}else{
 							alert('이미 수정되었거나 문제가 발생하였습니다.');
-							window.location.href = '/admin/answerCheck/<%=answerNo[0]%>';
+							window.location.reload(true);
 						}
 					}
 				});

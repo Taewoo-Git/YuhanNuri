@@ -1,8 +1,15 @@
-const port = 3000;
+const port = 3000; // 443;
 
 const express = require('express');
 const app = express();
+
 const https = require('https');
+const fs = require('fs');
+/*const options = {
+	key: fs.readFileSync('path'),
+	cert: fs.readFileSync('path'),
+	ca: fs.readFileSync('path')
+};*/
 
 const session = require('express-session');
 const dotenv = require('dotenv');
@@ -61,6 +68,15 @@ if(process.env.NODE_ENV==='production'){
 app.use('/user', userRouter);
 app.use('/admin', adminRouter);
 
+/*const server = https.createServer(options, app).listen(port, () => {
+	console.log('Listening on port ' + port);
+	
+	deleteOneMonth();
+	deleteFiveYear();
+	consultTodayPush();
+	consultTomorrowPush();
+});*/
+
 const server = app.listen(port, () => {
     console.log('Listening on port ' + port);
 	
@@ -89,6 +105,10 @@ app.get('/', function (req, res) {
 	}
 	else if(req.signedCookies.isAutoLogin != undefined) res.redirect('/user/auto');
 	else res.render('login');
+});
+
+app.get('/app', function(req,res){
+	res.download('./public/res/app/YuhanNuri.apk');
 });
 
 app.use((req,res,next)=>{

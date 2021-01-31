@@ -139,9 +139,6 @@ router.post('/question',function (req, res, next) { //POST /user/question
 			console.error(err);
 			next(err);
 		}
-		else {
-			console.info("문의 입력 완료")
-		}
 		res.redirect('/');
 	});
 });

@@ -96,15 +96,12 @@
                                     <div>
                                         <h4 class="card-title mb-0">내 예약 리스트</h4>
                                         <div class="text-muted">
-											<%= `${new Date().getFullYear()}년 ${new Date().getMonth()+1}월 ${new Date().getDate()}일`%>
-											&nbsp;&nbsp;
-											<% 
-												let dayArr = ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'];
-											%>
-											<%= dayArr[new Date().getDay()] %>
-											
+										<%= `${new Date().getFullYear()}년 ${new Date().getMonth()+1}월 ${new Date().getDate()}일`%>
+										<% 
+											let dayArr = ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'];
+										%>
+										<%= dayArr[new Date().getDay()] %>
 										</div>
-										
                                     </div>
 									<div class="float-right align-self-center">
 											
@@ -116,36 +113,57 @@
                                 </div>
                             </div>
 							<% myReservation.forEach(function(val,i){ %>
-							<% if(val.typename == undefined){ %>
-							<div class="card-body list-group-item border-left-0 border-right-0">
-								<h5 class="card-title">학번 :  <%=val.stuno%>
-									&nbsp;&nbsp;&nbsp;&nbsp;이름 : <b><%=val.stuname %></b>
-									&nbsp;&nbsp;&nbsp;&nbsp;연락처 : <%=val.phonenum %>
-								
-								</h5>
-								<p class="card-text mb-2"><b>상담 유형 : </b> 심리검사 &nbsp;&nbsp;&nbsp;&nbsp; <b>상담 일자 :</b> <%= val.date %></p>
-								<div class="float-right">
-									<button class="btn btn-info check-btn mr-2 showModalMental" id="check-register-btn-<%=i%>" value="<%= val.no%>"  data-toggle="modal"
-											data-target="#exampleModal">신청서 확인</button>
+								<% if(val.typename == undefined){ %>
+								<div class="card-body list-group-item border-left-0 border-right-0">
+									<table>
+										<tr style="font-size:18px;">
+											<td><b>학번</b></td>
+											<td style="padding-right:30px;"><%=val.stuno%></td>
+											<td style="padding-right:10px;"><b>이름</b></td>
+											<td style="padding-right:30px;"><%=val.stuname %></td>
+											<td style="padding-right:10px;"><b>연락처</b></td>
+											<td><%=val.phonenum %></td>
+										</tr>
+										<tr>
+											<td style="padding-right:10px;"><b>상담 유형</b></td>
+											<td>심리검사</td>
+											<td style="padding-right:10px;"><b>상담 일자</b></td>
+											<td><%= val.date %></td>
+										</tr>
+									</table>
+									<div class="float-right">
+										<button class="btn btn-info check-btn mr-2 showModalMental" id="check-register-btn-<%=i%>" value="<%= val.no%>" data-toggle="modal"
+												data-target="#exampleModal">신청서 확인</button>
+									</div>
 								</div>
-							</div>
-							<% } else { %>
-							<div class="card-body list-group-item border-left-0 border-right-0">
-								<h5 class="card-title">학번 : <%=val.stuno%>
-									&nbsp;&nbsp;&nbsp;&nbsp;이름 : <b><%=val.stuname %></b>
-									&nbsp;&nbsp;&nbsp;&nbsp;연락처 : <%=val.phonenum %>
-								</h5>
-								<p class="card-text mb-2"><b>상담 유형 :</b> <%= val.typename%> &nbsp;&nbsp;&nbsp;&nbsp;
-									<b>상담 일자 : </b><%let dateArr = val.date.split('-'); %><%=dateArr[0]+"년 "%><%=dateArr[1]+"월 "%><%=dateArr[2]+"일"%> &nbsp;&nbsp;&nbsp;&nbsp;
-									<b>상담 시간 :</b> <%= val.starttime %> 시</p>
-								<div class="float-right">
-									<button class="btn btn-info check-btn mr-2 showModalConsult" id="check-register-btn-<%=i%>" value="<%= val.no%>" data-toggle="modal"
-											data-target="#exampleModal">신청서 확인</button>
-									<button class="btn btn-danger finished-btn" id="finish-btn-<%=i%>" value="<%= val.no%>">종결</button>
+								<% } else { %>
+								<div class="card-body list-group-item border-left-0 border-right-0">
+									<table>
+										<tr style="font-size:18px;">
+											<td><b>학번</b></td>
+											<td style="padding-right:30px;"><%=val.stuno%></td>
+											<td><b>이름</b></td>
+											<td><%=val.stuname %></td>
+											<td><b>연락처</b></td>
+											<td><%=val.phonenum %></td>
+										</tr>
+										<tr>
+											<td style="padding-right:10px;"><b>상담 유형</b></td>
+											<td><%= val.typename%></td>
+											<td style="padding-right:10px;"><b>상담 일자</b></td>
+											<td style="padding-right:30px;"><%let dateArr = val.date.split('-'); %><%=dateArr[0]+"년 "%><%=dateArr[1]+"월 "%><%=dateArr[2]+"일"%></td>
+											<td style="padding-right:10px;"><b>상담 시간</b></td>
+											<td><%= val.starttime%>시</td>
+										</tr>
+									</table>
+									<div class="float-right">
+										<button class="btn btn-info check-btn mr-2 showModalConsult" id="check-register-btn-<%=i%>" value="<%= val.no%>" data-toggle="modal"
+												data-target="#exampleModal">신청서 확인</button>
+										<button class="btn btn-danger finished-btn" id="finish-btn-<%=i%>" value="<%= val.no%>">종결</button>
+									</div>
 								</div>
-							</div>
-							<% } %>
-							<% }) %>
+								<% } %>
+							<% }); %>
 						</div>
 					</div>
 				</div>

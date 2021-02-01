@@ -195,7 +195,7 @@
 					</ol>
 				</div>
 			</header>
-			<div class="c-body"> <!-- bbody -->
+			<div class="c-body">
 				<main class="c-main">
 					<div class="container-fluid" style="height:70vh!important;">
 						<div class='card' id='chattingCard' style="height:inherit; margin:0!important; float:left; position:relative;"> 
@@ -273,7 +273,7 @@
 				socket.on("waiting", function(stuname) {
 					if($('#stuAlert')) $('#stuAlert').remove();
 					
-					$("#bodyChat").append(`
+					$("#bodyChat").after(`
 						<div id="waitingAlert" style="display:none; position:absolute; bottom:85px; left:20px; background-color:white;">
 							${stuname} 학생, 상담 대기 중
 							<button id="waitingBtn" class="btn btn-light btn-sm" style="margin-top:-4px; margin-left:5px;"> 수락 </button>
@@ -310,7 +310,7 @@
 				socket.on("join", function(data) {
 					currentSerialNo = data.stuinfo.serialno;
 					
-					$("#bodyChat").append(`
+					$("#bodyChat").after(`
 						<div id='stuAlert' style="position:absolute; bottom:85px; left:20px; background-color:white;">
 							${data.stuinfo.name} 학생과 상담 중
 							<button id="closeChatBtn" class="btn btn-danger btn-sm" style="margin-top:-4px; margin-left:5px;"> 종료 </button>

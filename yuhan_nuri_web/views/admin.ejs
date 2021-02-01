@@ -63,12 +63,11 @@
                                     <div>
                                         <h4 class="card-title mb-0">예약 대기 리스트</h4>
                                         <div class="text-muted">
-											<%= `${new Date().getFullYear()}년 ${new Date().getMonth()+1}월 ${new Date().getDate()}일`%>
-											&nbsp;&nbsp;
-											<% 
-												let dayArr = ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'];
-											%>
-											<%= dayArr[new Date().getDay()] %>
+										<%= `${new Date().getFullYear()}년 ${new Date().getMonth()+1}월 ${new Date().getDate()}일`%>
+										<% 
+											let dayArr = ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'];
+										%>
+										<%= dayArr[new Date().getDay()] %>
 										</div>
                                     </div>
                                 </div>
@@ -127,7 +126,6 @@
 											<button class="btn btn-danger  cancel-btn" id="cancel-btn-<%=i%>" value="<%= val.no%>">취소</button>	
 											<% } %>
 										</div>
-										
 									</div>
 								<% } %>
 							<% }) %>

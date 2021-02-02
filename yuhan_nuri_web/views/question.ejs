@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>유한누리 문의 페이지</title>
+		<title>유한대학교 학생상담센터</title>
 		<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
 		
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -93,8 +93,8 @@
 					<textarea class="form-control" id="questionText" name="questionText" rows="11" placeholder="내용을 입력하세요." style="resize:none;" required></textarea>
 				</div>
 				
-				<div class="form-group text-right" style="margin-top:30px;"> 
-						<input type="submit" class="btn btn-primary mb-2" id="btnNext" value="작 성">
+				<div class="form-group text-right" style="margin-top:30px;">
+					<input type="submit" class="btn btn-primary mb-2" id="btnNext" value="작 성">
 				</div>
 			</div>
 		</form>
@@ -103,13 +103,13 @@
 				$("#btnNext").click(function(){
 					if(!$('#questionTitle').val() == ""){
 						if(!$('#questionText').val() == ""){
-							alert("문의가 작성되었습니다.");
+							alert("문의 작성이 완료되었습니다.");
 							window.flutter_inappwebview
-                      .callHandler('PageHandler', 'replaceMain');
+								.callHandler('PageHandler', 'replaceMain');
 						}
 					}
 				});
-			})
+			});
 		</script>
 	</body>
 </html>

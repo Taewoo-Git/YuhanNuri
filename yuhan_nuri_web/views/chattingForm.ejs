@@ -18,7 +18,7 @@
 		<script src="https://uicdn.toast.com/tui.code-snippet/v1.5.2/tui-code-snippet.min.js"></script>
 		<script src="/lib/tui-calendar.js"></script>
 		<script src="https://code.jquery.com/jquery-latest.min.js"></script>
-		<title>유한누리 상담사 페이지</title>
+		<title>유한대학교 학생상담센터</title>
 		<style>
 			#date{
 				font-size : 25px;
@@ -195,7 +195,7 @@
 					</ol>
 				</div>
 			</header>
-			<div class="c-body">
+			<div class="c-body"> <!-- bbody -->
 				<main class="c-main">
 					<div class="container-fluid" style="height:70vh!important;">
 						<div class='card' id='chattingCard' style="height:inherit; margin:0!important; float:left; position:relative;"> 
@@ -413,7 +413,7 @@
 					$("#saveLog").css('cursor', 'pointer');
 					$("#saveLog").css('color', 'black');
 					$("#saveLog").click(function(e) {
-						location.href=`/admin/getUserChatLog/${currentSerialNo}?name=${data.stuinfo.name}`;
+						location.href=`/admin/getUserChatLog/${currentSerialNo}?name=${data.stuinfo.name}&code=${data.stuinfo.code}`;
 					});
 					
 					$('#btnSend').click(function(e) {
@@ -563,7 +563,7 @@
 				calendar.setCalendars([
 					{
 						id: 'Reserved',
-						name: '예약됨',
+						name: '상담',
 						color: '#000000',
 						bgColor: '#A9E2F3',
 						dragBgColor: '#A9E2F3',

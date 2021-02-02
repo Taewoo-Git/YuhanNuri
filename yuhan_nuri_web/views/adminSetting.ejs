@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- CoreUI CSS -->
     <link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
-    <title>유한누리 상담사 페이지</title>
+    <title>유한대학교 학생상담센터</title>
     <script src="https://code.jquery.com/jquery-latest.min.js"></script>
 	<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
     <style>
@@ -175,7 +175,7 @@
 															<button type="button" class="btn btn-success" data-toggle="modal" data-target="#updateModal"
 																	onClick="giveInformation('<%=v.empname%>','<%=v.positionno%>','<%=v.empid%>')">수정</button>
 															<button type="button" class="btn btn-danger ml-1" data-toggle="modal" data-target="#deleteModal"
-																	onClick="checkDelete('<%=v.empid%>')">삭제</button>
+																	onClick="checkDelete('<%=v.empid%>', '<%=v.empname%>')">삭제</button>
 															<% } %>
 														</td>
 												  	</tr>
@@ -197,6 +197,7 @@
     </div>
     <script>
 		let checkId="";
+		let checkName="";
 		
 		const setChoiceType=(chType)=>{
 			choiceType=chType;
@@ -205,8 +206,10 @@
 		function exitModal(e){
 			
 		}
-		function checkDelete(id){
+		
+		function checkDelete(id, name){
 			checkId=id;
+			checkName=name;
 			$('#deleteError').text('');
 			document.querySelector('#delete-type').value='';
 		}
@@ -219,7 +222,7 @@
 					dataType:'json',
 					url:'./deleteCounselor',
 					async:true,
-					data:{"deleteId" : checkId},
+					data:{"deleteId": checkId, "deleteName": checkName},
 					success:function(data){
 						if(data==='ok'){
 							window.location.reload();

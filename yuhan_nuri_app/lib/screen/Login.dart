@@ -250,15 +250,17 @@ class _LoginState extends State<Login> {
       pwTextBoxController.clear();
       return;
     }
+
     if (res.statusCode == 200) {
       Cookie cookie = Cookie.fromSetCookieValue(res.headers['set-cookie']);
+
       if (isAutoLogin) {
         DateTime dateTime = cookie.expires.add(new Duration(days: 30));
         prefs.setString('cookie', cookie.toString());
         prefs.setString('expires', dateTime.toString());
       }
       progressDialog.hide();
- 
+
       Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (BuildContext context) => YuhanNuri(
                 cookie: cookie.toString(),

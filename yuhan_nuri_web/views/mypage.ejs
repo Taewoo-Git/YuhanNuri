@@ -7,20 +7,21 @@
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 		
 		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-		  integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z"
-		  crossorigin="anonymous">
+			  integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z"
+			  crossorigin="anonymous">
 		
 		<script src="https://code.jquery.com/jquery-3.5.1.min.js"
-			integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
-			crossorigin="anonymous">
+				integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+				crossorigin="anonymous">
 		</script>
 		
 		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
-			integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
-			crossorigin="anonymous">
+				integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+				crossorigin="anonymous">
 		</script>
 		<style>
 			html, body{
+    			position: fixed;
                 height: 100% !important;
 				width: 100% !important;
             }
@@ -158,8 +159,8 @@
 				</ul>
 			</div>
 		</div>
-		<div class="tab-content">
-			<div class="tab-pane fade" style="padding:0rem!important;" id="reservation">
+		<div class="tab-content" style="height:80%;">
+			<div class="tab-pane" style="padding:0rem!important;" id="reservation">
 				<%if(reservationBoard.length===0){%>
 				<div align=center style="margin-top:15%">예약한 내역이 없습니다!</div>
 				<%}else{%>
@@ -236,7 +237,7 @@
 					<%}%>
 				<%}%>
 			</div>
-			<div class="tab-pane fade" style="padding:0rem!important;" id="question">
+			<div class="tab-pane" style="padding:0rem!important; height:100%; overflow:scroll;" id="question">
 				<%if(questions.length===0){%>
 				<div align=center style="margin-top:15%">문의한 내역이 없습니다!</div>
 				<%}else{%>
@@ -244,14 +245,14 @@
                     <tbody>
 						<%questions.forEach(function(v,i){%>
 						<%if(isAnswerList[i]==='완료'){%>
-							<tr style="height:50px;"  data-toggle="collapse" href="#collapse<%=i%>">
+							<tr style="height:50px;" data-toggle="collapse" href="#collapse<%=i%>">
 								<td style='width: 20%; color:green; font-size: 0.9em;'>완 료</td>
 								<td align=center style="font-size: 0.9em; width: 50%;"><%=v.title%></td>
 								<td align=right style="font-size: 0.9em; width:20%;"><%=v.date%></td>
-							</tr>	
+							</tr>
 							<tr>
 								<td colspan="3" style="padding:0 !important;">
-									<div id="collapse<%=i%>" class="collapse in p-3">
+									<div id="collapse<%=i%>" class="collapse in p-3" style="height:0px;">
 										<h5 >
 											<label style="margin:0px;">내 용</label>
 										</h5>
@@ -268,10 +269,22 @@
 								</td>
 							</tr>
 							<%}else{%>
-							<tr style="height:50px;">
+							<tr style="height:50px;" data-toggle="collapse" href="#collapse<%=i%>">
 								<td style="width: 20%; font-size: 0.9em;">미완료</td>
 								<td align=center style="font-size: 0.9em; width: 50%;"><%=v.title%></td>
 								<td align=right style="font-size: 0.9em; width:20%;"><%=v.date%></td>
+							</tr>
+							<tr>
+								<td colspan="3" style="padding:0 !important;">
+									<div id="collapse<%=i%>" class="collapse in p-3">
+										<h5 >
+											<label style="margin:0px;">내 용</label>
+										</h5>
+										<p class="mb-2" style="color:#5a5a5a;">
+											<%= v.content%>
+										</p>
+									</div>
+								</td>
 							</tr>
 							<%}%>
 						<%})%>
@@ -279,7 +292,7 @@
                   </table>
 				<%}%>
 			</div>
-			<div class="tab-pane fade" id="chatting" style="margin-left: -15px; margin-right: -15px;">
+			<div class="tab-pane" id="chatting" style="margin-left: -15px; margin-right: -15px;">
 				<div class='align_spinner' id='chattingLoad'>
 					<div class='spinner-border text-primary'></div>
 				</div>
@@ -378,7 +391,7 @@
 											$("#bodyChat").append(
 												"<div class='d-flex justify-content-end mb-5 mt-2'>" +
 													"<div class='msg_time_send'>" +
-														log[i].split('： ')[1].split(' （')[1].split('시 ')[0] + ":" + log[i].split('： ')[1].split(' （')[1].split('시')[1].split('분')[0] +
+														log[i].split('（')[1].split('시')[0] + ":" + log[i].split('시 ')[1].split('분')[0] +
 													"</div>" +
 													"<div class='bg-primary msg_cotainer_send'>" +
 														"<span class='msg_name_send'>Me</span>" +
@@ -395,14 +408,14 @@
 														escapeHtml(log[i].split('： ')[1].split(' （')[0]) +
 													"</div>" +
 													"<div class='msg_time'>" +
-														log[i].split('： ')[1].split(' （')[1].split('시 ')[0] + ":" + log[i].split('： ')[1].split(' （')[1].split('시')[1].split('분')[0] +
+														log[i].split('（')[1].split('시')[0] + ":" + log[i].split('시 ')[1].split('분')[0] +
 													"</div>" +
 												"</div>"
 											);
 										}
 									}
+									$("#bodyChat").scrollTop($("#bodyChat")[0].scrollHeight);
 								}
-								
 
 								$('#btnSend').click(function(e) {
 									if($("#msgForm").val() != "") {
@@ -495,6 +508,10 @@
 						});
 				<% } %>
 			});
+			
+			window.onresize = function(event) {
+				setHeight();
+			};
 			
 			function setHeight() {
 				let top = document.getElementsByClassName("row");

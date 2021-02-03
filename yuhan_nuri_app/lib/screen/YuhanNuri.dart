@@ -50,8 +50,8 @@ class _DummyState extends State<YuhanNuri> {
 class YuhanNuriState extends State<YuhanNuri> {
   InAppWebViewController _webViewController;
   DateTime currentBackPressTime;
-  Map<String, String> header; // 전달받은 Cookie 객체를 string과 합쳐서 header 만듦
-  GlobalKey globalKey = new GlobalKey(); // 내비게이션 바 외부에서 접근 가능하게 해줄 Key 변수
+  Map<String, String> header;
+  GlobalKey globalKey = new GlobalKey();
   CurvedNavigationBarState navBarState;
   final FirebaseMessaging fcm = FirebaseMessaging();
 
@@ -78,8 +78,12 @@ class YuhanNuriState extends State<YuhanNuri> {
       if (visible) {
         // 키보드 올라왔을 때
         _webViewController.evaluateJavascript(
+<<<<<<< HEAD
                       source:
                           'document.activeElement.scrollIntoView({block: "center"})');
+=======
+            source: 'document.activeElement.scrollIntoView({block: "center"})');
+>>>>>>> 5017fd89c16f91e87d8567636b82b1c26cf6cab0
         /*_webViewController.getUrl().then((url) => {
               if (url != urls[3])
                 {
@@ -91,7 +95,11 @@ class YuhanNuriState extends State<YuhanNuri> {
       } else {
         // 키보드가 내려갈 때
         _webViewController.evaluateJavascript(
+<<<<<<< HEAD
                       source: 'document.activeElement.blur()');
+=======
+            source: 'document.activeElement.blur()');
+>>>>>>> 5017fd89c16f91e87d8567636b82b1c26cf6cab0
         /*_webViewController.getUrl().then((url) => {
               if (url != urls[3])
                 {
@@ -159,12 +167,21 @@ class YuhanNuriState extends State<YuhanNuri> {
                     initialHeaders: header,
                     onLoadStart: (_webViewController, String url) {
                       if (!urls.contains(url)) {
+<<<<<<< HEAD
                         print('oooooooooooooooooooooooooooooooooooo \n'+url);
+=======
+>>>>>>> 5017fd89c16f91e87d8567636b82b1c26cf6cab0
                         //google form 단축 url일 경우
-                        if(url.contains('action=com.google.firebase.dynamiclinks.VIEW_DYNAMIC_LINK;')){                
-                          url =url.toString().split(';')[4].toString().split('=')[1].split('viewform')[0]+'viewform';
+                        if (url.contains(
+                            'action=com.google.firebase.dynamiclinks.VIEW_DYNAMIC_LINK;')) {
+                          url = url
+                                  .toString()
+                                  .split(';')[4]
+                                  .toString()
+                                  .split('=')[1]
+                                  .split('viewform')[0] +
+                              'viewform';
                         }
-
                         _webViewController.stopLoading();
                         launch(url, forceWebView: false);
                         navBarState = globalKey.currentState;
@@ -176,9 +193,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                       cm.deleteAllCookies();
                       _webViewController.loadUrl(url: urls[0], headers: header);
                       _webViewController.addJavaScriptHandler(
-                          // 웹뷰 JavaScript와 통신하는 핸들러
-                          handlerName:
-                              'PageHandler', // 해당 핸들러를 웹뷰에서 호출(예약 완료 버튼 클릭)할 시 메인으로 돌아감
+                          handlerName: 'PageHandler',
                           callback: (args) {
                             if (args[0].toString() == "replaceMain") {
                               Future.delayed(Duration(milliseconds: 300), () {
@@ -218,8 +233,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                         height: 30,
                       ),
                     ],
-                    animationDuration:
-                        const Duration(milliseconds: 300), // trainsition 설정
+                    animationDuration: const Duration(milliseconds: 300),
                     onTap: (int index) {
                       int navigationIndex = index;
                       switch (navigationIndex) {
@@ -243,8 +257,8 @@ class YuhanNuriState extends State<YuhanNuri> {
                           break;
                       }
                     },
-                    animationCurve: Curves.easeOut, // transition-animation 설정
-                    height: 55.0, // 높이
+                    animationCurve: Curves.easeOut,
+                    height: 55.0,
                   ),
                 ),
                 onWillPop: () async {
@@ -253,15 +267,12 @@ class YuhanNuriState extends State<YuhanNuri> {
                     if (currentBackPressTime == null ||
                         now.difference(currentBackPressTime) >
                             Duration(seconds: 2)) {
-                      // 전에 back 버튼을 누른적이 없거나
-                      // back 버튼을 눌렀을 때의 시간과 전에 back 버튼을 눌렀을 때의 차이가 2초를 넘었으면
                       currentBackPressTime = now;
                       showToast("뒤로 가기 버튼을 한 번 더      \n 클릭하면 종료합니다.");
-                      return Future.value(false); // 종료 안함.
+                      return Future.value(false);
                     }
-                    return Future.value(true); // if문이 거짓일 때는 바로 종료
+                    return Future.value(true);
                   }
-                  // 마이페이지에서 채팅 창이 활성화되어있는지
                   bool isChatting = await _webViewController.evaluateJavascript(
                       source:
                           'if(document.getElementById("chattingCard") != null) true;' +

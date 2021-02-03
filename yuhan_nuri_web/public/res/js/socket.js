@@ -155,7 +155,7 @@ module.exports = (server) => {
 		});
 		
 		socket.on('initReservation', function() {
-			let selectCounselor = "SELECT empname, empid FROM Counselor WHERE positionno = 1";
+			let selectCounselor = "SELECT empname, empid FROM Counselor WHERE positionno = 1 AND Counselor.use = 'Y'";
 
 			connection.execute(selectCounselor, [], (err, rows) => {
 				if(err) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);
@@ -304,7 +304,7 @@ module.exports = (server) => {
 			if(socket.code) {
 				data.stuno = socket.code;
 				data.major = socket.major;
-				data.phone = socket.phonenum;
+				data.phone = socket.phone;
 				data.birth = socket.birth;
 			}
 			

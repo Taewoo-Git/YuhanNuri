@@ -48,7 +48,7 @@ class IntroduceScreenState extends State<IntroduceScreen> {
           image: Image(
             image: AssetImage("assets/team_success.png"),
           ),
-          body: "안녕하세요! \n 유한대학교 학생상담센터 예약어플 \n 유한누리입니다. \n 유한누리 방문이 처음이신가요? ",
+          body: "안녕하세요! \n 유한대학교 학생상담센터 앱 \n 유한누리입니다. \n 유한누리 방문이 처음이신가요? ",
           decoration: pageDecoration,
         ),
         PageViewModel(
@@ -56,7 +56,7 @@ class IntroduceScreenState extends State<IntroduceScreen> {
           image: Image(
             image: AssetImage("assets/sad_face.png"),
           ),
-          body: "유한누리로 간편하게 \n 심리검사와 상담예약을 해보세요. \n 비밀을 지켜드려요!",
+          body: "유한누리로 간편하게 \n 심리검사와 상담예약을 해보세요. \n 비밀을 지켜드립니다!",
           decoration: pageDecoration,
         ),
         PageViewModel(
@@ -65,7 +65,7 @@ class IntroduceScreenState extends State<IntroduceScreen> {
             image: AssetImage("assets/social_media.png"),
           ),
           body:
-              "유한누리를 이용할 준비가 되셨나요? \n 그럼 지금 바로 시작해보세요! \n 학생상담센터는  \n언제나 여러분을 환영합니다!",
+              "유한누리를 이용할 준비가 되었나요? \n 지금 바로 시작해보세요! \n 학생상담센터는  \n언제나 여러분을 환영합니다!",
           decoration: pageDecoration,
         ),
       ],

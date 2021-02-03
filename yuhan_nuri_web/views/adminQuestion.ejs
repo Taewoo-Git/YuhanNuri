@@ -125,6 +125,7 @@
 				}
 				$(function () {
 				$('#update_question').click(function(e) {
+					if($('#message-text').val() != ''){
 						$.ajax({
 						type: "POST",
 						dataType: "json",
@@ -132,27 +133,29 @@
 						async: true,
 						data: { "sendData" : $('#message-text').val(), "sendNumber":updateNumber },
 						success: function (data) { 
-							if(data.state==='ok'){
-								window.location.reload();
-							}else if(data.state==='overlapped'){
-								$('#close_modal').trigger('click');
-								$('.c-main').prepend(`<div class="alert alert-warning alert-dismissible fade show" role="alert">
-							  <strong>중복!</strong> 답변을 누가 먼저 남겼나봐요! <a href="#" class="alert-link" onClick="history.go(0)">새로고침</a>을 눌러주세요!
-							  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-								<span aria-hidden="true">&times;</span>
-							  </button>
-							</div>`);
-							}else{
-								$('.c-main').prepend(`<div class="alert alert-danger alert-dismissible fade show" role="alert">
-							  <strong>저장 실패!</strong> 이런! 다시 한번 더 확인 해보아요!
-							  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-								<span aria-hidden="true">&times;</span>
-							  </button>
-							</div>`);
+								if(data.state==='ok'){
+									window.location.reload();
+								}else if(data.state==='overlapped'){
+									$('#close_modal').trigger('click');
+									$('.c-main').prepend(`<div class="alert alert-warning alert-dismissible fade show" role="alert">
+								  <strong>오류</strong> 이미 처리되었거나 문제가 발생하였습니다. <a href="#" class="alert-link" onClick="history.go(0)">새로고침</a>을 눌러주세요
+								  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+									<span aria-hidden="true">&times;</span>
+								  </button>
+								</div>`);
+								}else{
+									$('.c-main').prepend(`<div class="alert alert-danger alert-dismissible fade show" role="alert">
+								  <strong>오류</strong> 이미 처리되었거나 문제가 발생하였습니다.
+								  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+									<span aria-hidden="true">&times;</span>
+								  </button>
+								</div>`);
+								}
 							}
-						}
-					});
-
+						});
+					}else{
+						alert("내용을 입력하세요.");
+					}
 				});
 			});
 				

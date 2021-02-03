@@ -72,7 +72,11 @@
 							</div>
                         </div>
 						<%if(answerList[(page * page_num) - page_num] == null){%>
-								데이터가 존재하지 않습니다.
+                        <div class="jumbotron jumbotron-fluid">
+                            <div class="container" style="text-align: center;">
+                                <h1 class="display-4">저장된 내역이 없습니다.</h1>
+                            </div>
+                        </div>
 						<%}else{%>
 							<table class="table" style="background:white; border-radius:.25rem;">
 								<tr>

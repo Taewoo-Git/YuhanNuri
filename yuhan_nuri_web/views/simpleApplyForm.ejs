@@ -45,30 +45,6 @@
     </style>
 	</head>
 	<body class="c-app">
-		<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-		  <div class="modal-dialog" role="document">
-			<div class="modal-content">
-			  <div class="modal-header">
-				<h5 class="modal-title" id="exampleModalLabel">항목 추가</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-				  <span aria-hidden="true">&times;</span>
-				</button>
-			  </div>
-			  <div class="modal-body">
-				<form>
-				  <div class="form-group">
-					<label for="type-name" class="col-form-label">항목 이름:</label>
-					<input type="text" class="form-control" id="type-name" placeholder="항목이름을 작성해주세요.">
-				  </div>
-				</form>
-			  </div>
-			  <div class="modal-footer">
-				<button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
-				<button type="button" class="btn btn-primary" id="add_type_button">추가하기</button>
-			  </div>
-			</div>
-		  </div>
-		</div>
 		<div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show c-sidebar-unfoldable" id="sidebar">
 			<%- include ('adminNav'); -%>
 			<button
@@ -253,9 +229,8 @@
 						if(sendObject.length===0){
 							$('.col-8').append(`
 							<div class="jumbotron jumbotron-fluid">
-							  <div class="container">
+							  <div class="container" style="text-align: center;">
 								<h1 class="display-4">저장된 질문이 없습니다.</h1>
-								<p class="lead">오른쪽 버튼을 통해 질문을 추가해 주세요.</p>
 							  </div>
 							</div>
 							`);
@@ -451,7 +426,6 @@
 									<div class="jumbotron jumbotron-fluid">
 									  <div class="container">
 										<h1 class="display-4">저장된 질문이 없습니다.</h1>
-										<p class="lead">오른쪽 버튼을 통해 질문을 추가해 주세요.</p>
 									  </div>
 									</div>
 								`);

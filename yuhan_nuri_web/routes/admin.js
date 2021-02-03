@@ -1188,12 +1188,12 @@ router.get('/getSatisfactionResult', isAllAdminLoggedIn, (req, res, next) => {
 	satisfactionWorkSheet.columns = [
 		{header: '작성일', key: "researchdatetime", width: 20},
 		{header: '학번', key: "stuno", width: 10},
-		{header: '상담사명', key: "empname", width: 10},
-		{header: '학생이름', key: "stuname", width: 10},
+		{header: '상담사 이름', key: "empname", width: 10},
+		{header: '학생 이름', key: "stuname", width: 10},
 		{header: '생년월일', key: "birth", width: 10},
 		{header: '이메일', key: "email", width: 20},
 		{header: '예약일', key: "date", width: 10},
-		{header: '상담유형', key: "typename", width: 10},
+		{header: '상담 유형', key: "typename", width: 10},
 		{header: '질문', key: "ask", width: 30},
 		{header: '답변', key: "choiceanswer", width: 50}
 	];

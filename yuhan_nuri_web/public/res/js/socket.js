@@ -304,7 +304,7 @@ module.exports = (server) => {
 			if(socket.code) {
 				data.stuno = socket.code;
 				data.major = socket.major;
-				data.phone = socket.phonenum;
+				data.phone = socket.phone;
 				data.birth = socket.birth;
 			}
 			

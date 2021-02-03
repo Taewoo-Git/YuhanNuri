@@ -5,11 +5,7 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<!-- CoreUI CSS -->
-		<link
-			rel="stylesheet"
-			href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css"
-			crossorigin="anonymous"
-		/>
+		<link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous"/>
 		<link rel="stylesheet" type="text/css" href="/res/css/tui-calendar.css" />
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
 			  integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU"
@@ -335,7 +331,7 @@
 											${escapeHtml(log[i].split('： ')[1].split(' （')[0])}
 										</div>
 										<div class='msg_time'>
-											${log[i].split('： ')[1].split(' （')[1].split('시 ')[0]} : ${log[i].split('： ')[1].split(' （')[1].split('시')[1].split('분')[0]}
+											${log[i].split('（')[1].split('시')[0] + ":" + log[i].split('시 ')[1].split('분')[0]}
 										</div>
 
 										<div class='stuInfo' style='display:none; position:absolute; height:140px; width:210px; background-color:#3c4b64;
@@ -398,7 +394,7 @@
 								$("#bodyChat").append(`
 									<div class='d-flex justify-content-end mb-5 mt-2'>
 										<div class='msg_time_send'>
-											${log[i].split('： ')[1].split(' （')[1].split('시 ')[0]} : ${log[i].split('： ')[1].split(' （')[1].split('시')[1].split('분')[0]}
+											${log[i].split('（')[1].split('시')[0] + ":" + log[i].split('시 ')[1].split('분')[0]}
 										</div>
 										<div class='msg_cotainer_send'>
 											<span class='msg_name_send'>Me</span>
@@ -466,7 +462,7 @@
 								${escapeHtml(data.msg)}
 							</div>
 							<div class='msg_time'>
-								${new Date().getHours()} : ${("00" + new Date().getMinutes()).slice(-2)}
+								${new Date().getHours() + ":" + ("00" + new Date().getMinutes()).slice(-2)}
 							</div>
 
 							<div class='stuInfo' style='display:none; position:absolute; height:140px; width:210px; background-color:#3c4b64;
@@ -514,11 +510,16 @@
 					
 					$('.msg_name').unbind('click');
 					$('.msg_name').click(function(e) {
-						$('.stuInfo:visible').each(function (index, item) {
-							$(this).hide();
-						});
-						$(this).parents(['.d-flex']).children('.stuInfo').slideToggle();
-						$(this).parents(['.d-flex']).children('.stuInfo').offset({top: $(this).offset().top + 23, left: $(this).offset().left - 3});
+						if($(this).parents(['.d-flex']).children('.stuInfo').is(':visible') == true) {
+							$(this).parents(['.d-flex']).children('.stuInfo').slideToggle();
+						}
+						else {
+							$('.stuInfo:visible').each(function (index, item) {
+								$(this).hide();
+							});
+							$(this).parents(['.d-flex']).children('.stuInfo').slideToggle();
+							$(this).parents(['.d-flex']).children('.stuInfo').offset({top: $(this).offset().top + 23, left: $(this).offset().left - 3});
+						}
 					});
 				});
 				

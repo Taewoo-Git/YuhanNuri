@@ -77,23 +77,28 @@ class YuhanNuriState extends State<YuhanNuri> {
     KeyboardVisibilityController().onChange.listen((bool visible) {
       if (visible) {
         // 키보드 올라왔을 때
-        _webViewController.getUrl().then((url) => {
+        _webViewController.evaluateJavascript(
+                      source:
+                          'document.activeElement.scrollIntoView({block: "center"})');
+        /*_webViewController.getUrl().then((url) => {
               if (url != urls[3])
                 {
                   _webViewController.evaluateJavascript(
                       source:
                           'document.activeElement.scrollIntoView({block: "center"})')
                 }
-            });
+            });*/
       } else {
         // 키보드가 내려갈 때
-        _webViewController.getUrl().then((url) => {
+        _webViewController.evaluateJavascript(
+                      source: 'document.activeElement.blur()');
+        /*_webViewController.getUrl().then((url) => {
               if (url != urls[3])
                 {
                   _webViewController.evaluateJavascript(
                       source: 'document.activeElement.blur()')
                 }
-            });
+            });*/
       }
     });
   }
@@ -154,7 +159,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                     initialHeaders: header,
                     onLoadStart: (_webViewController, String url) {
                       if (!urls.contains(url)) {
-                        
+                        print('oooooooooooooooooooooooooooooooooooo \n'+url);
                         //google form 단축 url일 경우
                         if(url.contains('action=com.google.firebase.dynamiclinks.VIEW_DYNAMIC_LINK;')){                
                           url =url.toString().split(';')[4].toString().split('=')[1].split('viewform')[0]+'viewform';
@@ -263,7 +268,31 @@ class YuhanNuriState extends State<YuhanNuri> {
                               'else false;');
                   if (isChatting) {
                     Vibration.vibrate();
-                    showBackButtonDialog(context);
+                    //showBackButtonDialog(context);
+                    showDialog(
+                      context: context,
+                      builder: (context){
+                        return AlertDialog(
+                          content: Text('현재 채팅이 활성화되어있습니다. \n홈 화면으로 돌아가시겠습니까?'),
+                          actions: <Widget>[
+                            FlatButton(
+                              child: Text('예'),
+                              onPressed: () {
+                                Navigator.pop(context, "OK");
+                                navBarState = globalKey.currentState;
+                                navBarState.setPage(0);
+                              },
+                            ),
+                            FlatButton(
+                              child: Text('아니오'),
+                              onPressed: () {
+                                Navigator.pop(context, "Cancel");
+                              },
+                            ),
+                          ],
+                        );
+                      }
+                    );
                   } else {
                     navBarState = globalKey.currentState;
                     navBarState.setPage(0);

@@ -229,7 +229,7 @@ class _LoginState extends State<Login> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     http.Response res = await http.Client().post(
-      Uri.parse('https://yuhannuri.run.goorm.io/user/mobile'),
+      Uri.parse('http://counsel.yuhan.ac.kr/user/mobile'),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
         'Accept': 'application/json; charset=utf-8',

@@ -229,7 +229,7 @@ class _LoginState extends State<Login> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     http.Response res = await http.Client().post(
-      Uri.parse('http://counsel.yuhan.ac.kr/user/mobile'),
+      Uri.parse('https://yuhannuri.run.goorm.io/user/mobile'),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
         'Accept': 'application/json; charset=utf-8',
@@ -242,9 +242,6 @@ class _LoginState extends State<Login> {
       },
     );
 
-    print(res.statusCode);
-    print(res.body);
-
     if (res.body == "null") {
       FocusManager.instance.primaryFocus.unfocus();
       progressDialog.hide();
@@ -255,13 +252,13 @@ class _LoginState extends State<Login> {
     }
     if (res.statusCode == 200) {
       Cookie cookie = Cookie.fromSetCookieValue(res.headers['set-cookie']);
-
       if (isAutoLogin) {
         DateTime dateTime = cookie.expires.add(new Duration(days: 30));
         prefs.setString('cookie', cookie.toString());
         prefs.setString('expires', dateTime.toString());
       }
       progressDialog.hide();
+ 
       Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (BuildContext context) => YuhanNuri(
                 cookie: cookie.toString(),

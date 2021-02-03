@@ -1095,6 +1095,25 @@ router.post('/updatePassword', isAllAdminLoggedIn, (req, res, next) => {
 	});
 });
 
+router.post('/updateReservation', isAllAdminLoggedIn, (req, res, next) => {
+	let updateNo = req.body.serialno;
+	let updateType = req.body.type;
+	let updateDate = req.body.date;
+	let updateTime = req.body.time;
+	
+	const sql_updateReservation = "UPDATE Reservation SET typeno = ?, date = ?, starttime = ? WHERE serialno = ?";
+	
+	connection.execute(sql_updateReservation, [updateType, updateDate, updateTime, updateNo], (err, rows) => {
+		if(err) {
+			ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);
+			next(err);
+		}
+		else {
+			res.json('success');
+		}
+	});
+});
+
 router.get('/getMyReservationHistory', isAllAdminLoggedIn, (req, res, next) => {
 	let empid = req.session.adminInfo.empid;
 	
@@ -1336,15 +1355,16 @@ router.get('/getAllReservationHistory', isAllAdminLoggedIn, (req, res, next) => 
 router.get('/getAllChatLog', isOnlyAdminLoggedIn, (req, res, next) => {
 	let empid = req.session.adminInfo.empid;
 	
-	const sql_selectAllChatLog = "select serialno, chatlog, DATE_FORMAT(date,'%Y-%m-%d') as chatdate from ConsultLog";
+	const sql_selectAllChatLog = "SELECT r.stuno, c.chatlog, c.chatdate FROM Reservation r, ConsultLog c WHERE r.serialno = c.serialno;";
 	
 	const workbook = new excel.Workbook();
 	const ChatLogWorksheet = workbook.addWorksheet("전체 채팅 내역");
 	const fileName = `유한대학교 학생상담센터 전체 채팅 내역.xlsx`;
 	
 	ChatLogWorksheet.columns = [
+		{header: '학번', key: 'stuno', width: 15},
 		{header: '내용', key: 'chatlog', width: 100},
-		{header: '상담 일자', key: 'chatdate', width: 15},
+		{header: '최종 상담 일자', key: 'chatdate', width: 15},
 	];
 	
 	connection.execute(sql_selectAllChatLog, (err, rows) => {

@@ -44,7 +44,7 @@
                 color:black !important;
                 height: 50px !important;
                 overflow-y: auto;
-				padding-bottom: 10px;
+				/* padding-bottom: 10px; */
             }
             .type_msg:focus{
                 box-shadow:none !important;
@@ -307,6 +307,10 @@
 		<script src="/socket.io/socket.io.js"></script>
 		<script>
 			$(function() {
+				$('#chat').click(function(e) {
+					if($("#bodyChat")) $("#bodyChat").scrollTop($("#bodyChat")[0].scrollHeight);
+				});
+				
 				if($('#cancelSubmit')) {
 					let cancel = io('/reaction', {transports:['websocket']});
 					
@@ -387,34 +391,35 @@
 								if(chatlog != null) {
 									let log = chatlog.split('\n');
 									for(let i=0; i<log.length-1; i++) {
-										if(log[i].includes('학생')) {
+										if(log[i].split('：')[0].includes('학생')) {
 											$("#bodyChat").append(
 												"<div class='d-flex justify-content-end mb-5 mt-2'>" +
 													"<div class='msg_time_send'>" +
-														log[i].split('（')[1].split('시')[0] + ":" + log[i].split('시 ')[1].split('분')[0] +
+														log[i].split('（')[1].split('일')[1].split('시')[0].trim() + ":" + log[i].split('시')[1].split('분')[0].trim() +
 													"</div>" +
 													"<div class='bg-primary msg_cotainer_send'>" +
 														"<span class='msg_name_send'>Me</span>" +
-														escapeHtml(log[i].split('： ')[1].split(' （')[0]) +
+														escapeHtml(log[i].split('：')[1].split('（')[0]) +
 													"</div>" +
 												"</div>"
 											);
+											$("#bodyChat").scrollTop($("#bodyChat")[0].scrollHeight);
 										}
 										else {
 											$("#bodyChat").append(
 												"<div class='d-flex justify-content-start mb-5 mt-2'>" +
 													"<div class='msg_cotainer'>" +
-														"<span class='msg_name'>" + log[i].split('： ')[0] + " </span>" +
-														escapeHtml(log[i].split('： ')[1].split(' （')[0]) +
+														"<span class='msg_name'>" + log[i].split('：')[0] + " </span>" +
+														escapeHtml(log[i].split('：')[1].split('（')[0]) +
 													"</div>" +
 													"<div class='msg_time'>" +
-														log[i].split('（')[1].split('시')[0] + ":" + log[i].split('시 ')[1].split('분')[0] +
+														log[i].split('（')[1].split('일')[1].split('시')[0].trim() + ":" + log[i].split('시')[1].split('분')[0].trim() +
 													"</div>" +
 												"</div>"
 											);
+											$("#bodyChat").scrollTop($("#bodyChat")[0].scrollHeight);
 										}
 									}
-									$("#bodyChat").scrollTop($("#bodyChat")[0].scrollHeight);
 								}
 
 								$('#btnSend').click(function(e) {
@@ -441,7 +446,7 @@
 								});
 
 								$("#msgForm").keydown(function(key) {
-									if (key.keyCode == 13) $('#btnSend').click();
+									if(key.keyCode == 13) $('#btnSend').click();
 								});
 
 								socket.on("msg", function(data) {
@@ -468,9 +473,7 @@
 										.callHandler('PageHandler', 'replaceMain');
 								});
 							}
-							else {
-								socket.emit("join");
-							}
+							else socket.emit("join");
 							
 							setHeight();
 						});

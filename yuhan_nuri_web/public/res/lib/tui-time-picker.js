@@ -3920,9 +3920,10 @@ var template = __webpack_require__(7);
 module.exports = function(context) {
   var source =
       '<select class="tui-timepicker-select" aria-label="Time" style="width : 100px;">'
+    + '      <option value="-" selected>시간</option>'
     + '  {{each items}}'
     + '    {{if equals initialValue @this}}'
-    + '      <option value="{{@this}}" selected {{if disabledItems[@index]}}disabled{{/if}}>{{formatTime @this format}}시</option>'
+    + '      <option value="{{@this}}" {{if disabledItems[@index]}}disabled{{/if}}>{{formatTime @this format}}시</option>'
     + '    {{else}}'
     + '      <option value="{{@this}}" {{if disabledItems[@index]}}disabled{{/if}}>{{formatTime @this format}}시</option>'
     + '    {{/if}}'

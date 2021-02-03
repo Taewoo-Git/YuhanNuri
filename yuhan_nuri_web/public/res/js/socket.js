@@ -316,9 +316,9 @@ module.exports = (server) => {
 			
 			let selectLog = "SELECT * FROM ConsultLog WHERE serialno = ?";
 			
-			let updateLog = "UPDATE ConsultLog SET chatlog=CONCAT(chatlog, ?) WHERE serialno = ?";
+			let updateLog = "UPDATE ConsultLog SET chatlog=CONCAT(chatlog, ?), date=CURDATE() WHERE serialno = ?";
 			
-			let insertLog = "INSERT INTO ConsultLog(serialno, chatlog) VALUES(?, ?)";
+			let insertLog = "INSERT INTO ConsultLog(serialno, chatlog, date) VALUES(?, ?, CURDATE())";
 
 			connection.execute(selectSerialno, [data.stuno, data.empid], (err, rows) => {
 				if(err) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);

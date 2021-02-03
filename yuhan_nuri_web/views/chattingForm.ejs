@@ -273,6 +273,8 @@
 				socket.on("waiting", function(stuname) {
 					if($('#stuAlert')) $('#stuAlert').remove();
 					
+					if($('#waitingAlert')) $('#waitingAlert').remove();
+					
 					$("#bodyChat").after(`
 						<div id="waitingAlert" style="display:none; position:absolute; bottom:85px; left:20px; background-color:white;">
 							${stuname} 학생, 상담 대기 중
@@ -599,11 +601,11 @@
 				});
 
 				calendar.on('beforeUpdateSchedule', event => {
-					alert("예약건 확인 스케줄은 수정할 수 없습니다.");
+					alert("예약 관련 스케줄은 수정할 수 없습니다.");
 				});
 
 				calendar.on('beforeDeleteSchedule', () =>{
-					alert("예약건 확인 스케줄은 삭제할 수 없습니다.");
+					alert("예약 관련 스케줄은 삭제할 수 없습니다.");
 				});
 
 				date.textContent = `${calendar.getDate().getFullYear()}-${calendar.getDate().getMonth() + 1}`;

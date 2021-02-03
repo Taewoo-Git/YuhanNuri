@@ -269,18 +269,18 @@
 								</td>
 							</tr>
 							<%}else{%>
-							<tr style="height:50px; background:#f1f3f5;" data-toggle="collapse" href="#collapse<%=i%>">
+							<tr style="height:50px;" data-toggle="collapse" href="#collapse<%=i%>">
 								<td style="width: 20%; font-size: 0.9em;">미완료</td>
 								<td align=center style="font-size: 0.9em; width: 50%;"><%=v.title%></td>
 								<td align=right style="font-size: 0.9em; width:20%;"><%=v.date%></td>
 							</tr>
 							<tr>
 								<td colspan="3" style="padding:0 !important;">
-									<div id="collapse<%=i%>" class="collapse in p-3" style="background:#f1f3f5;">
+									<div id="collapse<%=i%>" class="collapse in p-3">
 										<h5 >
 											<label style="margin:0px;">내 용</label>
 										</h5>
-										<p class="mb-5" style="color:#5a5a5a;">
+										<p class="mb-1" style="color:#5a5a5a;">
 											<%= v.content%>
 										</p>
 									</div>

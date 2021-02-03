@@ -628,19 +628,33 @@ router.post('/saveQuestion', isAllAdminLoggedIn, function(req, res, next) {
 	const sendNumber = req.body.sendNumber;
 	
 	const sql_updateAnswer = 'update QuestionBoard set empname = ?, answerdate = ?, answer = ? where no = ?';
-	
+	const answerCheckSql = 'SELECT answer FROM QuestionBoard WHERE no = ?;';
 	let nowMoment = moment().format("YYYYMMDD");
-
-	connection.execute(sql_updateAnswer, [req.session.adminInfo.empname, nowMoment, sendData, sendNumber], (err, rows) => {
+	
+	connection.execute(answerCheckSql, [sendNumber], (err, result) => {
 		if(err) {
 			ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);
 			next(err);
 		}
 		else {
-			answerPush(sendNumber);
-			res.json({state: 'ok'});
+			if(result[0].answer == null){
+				connection.execute(sql_updateAnswer, [req.session.adminInfo.empname, nowMoment, sendData, sendNumber], (err, rows) => {
+					if(err) {
+						ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);
+						next(err);
+					}
+					else {
+						answerPush(sendNumber);
+						res.json({state: 'ok'});
+					}
+				});
+			}else{
+				res.json({state: 'overlapped'});
+			}
 		}
 	});
+	
+	
 });
 
 router.get("/board/:type", isAllAdminLoggedIn, function(req, res, next) {

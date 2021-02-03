@@ -103,10 +103,8 @@ exports.consultTodayPush = () => {
 							body: '오늘 상담 예약이 있습니다.' ,
 						},
 						data: {
-							data: {
-								click_action: 'FLUTTER_NOTIFICATION_CLICK',
-								page: 'mypage'
-							}
+							click_action: 'FLUTTER_NOTIFICATION_CLICK',
+							page: 'mypage'
 						}
 					};
 					fcm_admin.messaging().send(fcm_message)

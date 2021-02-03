@@ -21,6 +21,7 @@
 		</script>
 		<style>
 			html, body{
+    			position: fixed;
                 height: 100% !important;
 				width: 100% !important;
             }
@@ -158,8 +159,8 @@
 				</ul>
 			</div>
 		</div>
-		<div class="tab-content">
-			<div class="tab-pane fade" style="padding:0rem!important;" id="reservation">
+		<div class="tab-content" style="height:80%;">
+			<div class="tab-pane" style="padding:0rem!important;" id="reservation">
 				<%if(reservationBoard.length===0){%>
 				<div align=center style="margin-top:15%">예약한 내역이 없습니다!</div>
 				<%}else{%>
@@ -236,7 +237,7 @@
 					<%}%>
 				<%}%>
 			</div>
-			<div class="tab-pane fade" style="padding:0rem!important;" id="question">
+			<div class="tab-pane" style="padding:0rem!important; height:100%; overflow:scroll;" id="question">
 				<%if(questions.length===0){%>
 				<div align=center style="margin-top:15%">문의한 내역이 없습니다!</div>
 				<%}else{%>
@@ -244,14 +245,14 @@
                     <tbody>
 						<%questions.forEach(function(v,i){%>
 						<%if(isAnswerList[i]==='완료'){%>
-							<tr style="height:50px;"  data-toggle="collapse" href="#collapse<%=i%>">
+							<tr style="height:50px;" data-toggle="collapse" href="#collapse<%=i%>">
 								<td style='width: 20%; color:green; font-size: 0.9em;'>완 료</td>
 								<td align=center style="font-size: 0.9em; width: 50%;"><%=v.title%></td>
 								<td align=right style="font-size: 0.9em; width:20%;"><%=v.date%></td>
-							</tr>	
+							</tr>
 							<tr>
 								<td colspan="3" style="padding:0 !important;">
-									<div id="collapse<%=i%>" class="collapse in p-3">
+									<div id="collapse<%=i%>" class="collapse in p-3" style="height:0px;">
 										<h5 >
 											<label style="margin:0px;">내 용</label>
 										</h5>
@@ -268,10 +269,22 @@
 								</td>
 							</tr>
 							<%}else{%>
-							<tr style="height:50px;">
+							<tr style="height:50px; background:#f1f3f5;" data-toggle="collapse" href="#collapse<%=i%>">
 								<td style="width: 20%; font-size: 0.9em;">미완료</td>
 								<td align=center style="font-size: 0.9em; width: 50%;"><%=v.title%></td>
 								<td align=right style="font-size: 0.9em; width:20%;"><%=v.date%></td>
+							</tr>
+							<tr>
+								<td colspan="3" style="padding:0 !important;">
+									<div id="collapse<%=i%>" class="collapse in p-3" style="background:#f1f3f5;">
+										<h5 >
+											<label style="margin:0px;">내 용</label>
+										</h5>
+										<p class="mb-5" style="color:#5a5a5a;">
+											<%= v.content%>
+										</p>
+									</div>
+								</td>
 							</tr>
 							<%}%>
 						<%})%>
@@ -279,7 +292,7 @@
                   </table>
 				<%}%>
 			</div>
-			<div class="tab-pane fade" id="chatting" style="margin-left: -15px; margin-right: -15px;">
+			<div class="tab-pane" id="chatting" style="margin-left: -15px; margin-right: -15px;">
 				<div class='align_spinner' id='chattingLoad'>
 					<div class='spinner-border text-primary'></div>
 				</div>
@@ -495,6 +508,10 @@
 						});
 				<% } %>
 			});
+			
+			window.onresize = function(event) {
+				setHeight();
+			};
 			
 			function setHeight() {
 				let top = document.getElementsByClassName("row");

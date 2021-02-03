@@ -2,7 +2,14 @@ var mysql = require('mysql2');
 const dotenv = require('dotenv');
 dotenv.config();
 
-module.exports = function () {
+const moment = require('moment');
+require('moment-timezone');
+moment.tz.setDefault("Asia/Seoul");
+
+const ErrorLogger = require('./ErrorLogger.js');
+const logTimeFormat = "YYYY-MM-DD HH:mm:ss";
+
+module.exports = function() {
 	return {
 		init: function () {
 			return mysql.createPool({
@@ -14,9 +21,9 @@ module.exports = function () {
 				dateStrings: 'date'
 			});
 		},
-		open: function (conn, target) {
-			conn.getConnection(function (err) {
-				if (err) console.error(`(${target}) MariaDB Connection ${err}`);
+		open: function(conn, target) {
+			conn.getConnection(function(err) {
+				if(err) ErrorLogger.info(`[${moment().format(logTimeFormat)}] (${target}) MariaDB Connection ${err}`);
 			});
 		}
 	}

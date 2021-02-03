@@ -7,13 +7,14 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<!-- CoreUI CSS -->
 		<link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
-		<title>유한누리 상담사 페이지</title>	
+		<title>유한대학교 학생상담센터</title>
 		<link rel="stylesheet" type="text/css" href="/res/css/tui-calendar.css" />
 		<link rel="stylesheet" type="text/css" href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css" />
 		<link rel="stylesheet" type="text/css" href="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.css" />
 		<script src="https://uicdn.toast.com/tui.code-snippet/v1.5.2/tui-code-snippet.min.js"></script>
 		<script src="/lib/tui-time-picker.js"></script>
-		<script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.min.js"></script>
+		<script src="/lib/tui-date-picker.js"></script>
+		<!--<script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.min.js"></script>-->
 		<script src="/lib/tui-calendar.js"></script>
 		<%if(adminInfo.author===1){%>
 			<script>
@@ -42,6 +43,9 @@
 		<script src="https://code.jquery.com/jquery-latest.min.js"></script>
 		<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
 		<style>
+			.tui-timepicker-row {
+				padding-left: 15px;
+			}
 			.pr_10{
 				padding-right:10px;
 			}
@@ -51,59 +55,6 @@
 		</style>
 	</head>
 	<body class="c-app">
-		<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-			  <div class="modal-dialog" role="document">
-				<div class="modal-content">
-				  <div class="modal-header">
-					<h5 class="modal-title" id="exampleModalLabel">항목 추가</h5>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					  <span aria-hidden="true">&times;</span>
-					</button>
-				  </div>
-				  <div class="modal-body">
-					<form>
-					  <div class="form-group">
-						<label for="type-name" class="col-form-label">항목 이름:</label>
-						<input type="text" class="form-control" id="type-name" placeholder="항목이름을 작성해주세요.">
-					  </div>
-					</form>
-				  </div>
-				  <div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
-					<button type="button" class="btn btn-primary" id="add_type_button">추가하기</button>
-				  </div>
-				</div>
-			  </div>
-			</div>
-			<script>
-				$('#add_type_button').click(function(e){
-								$.ajax({
-									type:'POST',
-									dataType:'json',
-									url:'../addType',
-									async:true,
-									data:{"add_type" : $('#type-name').val()},
-									success:function(data){
-										window.location.reload();
-									}
-								})
-							});
-					$(function () {
-					$('button.reser-btn').click(function(e) {
-							$.ajax({
-							type: "POST",
-							dataType: "json",
-							url: "./accessReservation",
-							async: true,
-							data: { "sendAjax" : $(`#${e.target.id}`).val() },
-							success: function (data) { 
-								window.location.reload();
-							}
-						});
-
-					});
-				});
-			</script>
 		<div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
 			<%- include ('adminNav'); -%>
 			<button class="c-sidebar-minimizer c-class-toggler" type="button" data-target="_parent"
@@ -179,7 +130,6 @@
 					dragBgColor: '#01FF30',
 					borderColor: '#01FF30'
 				},
-
 				{
 					id: 'Meeting',
 					name: '회의',
@@ -188,10 +138,9 @@
 					dragBgColor: '#03bd9e',
 					borderColor: '#03bd9e'
 				},
-
 				{
 					id: 'Reserved',
-					name: '예약됨',
+					name: '상담',
 					color: '#f361dc',
 					bgColor: '#f361dc',
 					dragBgColor: '#f361dc',
@@ -287,10 +236,10 @@
 							alert("스케줄 추가가 완료되었습니다.");
 							calendar.createSchedules([schedule]);
 							window.location.reload();
-						}else if(data.state === "isDiffDate"){
-							alert("예약 가능 일정 추가는 날짜가 같아야 합니다.");
-						}else if(data.state === "Duplicate Schedule"){
-							alert("이미 시간이 겹치는 스케줄이 존재합니다.");
+						}else if(data.state === "diff"){
+							alert("예약 가능한 일정 추가는 날짜가 같아야 합니다.");
+						}else if(data.state === "duplicate"){
+							alert("중복되는 스케줄이 존재합니다.");
 						}
 					}
 				});
@@ -303,7 +252,7 @@
 				const { schedule, changes } = event;
 
 				if(schedule.calendarId == "Reserved" || schedule.calendarId == "Finished"){
-					alert("예약 건 관련 스케줄은 수정할 수 없습니다.");
+					alert("예약 관련 스케줄은 수정할 수 없습니다.");
 					return;
 				}
 
@@ -351,8 +300,8 @@
 								alert("스케줄 수정이 완료되었습니다.");
 								calendar.updateSchedule(schedule.id, schedule.calendarId, changes);
 							}
-							else if(data.state === "can't update"){
-								alert("예약 건이 있어 수정이 되지 않습니다.");
+							else if(data.state === "deny"){
+								alert("이미 예약이 있어 수정할 수 없습니다.");
 							}
 						}
 					});
@@ -367,7 +316,7 @@
 				const { schedule } = scheduleData;
 
 				if(schedule.calendarId == "Reserved" || schedule.calendarId == "Finished"){
-					alert("예약 건 관련 스케줄은 삭제할 수 없습니다.");
+					alert("예약 관련 스케줄은 삭제할 수 없습니다.");
 					return;
 				}
 
@@ -382,11 +331,8 @@
 					async : true,
 					data : {"sendAjax" : JSON.stringify(sendAjax)},
 					success : function(data){
-						if(data.state === "can't delete : already Accept"){
-							alert("이미 예약이 있어 삭제가 불가능 합니다.");
-						}
-						else if(data.state === "can't delete : is not counselor's included schedule"){
-							alert("상담사님이 추가한 스케줄만 삭제가 가능합니다.");
+						if(data.state === "deny"){
+							alert("이미 예약이 있어 삭제할 수 없습니다.");
 						}
 						else if(data.state === "ok"){
 							alert("스케줄 삭제가 완료되었습니다.");

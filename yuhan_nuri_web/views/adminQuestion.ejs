@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- CoreUI CSS -->
     <link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
-    <title>유한누리 상담사 페이지</title>	
+    <title>유한대학교 학생상담센터</title>
 	<script src="https://code.jquery.com/jquery-latest.min.js"></script>
 	<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
 	<style>
@@ -82,17 +82,24 @@
                             <div class="card-body">
                                 <div class="d-flex justify-content-between">
                                     <div>
-                                        <h4 class="card-title mb-0">문의 목록</h4>
+                                        <h4 class="card-title mb-0">문의 대기 리스트</h4>
                                     </div>
                                 </div>
 							</div>
 								<% selectList.forEach(function(val,i){ %>
 								<div class="card-body list-group-item border-left-0 border-right-0">
-                                    <h5 class="card-title mb-5">학번 : <%=val.stuno%>
-									&nbsp;&nbsp;&nbsp;&nbsp;이름 : <b><%=val.stuname %></b>
-									&nbsp;&nbsp;&nbsp;&nbsp;질문 일자 : <%let dateArr = val.date.split('-');%><%=dateArr[0]+"년 "+dateArr[1]+"월 "+dateArr[2]+"일"%>
-									&nbsp;&nbsp;&nbsp;&nbsp;연락처 : <%=val.phonenum %>
-									</h5>
+									<table style="margin-bottom:35px;">
+										<tr style="font-size:17px;">
+											<td style="padding-right:10px;"><b>학번</b></td>
+											<td style="padding-right:30px;"><%=val.stuno%></td>
+											<td style="padding-right:10px;"><b>이름</b></td>
+											<td style="padding-right:30px;"><%=val.stuname %></td>
+											<td style="padding-right:10px;"><b>질문일자</b></td>
+											<td style="padding-right:30px;"><%let dateArr = val.date.split('-');%><%=dateArr[0]+"년 "+dateArr[1]+"월 "+dateArr[2]+"일"%></td>
+											<td style="padding-right:10px;"><b>연락처</b></td>
+											<td style="padding-right:30px;"><%=val.phonenum %></td>
+										</tr>
+									</table>
 									<label style="font-size:120%;"><b>제 목</b></label>
 									<p class="card-text mb-4"><%= val.title %></p>
 									<label style="font-size:120%;"><b>문의 유형</b></label>

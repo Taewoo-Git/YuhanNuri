@@ -2461,14 +2461,14 @@ var TimePicker = defineClass(
 
     _meridiemableTime: function(disabledHours) {
       var diffHour = 0;
-      var startHour = 0;
+      var startHour = 9;
       var endHour = 11;
       var result = [];
 
       if (this._hour >= 12) {
         diffHour = 12;
         startHour = 12;
-        endHour = 23;
+        endHour = 18;
       }
 
       forEachArray(disabledHours, function(hour) {
@@ -2588,7 +2588,7 @@ var TimePicker = defineClass(
     _getHourItems: function() {
       var step = this._hourStep;
 
-      return this._showMeridiem ? util.getRangeArr(1, 12, step) : util.getRangeArr(0, 23, step);
+      return this._showMeridiem ? util.getRangeArr(9, 12, step) : util.getRangeArr(9, 18, step);
     },
 
     /**
@@ -3919,12 +3919,12 @@ var template = __webpack_require__(7);
 
 module.exports = function(context) {
   var source =
-      '<select class="tui-timepicker-select" aria-label="Time">'
+      '<select class="tui-timepicker-select" aria-label="Time" style="width : 100px;">'
     + '  {{each items}}'
     + '    {{if equals initialValue @this}}'
-    + '      <option value="{{@this}}" selected {{if disabledItems[@index]}}disabled{{/if}}>{{formatTime @this format}}</option>'
+    + '      <option value="{{@this}}" selected {{if disabledItems[@index]}}disabled{{/if}}>{{formatTime @this format}}시</option>'
     + '    {{else}}'
-    + '      <option value="{{@this}}" {{if disabledItems[@index]}}disabled{{/if}}>{{formatTime @this format}}</option>'
+    + '      <option value="{{@this}}" {{if disabledItems[@index]}}disabled{{/if}}>{{formatTime @this format}}시</option>'
     + '    {{/if}}'
     + '  {{/each}}'
     + '</select>';
@@ -3974,15 +3974,15 @@ module.exports = function(context) {
     + '    <div class="tui-timepicker-row">'
     + '      {{if isSpinbox}}'
     + '        <div class="tui-timepicker-column tui-timepicker-spinbox tui-timepicker-hour"></div>'
-    + '        <span class="tui-timepicker-column tui-timepicker-colon"><span class="tui-ico-colon">:</span></span>'
-    + '        <div class="tui-timepicker-column tui-timepicker-spinbox tui-timepicker-minute"></div>'
+    + '        <span class="tui-timepicker-column tui-timepicker-colon">시</span>'
+    + '        <div class="tui-timepicker-column tui-timepicker-spinbox tui-timepicker-minute" style="display : none;"></div>'
     + '        {{if showMeridiem}}'
     + '          {{meridiemElement}}'
     + '        {{/if}}'
     + '      {{else}}'
     + '        <div class="tui-timepicker-column tui-timepicker-selectbox tui-timepicker-hour"></div>'
-    + '        <span class="tui-timepicker-column tui-timepicker-colon"><span class="tui-ico-colon">:</span></span>'
-    + '        <div class="tui-timepicker-column tui-timepicker-selectbox tui-timepicker-minute"></div>'
+    + '        <span class="tui-timepicker-column tui-timepicker-colon">시</span>'
+    + '        <div class="tui-timepicker-column tui-timepicker-selectbox tui-timepicker-minute" style="display : none;"></div>'
     + '        {{if showMeridiem}}'
     + '          {{meridiemElement}}'
     + '        {{/if}}'

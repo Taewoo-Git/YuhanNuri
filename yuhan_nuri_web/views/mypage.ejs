@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>유한누리 마이페이지</title>
+		<title>유한대학교 학생상담센터</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -232,7 +232,7 @@
 					<%}%>
 				</form>
 					<%if(reservationBoard[0].status === 1 && reservationBoard[0].finished === 1 && reservationBoard[0].research === 0){%>
-						<input type="button" class="btn btn-success pull-right" onclick = "location.href = '/user/satisfaction'" value="만족도 조사">
+						<input type="button" class="btn btn-success pull-right" onclick = "location.replace('/user/satisfaction');" value="만족도조사">
 					<%}%>
 				<%}%>
 			</div>
@@ -295,7 +295,7 @@
 		<script>
 			$(function() {
 				if($('#cancelSubmit')) {
-					let cancel = io('/reaction');
+					let cancel = io('/reaction', {transports:['websocket']});
 					
 					$('#cancelSubmit').click(function(e) {
 						cancel.emit('cancel', $('#cancelSerialno').val());
@@ -334,7 +334,8 @@
 							location.replace(location.origin+location.pathname+"?chatting");
 						});
 				<% } else if(isChatting === 1) { %>
-						const socket = io('/chat');
+						const socket = io('/chat', {transports:['websocket']});
+				
 						let isInit = 0;
 				
 						$("#waitingMsg").css('display', 'block');
@@ -495,11 +496,11 @@
 				<% } %>
 			});
 			
-			/*function setHeight() {
+			function setHeight() {
 				let top = document.getElementsByClassName("row");
 				$("#chatting").height(window.innerHeight - (top[0].clientHeight + top[1].clientHeight) - 20);
 				$("#bodyChat").scrollTop($("#bodyChat")[0].scrollHeight);
-			}*/
+			}
 	
 			// xss 취약점 막는 함수, php의 htmlspecialcharacter 과 같은 함수
 			function escapeHtml(str) {

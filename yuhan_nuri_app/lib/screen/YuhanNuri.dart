@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -85,13 +86,35 @@ class YuhanNuriState extends State<YuhanNuri> {
 
     KeyboardVisibilityController().onChange.listen((bool visible) {
       if (visible) {
-        // 키보드 올라왔을때
-        _webViewController.evaluateJavascript(
-            source: 'document.activeElement.scrollIntoView({block: "center"})');
+        // 키보드 올라왔을 때
+        _webViewController.getUrl().then((url) => {
+              if (url == urls[3])
+                {
+                  _webViewController.evaluateJavascript(
+                      source: 'setTimeout(setHeight, 450);')
+                }
+              else
+                {
+                  _webViewController.evaluateJavascript(
+                      source:
+                          'document.activeElement.scrollIntoView({block: "center"})')
+                }
+            });
       } else {
-        // 키보드가 내려갈때
-        _webViewController.evaluateJavascript(
-            source: 'document.activeElement.blur()'); // 해당 텍스트박스의 포커싱을 지움
+        // 키보드가 내려갈 때
+        _webViewController.getUrl().then((url) => {
+              if (url == urls[3])
+                {
+                  _webViewController.evaluateJavascript(
+                      source: 'setTimeout(setHeight, 450);')
+                }
+              else
+                {
+                  // 해당 요소에 대한 포커싱 해제
+                  _webViewController.evaluateJavascript(
+                      source: 'document.activeElement.blur()')
+                }
+            });
       }
     });
   }

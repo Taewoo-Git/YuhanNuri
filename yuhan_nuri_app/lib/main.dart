@@ -5,7 +5,6 @@ import 'package:flutter_phoenix/flutter_phoenix.dart';
 
 void main() {
   try {
-    // 처음 loading화면 실행, Splash.dart
     if (Platform.isAndroid || Platform.isIOS)
       runApp(Phoenix(child: SplashApp()));
   } catch (e) {

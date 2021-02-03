@@ -11,7 +11,6 @@ import 'package:oktoast/oktoast.dart';
 import 'package:vibration/vibration.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-//import 'package:flutter_phoenix/flutter_phoenix.dart';
 
 final FirebaseMessaging fcm = FirebaseMessaging();
 CookieManager cm;
@@ -23,8 +22,8 @@ const urls = [
   'http://counsel.yuhan.ac.kr/user/reservation',
   'http://counsel.yuhan.ac.kr/user/question',
   'http://counsel.yuhan.ac.kr/user/mypage',
-  'http://counsel.yuhan.ac.kr/user/satisfaction',
   'http://counsel.yuhan.ac.kr/user/mypage?chatting',
+  'http://counsel.yuhan.ac.kr/user/satisfaction',
 ];
 
 class YuhanNuri extends StatefulWidget {
@@ -79,12 +78,7 @@ class YuhanNuriState extends State<YuhanNuri> {
       if (visible) {
         // 키보드 올라왔을 때
         _webViewController.getUrl().then((url) => {
-              if (url == urls[3])
-                {
-                  _webViewController.evaluateJavascript(
-                      source: 'setTimeout(setHeight, 450);')
-                }
-              else
+              if (url != urls[3])
                 {
                   _webViewController.evaluateJavascript(
                       source:
@@ -96,12 +90,6 @@ class YuhanNuriState extends State<YuhanNuri> {
         _webViewController.getUrl().then((url) => {
               if (url == urls[3])
                 {
-                  _webViewController.evaluateJavascript(
-                      source: 'setTimeout(setHeight, 450);')
-                }
-              else
-                {
-                  // 해당 요소에 대한 포커싱 해제
                   _webViewController.evaluateJavascript(
                       source: 'document.activeElement.blur()')
                 }
@@ -344,7 +332,7 @@ class YuhanNuriState extends State<YuhanNuri> {
 
     AlertDialog alert = AlertDialog(
       title: Text("유한누리"),
-      content: Text("자동 로그인을 해제한 후\n종료합니다"),
+      content: Text("로그아웃 후 종료합니다."),
       actions: [
         continueButton,
         cancelButton,

@@ -15,7 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 final FirebaseMessaging fcm = FirebaseMessaging();
 CookieManager cm;
 
-// [0] 메인, [1] 예약, [2] 문의, [3] 마이페이지, [4] 만족도조사페이지, [5] 채팅
+// [0] 메인, [1] 예약, [2] 문의, [3] 마이페이지, [4] 채팅, [5] 만족도조사페이지
 // urls 배열 외의 외부url을 로드할 시 webview가 아닌 기기의 브라우저(크롬, 사파리)를 이용해 로드(하이퍼링크 등)
 const urls = [
   'http://counsel.yuhan.ac.kr/',
@@ -88,7 +88,11 @@ class YuhanNuriState extends State<YuhanNuri> {
       } else {
         // 키보드가 내려갈 때
         _webViewController.getUrl().then((url) => {
+<<<<<<< HEAD
               if (url == urls[3])
+=======
+              if (url != urls[3])
+>>>>>>> c1886cc0d0e41473cb9a3fc7c51a30d2a2bd8767
                 {
                   _webViewController.evaluateJavascript(
                       source: 'document.activeElement.blur()')
@@ -154,6 +158,12 @@ class YuhanNuriState extends State<YuhanNuri> {
                     initialHeaders: header,
                     onLoadStart: (_webViewController, String url) {
                       if (!urls.contains(url)) {
+                        
+                        //google form 단축 url일 경우
+                        if(url.contains('action=com.google.firebase.dynamiclinks.VIEW_DYNAMIC_LINK;')){                
+                          url =url.toString().split(';')[4].toString().split('=')[1].split('viewform')[0]+'viewform';
+                        }
+
                         _webViewController.stopLoading();
                         launch(url, forceWebView: false);
                         navBarState = globalKey.currentState;
@@ -177,12 +187,6 @@ class YuhanNuriState extends State<YuhanNuri> {
                             } else if (args[0].toString() == "replaceMypage") {
                               navBarState = globalKey.currentState;
                               navBarState.setPage(3);
-                            } else if (args[0].toString() == "Restart") {
-                              // SharedPreferences prefs =
-                              //     await SharedPreferences.getInstance();
-                              // prefs.remove('expires');
-                              // prefs.remove('cookie');
-                              // Phoenix.rebirth(context);
                             }
                           });
                     },

@@ -242,9 +242,6 @@ class _LoginState extends State<Login> {
       },
     );
 
-    print(res.statusCode);
-    print(res.body);
-
     if (res.body == "null") {
       FocusManager.instance.primaryFocus.unfocus();
       progressDialog.hide();
@@ -253,6 +250,7 @@ class _LoginState extends State<Login> {
       pwTextBoxController.clear();
       return;
     }
+
     if (res.statusCode == 200) {
       Cookie cookie = Cookie.fromSetCookieValue(res.headers['set-cookie']);
 
@@ -262,6 +260,7 @@ class _LoginState extends State<Login> {
         prefs.setString('expires', dateTime.toString());
       }
       progressDialog.hide();
+
       Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (BuildContext context) => YuhanNuri(
                 cookie: cookie.toString(),

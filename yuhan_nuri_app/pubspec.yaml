@@ -34,7 +34,6 @@ dev_dependencies:
     sdk: flutter
   flutter_local_notifications: ^1.4.4
   curved_navigation_bar: ^0.3.3
-  flutter_keyboard_visibility: ^4.0.2
   http: ^0.12.2
   toast: ^0.1.5
   shared_preferences: ^0.5.10

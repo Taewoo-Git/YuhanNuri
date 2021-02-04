@@ -1,40 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <!-- Required meta tags -->
+    <title>유한대학교 학생상담센터</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- CoreUI CSS -->
+    <script src="/js/jquery-latest.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
-    <title>유한대학교 학생상담센터</title>
-    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
 	<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
     <style>
-        .dropTitle {
+        .dropTitle{
             float: left;
             margin: 0 !important;
             text-align: left;
             width: 1000px;
         }
-
-        .custom-list-item {
+        .custom-list-item{
             width: 1000px;
         }
-
-        .custom-btn-position {
+        .custom-btn-position{
             float: right;
             margin-top: -7px;
         }
-
-        .show>.btn-secondary.dropdown-toggle {
+        .show>.btn-secondary.dropdown-toggle{
             background-color: #fafbfd !important;
         }
-
-        .nav-link {
+        .nav-link{
             padding: .5rem 3rem;
         }
-		.fixed_btn_position {
+		.fixed_btn_position{
             top: 25%;
             left: 90%;
         }
@@ -64,15 +57,13 @@
                 <i class="cil-hamburger-menu"></i>
             </button>
 			<ul class="c-header-nav ml-auto mr-4">
-                <%- include ('adminAccount'); -%>
+        	<%- include ('adminAccount'); -%>
             </ul>
             <div class="c-subheader px-3">
-                <!-- Breadcrumb-->
                 <ol class="breadcrumb border-0 m-0">
                     <li class="breadcrumb-item">예약</li>
                     <li class="breadcrumb-item">양식 항목</li>
                     <li class="breadcrumb-item active">자가진단 질문</li>
-                    <!-- Breadcrumb Menu-->
                 </ol>
             </div>
     </header>
@@ -133,16 +124,19 @@
         </main>
     </div>
     </div>
+    <script src="/lib/coreui.bundle.min.js"></script>
     <script>
         let i = <%=max%>;
         let cur_i = <%=max%>;
-		
-        let askList = [<% result.forEach(function(v,i){%>
+        let askList = [
+			<% result.forEach(function(v, i) { %>
 			{
 				id:'ask_<%=v.checkno%>',
 				ask:'<%=v.checkname%>'
 			},
-			<%});%>];
+			<% }); %>
+		];
+		
         function addAsk(e) {
             $(e).append(`
 				<div class="input-group mb-3" style="width:75%; margin:0 auto;" id="ask_${++i}">
@@ -160,6 +154,7 @@
 			let asks = document.getElementsByClassName('checkTitle');
 			window.scrollBy(0, asks[asks.length - 1].getBoundingClientRect().bottom);
         }
+		
         function removeAsk(me,askno) {
 			--i;
 			if (i + 1 == cur_i) {
@@ -184,10 +179,12 @@
             	$(me).remove();
 			}
         }
+		
         function updateAsk(parent,me) {
             const findMyIndex = askList.findIndex((v) => v.id === parent.id);
             askList[findMyIndex].ask = overidingEscape(me.value);
         }
+		
 		function saveList(){
 			$.ajax({
 				type: 'POST',
@@ -239,7 +236,5 @@
 			return str.replace(/[&<>"']/g, function(m) { return map[m]; });
 		}
     </script>
-    <script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
 </body>
-
 </html>

@@ -1,14 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <!-- Required meta tags -->
+    <title>유한대학교 학생상담센터</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- CoreUI CSS -->
+	<script src="/js/jquery-latest.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
-    <title>유한대학교 학생상담센터</title>
-	<script src="https://code.jquery.com/jquery-latest.min.js"></script>
 	<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
 	<style>
 		.pr_10{
@@ -25,15 +22,14 @@
 			height:35px;
 			border: 1px solid #d8dbe0;
 		}
-		.btnInput:focus {
+		.btnInput:focus{
 			outline:none;
 		}
 	</style>
 </head>
 <body class="c-app">
-	
     <div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
-                <%- include ('adminNav'); -%>
+        <%- include ('adminNav'); -%>
         <button class="c-sidebar-minimizer c-class-toggler" type="button" data-target="_parent"
             data-class="c-sidebar-minimized"></button>
     </div>
@@ -49,7 +45,7 @@
                 <i class="cil-hamburger-menu"></i>
             </button>
 			<ul class="c-header-nav ml-auto mr-4">
-                <%- include ('adminAccount'); -%>
+            <%- include ('adminAccount'); -%>
             </ul>
             <div class="c-subheader px-3">
                 <ol class="breadcrumb border-0 m-0">
@@ -90,7 +86,7 @@
 									for(var i = (page * page_num) - page_num; i < (page * page_num); i++) {
 									if(i > length){
 										i++;
-									}else{
+									}else {
 										var data = answerList[i];
 									%>
 									<tr>
@@ -147,7 +143,7 @@
             </footer>
         </div>
     </div>
-	<script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
+	<script src="/lib/coreui.bundle.min.js"></script>
 	<script>
 		$('#btnSearch').click(function(e) {
 			if($('#btnSearchVal').val() == ''){
@@ -158,10 +154,7 @@
 				let searchRequest = "/admin/questionAnswer/1/" + type+"/"+search;
 				location.href = searchRequest;
 			}
-
 		});
 	</script>
 </body>
-
 </html>
-

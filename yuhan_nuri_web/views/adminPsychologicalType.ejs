@@ -1,40 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <!-- Required meta tags -->
+    <title>유한대학교 학생상담센터</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- CoreUI CSS -->
+	<script src="/js/jquery-latest.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
-    <title>유한대학교 학생상담센터</title>
-	<script src="https://code.jquery.com/jquery-latest.min.js"></script>
 	<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
 	<style>
-		.dropTitle {
+		.dropTitle{
             float: left;
             margin: 0 !important;
             text-align: left;
             width: 1000px;
         }
-
-        .custom-list-item {
+        .custom-list-item{
             width: 1000px;
         }
-
-        .custom-btn-position {
+        .custom-btn-position{
             float: right;
             margin-top: -7px;
         }
-
-        .show>.btn-secondary.dropdown-toggle {
+        .show>.btn-secondary.dropdown-toggle{
             background-color: #fafbfd !important;
         }
-
-        .nav-link {
+        .nav-link{
             padding: .5rem 3rem;
         }
-		.fixed_btn_position {
+		.fixed_btn_position{
             top: 25%;
             left: 90%;
         }
@@ -47,9 +40,8 @@
 	</style>
 </head>
 <body class="c-app">
-	
     <div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
-                <%- include ('adminNav'); -%>
+        <%- include ('adminNav'); -%>
         <button class="c-sidebar-minimizer c-class-toggler" type="button" data-target="_parent"
             data-class="c-sidebar-minimized"></button>
     </div>
@@ -65,7 +57,7 @@
                 <i class="cil-hamburger-menu"></i>
             </button>
 			<ul class="c-header-nav ml-auto mr-4">
-                <%- include ('adminAccount'); -%>
+        	<%- include ('adminAccount'); -%>
             </ul>
             <div class="c-subheader px-3">
                 <ol class="breadcrumb border-0 m-0">
@@ -119,7 +111,7 @@
             </footer>
         </div>
     </div>
-	<script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
+	<script src="/lib/coreui.bundle.min.js"></script>
 	<script>
 		 $("button[name=btnDelete]").click(function(e){
 			 let deleteDialog = confirm("정말로 삭제하시겠습니까?");
@@ -201,26 +193,27 @@
 			let cards = document.getElementsByClassName('card');
 			window.scrollBy(0, cards[cards.length - 1].getBoundingClientRect().bottom);
 		});
+		
 		$('#cardList').on('click', '#btnDataAdd', function() {
 			var sendAjaxData = {
 					context : $("#inputContext").val(),
 					text : $("#inputText").val()
-				};
-				$.ajax({
-					url: '/admin/psychologicalType/3',
-					dataType: 'json',
-					type: 'POST',
-					data: {ajaxData:JSON.stringify(sendAjaxData)},
-					success: function(result) {
-						if(result.check == 'success'){
-							alert('추가가 완료되었습니다.');
-							window.location.href = '/admin/psychologicalType';
-						}else{
-							alert('이미 추가되었거나 문제가 발생하였습니다.');
-							window.location.href = '/admin/psychologicalType';
-						}
+			};
+			$.ajax({
+				url: '/admin/psychologicalType/3',
+				dataType: 'json',
+				type: 'POST',
+				data: {ajaxData:JSON.stringify(sendAjaxData)},
+				success: function(result) {
+					if(result.check == 'success'){
+						alert('추가가 완료되었습니다.');
+						window.location.href = '/admin/psychologicalType';
+					}else{
+						alert('이미 추가되었거나 문제가 발생하였습니다.');
+						window.location.href = '/admin/psychologicalType';
 					}
-				});
+				}
+			});
 		});
 		
 		$('#cardList').on('click', '#btnDataCancel', function() {

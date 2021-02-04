@@ -1,45 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<!-- Required meta tags -->
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<!-- CoreUI CSS -->
+		<title>유한대학교 학생상담센터</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<script src="/js/jquery-latest.min.js"></script>
+		<script src="/lib/tui-code-snippet.min.js"></script>
+		<script src="/lib/tui-calendar.js"></script>
 		<link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous"/>
-		<link rel="stylesheet" type="text/css" href="/res/css/tui-calendar.css" />
+		<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
+		<link rel="stylesheet" type="text/css" href="/css/tui-calendar.css" />
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
 			  integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU"
 			  crossorigin="anonymous">
-		<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
-		<script src="https://uicdn.toast.com/tui.code-snippet/v1.5.2/tui-code-snippet.min.js"></script>
-		<script src="/lib/tui-calendar.js"></script>
-		<script src="https://code.jquery.com/jquery-latest.min.js"></script>
-		<title>유한대학교 학생상담센터</title>
 		<style>
 			#date{
 				font-size : 25px;
-				
 			}
-			.toggle_wrap {
+			.toggle_wrap{
 				float: right;
 				margin-right: 1.25rem;
 				margin-top: 0.25rem;
 				font-size: 15px;
 			}
-			.font-size-15 {
+			.font-size-15{
 				font-size: 15px!important;
 			}
-			.fixed_btn_position {
+			.fixed_btn_position{
 				top: 20%;
 				left: 90%;
 			}
-			.toggle_normal_wrap {
+			.toggle_normal_wrap{
 				float: right;
 				margin-top: 0.25rem;
 				font-size: 15px;
 			}
 			.card{
-				/* width: 100%; */
 				width:48%;
 				margin:0 auto;
 				background-color: rgba(0,0,0,0);
@@ -73,7 +69,6 @@
                 outline:0px !important;
             }
             .send_btn{
-				/* width: 10vw; */
 				width:3vw;
 				padding-right: 1.3rem;
 				background-color: #0275d8 !important;
@@ -180,18 +175,16 @@
 					<i class="cil-hamburger-menu"></i>
 				</button>
 				<ul class="c-header-nav ml-auto mr-4">
-					<%- include ('adminAccount'); -%>
+				<%- include ('adminAccount'); -%>
 				</ul>
 				<div class="c-subheader px-3">
-					<!-- Breadcrumb-->
 					<ol class="breadcrumb border-0 m-0">
 						<li class="breadcrumb-item">채팅</li>
 						<li class="breadcrumb-item active">채팅 상담</li>
-						<!-- Breadcrumb Menu-->
 					</ol>
 				</div>
 			</header>
-			<div class="c-body"> <!-- bbody -->
+			<div class="c-body">
 				<main class="c-main">
 					<div class="container-fluid" style="height:70vh!important;">
 						<div class='card' id='chattingCard' style="height:inherit; margin:0!important; float:left; position:relative;"> 
@@ -211,22 +204,16 @@
 							</div> 
 						</div>
 						<div class='card ml-2' id='dailyCalendarCard' style="height:inherit; float:right; overflow : hidden; ">
-							
 							<div class="row mb-1 justify-content-between">
 								<div class="date-area ml-3 float-left">
 									<h2><span id="date"></span></h2>
 								</div>
-								
 								<div class="mr-4 float-right">
 									<button id="nowBtn" class="btn btn-outline-primary">Today</button>
 									<button id="prevBtn" class="btn btn-outline-primary"><i class="cil-chevron-left"></i></button>
 									<button id="nextBtn" class="btn btn-outline-primary"><i class="cil-chevron-right"></i></button>
-								
-								
 								</div>
 							</div>
-							
-							
 							<div id="calendar"></div>
 						</div>
 					</div>
@@ -239,7 +226,7 @@
 				</footer>
 			</div>
 		</div>
-		<script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
+		<script src="/lib/coreui.bundle.min.js"></script>
 		<script src="/socket.io/socket.io.js"></script>
 		<script>
 			$(function() {
@@ -554,7 +541,6 @@
 				});
 				
 				/*스케줄 캘린더 부분*/
-				
 				const container = document.getElementById('calendar');
 			
 				const options = {

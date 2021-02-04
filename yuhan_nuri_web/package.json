@@ -1,12 +1,13 @@
 {
   "name": "YuhanNuri",
   "version": "1.0.0",
-  "description": "유한누리, 학생 상담 어플리케이션",
+  "description": "학생상담센터 앱, 유한누리",
   "main": "main.js",
   "author": "유한대학교 IT소프트웨어공학과",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon main.js"
+    "dev": "nodemon main.js",
+    "start": "pm2 start main.js"
   },
   "dependencies": {
     "bcrypt": "^5.0.0",
@@ -20,7 +21,6 @@
     "express-session": "^1.17.1",
     "firebase-admin": "^9.2.0",
     "helmet": "^4.2.0",
-    "https": "^1.0.0",
     "moment": "^2.27.0",
     "moment-timezone": "^0.5.31",
     "multer": "^1.4.2",

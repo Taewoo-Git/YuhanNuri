@@ -1,48 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<!-- Required meta tags -->
+		<title>유한대학교 학생상담센터</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<!-- CoreUI CSS -->
-		<link
-			rel="stylesheet"
-			href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css"
-			crossorigin="anonymous"
-		/>
+		<script src="/js/jquery-latest.min.js"></script>
+		<link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
 		<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
-
-		<title>유한대학교 학생상담센터</title>
-		<script src="https://code.jquery.com/jquery-latest.min.js"></script>
 		<style>
-        .toggle_wrap {
-            float: right;
-            margin-right: 1.25rem;
-            margin-top: 0.25rem;
-            font-size: 15px;
-        }
-
-        .font-size-15 {
-            font-size: 15px;
-        }
-
-        .fixed_btn_position {
-            top: 20%;
-            left: 90%;
-        }
-
-        .toggle_normal_wrap {
-            float: right;
-            margin-top: 0.25rem;
-            font-size: 15px;
-        }
-		.pr_10{
-			padding-right:10px;
-		}
-		.pr_30{
-			padding-right:30px;
-		}
-    </style>
+			.toggle_wrap{
+				float: right;
+				margin-right: 1.25rem;
+				margin-top: 0.25rem;
+				font-size: 15px;
+			}
+			.font-size-15{
+				font-size: 15px;
+			}
+			.fixed_btn_position{
+				top: 20%;
+				left: 90%;
+			}
+			.toggle_normal_wrap{
+				float: right;
+				margin-top: 0.25rem;
+				font-size: 15px;
+			}
+			.pr_10{
+				padding-right:10px;
+			}
+			.pr_30{
+				padding-right:30px;
+			}
+    	</style>
 	</head>
 	<body class="c-app">
 		<div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show c-sidebar-unfoldable" id="sidebar">
@@ -66,15 +56,13 @@
 					<i class="cil-hamburger-menu"></i>
 				</button>
 				<ul class="c-header-nav ml-auto mr-4">
-					<%- include ('adminAccount'); -%>
+				<%- include ('adminAccount'); -%>
 				</ul>
 				<div class="c-subheader px-3">
-					<!-- Breadcrumb-->
 					<ol class="breadcrumb border-0 m-0">
 						<li class="breadcrumb-item">예약</li>
 						<li class="breadcrumb-item">양식 항목</li>
 						<li class="breadcrumb-item active"><%=type.typename%> 질문</li>
-						<!-- Breadcrumb Menu-->
 					</ol>
 				</div>
 			</header>
@@ -190,354 +178,7 @@
 						<button type="submit" class="add_event_btn_ btn btn-primary" value="save">
 							저 장
 						</button>
-					</div> 
-					<script>
-						let sendObject = [
-						<% result.forEach(function(v,i){ %>
-							{
-								id: 'card_id_<%=v.askno%>',
-								type: <%if(v.choicetypeno===1){%>
-                                        "<%='radio'%>"
-                                	  <%}if(v.choicetypeno===2) {%>
-                                    	"<%='check'%>"
-                                      <%}if(v.choicetypeno===3) {%>
-                                        "<%='normal'%>"
-                                      <%}%>,
-								question: '<%= v.ask %>',
-								<%if(v.choicetypeno==2){%> 
-								askList:[
-										<%v.choice.split(',').forEach(function(b,j){%>
-										{
-											id:'check_<%=v.askno%>_<%=j%>',
-											ask:'<%=b%>'
-										},
-										<%}) %>
-									],
-								<%}%>
-								<%if(v.choicetypeno==1){%> 
-								askList:[
-										<%v.choice.split(',').forEach(function(b,j){%>
-										{
-											id:'radio_<%=v.askno%>_<%=j%>',
-											ask:'<%= b %>'
-										},
-										<%}) %>
-									],
-								<%}%>
-							},
-						<%});%>	];
-						if(sendObject.length===0){
-							$('.col-8').append(`
-							<div class="jumbotron jumbotron-fluid">
-							  <div class="container" style="text-align: center;">
-								<h1 class="display-4">저장된 질문이 없습니다.</h1>
-							  </div>
-							</div>
-							`);
-						}
-						let i = <%=max ? max : 0%>;
-						let cur_i = <%=max ? max : 0%>;
-
-						$('.add_event_btn_').click(function (e) {
-							switch (e.target.value) {
-								case 'add_check_card':
-									if(sendObject.length===0){
-										$('div').remove('.jumbotron');
-									}
-									$('.col-8').append(`
-										<div class="card">
-											<div class="card-body" id=card_id_${++i}>
-												<div class="input-group mb-3">
-													<div class="input-group-prepend">
-														<span class="input-group-text" id="question">질 문</span>
-													</div>
-													<input type="text" class="form-control cardTitle" placeholder="Question" aria-label="question" 
-													 oninput="updateQuestion(card_id_${i},this)" style="background-color:white!important;">
-													<button type="button" class="btn btn-danger ml-2" onclick="deleteCard(card_id_${i},this,${i})">질문 취소</button>
-												</div>
-												<div class="form-check">
-													<input class="form-check-input" type="checkbox" id="defaultCheck1">
-													<label class="form-check-label" for="defaultCheck1">
-														<input type="text" class="form-control" placeholder="답" aria-label="" size=50 
-														 oninput="updateAsk(card_id_${i},this)">
-													</label>
-													<button type="button" class="btn btn-ghost-danger" id="check_${i}_0" 
-														onclick="deleteAsk(card_id_${i},this)">X</button>
-												</div>
-											</div>
-											<div class="form-check mb-3 add_check_btn">
-												<label class="form-check-label">
-													<button type="button" value="add_check" class="add_event_btn_${i} btn btn-primary"  onclick=addCheck(card_id_${i})>추 가</button>
-												</label>
-											</div>
-										</div>
-									`);
-									sendObject.push({
-										id: `card_id_${i}`,
-										type: 'check',
-										question: '',
-										askList: [{ id: `check_${i}_0`, ask: '' }],
-										required: false,
-									});
-									cur_i = i;
-									break;
-								case 'add_radio_card':
-									if(sendObject.length===0){
-										$('div').remove('.jumbotron');
-									}
-									$('.col-8').append(`
-										<div class="card">
-											<div class="card-body" id=card_id_${++i}>
-												<div class="input-group mb-3">
-													<div class="input-group-prepend">
-														<span class="input-group-text" id="question">질 문</span>
-													</div>
-													<input type="text" class="form-control cardTitle" placeholder="Question" aria-label="question" 
-													 oninput="updateQuestion(card_id_${i},this)" style="background-color:white!important;">
-													<button type="button" class="btn btn-danger ml-2" onclick="deleteCard(card_id_${i},this,${i})">질문 취소</button>
-												</div>
-												<div class="form-check">
-													<input class="form-check-input" type="radio" name="radio_${i}" id="exampleRadios_${i}" value="option1">
-													<label class="form-check-label" for="exampleRadios1">
-														<input type="text" class="form-control" placeholder="답" aria-label="" size=50 
-														 oninput="updateAsk(card_id_${i}, this)">
-													</label>
-													<button type="button" class="btn btn-ghost-danger" id="radio_${i}_0" 
-														onclick="deleteAsk(card_id_${i},this)">X</button>
-												</div>
-											</div>
-											<div class="form-check mb-3">
-												<label class="form-check-label">
-													<button type="button" value="add_check" class="add_event_btn_${i} btn btn-primary" onclick=addRadio(card_id_${i})>추 가</button>
-												</label>
-											</div>
-										</div>
-									`);
-									sendObject.push({
-										id: `card_id_${i}`,
-										type: 'radio',
-										question: '',
-										askList: [{ id: `radio_${i}_0`, ask: '' }],
-										required: false,
-									});
-									cur_i = i;
-									break;
-								case 'add_nomal_card':
-									if(sendObject.length===0){
-										$('div').remove('.jumbotron');
-									}
-									$('.col-8').append(`
-										<div class="card">
-											<div class="card-body" id=card_id_${++i} style="padding-bottom: 5px!important;">
-												<div class="input-group mb-3">
-													<div class="input-group-prepend">
-														<span class="input-group-text" id="question">질 문</span>
-													</div>
-													<input type="text" class="form-control cardTitle" placeholder="Question" aria-label="question" 
-													 oninput="updateQuestion(card_id_${i},this)" style="background-color:white!important;">
-													<button type="button" class="btn btn-danger add_event_btn" onclick="deleteCard(card_id_${i},this,${i})">질문 취소</button>
-												</div>
-												<!-- <div class="toggle_normal_wrap">
-													<pre class="float-left font-size-15">필 수 </pre>
-													<label class="float-right c-switch c-switch-3d c-switch-primary addbtn-side-vertical-match">
-														<input type="checkbox" class="c-switch-input" onchange="isRequired(card_id_${i},this)">
-														<span class="c-switch-slider"></span>
-													</label>
-												</div> -->
-											</div>
-										</div>
-									`);
-									sendObject.push({
-										id: `card_id_${i}`,
-										type: 'normal',
-										question: '',
-										required: false,
-									});
-									cur_i = i;
-									break;
-								case 'save':
-									$.ajax({
-										type: 'POST',
-										dataType: 'json',
-										url: '../saveForm/<%= type.typeno%>',
-										async: true,
-										data: { sendAjax: JSON.stringify(sendObject) },
-										success: function (data) {
-											if (data.state === 'ok') {
-												$('.c-main').prepend(`
-													<div class="alert alert-success alert-dismissible fade show successAlert" role="alert">
-													  <strong>저장 완료!</strong> 질문이 정상적으로 저장되었습니다.
-													  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-														<span aria-hidden="true">&times;</span>
-													  </button>
-													</div>
-												`);
-												
-												$('.cardTitle').each(function(index, item){ 
-													$(item).prop('readonly', true);
-												});
-												
-												$(window).scrollTop(0);
-												
-												$('.successAlert').eq(0).fadeOut(3000);
-											}
-											else{
-												$('.c-main').prepend(`
-													<div class="alert alert-danger alert-dismissible fade show failAlert" role="alert">
-													  <strong>저장 실패!</strong> 다시 한번 확인해 주세요.
-													  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-														<span aria-hidden="true">&times;</span>
-													  </button>
-													</div>
-												`);
-												
-												$(window).scrollTop(0);
-												
-												$('.failAlert').eq(0).fadeOut(3000);
-											}
-										},
-									});
-									break;
-								default:
-									break;
-							}
-							window.scrollBy(0, document.getElementsByClassName('card')[document.getElementsByClassName('card').length - 1].getBoundingClientRect().bottom);
-						});
-						function deleteCard(parent, me, askno) {
-							--i;
-							if (i + 1 == cur_i) {
-								// 1 2 3에서 2번 카드를 지우면 3이 되어 이후 추가이벤트로 인해 생겨있던 카드 3과 생겨질 카드3에서 중복 발생하여 중복 제거하기 위함
-								i = cur_i;
-							}
-							const findParentIndex = sendObject.findIndex((v) => v.id === parent.id);
-							sendObject.splice(findParentIndex, 1);
-							$.ajax({
-								type:'POST',
-								dataType:'json',
-								url:'../noUseAsk',
-								async:true,
-								data:{"noUse" : askno},
-								success:function(data){
-								}
-							});
-							$(me).parentsUntil('.col-8').remove();
-							if(sendObject.length===0){
-								$('.col-8').append(`
-									<div class="jumbotron jumbotron-fluid">
-									  <div class="container">
-										<h1 class="display-4">저장된 질문이 없습니다.</h1>
-									  </div>
-									</div>
-								`);
-							}
-						}
-
-						function deleteAsk(parent, me) {
-							const findParentIndex = sendObject.findIndex((v) => v.id === parent.id);
-							const findAskListLength = sendObject[findParentIndex].askList.length;
-							if(findAskListLength === 1) {
-								alert("적어도 한 개 이상의 답안이 필요합니다.");
-							}
-							else {
-								let elem_id_prefix = me.id.split('_')[0] + "_" + me.id.split('_')[1] + "_";
-								
-								const findMeIndex = sendObject[findParentIndex].askList.findIndex((v) => v.id === me.id);
-								sendObject[findParentIndex].askList.splice(findMeIndex, 1);
-								$(me).parent().remove();
-								
-								for(let i=0; i<sendObject[findParentIndex].askList.length; i++) {
-									sendObject[findParentIndex].askList[i].id = elem_id_prefix + i;
-									  
-									$("button[id^='check_17_']").each(function(index) {
-										$(this).attr('id', elem_id_prefix+index);
-									});
-								}
-							}
-						}
-						
-						function addCheck(e) {
-							const findParentIndex = sendObject.findIndex((v) => v.id === e.id);
-							const findParentId = e.id.split('_')[2];
-							const findAskListLength = sendObject[findParentIndex].askList.length;
-							sendObject
-								.find((v) => v.id === e.id)
-								.askList.push({
-									id: `check_${findParentId}_${findAskListLength}`,
-									ask: '',
-								});
-							$(e).append(`
-								<div class="form-check">
-									<input class="form-check-input" type="checkbox">
-									<label class="form-check-label">
-										<input type="text" class="form-control" placeholder="답" aria-label="" size=50 
-										 oninput="updateAsk(card_id_${findParentId},this)">
-									</label>
-									<button type="button" class="btn btn-ghost-danger" id="check_${findParentId}_${findAskListLength}" 
-									onclick="deleteAsk(card_id_${findParentId},this)">X</button>
-								</div>
-							`);
-						}
-						function addRadio(e) {
-							const findParentIndex = sendObject.findIndex((v) => v.id === e.id);
-							const findParentId = e.id.split('_')[2];
-							const findAskListLength = sendObject[findParentIndex].askList.length;
-							sendObject
-								.find((v) => v.id === e.id)
-								.askList.push({
-									id: `radio_${findParentId}_${findAskListLength}`,
-									ask: '',
-								});
-							$(e).append(`
-								<div class="form-check">
-									<input class="form-check-input" type="radio" name="radio_${findParentId}" id="exampleRadios_${findParentId}">
-									<label class="form-check-label" for="exampleRadios1">
-										<input type="text" class="form-control" placeholder="답" aria-label="" size=50 
-										oninput="updateAsk(card_id_${findParentId},this)">
-									</label>
-									<button type="button" class="btn btn-ghost-danger" id="radio_${findParentId}_${findAskListLength}" 
-									onclick="deleteAsk(card_id_${findParentId},this)">X</button>
-								</div>
-							`);
-						}
-						function addGrid(e) {
-							const findParentIndex = sendObject.findIndex(v => v.id === e.id);
-							const findParentIdTail = sendObject[findParentIndex].id[sendObject[findParentIndex].id.length - 1];
-							const findAskListLength = sendObject[findParentIndex].askList.length;
-							sendObject.find(v => v.id === e.id).askList.push({ id: `grid_${findParentIdTail}_${findAskListLength}`, ask: '', });
-							$(e).append(`
-								<div class="form-check">
-									<label class="form-check-label" for="exampleRadios1">
-										<input type="text" class="form-control" placeholder="답" aria-label="" size=50 
-										id="grid_${findParentIdTail}_${findAskListLength}" oninput="updateAsk(card_id_${findParentIdTail},this)">
-									</label>
-									<button type="button" class="btn btn-ghost-danger"
-										onclick="deleteAsk(card_id_${findParentIdTail},this)">X</button>
-								</div>
-							`);
-						}
-
-						function updateQuestion(parent, me) {
-							const findParentIndex = sendObject.findIndex((v) => v.id === parent.id);
-							sendObject[findParentIndex].question = overidingEscape(me.value);
-						}
-						function updateAsk(parent, me) {
-							const findParentIndex = sendObject.findIndex((v) => v.id === parent.id);
-							const findMeIndex = sendObject[findParentIndex].askList.findIndex(
-								(v) => v.id === me.parentNode.nextSibling.nextSibling.id
-							);
-							sendObject[findParentIndex].askList[findMeIndex].ask = overidingEscape(me.value);
-						}
-						function overidingEscape(str) {
-							var map = {
-								'&': escape('&'),
-								'<': escape('<'),
-								'>': escape('>'),
-								'"': escape('"'),
-								"'": escape('\'')
-							};
-							return str.replace(/[&<>"']/g, function(m) { return map[m]; });
-						}
-					</script>
+					</div>
 				</main>
 				<footer class="c-footer">
 					<div><a href="https://coreui.io">CoreUI</a> &copy; 2020 creativeLabs.</div>
@@ -547,6 +188,360 @@
 				</footer>
 			</div>
 		</div>
-	<script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
+		<script src="/lib/coreui.bundle.min.js"></script>
+		<script>
+			let sendObject = [
+				<% result.forEach(function(v,i){ %>
+				{
+					id: 'card_id_<%=v.askno%>',
+					type: <%if(v.choicetypeno===1){%>
+							"<%='radio'%>"
+						  <%}if(v.choicetypeno===2) {%>
+							"<%='check'%>"
+						  <%}if(v.choicetypeno===3) {%>
+							"<%='normal'%>"
+						  <%}%>,
+					question: '<%= v.ask %>',
+					<%if(v.choicetypeno==2){%> 
+					askList:[
+							<%v.choice.split(',').forEach(function(b,j){%>
+							{
+								id:'check_<%=v.askno%>_<%=j%>',
+								ask:'<%=b%>'
+							},
+							<%}) %>
+						],
+					<%}%>
+					<%if(v.choicetypeno==1){%> 
+					askList:[
+							<%v.choice.split(',').forEach(function(b,j){%>
+							{
+								id:'radio_<%=v.askno%>_<%=j%>',
+								ask:'<%= b %>'
+							},
+							<%}) %>
+						],
+					<%}%>
+				},
+				<%});%>
+			];
+			
+			if(sendObject.length===0){
+				$('.col-8').append(`
+				<div class="jumbotron jumbotron-fluid">
+				  <div class="container" style="text-align: center;">
+					<h1 class="display-4">저장된 질문이 없습니다.</h1>
+				  </div>
+				</div>
+				`);
+			}
+			let i = <%=max ? max : 0%>;
+			let cur_i = <%=max ? max : 0%>;
+
+			$('.add_event_btn_').click(function (e) {
+				switch (e.target.value) {
+					case 'add_check_card':
+						if(sendObject.length===0){
+							$('div').remove('.jumbotron');
+						}
+						$('.col-8').append(`
+							<div class="card">
+								<div class="card-body" id=card_id_${++i}>
+									<div class="input-group mb-3">
+										<div class="input-group-prepend">
+											<span class="input-group-text" id="question">질 문</span>
+										</div>
+										<input type="text" class="form-control cardTitle" placeholder="Question" aria-label="question" 
+										 oninput="updateQuestion(card_id_${i},this)" style="background-color:white!important;">
+										<button type="button" class="btn btn-danger ml-2" onclick="deleteCard(card_id_${i},this,${i})">질문 취소</button>
+									</div>
+									<div class="form-check">
+										<input class="form-check-input" type="checkbox" id="defaultCheck1">
+										<label class="form-check-label" for="defaultCheck1">
+											<input type="text" class="form-control" placeholder="답" aria-label="" size=50 
+											 oninput="updateAsk(card_id_${i},this)">
+										</label>
+										<button type="button" class="btn btn-ghost-danger" id="check_${i}_0" 
+											onclick="deleteAsk(card_id_${i},this)">X</button>
+									</div>
+								</div>
+								<div class="form-check mb-3 add_check_btn">
+									<label class="form-check-label">
+										<button type="button" value="add_check" class="add_event_btn_${i} btn btn-primary"  onclick=addCheck(card_id_${i})>추 가</button>
+									</label>
+								</div>
+							</div>
+						`);
+						sendObject.push({
+							id: `card_id_${i}`,
+							type: 'check',
+							question: '',
+							askList: [{ id: `check_${i}_0`, ask: '' }],
+							required: false,
+						});
+						cur_i = i;
+						break;
+					case 'add_radio_card':
+						if(sendObject.length===0){
+							$('div').remove('.jumbotron');
+						}
+						$('.col-8').append(`
+							<div class="card">
+								<div class="card-body" id=card_id_${++i}>
+									<div class="input-group mb-3">
+										<div class="input-group-prepend">
+											<span class="input-group-text" id="question">질 문</span>
+										</div>
+										<input type="text" class="form-control cardTitle" placeholder="Question" aria-label="question" 
+										 oninput="updateQuestion(card_id_${i},this)" style="background-color:white!important;">
+										<button type="button" class="btn btn-danger ml-2" onclick="deleteCard(card_id_${i},this,${i})">질문 취소</button>
+									</div>
+									<div class="form-check">
+										<input class="form-check-input" type="radio" name="radio_${i}" id="exampleRadios_${i}" value="option1">
+										<label class="form-check-label" for="exampleRadios1">
+											<input type="text" class="form-control" placeholder="답" aria-label="" size=50 
+											 oninput="updateAsk(card_id_${i}, this)">
+										</label>
+										<button type="button" class="btn btn-ghost-danger" id="radio_${i}_0" 
+											onclick="deleteAsk(card_id_${i},this)">X</button>
+									</div>
+								</div>
+								<div class="form-check mb-3">
+									<label class="form-check-label">
+										<button type="button" value="add_check" class="add_event_btn_${i} btn btn-primary" onclick=addRadio(card_id_${i})>추 가</button>
+									</label>
+								</div>
+							</div>
+						`);
+						sendObject.push({
+							id: `card_id_${i}`,
+							type: 'radio',
+							question: '',
+							askList: [{ id: `radio_${i}_0`, ask: '' }],
+							required: false,
+						});
+						cur_i = i;
+						break;
+					case 'add_nomal_card':
+						if(sendObject.length===0){
+							$('div').remove('.jumbotron');
+						}
+						$('.col-8').append(`
+							<div class="card">
+								<div class="card-body" id=card_id_${++i} style="padding-bottom: 5px!important;">
+									<div class="input-group mb-3">
+										<div class="input-group-prepend">
+											<span class="input-group-text" id="question">질 문</span>
+										</div>
+										<input type="text" class="form-control cardTitle" placeholder="Question" aria-label="question" 
+										 oninput="updateQuestion(card_id_${i},this)" style="background-color:white!important;">
+										<button type="button" class="btn btn-danger add_event_btn" onclick="deleteCard(card_id_${i},this,${i})">질문 취소</button>
+									</div>
+									<!-- <div class="toggle_normal_wrap">
+										<pre class="float-left font-size-15">필 수 </pre>
+										<label class="float-right c-switch c-switch-3d c-switch-primary addbtn-side-vertical-match">
+											<input type="checkbox" class="c-switch-input" onchange="isRequired(card_id_${i},this)">
+											<span class="c-switch-slider"></span>
+										</label>
+									</div> -->
+								</div>
+							</div>
+						`);
+						sendObject.push({
+							id: `card_id_${i}`,
+							type: 'normal',
+							question: '',
+							required: false,
+						});
+						cur_i = i;
+						break;
+					case 'save':
+						$.ajax({
+							type: 'POST',
+							dataType: 'json',
+							url: '../saveForm/<%= type.typeno%>',
+							async: true,
+							data: { sendAjax: JSON.stringify(sendObject) },
+							success: function (data) {
+								if (data.state === 'ok') {
+									$('.c-main').prepend(`
+										<div class="alert alert-success alert-dismissible fade show successAlert" role="alert">
+										  <strong>저장 완료!</strong> 질문이 정상적으로 저장되었습니다.
+										  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+											<span aria-hidden="true">&times;</span>
+										  </button>
+										</div>
+									`);
+
+									$('.cardTitle').each(function(index, item){ 
+										$(item).prop('readonly', true);
+									});
+
+									$(window).scrollTop(0);
+
+									$('.successAlert').eq(0).fadeOut(3000);
+								}
+								else{
+									$('.c-main').prepend(`
+										<div class="alert alert-danger alert-dismissible fade show failAlert" role="alert">
+										  <strong>저장 실패!</strong> 다시 한번 확인해 주세요.
+										  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+											<span aria-hidden="true">&times;</span>
+										  </button>
+										</div>
+									`);
+
+									$(window).scrollTop(0);
+
+									$('.failAlert').eq(0).fadeOut(3000);
+								}
+							},
+						});
+						break;
+					default:
+						break;
+				}
+				window.scrollBy(0, document.getElementsByClassName('card')[document.getElementsByClassName('card').length - 1].getBoundingClientRect().bottom);
+			});
+			
+			function deleteCard(parent, me, askno) {
+				--i;
+				if (i + 1 == cur_i) {
+					// 1 2 3에서 2번 카드를 지우면 3이 되어 이후 추가이벤트로 인해 생겨있던 카드 3과 생겨질 카드3에서 중복 발생하여 중복 제거하기 위함
+					i = cur_i;
+				}
+				const findParentIndex = sendObject.findIndex((v) => v.id === parent.id);
+				sendObject.splice(findParentIndex, 1);
+				$.ajax({
+					type:'POST',
+					dataType:'json',
+					url:'../noUseAsk',
+					async:true,
+					data:{"noUse" : askno},
+					success:function(data){
+					}
+				});
+				$(me).parentsUntil('.col-8').remove();
+				if(sendObject.length===0){
+					$('.col-8').append(`
+						<div class="jumbotron jumbotron-fluid">
+						  <div class="container">
+							<h1 class="display-4">저장된 질문이 없습니다.</h1>
+						  </div>
+						</div>
+					`);
+				}
+			}
+
+			function deleteAsk(parent, me) {
+				const findParentIndex = sendObject.findIndex((v) => v.id === parent.id);
+				const findAskListLength = sendObject[findParentIndex].askList.length;
+				if(findAskListLength === 1) {
+					alert("적어도 한 개 이상의 답안이 필요합니다.");
+				}
+				else {
+					let elem_id_prefix = me.id.split('_')[0] + "_" + me.id.split('_')[1] + "_";
+
+					const findMeIndex = sendObject[findParentIndex].askList.findIndex((v) => v.id === me.id);
+					sendObject[findParentIndex].askList.splice(findMeIndex, 1);
+					$(me).parent().remove();
+
+					for(let i=0; i<sendObject[findParentIndex].askList.length; i++) {
+						sendObject[findParentIndex].askList[i].id = elem_id_prefix + i;
+
+						$("button[id^='check_17_']").each(function(index) {
+							$(this).attr('id', elem_id_prefix+index);
+						});
+					}
+				}
+			}
+
+			function addCheck(e) {
+				const findParentIndex = sendObject.findIndex((v) => v.id === e.id);
+				const findParentId = e.id.split('_')[2];
+				const findAskListLength = sendObject[findParentIndex].askList.length;
+				sendObject
+					.find((v) => v.id === e.id)
+					.askList.push({
+						id: `check_${findParentId}_${findAskListLength}`,
+						ask: '',
+					});
+				$(e).append(`
+					<div class="form-check">
+						<input class="form-check-input" type="checkbox">
+						<label class="form-check-label">
+							<input type="text" class="form-control" placeholder="답" aria-label="" size=50 
+							 oninput="updateAsk(card_id_${findParentId},this)">
+						</label>
+						<button type="button" class="btn btn-ghost-danger" id="check_${findParentId}_${findAskListLength}" 
+						onclick="deleteAsk(card_id_${findParentId},this)">X</button>
+					</div>
+				`);
+			}
+
+			function addRadio(e) {
+				const findParentIndex = sendObject.findIndex((v) => v.id === e.id);
+				const findParentId = e.id.split('_')[2];
+				const findAskListLength = sendObject[findParentIndex].askList.length;
+				sendObject
+					.find((v) => v.id === e.id)
+					.askList.push({
+						id: `radio_${findParentId}_${findAskListLength}`,
+						ask: '',
+					});
+				$(e).append(`
+					<div class="form-check">
+						<input class="form-check-input" type="radio" name="radio_${findParentId}" id="exampleRadios_${findParentId}">
+						<label class="form-check-label" for="exampleRadios1">
+							<input type="text" class="form-control" placeholder="답" aria-label="" size=50 
+							oninput="updateAsk(card_id_${findParentId},this)">
+						</label>
+						<button type="button" class="btn btn-ghost-danger" id="radio_${findParentId}_${findAskListLength}" 
+						onclick="deleteAsk(card_id_${findParentId},this)">X</button>
+					</div>
+				`);
+			}
+
+			function addGrid(e) {
+				const findParentIndex = sendObject.findIndex(v => v.id === e.id);
+				const findParentIdTail = sendObject[findParentIndex].id[sendObject[findParentIndex].id.length - 1];
+				const findAskListLength = sendObject[findParentIndex].askList.length;
+				sendObject.find(v => v.id === e.id).askList.push({ id: `grid_${findParentIdTail}_${findAskListLength}`, ask: '', });
+				$(e).append(`
+					<div class="form-check">
+						<label class="form-check-label" for="exampleRadios1">
+							<input type="text" class="form-control" placeholder="답" aria-label="" size=50 
+							id="grid_${findParentIdTail}_${findAskListLength}" oninput="updateAsk(card_id_${findParentIdTail},this)">
+						</label>
+						<button type="button" class="btn btn-ghost-danger"
+							onclick="deleteAsk(card_id_${findParentIdTail},this)">X</button>
+					</div>
+				`);
+			}
+
+			function updateQuestion(parent, me) {
+				const findParentIndex = sendObject.findIndex((v) => v.id === parent.id);
+				sendObject[findParentIndex].question = overidingEscape(me.value);
+			}
+
+			function updateAsk(parent, me) {
+				const findParentIndex = sendObject.findIndex((v) => v.id === parent.id);
+				const findMeIndex = sendObject[findParentIndex].askList.findIndex(
+					(v) => v.id === me.parentNode.nextSibling.nextSibling.id
+				);
+				sendObject[findParentIndex].askList[findMeIndex].ask = overidingEscape(me.value);
+			}
+
+			function overidingEscape(str) {
+				var map = {
+					'&': escape('&'),
+					'<': escape('<'),
+					'>': escape('>'),
+					'"': escape('"'),
+					"'": escape('\'')
+				};
+				return str.replace(/[&<>"']/g, function(m) { return map[m]; });
+			}
+		</script>
 	</body>
 </html>

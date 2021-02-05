@@ -1,34 +1,33 @@
 {
   "project_info": {
-    "project_number": "1077468891600",
-    "firebase_url": "https://yuhannuri-50a5e.firebaseio.com",
-    "project_id": "yuhannuri-50a5e",
-    "storage_bucket": "yuhannuri-50a5e.appspot.com"
+    "project_number": "948392679169",
+    "project_id": "yuhannuri-d4f0f",
+    "storage_bucket": "yuhannuri-d4f0f.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1077468891600:android:b95437d2d5cac7cb5a91d5",
+        "mobilesdk_app_id": "1:948392679169:android:cac172ba5b83f6d830ad00",
         "android_client_info": {
           "package_name": "com.example.yuhan_nuri_app"
         }
       },
       "oauth_client": [
         {
-          "client_id": "1077468891600-arp9arkahvjk830d7khsn13kihmuru4q.apps.googleusercontent.com",
+          "client_id": "948392679169-uhbcj3rgoii3k4s8tea0inng6hublqt3.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBVot5O8JQnlMJNPiGv1jP7N_TzymoE6Hg"
+          "current_key": "AIzaSyDn74kGameD_YoUmR3P75U29hGmCbviOFk"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "1077468891600-arp9arkahvjk830d7khsn13kihmuru4q.apps.googleusercontent.com",
+              "client_id": "948392679169-uhbcj3rgoii3k4s8tea0inng6hublqt3.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

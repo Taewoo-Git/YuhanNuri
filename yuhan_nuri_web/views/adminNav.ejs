@@ -22,21 +22,6 @@
 		스케줄</a>
 	</li>
 	
-	<!-- <li class="c-sidebar-nav-item c-sidebar-nav-dropdown"><a
-            class="c-sidebar-nav-link c-sidebar-nav-dropdown-toggle" href="#">
-        <i class="cil-group pr_30"></i>문의</a>
-        <ul class="c-sidebar-nav-dropdown-items">
-			<li class="c-sidebar-nav-item">
-					<a class="c-sidebar-nav-link" href="/admin/question">
-					문의 목록</a>
-			</li>
-			<li class="c-sidebar-nav-item">
-					<a class="c-sidebar-nav-link" href="/admin/questionAnswer/1">
-					문의 내역</a>
-			</li>
-        </ul>
-    </li> -->
-	
 	<li class="c-sidebar-nav-item c-sidebar-nav-dropdown"><a
             class="c-sidebar-nav-link c-sidebar-nav-dropdown-toggle" href="#">
         <i class="cil-clipboard pr_30"></i>양식 항목</a>
@@ -78,6 +63,7 @@
 			</li>
         </ul>
     </li>
+	
 	<li class="c-sidebar-nav-title">문의</li>
 	<li class="c-sidebar-nav-item">
 		<a class="c-sidebar-nav-link" href="/admin/question" target="_top">
@@ -87,6 +73,7 @@
 			<i class="cil-clipboard pr_30"></i>
 				문의 내역</a>
 	</li>
+	
 	<%if(adminInfo.author===1){%>
 	<li class="c-sidebar-nav-title">채팅</li>
 	<li class="c-sidebar-nav-item">
@@ -97,28 +84,14 @@
 			<i class="cil-save pr_30"></i>
 				전체 채팅 내역 저장</a>
 	</li>
-	<!-- <li class="c-sidebar-nav-item c-sidebar-nav-dropdown"><a
-            class="c-sidebar-nav-link c-sidebar-nav-dropdown-toggle" href="#">
-        <i class="cil-list-rich pr_30"></i>채팅 항목</a>
-        <ul class="c-sidebar-nav-dropdown-items">
-			<li class="c-sidebar-nav-item">
-				<a class="c-sidebar-nav-link" href="/admin/chat" target="_top">
-					<i class="cil-chat-bubble pr_30"></i>
-					채팅 상담</a>
-			</li>	
-			<li class="c-sidebar-nav-item">
-				<a class="c-sidebar-nav-link" href="/admin/getAllChatLog" target="_top">
-					<i class="cil-save pr_30"></i>
-					전체 채팅 내역 저장</a>
-			</li>	
-        </ul>
-    </li> -->
+	
 	<li class="c-sidebar-nav-title">만족도조사</li>
 	<li class="c-sidebar-nav-item">
 		<a class="c-sidebar-nav-link" href="/admin/getSatisfactionResult" target="_top">
 			<i class="cil-save pr_30"></i>
 				만족도조사 내역 저장</a>
 	</li>
+	
 	<li class="c-sidebar-nav-title">관리자</li>
 	<li class="c-sidebar-nav-item">
 		<a class="c-sidebar-nav-link" href="/admin/signUp" target="_top">

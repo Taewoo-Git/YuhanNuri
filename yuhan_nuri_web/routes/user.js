@@ -3,7 +3,7 @@ const router = express.Router();
 
 const cheerio = require('cheerio-httpcli');
 
-const db = require('../public/res/js/database.js')();
+const db = require('./database.js')();
 const connection = db.init();
 
 db.open(connection,'user');
@@ -16,7 +16,7 @@ const {isUserLoggedIn} = require('./middlewares');
 
 const bcrypt = require('bcrypt');
 
-const ErrorLogger = require('../public/res/js/ErrorLogger.js');
+const ErrorLogger = require('./logger_error.js');
 const logTimeFormat = "YYYY-MM-DD HH:mm:ss";
 
 router.post('/', function(req, res, next) { //POST /user
@@ -125,7 +125,7 @@ router.post('/mobile', function(req, res) { //POST /user/mobile
 		}
 		res.json("Login Success");
 	}, function(error) {
-		ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${error}`);
+		//ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${error}`);
 		res.json(null)
 	});
 });

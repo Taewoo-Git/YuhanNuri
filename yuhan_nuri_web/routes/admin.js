@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const db = require('../public/res/js/database.js')();
+const db = require('./database.js')();
 const connection = db.init();
 db.open(connection, "admin");
 
@@ -16,7 +16,7 @@ const schedule = require('node-schedule');
 const pdfDocument = require('pdfkit');
 
 const {reservationAcceptPush,answerPush,satisfactionPush} = require('./fcm'); 
-const {isAllAdminLoggedIn,isOnlyAdminLoggedIn} = require('./middlewares');  
+const {isAdminLoggedIn,isAccessDenied} = require('./middlewares');  
 
 const excel = require('exceljs');
 
@@ -29,8 +29,8 @@ deleteRule.dayOfWeek = [0, new schedule.Range(0,6)];
 deleteRule.hour = 00;
 deleteRule.minute = 00;
 
-const ErrorLogger = require('../public/res/js/ErrorLogger.js');
-const DefaultLogger = require('../public/res/js/DefaultLogger.js');
+const ErrorLogger = require('./logger_error.js');
+const DefaultLogger = require('./logger_default.js');
 const logTimeFormat = "YYYY-MM-DD HH:mm:ss";
 
 router.use(function(req, res, next) {
@@ -59,7 +59,7 @@ const upload = multer({
 	limits: {fileSize: 5 * 1024 * 1024}, // 5MB
 });
 
-router.get("/", isAllAdminLoggedIn, function(req, res, next) { //GET /admin
+router.get("/", isAdminLoggedIn, function(req, res, next) { //GET /admin
 	const getReservationData = "SELECT User.stuname as stuname, User.phonenum as phonenum, reserv.serialno as no, " +
 		  "reserv.stuno as stuno, consult.typename as typename, reserv.starttime as starttime, reserv.date as date " +  
 		  "FROM User JOIN Reservation reserv ON User.stuno = reserv.stuno LEFT JOIN ConsultType consult ON reserv.typeno = consult.typeno " +
@@ -93,7 +93,7 @@ router.get("/", isAllAdminLoggedIn, function(req, res, next) { //GET /admin
 	}
 });
 
-router.post("/readReservedSchedule", isAllAdminLoggedIn, function(req, res, next) {	
+router.post("/readReservedSchedule", isAdminLoggedIn, function(req, res, next) {	
 	const sql_readReservedSchedule = "SELECT consulttype.typename as typename, user.stuno as stuno, " +
 		  "user.stuname as stuname, reserv.date as date, reserv.finished as finished, reserv.empid, " +
 		  "reserv.starttime as starttime, reserv.date as date " +
@@ -156,7 +156,7 @@ router.post("/readReservedSchedule", isAllAdminLoggedIn, function(req, res, next
 });
 
 // 관리자 계정에 따라 자신의 스케줄을 가져옴.
-router.post("/readMySchedule", isAllAdminLoggedIn, function(req, res, next) {
+router.post("/readMySchedule", isAdminLoggedIn, function(req, res, next) {
 	const sql_readMySchedule = "SELECT scheduleno, Schedule.empid, calendarId, title, category, " +
 		  "start, end, location, empname FROM Schedule JOIN Counselor ON " +
 		  "Schedule.empid = Counselor.empid WHERE Schedule.empid = ?";
@@ -185,7 +185,7 @@ router.post("/readMySchedule", isAllAdminLoggedIn, function(req, res, next) {
 });
 
 // 자신의 스케줄을 변경하는 부분
-router.post("/updateSchedule", isAllAdminLoggedIn, function(req, res, next) {
+router.post("/updateSchedule", isAdminLoggedIn, function(req, res, next) {
 	const datetime_format = "YYYY-MM-DD HH:mm:ss";
 	let sql_updateSchedule = "UPDATE Schedule SET ";
 	let sql_alreadyReserved = "SELECT serialno FROM Reservation WHERE date = (SELECT DATE(start) FROM Schedule WHERE scheduleno = ?)";
@@ -229,7 +229,7 @@ router.post("/updateSchedule", isAllAdminLoggedIn, function(req, res, next) {
 });
 
 // 스케줄 삭제
-router.post("/deleteSchedule", isAllAdminLoggedIn, function(req, res, next) {
+router.post("/deleteSchedule", isAdminLoggedIn, function(req, res, next) {
 	let data = JSON.parse(req.body.sendAjax);
 	let session_empid = req.session.adminInfo.empid;
 	
@@ -270,7 +270,7 @@ router.post("/deleteSchedule", isAllAdminLoggedIn, function(req, res, next) {
 });
 
 // 스케줄을 새로 생성하는 부분
-router.post("/createSchedule", isAllAdminLoggedIn, function(req, res, next) {
+router.post("/createSchedule", isAdminLoggedIn, function(req, res, next) {
 	const sql_createSchedule = "INSERT INTO Schedule(empid, calendarId, title, category, start, end, location) VALUES (?, ?, ?, ?, ?, ?, ?)";
 	const sql_getAlreadyScheduled = "SELECT HOUR(start) as start, HOUR(end) as end FROM Schedule WHERE DATE(start) = ? AND empid = ?";
 	
@@ -286,8 +286,10 @@ router.post("/createSchedule", isAllAdminLoggedIn, function(req, res, next) {
 	let start = moment(new Date(data.start)).format(datetime_format);
 	let end = moment(new Date(data.end)).format(datetime_format);
 	
+	
 	let startIndex = moment(new Date(data.start)).format(date_format);
 	let endIndex = moment(new Date(data.end)).format(date_format);
+	
 	
 	let location = "";
 	
@@ -304,9 +306,17 @@ router.post("/createSchedule", isAllAdminLoggedIn, function(req, res, next) {
 			}
 			else{
 				if(row.length > 0) {
-					for(let time = row[0].start; time <= row[0].end; time++) {
-						scheduled_hour.push(time); // 이건 기존 스케줄 표에서 가져온 스케줄
+					for(let rownum = 0; rownum < row.length; rownum++){
+						for(let time = row[rownum].start; time <= row[rownum].end; time++) {
+							if(scheduled_hour.lastIndexOf(time) == -1){
+								scheduled_hour.push(time); // 이건 기존 스케줄 표에서 가져온 스케줄
+							}
+						}
 					}
+					
+					
+					
+					
 					
 					let created_start = new Date(start).getHours();
 					let created_end = new Date(end).getHours();
@@ -316,18 +326,26 @@ router.post("/createSchedule", isAllAdminLoggedIn, function(req, res, next) {
 						createad_hour.push(time);
 					}
 					
-					let isDuplicateArray = createad_hour.filter((item) => scheduled_hour.includes(item));
+				
 					
-					if(isDuplicateArray.length > 0) res.json({state: "duplicate"});
-					else {
-						connection.execute(sql_createSchedule, [empid, data.calendarId, data.title, data.category, start, end, location], (err) => {
-							if(err) {
-								ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);
-								next(err);
-							}
-							else res.json({state: "ok"});
-						});
+					if(createad_hour.length == 1){
+						res.json({state : "inputerrtime"});
+					}else{
+						let isDuplicateArray = createad_hour.filter((item) => scheduled_hour.includes(item));
+					
+						if(isDuplicateArray.length > 1) res.json({state: "duplicate"});
+						else {
+							connection.execute(sql_createSchedule, [empid, data.calendarId, data.title, data.category, start, end, location], (err) => {
+								if(err) {
+									ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);
+									next(err);
+								}
+								else res.json({state: "ok"});
+							});
+						}
 					}
+					
+					
 				}
 				else {
 					connection.execute(sql_createSchedule, [empid, data.calendarId, data.title, data.category, start, end, location], (err) => {
@@ -343,7 +361,7 @@ router.post("/createSchedule", isAllAdminLoggedIn, function(req, res, next) {
 	}
 });
 
-router.post("/accessReservation", isAllAdminLoggedIn, function(req, res, next) { //POST /admin/accessReservation
+router.post("/accessReservation", isAdminLoggedIn, function(req, res, next) { //POST /admin/accessReservation
 	const setAccessReservationData = "UPDATE Reservation SET status = 1, finished = ?, empid = ? WHERE serialno = ?";
 	const isPsyTest = "SELECT typeno FROM Reservation WHERE serialno = ?";
 	
@@ -374,7 +392,7 @@ router.post("/accessReservation", isAllAdminLoggedIn, function(req, res, next) {
 	});
 });
 
-router.post("/cancelReservation", isAllAdminLoggedIn, function(req, res, next) { //POST /admin/cancelReservation
+router.post("/cancelReservation", isAdminLoggedIn, function(req, res, next) { //POST /admin/cancelReservation
 	const setCancelReservationData = "DELETE FROM Reservation WHERE serialno = ?";
 	let serialno = req.body.sendAjax;
 	
@@ -387,7 +405,7 @@ router.post("/cancelReservation", isAllAdminLoggedIn, function(req, res, next) {
 	});
 });
 
-router.post("/getMentalApplyForm", isAllAdminLoggedIn, function(req, res, next) { //POST /admin/getMentalApplyForm
+router.post("/getMentalApplyForm", isAdminLoggedIn, function(req, res, next) { //POST /admin/getMentalApplyForm
 	const query = "SELECT a.serialno, a.stuno, a.stuname, a.gender, a.birth, a.email, a.date, " +
 				  "GROUP_CONCAT(b.ask SEPARATOR '|') AS 'asks', GROUP_CONCAT(c.choiceanswer SEPARATOR '|') AS 'answers', " +
 				  "(SELECT GROUP_CONCAT(testname) FROM PsyTestList list, " +
@@ -406,7 +424,7 @@ router.post("/getMentalApplyForm", isAllAdminLoggedIn, function(req, res, next) 
 	});
 });
 
-router.post("/getConsultApplyForm", isAllAdminLoggedIn, function(req, res, next) { //POST /admin/getMentalApplyForm
+router.post("/getConsultApplyForm", isAdminLoggedIn, function(req, res, next) { //POST /admin/getMentalApplyForm
 	const query = "SELECT a.serialno, a.stuno, a.stuname, a.gender, a.birth, a.email, a.date, " +
 				  "GROUP_CONCAT(b.ask SEPARATOR '|') AS 'asks', " +
 				  "GROUP_CONCAT(c.choiceanswer SEPARATOR '|') AS 'answers', " +
@@ -429,18 +447,18 @@ router.post("/getConsultApplyForm", isAllAdminLoggedIn, function(req, res, next)
 	});
 });
 
-router.get("/chat", isOnlyAdminLoggedIn, (req, res, next) => {
+router.get("/chat", isAccessDenied, (req, res, next) => {
 	res.render('chattingForm', {
 		empid: req.session.adminInfo.empid,
 		empname: req.session.adminInfo.empname
 	});
 });
 
-router.get("/schedule", isAllAdminLoggedIn, function(req, res, next) { //GET /admin/adminTest
+router.get("/schedule", isAdminLoggedIn, function(req, res, next) { //GET /admin/adminTest
 	res.render('adminCalendar');
 });
 
-router.get("/settings", isOnlyAdminLoggedIn, function(req, res, next) {
+router.get("/settings", isAccessDenied, function(req, res, next) {
 	const sql_selectCounselor="select empid, empname, positionno from Counselor where Counselor.use = 'Y'";
 	connection.execute(sql_selectCounselor, (err, rows) => {
 		if(err) {
@@ -451,19 +469,19 @@ router.get("/settings", isOnlyAdminLoggedIn, function(req, res, next) {
 	});
 });
 
-router.post('/uploadFile', isAllAdminLoggedIn, upload.single('file'), function(req, res, next) {
+router.post('/uploadFile', isAdminLoggedIn, upload.single('file'), function(req, res, next) {
 	res.json({
 		"location": "/" + req.file.path.toString(),
 	});
 });
 
-router.get('/logout', isAllAdminLoggedIn, function(req, res) { //GET /user/logout
+router.get('/logout', isAdminLoggedIn, function(req, res) { //GET /user/logout
     req.session.destroy();
 	res.clearCookie('isAutoLogin');
     res.redirect('/');
 });
 
-router.get('/question', isAllAdminLoggedIn, function(req, res) {
+router.get('/question', isAdminLoggedIn, function(req, res) {
 	const sql_selectQuestion='SELECT DISTINCT t1.*, t2.stuname, t2.phonenum FROM QuestionBoard t1, User t2 WHERE t1.stuno = t2.stuno AND  answer IS NULL ORDER BY t1.no ASC';
 	let selectList = [];
 	
@@ -476,7 +494,7 @@ router.get('/question', isAllAdminLoggedIn, function(req, res) {
 	});
 });
 
-router.get('/questionAnswer/:page/', isAllAdminLoggedIn, function(req, res) {
+router.get('/questionAnswer/:page/', isAdminLoggedIn, function(req, res) {
 	const questionAnswerSql = 'SELECT t1.no, t1.title, t1.empname, t1.date, t2.stuname FROM QuestionBoard t1, User t2 WHERE t1.stuno = t2.stuno AND t1.empname IS NOT NULL';
 	const page = req.params.page;
 	connection.execute(questionAnswerSql, (err, rows) => {
@@ -485,7 +503,7 @@ router.get('/questionAnswer/:page/', isAllAdminLoggedIn, function(req, res) {
 	});
 });
 
-router.get('/questionAnswer/:page/:type/:search', isAllAdminLoggedIn, function(req, res) {
+router.get('/questionAnswer/:page/:type/:search', isAdminLoggedIn, function(req, res) {
 	var answerSearchSql = '';
 	
 	let page = req.params.page;
@@ -525,7 +543,7 @@ router.get('/questionAnswer/:page/:type/:search', isAllAdminLoggedIn, function(r
 	});
 });
 
-router.get('/psychologicalType', isAllAdminLoggedIn, function(req, res) {
+router.get('/psychologicalType', isAdminLoggedIn, function(req, res) {
 	const psychologicalTypeSql = "SELECT * FROM PsyTestList a WHERE a.use = 'Y'";
 	connection.execute(psychologicalTypeSql, (err, rows) => {
 		if(err) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);
@@ -533,7 +551,7 @@ router.get('/psychologicalType', isAllAdminLoggedIn, function(req, res) {
 	});
 });
 
-router.post('/psychologicalType/:type', isAllAdminLoggedIn, function(req, res) {
+router.post('/psychologicalType/:type', isAdminLoggedIn, function(req, res) {
 	let type = req.params.type;
 	var updateTypeSql;
 	var recvData;
@@ -568,7 +586,7 @@ router.post('/psychologicalType/:type', isAllAdminLoggedIn, function(req, res) {
 	}
 });
 
-router.get('/answerCheck/:no', isAllAdminLoggedIn, function(req, res) {
+router.get('/answerCheck/:no', isAdminLoggedIn, function(req, res) {
 	const answerCheckSql = 'SELECT t1.*, t2.stuname, t2.phonenum FROM QuestionBoard t1, User t2 WHERE t1.stuno = t2.stuno AND t1.no = ?';
 	const no = req.params.no;
 	
@@ -578,7 +596,7 @@ router.get('/answerCheck/:no', isAllAdminLoggedIn, function(req, res) {
 	});
 });
 
-router.post('/answerCheck/:no', isAllAdminLoggedIn, function(req, res) {
+router.post('/answerCheck/:no', isAdminLoggedIn, function(req, res) {
 	var updateAnswerSql = "UPDATE QuestionBoard SET answer = ?, empname = ?, answerdate = ? WHERE no = ?";
 	
 	connection.execute(updateAnswerSql, [req.body.content, req.session.adminInfo.empname, moment().format("YYYYMMDD"), req.params.no], (err, rows) => {
@@ -587,7 +605,7 @@ router.post('/answerCheck/:no', isAllAdminLoggedIn, function(req, res) {
 	});
 });
 
-router.get('/myReservation', isAllAdminLoggedIn, function(req, res, next) {
+router.get('/myReservation', isAdminLoggedIn, function(req, res, next) {
 	const empid = req.session.adminInfo.empid;
 	
 	const sql_findNotFinishedMyReservation ="SELECT User.stuname as stuname, User.phonenum as phonenum, " +
@@ -605,7 +623,7 @@ router.get('/myReservation', isAllAdminLoggedIn, function(req, res, next) {
 	});
 });
 
-router.post('/finishedReservation', isAllAdminLoggedIn, function(req, res, next) {
+router.post('/finishedReservation', isAdminLoggedIn, function(req, res, next) {
 	const sendAjax = req.body.sendAjax;
 	const empid = req.session.adminInfo.empid;
 	
@@ -623,7 +641,7 @@ router.post('/finishedReservation', isAllAdminLoggedIn, function(req, res, next)
 	})
 });
 
-router.post('/saveQuestion', isAllAdminLoggedIn, function(req, res, next) {
+router.post('/saveQuestion', isAdminLoggedIn, function(req, res, next) {
 	const sendData = req.body.sendData;
 	const sendNumber = req.body.sendNumber;
 	
@@ -657,7 +675,7 @@ router.post('/saveQuestion', isAllAdminLoggedIn, function(req, res, next) {
 	
 });
 
-router.get("/board/:type", isAllAdminLoggedIn, function(req, res, next) {
+router.get("/board/:type", isAdminLoggedIn, function(req, res, next) {
 	const sql_findType = "select no from HomeBoard where no = ?";
 	const sql_readBoard = "select * from HomeBoard where no = ?";
 	const sql_findFormTypes = "select typename from AskType";
@@ -694,7 +712,7 @@ router.get("/board/:type", isAllAdminLoggedIn, function(req, res, next) {
 	})
 });
 
-router.post("/saveBoard/:type", isAllAdminLoggedIn, function(req, res, next) {
+router.post("/saveBoard/:type", isAdminLoggedIn, function(req, res, next) {
 	const sendAjax = req.body.sendAjax;
 	const paramType = decodeURIComponent(req.params.type);
 	
@@ -719,7 +737,7 @@ router.post("/saveBoard/:type", isAllAdminLoggedIn, function(req, res, next) {
 	});
 });
 
-router.get("/form/:type", isAllAdminLoggedIn, function(req, res, next) {
+router.get("/form/:type", isAdminLoggedIn, function(req, res, next) {
 	const sql_checkMaxAskCount = "select MAX(askno) as maxAskNo from AskList where typeno = ?";
     const sql_findFormTypes = "select typeno from AskType";
     const sql_checkType = "select * from AskType where typeno = ?";
@@ -761,7 +779,7 @@ router.get("/form/:type", isAllAdminLoggedIn, function(req, res, next) {
 	}
 });
 
-router.post('/saveForm/:type', isAllAdminLoggedIn, function(req, res, next) { 
+router.post('/saveForm/:type', isAdminLoggedIn, function(req, res, next) { 
     const sendObject = JSON.parse(req.body.sendAjax);
 	
 	const paramType = req.params.type;
@@ -853,7 +871,7 @@ router.post('/saveForm/:type', isAllAdminLoggedIn, function(req, res, next) {
 	}
 });
 
-router.post('/noUseAsk', isAllAdminLoggedIn, function(req, res, next) {
+router.post('/noUseAsk', isAdminLoggedIn, function(req, res, next) {
 	let data = req.body.noUse;
     const sql_noUseAsk = "UPDATE AskList SET AskList.use = 'N' WHERE askno = (SELECT * FROM (SELECT askno FROM AskList WHERE askno = ?) temp)";
 	
@@ -865,7 +883,7 @@ router.post('/noUseAsk', isAllAdminLoggedIn, function(req, res, next) {
 	});
 });
 
-router.get('/recovery/:id', isOnlyAdminLoggedIn, function(req, res, next) {
+router.get('/recovery/:id', isAccessDenied, function(req, res, next) {
 	const updateAccountUse = "update Counselor set Counselor.use = 'Y' where empid = ? and Counselor.use = 'N'";
 	
 	connection.execute(updateAccountUse, [req.params.id], (err, rows) => {
@@ -877,11 +895,11 @@ router.get('/recovery/:id', isOnlyAdminLoggedIn, function(req, res, next) {
 	});
 });
 
-router.get('/signUp', isOnlyAdminLoggedIn, function(req, res, next) {
+router.get('/signUp', isAccessDenied, function(req, res, next) {
 	res.render('adminSignUp');
 });
 
-router.post('/signUp', isOnlyAdminLoggedIn, (req, res, next) => {
+router.post('/signUp', isAccessDenied, (req, res, next) => {
 	const sql_addCounselor = "insert into Counselor(empid,emppwd,empname,positionno) values(?, ?, ?, ?)";
 	const sql_checkEmpId = "select empid, Counselor.use isUse from Counselor where empid = ?";
 	
@@ -945,7 +963,7 @@ router.post('/signUp', isOnlyAdminLoggedIn, (req, res, next) => {
 	});
 });
 
-router.get('/selfCheckForm', isAllAdminLoggedIn, (req, res, next) => {
+router.get('/selfCheckForm', isAdminLoggedIn, (req, res, next) => {
 	const sql_checkMaxSelfCheckCount = "select MAX(checkno) as maxCheckNo from SelfCheckList";
 	const sql_selectSelfCheckList = "select * from SelfCheckList where SelfCheckList.use='Y'";
 	let max = 0;
@@ -967,7 +985,7 @@ router.get('/selfCheckForm', isAllAdminLoggedIn, (req, res, next) => {
 	});
 });
 
-router.post('/noUseSelfCheck', isAllAdminLoggedIn, (req, res, next) => {
+router.post('/noUseSelfCheck', isAdminLoggedIn, (req, res, next) => {
 	let data = req.body.noUse;
 	const sql_noUseSelfCheck = "update SelfCheckList set SelfCheckList.use = 'N' where checkno = ?";
 	
@@ -979,7 +997,7 @@ router.post('/noUseSelfCheck', isAllAdminLoggedIn, (req, res, next) => {
 	});
 });
 
-router.post('/saveSelfCheckList', isAllAdminLoggedIn, (req, res, next) => {
+router.post('/saveSelfCheckList', isAdminLoggedIn, (req, res, next) => {
 	const sendObject = JSON.parse(req.body.sendAjax);
 	let max = 0;
 	
@@ -1016,7 +1034,7 @@ router.post('/saveSelfCheckList', isAllAdminLoggedIn, (req, res, next) => {
 	res.json({state: 'ok'});
 });
 
-router.post('/updateCounselor', isOnlyAdminLoggedIn, (req, res, next) => {
+router.post('/updateCounselor', isAccessDenied, (req, res, next) => {
 	const updateId = req.body.empid;
 	const updateName = req.body.updateEmpName;
 	const updatePosition = req.body.position;
@@ -1035,7 +1053,7 @@ router.post('/updateCounselor', isOnlyAdminLoggedIn, (req, res, next) => {
 	});
 });
 
-router.post('/deleteCounselor', isOnlyAdminLoggedIn, (req, res, next) => {
+router.post('/deleteCounselor', isAccessDenied, (req, res, next) => {
 	const delEmpId = req.body.deleteId;
 	const delEmpName = req.body.deleteName;
 	
@@ -1053,11 +1071,11 @@ router.post('/deleteCounselor', isOnlyAdminLoggedIn, (req, res, next) => {
 	});
 });
 
-router.get('/changePassword', isAllAdminLoggedIn, (req, res, next) => {
+router.get('/changePassword', isAdminLoggedIn, (req, res, next) => {
 	res.render('adminChangePwd');
 });
 
-router.post('/updatePassword', isAllAdminLoggedIn, (req, res, next) => {
+router.post('/updatePassword', isAdminLoggedIn, (req, res, next) => {
 	const sql_checkPassword = "select emppwd from Counselor where empid = ?";
 	const sql_updatePassword = "update Counselor set emppwd = ? where empid = ?";
 	
@@ -1095,7 +1113,26 @@ router.post('/updatePassword', isAllAdminLoggedIn, (req, res, next) => {
 	});
 });
 
-router.get('/getMyReservationHistory', isAllAdminLoggedIn, (req, res, next) => {
+router.post('/updateReservation', isAdminLoggedIn, (req, res, next) => {
+	let updateNo = req.body.serialno;
+	let updateType = req.body.type;
+	let updateDate = req.body.date;
+	let updateTime = req.body.time;
+	
+	const sql_updateReservation = "UPDATE Reservation SET typeno = ?, date = ?, starttime = ? WHERE serialno = ?";
+	
+	connection.execute(sql_updateReservation, [updateType, updateDate, updateTime, updateNo], (err, rows) => {
+		if(err) {
+			ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);
+			next(err);
+		}
+		else {
+			res.json('success');
+		}
+	});
+});
+
+router.get('/getMyReservationHistory', isAdminLoggedIn, (req, res, next) => {
 	let empid = req.session.adminInfo.empid;
 	
 	const workbook = new excel.Workbook();
@@ -1172,7 +1209,7 @@ router.get('/getMyReservationHistory', isAllAdminLoggedIn, (req, res, next) => {
 	});
 });
 
-router.get('/getSatisfactionResult', isAllAdminLoggedIn, (req, res, next) => {
+router.get('/getSatisfactionResult', isAdminLoggedIn, (req, res, next) => {
 	const workbook = new excel.Workbook();
 	const satisfactionWorkSheet = workbook.addWorksheet("만족도조사 결과");
 	
@@ -1258,7 +1295,7 @@ router.get('/getSatisfactionResult', isAllAdminLoggedIn, (req, res, next) => {
 	});
 });
 
-router.get('/getAllReservationHistory', isAllAdminLoggedIn, (req, res, next) => {
+router.get('/getAllReservationHistory', isAdminLoggedIn, (req, res, next) => {
 	let empid = req.session.adminInfo.empid;
 	
 	const workbook = new excel.Workbook();
@@ -1333,18 +1370,19 @@ router.get('/getAllReservationHistory', isAllAdminLoggedIn, (req, res, next) => 
 	});
 });
 
-router.get('/getAllChatLog', isOnlyAdminLoggedIn, (req, res, next) => {
+router.get('/getAllChatLog', isAccessDenied, (req, res, next) => {
 	let empid = req.session.adminInfo.empid;
 	
-	const sql_selectAllChatLog = "select serialno, chatlog, DATE_FORMAT(date,'%Y-%m-%d') as chatdate from ConsultLog";
+	const sql_selectAllChatLog = "SELECT r.stuno, c.chatlog, c.chatdate FROM Reservation r, ConsultLog c WHERE r.serialno = c.serialno;";
 	
 	const workbook = new excel.Workbook();
 	const ChatLogWorksheet = workbook.addWorksheet("전체 채팅 내역");
 	const fileName = `유한대학교 학생상담센터 전체 채팅 내역.xlsx`;
 	
 	ChatLogWorksheet.columns = [
+		{header: '학번', key: 'stuno', width: 15},
 		{header: '내용', key: 'chatlog', width: 100},
-		{header: '상담 일자', key: 'chatdate', width: 15},
+		{header: '최종 상담 일자', key: 'chatdate', width: 15},
 	];
 	
 	connection.execute(sql_selectAllChatLog, (err, rows) => {
@@ -1368,7 +1406,7 @@ router.get('/getAllChatLog', isOnlyAdminLoggedIn, (req, res, next) => {
 	});
 });
 
-router.get('/getUserChatLog/:serialNo', isOnlyAdminLoggedIn, (req, res, next) => {
+router.get('/getUserChatLog/:serialNo', isAccessDenied, (req, res, next) => {
 	let empid = req.session.adminInfo.empid;
 	const serialNo = decodeURIComponent(req.params.serialNo);
 	const stuName = req.query.name;
@@ -1405,7 +1443,7 @@ router.get('/getUserChatLog/:serialNo', isOnlyAdminLoggedIn, (req, res, next) =>
 	});
 });
 
-router.get('/getSimpleApplyFormPDF/:serialNo', isAllAdminLoggedIn, (req, res, next) => {
+router.get('/getSimpleApplyFormPDF/:serialNo', isAdminLoggedIn, (req, res, next) => {
 	const serialNo = decodeURIComponent(req.params.serialNo);
 	
 	const sql_selectConsultApply = "SELECT a.serialno, a.stuno, a.stuname, User.phonenum, a.gender, a.birth, a.email, a.date, " +

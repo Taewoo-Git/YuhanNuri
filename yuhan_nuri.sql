@@ -1,5 +1,5 @@
 -- --------------------------------------------------------
--- 호스트:                          54.180.149.157
+-- 호스트:                          54.180.98.87
 -- 서버 버전:                        10.1.44-MariaDB-0ubuntu0.18.04.1 - Ubuntu 18.04
 -- 서버 OS:                        debian-linux-gnu
 -- HeidiSQL 버전:                  10.2.0.5599
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS `AnswerLog` (
   PRIMARY KEY (`serialno`,`askno`),
   KEY `FK_AnswerLog_askno_TO_AskList_askno` (`askno`),
   CONSTRAINT `FK_AnswerLog_askno_TO_AskList_askno` FOREIGN KEY (`askno`) REFERENCES `AskList` (`askno`) ON UPDATE CASCADE,
-  CONSTRAINT `FK_AnswerLog_serialno_TO_SimpleApplyForm_serialno` FOREIGN KEY (`serialno`) REFERENCES `SimpleApplyForm` (`serialno`) ON UPDATE CASCADE
+  CONSTRAINT `FK_AnswerLog_serialno_TO_SimpleApplyForm_serialno` FOREIGN KEY (`serialno`) REFERENCES `SimpleApplyForm` (`serialno`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 yuhan_nuri.AnswerLog:~0 rows (대략적) 내보내기
@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS `AskList` (
   KEY `FK_AskList_choicetypeno_TO_ChoiceType` (`choicetypeno`),
   CONSTRAINT `FK_AskList_choicetypeno_TO_ChoiceType` FOREIGN KEY (`choicetypeno`) REFERENCES `ChoiceType` (`choicetypeno`) ON UPDATE CASCADE,
   CONSTRAINT `FK_AskList_typeno_TO_AskType_typeno` FOREIGN KEY (`typeno`) REFERENCES `AskType` (`typeno`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=266 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 yuhan_nuri.AskList:~0 rows (대략적) 내보내기
 /*!40000 ALTER TABLE `AskList` DISABLE KEYS */;
@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS `ChoiceList` (
   KEY `FK_ChoiceList_typeno_TO_AskList_typeno` (`typeno`),
   CONSTRAINT `FK_ChoiceList_askno_TO_AskList_askno` FOREIGN KEY (`askno`) REFERENCES `AskList` (`askno`) ON UPDATE CASCADE,
   CONSTRAINT `FK_ChoiceList_typeno_TO_AskList_typeno` FOREIGN KEY (`typeno`) REFERENCES `AskList` (`typeno`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=177 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 yuhan_nuri.ChoiceList:~0 rows (대략적) 내보내기
 /*!40000 ALTER TABLE `ChoiceList` DISABLE KEYS */;
@@ -98,11 +98,11 @@ INSERT INTO `ChoiceType` (`choicetypeno`, `choicetypename`) VALUES
 
 -- 테이블 yuhan_nuri.ConsultLog 구조 내보내기
 CREATE TABLE IF NOT EXISTS `ConsultLog` (
-  `serialno` int(11) NOT NULL,
+  `serialno` int(11) NOT NULL DEFAULT '0',
   `chatlog` text,
-  `date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `chatdate` date NOT NULL,
   PRIMARY KEY (`serialno`) USING BTREE,
-  CONSTRAINT `FK_ConsultLog_serialno_TO_Reservation_serialno` FOREIGN KEY (`serialno`) REFERENCES `Reservation` (`serialno`) ON UPDATE CASCADE
+  CONSTRAINT `FK_ConsultLog_serialno_TO_Reservation_serialno` FOREIGN KEY (`serialno`) REFERENCES `Reservation` (`serialno`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 테이블 데이터 yuhan_nuri.ConsultLog:~0 rows (대략적) 내보내기
@@ -137,7 +137,7 @@ CREATE TABLE IF NOT EXISTS `Counselor` (
   CONSTRAINT `FK_Counselor_positionno_To_PositionType_positionno` FOREIGN KEY (`positionno`) REFERENCES `PositionType` (`positionno`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 테이블 데이터 yuhan_nuri.Counselor:~9 rows (대략적) 내보내기
+-- 테이블 데이터 yuhan_nuri.Counselor:~3 rows (대략적) 내보내기
 /*!40000 ALTER TABLE `Counselor` DISABLE KEYS */;
 INSERT INTO `Counselor` (`empid`, `emppwd`, `empname`, `positionno`, `use`) VALUES
 	('admin', '$2b$12$KYl46rZEeMnxPA.uQLY/SeWSH0cWTiYRLeVbM9vZ9QhVGXMff1Nsa', '관리자', 1, 'Y');
@@ -157,8 +157,8 @@ CREATE TABLE IF NOT EXISTS `HomeBoard` (
 -- 테이블 데이터 yuhan_nuri.HomeBoard:~2 rows (대략적) 내보내기
 /*!40000 ALTER TABLE `HomeBoard` DISABLE KEYS */;
 INSERT INTO `HomeBoard` (`no`, `empid`, `date`, `content`) VALUES
-	(1, NULL, NULL, ''),
-	(2, NULL, NULL, '');
+	(1, NULL, NULL, NULL),
+	(2, NULL, NULL, NULL);
 /*!40000 ALTER TABLE `HomeBoard` ENABLE KEYS */;
 
 -- 테이블 yuhan_nuri.PositionType 구조 내보내기
@@ -185,7 +185,7 @@ CREATE TABLE IF NOT EXISTS `PsyTest` (
   CONSTRAINT `FK_PsyTest_testno_TO_PsyTestList_testno` FOREIGN KEY (`testno`) REFERENCES `PsyTestList` (`testno`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 테이블 데이터 yuhan_nuri.PsyTest:~53 rows (대략적) 내보내기
+-- 테이블 데이터 yuhan_nuri.PsyTest:~0 rows (대략적) 내보내기
 /*!40000 ALTER TABLE `PsyTest` DISABLE KEYS */;
 /*!40000 ALTER TABLE `PsyTest` ENABLE KEYS */;
 
@@ -196,9 +196,9 @@ CREATE TABLE IF NOT EXISTS `PsyTestList` (
   `description` text,
   `use` char(1) NOT NULL DEFAULT 'Y',
   PRIMARY KEY (`testno`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4;
 
--- 테이블 데이터 yuhan_nuri.PsyTestList:~15 rows (대략적) 내보내기
+-- 테이블 데이터 yuhan_nuri.PsyTestList:~14 rows (대략적) 내보내기
 /*!40000 ALTER TABLE `PsyTestList` DISABLE KEYS */;
 INSERT INTO `PsyTestList` (`testno`, `testname`, `description`, `use`) VALUES
 	(1, 'MBTI', '16가지 성격유형 중 자신의 성격유형에 대한 장단점 탐색', 'Y'),
@@ -231,9 +231,9 @@ CREATE TABLE IF NOT EXISTS `QuestionBoard` (
   PRIMARY KEY (`no`),
   KEY `QuestionBoard_stuno_fk` (`stuno`),
   CONSTRAINT `QuestionBoard_stuno_fk` FOREIGN KEY (`stuno`) REFERENCES `User` (`stuno`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4;
 
--- 테이블 데이터 yuhan_nuri.QuestionBoard:~11 rows (대략적) 내보내기
+-- 테이블 데이터 yuhan_nuri.QuestionBoard:~0 rows (대략적) 내보내기
 /*!40000 ALTER TABLE `QuestionBoard` DISABLE KEYS */;
 /*!40000 ALTER TABLE `QuestionBoard` ENABLE KEYS */;
 
@@ -255,12 +255,12 @@ CREATE TABLE IF NOT EXISTS `Reservation` (
   KEY `FK_Reservation_empid_TO_Counselor_empid` (`empid`),
   KEY `FK_Reservation_typeno_TO_ConsultType_typeno` (`typeno`),
   CONSTRAINT `FK_Reservation_empid_TO_Counselor_empid` FOREIGN KEY (`empid`) REFERENCES `Counselor` (`empid`) ON UPDATE CASCADE,
-  CONSTRAINT `FK_Reservation_serialno_TO_SimpleApplyForm_serialno` FOREIGN KEY (`serialno`) REFERENCES `SimpleApplyForm` (`serialno`) ON UPDATE CASCADE,
+  CONSTRAINT `FK_Reservation_serialno_TO_SimpleApplyForm_serialno` FOREIGN KEY (`serialno`) REFERENCES `SimpleApplyForm` (`serialno`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_Reservation_stuno_TO_User_stuno` FOREIGN KEY (`stuno`) REFERENCES `User` (`stuno`) ON UPDATE CASCADE,
   CONSTRAINT `FK_Reservation_typeno_TO_ConsultType_typeno` FOREIGN KEY (`typeno`) REFERENCES `ConsultType` (`typeno`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 테이블 데이터 yuhan_nuri.Reservation:~35 rows (대략적) 내보내기
+-- 테이블 데이터 yuhan_nuri.Reservation:~0 rows (대략적) 내보내기
 /*!40000 ALTER TABLE `Reservation` DISABLE KEYS */;
 /*!40000 ALTER TABLE `Reservation` ENABLE KEYS */;
 
@@ -277,9 +277,9 @@ CREATE TABLE IF NOT EXISTS `Schedule` (
   PRIMARY KEY (`scheduleno`) USING BTREE,
   KEY `FK_Schedule_empid_TO_Counselor_empid` (`empid`),
   CONSTRAINT `FK_Schedule_empid_TO_Counselor_empid` FOREIGN KEY (`empid`) REFERENCES `Counselor` (`empid`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4;
 
--- 테이블 데이터 yuhan_nuri.Schedule:~10 rows (대략적) 내보내기
+-- 테이블 데이터 yuhan_nuri.Schedule:~0 rows (대략적) 내보내기
 /*!40000 ALTER TABLE `Schedule` DISABLE KEYS */;
 /*!40000 ALTER TABLE `Schedule` ENABLE KEYS */;
 
@@ -290,11 +290,11 @@ CREATE TABLE IF NOT EXISTS `SelfCheck` (
   `score` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`serialno`,`checkno`) USING BTREE,
   KEY `FK_SelfCheck_checkno_TO_SelfCheckList_checkno` (`checkno`),
-  CONSTRAINT `FK_SelfCheck_checkno_TO_SelfCheckList_checkno` FOREIGN KEY (`checkno`) REFERENCES `SelfCheckList` (`checkno`) ON UPDATE CASCADE,
-  CONSTRAINT `FK_SelfCheck_serialno_TO_SimpleApplyForm_serialno` FOREIGN KEY (`serialno`) REFERENCES `SimpleApplyForm` (`serialno`) ON UPDATE CASCADE
+  CONSTRAINT `FK_SelfCheck_checkno_TO_SelfCheckList_checkno` FOREIGN KEY (`checkno`) REFERENCES `SelfCheckList` (`checkno`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_SelfCheck_serialno_TO_SimpleApplyForm_serialno` FOREIGN KEY (`serialno`) REFERENCES `SimpleApplyForm` (`serialno`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 테이블 데이터 yuhan_nuri.SelfCheck:~56 rows (대략적) 내보내기
+-- 테이블 데이터 yuhan_nuri.SelfCheck:~0 rows (대략적) 내보내기
 /*!40000 ALTER TABLE `SelfCheck` DISABLE KEYS */;
 /*!40000 ALTER TABLE `SelfCheck` ENABLE KEYS */;
 
@@ -304,9 +304,9 @@ CREATE TABLE IF NOT EXISTS `SelfCheckList` (
   `checkname` text NOT NULL,
   `use` char(1) NOT NULL DEFAULT 'Y',
   PRIMARY KEY (`checkno`)
-) ENGINE=InnoDB AUTO_INCREMENT=50 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
 
--- 테이블 데이터 yuhan_nuri.SelfCheckList:~36 rows (대략적) 내보내기
+-- 테이블 데이터 yuhan_nuri.SelfCheckList:~0 rows (대략적) 내보내기
 /*!40000 ALTER TABLE `SelfCheckList` DISABLE KEYS */;
 /*!40000 ALTER TABLE `SelfCheckList` ENABLE KEYS */;
 
@@ -322,7 +322,7 @@ CREATE TABLE IF NOT EXISTS `SimpleApplyForm` (
   PRIMARY KEY (`serialno`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 테이블 데이터 yuhan_nuri.SimpleApplyForm:~28 rows (대략적) 내보내기
+-- 테이블 데이터 yuhan_nuri.SimpleApplyForm:~0 rows (대략적) 내보내기
 /*!40000 ALTER TABLE `SimpleApplyForm` DISABLE KEYS */;
 /*!40000 ALTER TABLE `SimpleApplyForm` ENABLE KEYS */;
 
@@ -339,7 +339,7 @@ CREATE TABLE IF NOT EXISTS `User` (
   PRIMARY KEY (`stuno`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 테이블 데이터 yuhan_nuri.User:~6 rows (대략적) 내보내기
+-- 테이블 데이터 yuhan_nuri.User:~0 rows (대략적) 내보내기
 /*!40000 ALTER TABLE `User` DISABLE KEYS */;
 /*!40000 ALTER TABLE `User` ENABLE KEYS */;
 

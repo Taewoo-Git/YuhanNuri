@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Required meta tags -->
+    <title>유한대학교 학생상담센터</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- CoreUI CSS -->
+	<script src="/js/jquery-latest.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
-    <title>유한대학교 학생상담센터</title>
-	<script src="https://code.jquery.com/jquery-latest.min.js"></script>
 	<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
 	<style>
 		.pr_10{
@@ -22,12 +20,11 @@
 	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content" id="applyModal">
-				
 			</div>
 		</div>
 	</div>
     <div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
-                <%- include ('adminNav'); -%>
+    	<%- include ('adminNav'); -%>
         <button class="c-sidebar-minimizer c-class-toggler" type="button" data-target="_parent"
             data-class="c-sidebar-minimized"></button>
     </div>
@@ -43,7 +40,7 @@
                 <i class="cil-hamburger-menu"></i>
             </button>
             <ul class="c-header-nav ml-auto mr-4">
-                <%- include ('adminAccount'); -%>
+            <%- include ('adminAccount'); -%>
             </ul>
             <div class="c-subheader px-3">
                 <ol class="breadcrumb border-0 m-0">
@@ -140,7 +137,7 @@
         </div>
     </div>
 	<script src="/socket.io/socket.io.js"></script>
-	<script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
+	<script src="/lib/coreui.bundle.min.js"></script>
 	<script>
 		const socket = io('/reaction', {transports:['websocket']});
 		
@@ -185,8 +182,7 @@
 				}
 			});
 		});
-	</script>
-	<script>
+		
 		$('.showModalMental').click(function(e) {
 			$.ajax({
 				type:'POST',

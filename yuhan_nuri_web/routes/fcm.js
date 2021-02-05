@@ -1,4 +1,4 @@
-const db = require('../public/res/js/database.js')();
+const db = require('./database.js')();
 const connection = db.init();
 
 db.open(connection,'fcm');
@@ -30,7 +30,7 @@ const moment = require('moment');
 require('moment-timezone'); 
 moment.tz.setDefault("Asia/Seoul");
 
-const ErrorLogger = require('../public/res/js/ErrorLogger.js');
+const ErrorLogger = require('./logger_error.js');
 const logTimeFormat = "YYYY-MM-DD HH:mm:ss";
 
 exports.reservationAcceptPush = (reservationNumber) => {

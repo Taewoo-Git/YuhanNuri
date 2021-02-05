@@ -1,15 +1,11 @@
-const port = 3000; // 443;
+let server;
 
 const express = require('express');
 const app = express();
 
+const http = require('http');
 const https = require('https');
-const fs = require('fs');
-/*const options = {
-	key: fs.readFileSync('path'),
-	cert: fs.readFileSync('path'),
-	ca: fs.readFileSync('path')
-};*/
+const options = process.env.NODE_ENV === "production" ? require('./security.js')() : undefined;
 
 const session = require('express-session');
 const dotenv = require('dotenv');
@@ -17,11 +13,11 @@ const path = require('path');
 
 const helmet = require('helmet');
 
-const userRouter = require('./routes/user');
-const adminRouter = require('./routes/admin');
+const user = require('./routes/user');
+const admin = require('./routes/admin');
 
-const {deleteOneMonth,deleteFiveYear} = require('./public/res/js/schedule');
-const {consultTodayPush,consultTomorrowPush} = require('./routes/fcm');
+const {deleteOneMonth, deleteFiveYear} = require('./routes/schedule');
+const {consultTodayPush, consultTomorrowPush} = require('./routes/fcm');
 
 const cookieParser = require('cookie-parser');
 
@@ -31,10 +27,10 @@ const moment = require('moment');
 require('moment-timezone'); 
 moment.tz.setDefault("Asia/Seoul");
 
-const db = require('./public/res/js/database.js')();
+const db = require('./routes/database.js')();
 const connection = db.init();
 
-const ErrorLogger = require('./public/res/js/ErrorLogger.js');
+const ErrorLogger = require('./routes/logger_error.js');
 const logTimeFormat = "YYYY-MM-DD HH:mm:ss";
 
 const favicon = require('serve-favicon');
@@ -50,9 +46,11 @@ app.set('view engine', 'ejs');
 app.engine('html', require('ejs').renderFile);
 
 app.use(express.static(__dirname + '/public'));
-app.use('/style', express.static(path.join(__dirname, '/public/res/css')));
-app.use('/images', express.static(path.join(__dirname,'/public/res/imgs')));
+app.use('/js', express.static(path.join(__dirname, '/public/res/js')));
 app.use('/lib', express.static(path.join(__dirname, '/public/res/lib')));
+app.use('/css', express.static(path.join(__dirname, '/public/res/css')));
+app.use('/images', express.static(path.join(__dirname,'/public/res/imgs')));
+
 app.use('/uploads', express.static(path.join(__dirname,'/uploads')));
 
 app.use(express.json());
@@ -74,20 +72,27 @@ if(process.env.NODE_ENV==='production'){
 	// xssFilter:  X-XSS-Protection 설정. 대부분의 최신 웹 브라우저에서 XSS(Cross-site scripting) 필터를 사용.
 	// noSniff: X-Content-Type-Options 설정하여, 선언된 콘텐츠 유형으로부터 벗어난 응답에 대한 브라우저의 MIME 가로채기를 방지.
 }
-app.use('/user', userRouter);
-app.use('/admin', adminRouter);
 
-/*const server = https.createServer(options, app).listen(port, () => {
-	console.log('Listening on port ' + port);
+app.use('/user', user);
+app.use('/admin', admin);
+
+options ? server = https.createServer(options, app).listen(443, () => {
+	console.log('YuhanNuri, Listening on port ' + 443);
 	
 	deleteOneMonth();
 	deleteFiveYear();
 	consultTodayPush();
 	consultTomorrowPush();
-});*/
+}) : undefined;
 
-const server = app.listen(port, () => {
-    console.log('YuhanNuri, Listening on port ' + port);
+options ? http.createServer(function(req, res) {
+	res.writeHead(301, {
+		Location: `https://${req.headers["host"]}${req.url}`
+	});
+	res.end();
+}).listen(80)
+: server = http.createServer(app).listen(80, () => {
+	console.log('YuhanNuri, Listening on port ' + 80);
 	
 	deleteOneMonth();
 	deleteFiveYear();
@@ -95,7 +100,7 @@ const server = app.listen(port, () => {
 	consultTomorrowPush();
 });
 
-const io = require(__dirname + '/public/res/js/socket.js')(server); // socket.js파일에 server를 미들웨어로 사용
+const io = require('./routes/socket.js')(server); // socket.js파일에 server를 미들웨어로 사용
 
 app.get('/', function (req, res) {
 	let selectHomeBoard = "select * from HomeBoard";

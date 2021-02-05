@@ -2,49 +2,25 @@
 <html lang="en">
 	<!-- 관리자 스케줄 달력 -->
 	<head>
-		<!-- Required meta tags -->
+		<title>유한대학교 학생상담센터</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<!-- CoreUI CSS -->
-		<link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
-		<title>유한대학교 학생상담센터</title>
-		<link rel="stylesheet" type="text/css" href="/res/css/tui-calendar.css" />
-		<link rel="stylesheet" type="text/css" href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css" />
-		<link rel="stylesheet" type="text/css" href="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.css" />
-		<script src="https://uicdn.toast.com/tui.code-snippet/v1.5.2/tui-code-snippet.min.js"></script>
+		<script src="/lib/tui-code-snippet.min.js"></script>
 		<script src="/lib/tui-time-picker.js"></script>
 		<script src="/lib/tui-date-picker.js"></script>
-		<!--<script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.min.js"></script>-->
 		<script src="/lib/tui-calendar.js"></script>
-		<%if(adminInfo.author===1){%>
-			<script>
-				
-				const options = {
-					defaultView: 'month',
-					useCreationPopup: true,
-					useDetailPopup: true,
-				}
-			</script>
-		<%} else {%>
-			
-			<script>
-				
-				const options = {
-					defaultView: 'month',
-					useCreationPopup: true,
-					useDetailPopup: true,
-					isReadOnly : true
-					
-				}
-			</script>
-		<%} %>
-		<!-- 상담사, 근로학생 구분 달력 수정 커스텀 -->
-		
-		<script src="https://code.jquery.com/jquery-latest.min.js"></script>
+		<script src="/js/jquery-latest.min.js"></script>
+		<link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
 		<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
+		<link rel="stylesheet" type="text/css" href="/css/tui-calendar.css" />
+		<link rel="stylesheet" type="text/css" href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css" />
+		<link rel="stylesheet" type="text/css" href="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.css" />
 		<style>
-			.tui-timepicker-row {
-				padding-left: 15px;
+			.tui-timepicker-column:nth-of-type(1){
+				display:block!important;
+			}
+			.tui-timepicker{
+				padding:30px 20px!important;
 			}
 			.pr_10{
 				padding-right:10px;
@@ -72,14 +48,12 @@
 					<i class="cil-hamburger-menu"></i>
 				</button>
 				<ul class="c-header-nav ml-auto mr-4">
-					<%- include ('adminAccount'); -%>
+				<%- include ('adminAccount'); -%>
 				</ul>
 				<div class="c-subheader px-3">
-					<!-- Breadcrumb-->
 					<ol class="breadcrumb border-0 m-0">
 						<li class="breadcrumb-item">예약</li>
 						<li class="breadcrumb-item active">스케줄</li>
-						<!-- Breadcrumb Menu-->
 					</ol>
 				</div>
 			</header>
@@ -106,6 +80,21 @@
 			</div>
 		</div>
 		<script>
+			<%if(adminInfo.author===1){%>
+			const options = {
+				defaultView: 'month',
+				useCreationPopup: true,
+				useDetailPopup: true,
+			}
+			<%}else {%>
+			const options = {
+				defaultView: 'month',
+				useCreationPopup: true,
+				useDetailPopup: true,
+				isReadOnly : true
+			}
+			<%} %>
+		
 			const container = document.getElementById('calendar');
 			
 			var Calendar = tui.Calendar;
@@ -145,6 +134,7 @@
 					bgColor: '#f361dc',
 					dragBgColor: '#f361dc',
 					borderColor: '#f361dc'
+					
 				}
 				,
 				{
@@ -154,6 +144,7 @@
 					bgColor: '#000000',
 					dragBgColor: '#000000',
 					borderColor: '#000000'
+					
 				}
 			]); //캘린더 종류 등록
 
@@ -197,7 +188,6 @@
 				}
 			});
 			
-			
 			calendar.on('beforeCreateSchedule', scheduleData => {
 				const schedule = { // 해당 객체의 형태로 db를 구성해야 할 것 같음
 					calendarId: scheduleData.calendarId,
@@ -221,7 +211,7 @@
 				};
 
 				if(schedule.calendarId == "Reserved" || schedule.calendarId == "Finished"){
-					alert("예약 건 관련 유형은 등록할 수 없습니다.");
+					alert("예약 관련 스케줄은 추가할 수 없습니다.");
 					return;
 				}
 
@@ -240,13 +230,13 @@
 							alert("예약 가능한 일정 추가는 날짜가 같아야 합니다.");
 						}else if(data.state === "duplicate"){
 							alert("중복되는 스케줄이 존재합니다.");
+						}else if(data.state === "inputerrtime"){
+							alert("스케줄 시간을 잘못 입력하셨습니다.");
 						}
 					}
 				});
 
 			});
-			
-			
 			
 			calendar.on('beforeUpdateSchedule', event => {
 				const { schedule, changes } = event;
@@ -357,6 +347,6 @@
 				date.textContent = `${calendar.getDate().getFullYear()}-${calendar.getDate().getMonth() + 1}`;
 			});
 		</script>
-		<script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>	
+		<script src="/lib/coreui.bundle.min.js"></script>	
 	</body>
 </html>

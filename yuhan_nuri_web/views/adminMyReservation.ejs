@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Required meta tags -->
+    <title>유한대학교 학생상담센터</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- CoreUI CSS -->
+	<script src="/js/jquery-latest.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
-    <title>유한대학교 학생상담센터</title>
-	<script src="https://code.jquery.com/jquery-latest.min.js"></script>
 	<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
 	<style>
 		.pr_10{
@@ -16,46 +14,16 @@
 		.pr_30{
 			padding-right:30px;
 		}
+		::-webkit-calendar-picker-indicator{
+			border: none;
+			outline: none;
+		}
 	</style>
-	<script>
-		$(function () {
-			$('button.finished-btn').click(function(e) {
-					$.ajax({
-					type: "POST",
-					dataType: "json",
-					url: "./finishedReservation",
-					async: true,
-					data: { "sendAjax" : $(`#${e.target.id}`).val() },
-					success: function (data) { 
-						if(data.state==='ok') {
-							window.location.reload();
-						}
-					}
-				});
-			});
-		});
-		
-		$(function () {
-			$('#save_ReservationLog').click(function(e){
-				
-				location.href='./getMyReservationHistory';
-				
-			});
-		});
-		
-		$(function () {
-			$('#save_all_ReservationLog').click(function(e){
-				
-				location.href='./getAllReservationHistory';
-			});
-		});
-	</script>
 </head>
 <body class="c-app">
 	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content" id="applyModal">
-				
 			</div>
 		</div>
 	</div>
@@ -76,7 +44,7 @@
 				<i class="cil-hamburger-menu"></i>
 			</button>
 			<ul class="c-header-nav ml-auto mr-4">
-                <%- include ('adminAccount'); -%>
+            <%- include ('adminAccount'); -%>
             </ul>
 			<div class="c-subheader px-3">
 				<ol class="breadcrumb border-0 m-0">
@@ -159,6 +127,8 @@
 									<div class="float-right">
 										<button class="btn btn-info check-btn mr-2 showModalConsult" id="check-register-btn-<%=i%>" value="<%= val.no%>" data-toggle="modal"
 												data-target="#exampleModal">신청서 확인</button>
+										<button class="btn btn-success updated-btn mr-2" id="updated-btn-<%=i%>" value="<%= val.no%>"
+												data-toggle="modal" data-target="#exampleModal">추가 상담</button>
 										<button class="btn btn-danger finished-btn" id="finish-btn-<%=i%>" value="<%= val.no%>">종결</button>
 									</div>
 								</div>
@@ -174,8 +144,100 @@
             </footer>
         </div>
     </div>
-	<script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
+	<script src="/lib/coreui.bundle.min.js"></script>
 	<script>
+		$(function () {
+			$('button.finished-btn').click(function(e) {
+				$.ajax({
+					type: "POST",
+					dataType: "json",
+					url: "./finishedReservation",
+					async: true,
+					data: { "sendAjax" : $(`#${e.target.id}`).val() },
+					success: function (data) { 
+						if(data.state==='ok') {
+							window.location.reload();
+						}
+					}
+				});
+				
+			});
+		});
+		
+		$(function () {
+			$('#save_ReservationLog').click(function(e){
+				location.href='./getMyReservationHistory';
+			});
+		});
+		
+		$(function () {
+			$('#save_all_ReservationLog').click(function(e){
+				location.href='./getAllReservationHistory';
+			});
+		});
+	
+		function updateConsult(serialno) {
+			let updateType = $('#sendUpdatedType').val();
+			let updateDate = $('#sendUpdatedDate').val();
+			let updateTime = $('#sendUpdatedTime').val();
+			
+			$.ajax({
+				type:'POST',
+				dataType:'json',
+				url:'./updateReservation',
+				async:true,
+				data:{"serialno": serialno, "type": updateType, "date": updateDate, "time": updateTime},
+				success:function(data) {
+					alert("추가 상담 등록이 완료되었습니다.");
+					location.reload();
+				}
+			});
+		}
+		
+		$('button.updated-btn').click(function(e) {
+			$('#applyModal').empty();
+			$('#applyModal').append(`
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLabel">추가 상담 등록</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+
+				<div class="modal-body" id="modalPart" >
+					<center>
+						<select id="sendUpdatedType" style="width:80px; height:25px; border-radius:5px;">
+							<option value="1">채팅</option>
+							<option value="2">화상</option>
+							<option value="3">전화</option>
+							<option value="4">대면</option>
+						</select>
+						<input type="date" id="sendUpdatedDate" style="border:1px solid black; border-radius:5px;">
+						<select id="sendUpdatedTime" style="width:80px; height:25px; border-radius:5px;">
+							<option value="9">09시</option>
+							<option value="10">10시</option>
+							<option value="11">11시</option>
+							<option value="12">12시</option>
+							<option value="13">13시</option>
+							<option value="14">14시</option>
+							<option value="15">15시</option>
+							<option value="16">16시</option>
+							<option value="17">17시</option>
+							<option value="18">18시</option>
+						</select>
+					</center>
+				</div>
+			`);
+			$('#applyModal').append(`
+				<div class="modal-footer">
+					<button type="button" class="btn btn-info" data-dismiss="modal" onclick="updateConsult(${$(this).val()})">등록</button>
+					<button type="button" class="btn btn-danger" data-dismiss="modal">닫기</button>
+				</div>
+			`);
+			
+			$('#sendUpdatedDate').val(new Date().toISOString().substring(0, 10));
+		});
+		
 		$('.showModalMental').click(function(e) {
 			$.ajax({
 				type:'POST',

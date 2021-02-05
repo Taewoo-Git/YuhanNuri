@@ -59,19 +59,20 @@ app.use(express.urlencoded({extended: false}));
 app.use(session({secret: process.env.COOKIE_SECRET, resave: false, saveUninitialized: false}));
 app.use(cookieParser('vaCzbAVeMy9pT7Uw'));
 
-if(process.env.NODE_ENV==='production'){
-	app.use(helmet());
-	// helmet 미들웨어에는 이런 기능들을 통해 보안을 설정 합니다. 어느정도 타협해야하는 보안 수준이 있다면 말씀해 주시면 빼도록 하겠습니다
-	// csp: Content-Security-Policy 헤더 설정. XSS(Cross-site scripting) 공격 및 기타 교차 사이트 인젝션 예방.
-	// hidePoweredBy: X-Powered-By 헤더 제거.
-	// hpkp: Public Key Pinning 헤더 추가. 위조된 인증서를 이용한 중간자 공격 방지.
-	// hsts: SSL/TLS를 통한 HTTP 연결을 적용하는 Strict-Transport-Security 헤더 설정.
-	// noCache: Cache-Control 및 Pragma 헤더를 설정하여 클라이언트 측에서 캐싱을 사용하지 않도록 함.
-	// frameguard: X-Frame-Options 헤더 설정하여 clickjacking에 대한 보호 제공.
-	// ieNoOpen: (IE8 이상) X-Download-Options 설정.
-	// xssFilter:  X-XSS-Protection 설정. 대부분의 최신 웹 브라우저에서 XSS(Cross-site scripting) 필터를 사용.
-	// noSniff: X-Content-Type-Options 설정하여, 선언된 콘텐츠 유형으로부터 벗어난 응답에 대한 브라우저의 MIME 가로채기를 방지.
-}
+app.use(helmet({
+	contentSecurityPolicy: false,
+}));
+
+// helmet 미들웨어에는 이런 기능들을 통해 보안을 설정 합니다. 어느정도 타협해야하는 보안 수준이 있다면 말씀해 주시면 빼도록 하겠습니다
+// csp: Content-Security-Policy 헤더 설정. XSS(Cross-site scripting) 공격 및 기타 교차 사이트 인젝션 예방.
+// hidePoweredBy: X-Powered-By 헤더 제거.
+// hpkp: Public Key Pinning 헤더 추가. 위조된 인증서를 이용한 중간자 공격 방지.
+// hsts: SSL/TLS를 통한 HTTP 연결을 적용하는 Strict-Transport-Security 헤더 설정.
+// noCache: Cache-Control 및 Pragma 헤더를 설정하여 클라이언트 측에서 캐싱을 사용하지 않도록 함.
+// frameguard: X-Frame-Options 헤더 설정하여 clickjacking에 대한 보호 제공.
+// ieNoOpen: (IE8 이상) X-Download-Options 설정.
+// xssFilter: X-XSS-Protection 설정. 대부분의 최신 웹 브라우저에서 XSS(Cross-site scripting) 필터를 사용.
+// noSniff: X-Content-Type-Options 설정하여, 선언된 콘텐츠 유형으로부터 벗어난 응답에 대한 브라우저의 MIME 가로채기를 방지.
 
 app.use('/user', user);
 app.use('/admin', admin);

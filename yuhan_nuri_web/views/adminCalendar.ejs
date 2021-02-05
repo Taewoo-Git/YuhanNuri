@@ -5,16 +5,16 @@
 		<title>유한대학교 학생상담센터</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<script src="/lib/tui-code-snippet.min.js"></script>
-		<script src="/lib/tui-time-picker.js"></script>
-		<script src="/lib/tui-date-picker.js"></script>
-		<script src="/lib/tui-calendar.js"></script>
 		<script src="/js/jquery-latest.min.js"></script>
-		<link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
+		<script src="/js/tui-code-snippet.min.js"></script>
+		<script src="/js/tui-time-picker.js"></script>
+		<script src="/js/tui-date-picker.js"></script>
+		<script src="/js/tui-calendar.js"></script>
+		<link rel="stylesheet" href="/css/tui-time-picker.css">
+		<link rel="stylesheet" href="/css/tui-date-picker.css">
+		<link rel="stylesheet" href="/css/tui-calendar.css">
+		<link rel="stylesheet" href="/css/coreui.min.css">
 		<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
-		<link rel="stylesheet" type="text/css" href="/css/tui-calendar.css" />
-		<link rel="stylesheet" type="text/css" href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.css" />
-		<link rel="stylesheet" type="text/css" href="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.css" />
 		<style>
 			.tui-timepicker-column:nth-of-type(1){
 				display:block!important;
@@ -79,6 +79,7 @@
 				</footer>
 			</div>
 		</div>
+		<script src="/js/coreui.bundle.min.js"></script>
 		<script>
 			<%if(adminInfo.author===1){%>
 			const options = {
@@ -346,7 +347,6 @@
 				calendar.next();
 				date.textContent = `${calendar.getDate().getFullYear()}-${calendar.getDate().getMonth() + 1}`;
 			});
-		</script>
-		<script src="/lib/coreui.bundle.min.js"></script>	
+		</script>	
 	</body>
 </html>

@@ -1,4 +1,5 @@
 <ul class="c-sidebar-nav">
+	<%if(adminInfo.author===1){%>
 	<li class="c-sidebar-nav-title">예약</li>
 	<li class="c-sidebar-nav-item c-sidebar-nav-dropdown"><a
             class="c-sidebar-nav-link c-sidebar-nav-dropdown-toggle" href="#">
@@ -7,15 +8,18 @@
 			<li class="c-sidebar-nav-item">
 				<a class="c-sidebar-nav-link" href="/admin">예약 대기 리스트</a>
 			</li>
-			<%if(adminInfo.author===1){%>
+			
 				<li class="c-sidebar-nav-item">
 					<a class="c-sidebar-nav-link" href="/admin/myReservation">내 예약 리스트</a>
 				</li>
-			<%}%>
+			
 			
         </ul>
     </li>
-	
+	<%}%>
+	<% if(adminInfo.author === 2) { %>
+		<li class="c-sidebar-nav-title">메뉴</li>
+	<% } %>
 	<li class="c-sidebar-nav-item">
 	<a class="c-sidebar-nav-link" href="/admin/schedule">
 		<i class="cil-calendar pr_30"></i>

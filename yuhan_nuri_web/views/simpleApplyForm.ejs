@@ -5,7 +5,7 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<script src="/js/jquery-latest.min.js"></script>
-		<link rel="stylesheet" href="https://unpkg.com/@coreui/coreui/dist/css/coreui.min.css" crossorigin="anonymous">
+		<link rel="stylesheet" href="/css/coreui.min.css">
 		<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
 		<style>
 			.toggle_wrap{
@@ -152,7 +152,8 @@
 							</div>
 						</div>
 					</div>
-
+					<script>
+					</script>
 					<div class="btn-group-vertical position-fixed fixed_btn_position">
 						<button
 							type="button"
@@ -188,7 +189,7 @@
 				</footer>
 			</div>
 		</div>
-		<script src="/lib/coreui.bundle.min.js"></script>
+		<script src="/js/coreui.bundle.min.js"></script>
 		<script>
 			let sendObject = [
 				<% result.forEach(function(v,i){ %>
@@ -356,10 +357,11 @@
 						cur_i = i;
 						break;
 					case 'save':
+						alert(JSON.stringify(sendObject));
 						$.ajax({
 							type: 'POST',
 							dataType: 'json',
-							url: '../saveForm/<%= type.typeno%>',
+							url: '/admin/saveForm/<%= type.typeno%>',
 							async: true,
 							data: { sendAjax: JSON.stringify(sendObject) },
 							success: function (data) {

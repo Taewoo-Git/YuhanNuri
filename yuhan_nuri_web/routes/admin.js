@@ -755,28 +755,32 @@ router.get("/form/:type", isAdminLoggedIn, function(req, res, next) {
 			ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);
 			next(err);
 		}
-		else max = rows[0].maxAskNo;
-    });
-	
-    connection.execute(sql_checkType, [paramType], (err, rows) => {
-		if(err) {
-			ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);
-			next(err);
-		}
-		
-		if(rows.length === 0) next(err);
-		else type = rows[0];
-    });
+		else {
+			max = rows[0].maxAskNo;
+			connection.execute(sql_checkType, [paramType], (err, rows) => {
+				if(err) {
+					ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);
+					next(err);
+				}
 
-    if(paramType === '1' || paramType === '2' || paramType === '3') {
-		connection.execute(sql_findThreeConceptForm, [paramType], (err, rows) => {
-			if(err) {
-				ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);
-				next(err);
-			}
-			res.render('simpleApplyForm', {result: rows, type: type, max: max});
-		});
-	}
+				if(rows.length === 0) next(err);
+				else {
+					type = rows[0];
+						if(paramType === '1' || paramType === '2' || paramType === '3') {
+							connection.execute(sql_findThreeConceptForm, [paramType], (err, rows) => {
+								if(err) {
+									ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);
+									next(err);
+								}
+								else{
+									res.render('simpleApplyForm', {result: rows, type: type, max: max});
+								}
+							});
+						}
+					}
+			});
+		}
+    });
 });
 
 router.post('/saveForm/:type', isAdminLoggedIn, function(req, res, next) { 
@@ -1139,18 +1143,22 @@ router.get('/getMyReservationHistory', isAdminLoggedIn, (req, res, next) => {
 	const PsyTestWorksheet = workbook.addWorksheet("심리검사 내역");
 	const ReservationWorksheet = workbook.addWorksheet("상담 내역");
 
-	const sql_selectPsyTestLog = "SELECT s.stuno, s.stuname, s.gender, s.birth, s.email, s.date, GROUP_CONCAT(ptl.testname) AS testname " +
-		  "from PsyTest p, PsyTestList ptl, SimpleApplyForm s where s.serialno = p.serialno AND p.testno = ptl.testno GROUP BY s.serialno";
+	const sql_selectPsyTestLog="SELECT simple.stuno,  simple.stuname, user.major, simple.gender, simple.birth, simple.email, simple.date, GROUP_CONCAT(psyTList.testname) AS testname " + 
+"FROM SimpleApplyForm simple JOIN PsyTest psyT ON simple.serialno = psyT.serialno JOIN PsyTestList psyTList ON psyT.testno = psyTList.testno " + 
+"JOIN User user ON simple.stuno = user.stuno GROUP BY simple.serialno;";
 	
-	const sql_selectReservationLog = "SELECT reserv.stuno, reserv.typeno, simple.stuname, contype.typename, reserv.agree, reserv.finished, simple.date " +
-		  "FROM Reservation reserv JOIN SimpleApplyForm simple ON reserv.serialno = simple.serialno JOIN ConsultType contype ON reserv.typeno = contype.typeno " +
-		  "WHERE NOT reserv.typeno IS NULL AND reserv.empid = ? AND reserv.status = 1";
+	const sql_selectReservationLog="SELECT reserv.stuno, reserv.typeno, simple.stuname, user.major, contype.typename, reserv.agree, reserv.finished, simple.date " + 
+"FROM Reservation reserv JOIN SimpleApplyForm simple ON reserv.serialno = simple.serialno JOIN ConsultType contype ON "  + "reserv.typeno = contype.typeno JOIN User user ON reserv.stuno = user.stuno " +
+"WHERE NOT reserv.typeno IS NULL AND reserv.empid = ? AND reserv.status = 1";
+	
+
 	
 	const fileName=`유한대학교 학생상담센터 상담 내역.xlsx`;
 	
 	PsyTestWorksheet.columns = [
 		{header: '학번', key: 'stuno', width: 10},
 		{header: '이름', key: 'stuname', width: 10},
+		{header: '학과', key: 'major', width: 20},
 		{header: '성별', key: 'gender', width: 20},
 		{header: '생년월일', key: 'birth', width: 50},
 		{header: '이메일', key: 'email', width: 20},
@@ -1161,6 +1169,7 @@ router.get('/getMyReservationHistory', isAdminLoggedIn, (req, res, next) => {
 	ReservationWorksheet.columns = [
 		{header: '학번', key: 'stuno', width: 10},
 		{header: '이름', key: 'stuname', width: 15},
+		{header: '학과', key: 'major', width: 20},
 		{header: '상담종류', key: 'typename', width: 15},
 		{header: '개인정보동의여부', key: 'agree', width: 10},
 		{header: '상담완료여부', key: 'finished', width: 15},
@@ -1213,20 +1222,22 @@ router.get('/getSatisfactionResult', isAdminLoggedIn, (req, res, next) => {
 	const workbook = new excel.Workbook();
 	const satisfactionWorkSheet = workbook.addWorksheet("만족도조사 결과");
 	
-	const sql_getSatisfationResult = "SELECT Reservation.stuno, Counselor.empname, SimpleApplyForm.stuname, SimpleApplyForm.birth, SimpleApplyForm.email, Reservation.date, " + 
-		  "Reservation.researchdatetime, ConsultType.typename, Reservation.serialno, AskList.ask, AnswerLog.choiceanswer " + 
-		  "FROM Reservation JOIN SimpleApplyForm ON Reservation.serialno = SimpleApplyForm.serialno LEFT JOIN ConsultType ON Reservation.typeno = ConsultType.typeno LEFT JOIN Counselor ON " + 
-		  "Reservation.empid = Counselor.empid JOIN AnswerLog ON Reservation.serialno = AnswerLog.serialno JOIN AskList ON AnswerLog.askno = AskList.askno " +
-		  "WHERE AskList.typeno = 3 GROUP BY Reservation.stuno, Counselor.empname, SimpleApplyForm.stuname, SimpleApplyForm.birth, SimpleApplyForm.email, Reservation.date, " +
-		  "ConsultType.typename, AnswerLog.serialno, AskList.ask ORDER BY Reservation.researchdatetime";
+	const sql_getSatisfationResult = "SELECT Reservation.stuno, Counselor.empname, SimpleApplyForm.stuname, User.major, SimpleApplyForm.birth, SimpleApplyForm.email, Reservation.date, " +
+"Reservation.researchdatetime, ConsultType.typename, Reservation.serialno, AskList.ask, AnswerLog.choiceanswer " + 
+"FROM Reservation JOIN SimpleApplyForm ON Reservation.serialno = SimpleApplyForm.serialno LEFT JOIN ConsultType ON " + "Reservation.typeno = ConsultType.typeno LEFT JOIN Counselor ON " + 
+"Reservation.empid = Counselor.empid JOIN AnswerLog ON Reservation.serialno = AnswerLog.serialno JOIN AskList ON AnswerLog.askno = AskList.askno " + 
+"JOIN User ON Reservation.stuno = User.stuno " + 
+"WHERE AskList.typeno = 3 GROUP BY Reservation.stuno, Counselor.empname, SimpleApplyForm.stuname, SimpleApplyForm.birth, SimpleApplyForm.email, Reservation.date, " + 
+"ConsultType.typename, AnswerLog.serialno, AskList.ask ORDER BY Reservation.researchdatetime;";
 	
-	//const fileName = `유한대학교 학생상담센터 만족도 조사 내역 ${new Date().getFullYear()}_${new Date().getMonth() + 1}월.xlsx`;
+
 	const fileName = `유한대학교 학생상담센터 만족도조사 내역.xlsx`;
 	satisfactionWorkSheet.columns = [
 		{header: '작성일', key: "researchdatetime", width: 20},
 		{header: '학번', key: "stuno", width: 10},
 		{header: '상담사 이름', key: "empname", width: 10},
 		{header: '학생 이름', key: "stuname", width: 10},
+		{header: '학과', key: "major", width: 20},
 		{header: '생년월일', key: "birth", width: 10},
 		{header: '이메일', key: "email", width: 20},
 		{header: '예약일', key: "date", width: 10},
@@ -1267,6 +1278,7 @@ router.get('/getSatisfactionResult', isAdminLoggedIn, (req, res, next) => {
 					else {
 						row.researchdatetime = "";
 						row.stuno = "";
+						row.major = "";
 						row.empname = "";
 						row.stuname = "";
 						row.birth = "";
@@ -1302,18 +1314,20 @@ router.get('/getAllReservationHistory', isAdminLoggedIn, (req, res, next) => {
 	const PsyTestWorksheet = workbook.addWorksheet("심리검사 내역");
 	const ReservationWorksheet = workbook.addWorksheet("상담 내역");
 
-	const sql_selectPsyTestLog="SELECT s.stuno, s.stuname, s.gender, s.birth, s.email, s.date, GROUP_CONCAT(ptl.testname) AS testname " +
-		  "from PsyTest p, PsyTestList ptl, SimpleApplyForm s where s.serialno = p.serialno AND p.testno = ptl.testno GROUP BY s.serialno";
+	const sql_selectPsyTestLog="SELECT simple.stuno,  simple.stuname, user.major, simple.gender, simple.birth, simple.email, simple.date, GROUP_CONCAT(psyTList.testname) AS testname " + 
+"FROM SimpleApplyForm simple JOIN PsyTest psyT ON simple.serialno = psyT.serialno JOIN PsyTestList psyTList ON psyT.testno = psyTList.testno " + 
+"JOIN User user ON simple.stuno = user.stuno GROUP BY simple.serialno;";
 	
-	const sql_selectReservationLog="SELECT reserv.stuno, reserv.typeno, simple.stuname, contype.typename, reserv.agree, reserv.finished, simple.date " +
-		  "FROM Reservation reserv JOIN SimpleApplyForm simple ON reserv.serialno = simple.serialno JOIN ConsultType contype ON reserv.typeno = contype.typeno " +
-		  "WHERE NOT reserv.typeno IS NULL AND reserv.status = 1";
+	const sql_selectReservationLog="SELECT reserv.stuno, reserv.typeno, simple.stuname, user.major, contype.typename, reserv.agree, reserv.finished, simple.date " + 
+"FROM Reservation reserv JOIN SimpleApplyForm simple ON reserv.serialno = simple.serialno JOIN ConsultType contype ON "  + "reserv.typeno = contype.typeno JOIN User user ON reserv.stuno = user.stuno " +
+"WHERE NOT reserv.typeno IS NULL AND reserv.status = 1";
 	
 	const fileName=`유한대학교 학생상담센터 전체 상담 내역.xlsx`;
 	
 	PsyTestWorksheet.columns = [
 		{header: '학번', key: 'stuno', width: 10},
 		{header: '이름', key: 'stuname', width: 10},
+		{header: '학과', key: 'major', width : 20},
 		{header: '성별', key: 'gender', width: 20},
 		{header: '생년월일', key: 'birth', width: 50},
 		{header: '이메일', key: 'email', width: 20},
@@ -1324,6 +1338,7 @@ router.get('/getAllReservationHistory', isAdminLoggedIn, (req, res, next) => {
 	ReservationWorksheet.columns = [
 		{header: '학번', key: 'stuno', width: 10},
 		{header: '이름', key: 'stuname', width: 15},
+		{header: '학과', key: 'major', width:20},
 		{header: '상담종류', key: 'typename', width: 15},
 		{header: '개인정보동의여부', key: 'agree', width: 10},
 		{header: '상담완료여부', key: 'finished', width: 15},

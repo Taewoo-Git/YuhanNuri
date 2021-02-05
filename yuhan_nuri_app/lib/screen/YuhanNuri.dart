@@ -238,7 +238,31 @@ class YuhanNuriState extends State<YuhanNuri> {
                               'else false;');
                   if (isChatting) {
                     Vibration.vibrate();
-                    showBackButtonDialog(context);
+                    //showBackButtonDialog(context);
+                    showDialog(
+                      context: context,
+                      builder: (context){
+                        return AlertDialog(
+                          content: Text('현재 채팅이 활성화되어있습니다. \n홈 화면으로 돌아가시겠습니까?'),
+                          actions: <Widget>[
+                            FlatButton(
+                              child: Text('예'),
+                              onPressed: () {
+                                Navigator.pop(context, "OK");
+                                navBarState = globalKey.currentState;
+                                navBarState.setPage(0);
+                              },
+                            ),
+                            FlatButton(
+                              child: Text('아니오'),
+                              onPressed: () {
+                                Navigator.pop(context, "Cancel");
+                              },
+                            ),
+                          ],
+                        );
+                      }
+                    );
                   } else {
                     navBarState = globalKey.currentState;
                     navBarState.setPage(0);

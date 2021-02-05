@@ -23,6 +23,7 @@ if (flutterVersionName == null) {
 
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: 'com.google.gms.google-services'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
@@ -64,5 +65,5 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging:20.1.0'
     
 }
-apply plugin: 'com.google.gms.google-services'
+
 

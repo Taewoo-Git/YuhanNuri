@@ -10,23 +10,14 @@ import 'package:oktoast/oktoast.dart';
 import 'package:vibration/vibration.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 final FirebaseMessaging fcm = FirebaseMessaging();
 CookieManager cm;
 
 // [0] 메인, [1] 예약, [2] 문의, [3] 마이페이지, [4] 채팅, [5] 만족도조사페이지
 // urls 배열 외의 외부url을 로드할 시 webview가 아닌 기기의 브라우저(크롬, 사파리)를 이용해 로드(하이퍼링크 등)
-<<<<<<< HEAD
-
-const urls = [
-  'http://yuhannuri.run.goorm.io/',
-  'http://yuhannuri.run.goorm.io/user/reservation',
-  'http://yuhannuri.run.goorm.io/user/question',
-  'http://yuhannuri.run.goorm.io/user/mypage',
-  'http://yuhannuri.run.goorm.io/user/mypage?chatting',
-  'http://yuhannuri.run.goorm.io/user/satisfaction',
-=======
-const Domain = 'https://counsel.yuhan.ac.kr/';
+const Domain = 'https://yuhannuri.run.goorm.io/';
 const urls = [
   Domain,
   Domain + 'user/reservation',
@@ -34,21 +25,9 @@ const urls = [
   Domain + 'user/mypage',
   Domain + 'user/mypage?chatting',
   Domain + 'user/satisfaction',
->>>>>>> f332b525d4c0fe48db84d267f57142ee100f6117
 ];
 
-<<<<<<< HEAD
-// const urls = [
-//   'http://counsel.yuhan.ac.kr/',
-//   'http://counsel.yuhan.ac.kr/user/reservation',
-//   'http://counsel.yuhan.ac.kr/user/question',
-//   'http://counsel.yuhan.ac.kr/user/mypage',
-//   'http://counsel.yuhan.ac.kr/user/mypage?chatting',
-//   'http://counsel.yuhan.ac.kr/user/satisfaction',
-// ];
-=======
 String appBarText = '홈';
->>>>>>> 2f4af6f9c0a293a9f48a0c88a8cb96308847495d
 
 class YuhanNuri extends StatefulWidget {
   final String cookie;
@@ -85,48 +64,54 @@ class YuhanNuriState extends State<YuhanNuri> {
 
   void initState() {
     super.initState();
+
+    var initAndroidSetting = AndroidInitializationSettings('@mipmap/ic_launcher');
+    var initIosSetting = IOSInitializationSettings();
+    var initSetting = InitializationSettings(initAndroidSetting, initIosSetting);
+    FlutterLocalNotificationsPlugin().initialize(initSetting);
+
     fcm.configure(
-        onMessage: (Map<String, dynamic> message) async {},
-        onResume: (Map<String, dynamic> message) async {
+      onMessage: (Map<String, dynamic> message) async {
+        print(message['notification']['body'].toString());
+        showNotificationWhenReceivePush(message['notification']['body'].toString());
+      },
+      onResume: (Map<String, dynamic> message) async {
+        gotoPage(message['data']['page']);
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        Timer(Duration(milliseconds: 1500), () {
           gotoPage(message['data']['page']);
-        },
-        onLaunch: (Map<String, dynamic> message) async {
-          Timer(Duration(milliseconds: 1500), () {
-            gotoPage(message['data']['page']);
-          });
         });
+      }
+    );
+    fcm.requestNotificationPermissions(
+      const IosNotificationSettings(sound: true,badge: true,alert: true,provisional: true)
+    );
 
     cm = new CookieManager();
-<<<<<<< HEAD
+  }
 
-    KeyboardVisibilityController().onChange.listen((bool visible) {
-      if (visible) {
-        // 키보드 올라왔을 때
-        _webViewController.evaluateJavascript(
-            source: 'document.activeElement.scrollIntoView({block: "center"})');
-        // _webViewController.getUrl().then((url) => {
-        //       if (url != urls[3])
-        //         {
-        //           _webViewController.evaluateJavascript(
-        //               source:
-        //                   'document.activeElement.scrollIntoView({block: "center"})')
-        //         }
-        //     });
-      } else {
-        // 키보드가 내려갈 때
-        _webViewController.evaluateJavascript(
-            source: 'document.activeElement.blur()');
-        // _webViewController.getUrl().then((url) => {
-        //       if (url != urls[3])
-        //         {
-        //           _webViewController.evaluateJavascript(
-        //               source: 'document.activeElement.blur()')
-        //         }
-        //     });
+  Future<void> showNotificationWhenReceivePush(String str) async {
+    var android = AndroidNotificationDetails(
+        'channelId', 'channelName', 'channelDescription');
+    var iOS = IOSNotificationDetails();
+    var platform = NotificationDetails(android, iOS);
+
+    // await FlutterLocalNotificationsPlugin().show(0, 'title', 'body', platform);
+    await FlutterLocalNotificationsPlugin().show(0, '유한누리', str, platform);
+  }
+
+  showAlertWhenReceivePush(String str) async{
+    print('sex');
+    showDialog(
+      context: context,
+      builder: (builder){
+        return AlertDialog(
+          content: Text(str),
+        );
       }
-    });
-=======
->>>>>>> f332b525d4c0fe48db84d267f57142ee100f6117
+    );
+
   }
 
   void gotoPage(String msg) {

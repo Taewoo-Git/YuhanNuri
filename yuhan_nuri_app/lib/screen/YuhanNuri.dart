@@ -37,6 +37,7 @@ const urls = [
 >>>>>>> f332b525d4c0fe48db84d267f57142ee100f6117
 ];
 
+<<<<<<< HEAD
 // const urls = [
 //   'http://counsel.yuhan.ac.kr/',
 //   'http://counsel.yuhan.ac.kr/user/reservation',
@@ -45,6 +46,9 @@ const urls = [
 //   'http://counsel.yuhan.ac.kr/user/mypage?chatting',
 //   'http://counsel.yuhan.ac.kr/user/satisfaction',
 // ];
+=======
+String appBarText = '홈';
+>>>>>>> 2f4af6f9c0a293a9f48a0c88a8cb96308847495d
 
 class YuhanNuri extends StatefulWidget {
   final String cookie;
@@ -144,10 +148,6 @@ class YuhanNuriState extends State<YuhanNuri> {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitDown,
-      DeviceOrientation.portraitUp,
-    ]);
     return OKToast(
         position: ToastPosition.bottom,
         child: MaterialApp(
@@ -155,13 +155,11 @@ class YuhanNuriState extends State<YuhanNuri> {
             home: WillPopScope(
                 child: Scaffold(
                   appBar: AppBar(
-                    title: Container(
-                      child: Image(
-                        image: AssetImage('assets/nuri.png'),
-                        fit: BoxFit.fill,
-                        height: 22,
-                      ),
-                    ),
+                    backgroundColor: Color.fromARGB(255, 0, 115, 215),
+                    toolbarHeight: 50,
+                    title: new Text(appBarText,
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 25)),
                     actions: <Widget>[
                       IconButton(
                         icon: Icon(Icons.logout),
@@ -219,7 +217,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                   bottomNavigationBar: CurvedNavigationBar(
                     key: globalKey,
                     index: 0,
-                    backgroundColor: Colors.blueAccent[100],
+                    backgroundColor: Color.fromARGB(255, 0, 115, 215),
                     items: <Widget>[
                       Image(
                         image: AssetImage('assets/home.png'),
@@ -249,18 +247,30 @@ class YuhanNuriState extends State<YuhanNuri> {
                         case 0:
                           _webViewController.loadUrl(
                               url: urls[0], headers: header);
+                          setState(() {
+                            appBarText = '홈';
+                          });
                           break;
                         case 1:
                           _webViewController.loadUrl(
                               url: urls[1], headers: header);
+                          setState(() {
+                            appBarText = '예약';
+                          });
                           break;
                         case 2:
                           _webViewController.loadUrl(
                               url: urls[2], headers: header);
+                          setState(() {
+                            appBarText = '문의';
+                          });
                           break;
                         case 3:
                           _webViewController.loadUrl(
                               url: urls[3], headers: header);
+                          setState(() {
+                            appBarText = 'MY';
+                          });
                           break;
                         default:
                           break;
@@ -277,7 +287,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                         now.difference(currentBackPressTime) >
                             Duration(seconds: 2)) {
                       currentBackPressTime = now;
-                      showToast("뒤로 가기 버튼을 한 번 더      \n 클릭하면 종료합니다.");
+                      showToast("뒤로 가기 버튼을 한 번 더\n누르면 종료합니다.");
                       return Future.value(false);
                     }
                     return Future.value(true);
@@ -288,74 +298,38 @@ class YuhanNuriState extends State<YuhanNuri> {
                               'else false;');
                   if (isChatting) {
                     Vibration.vibrate();
-                    //showBackButtonDialog(context);
                     showDialog(
-                      context: context,
-                      builder: (context){
-                        return AlertDialog(
-                          content: Text('현재 채팅이 활성화되어있습니다. \n홈 화면으로 돌아가시겠습니까?'),
-                          actions: <Widget>[
-                            FlatButton(
-                              child: Text('예'),
-                              onPressed: () {
-                                Navigator.pop(context, "OK");
-                                navBarState = globalKey.currentState;
-                                navBarState.setPage(0);
-                              },
-                            ),
-                            FlatButton(
-                              child: Text('아니오'),
-                              onPressed: () {
-                                Navigator.pop(context, "Cancel");
-                              },
-                            ),
-                          ],
-                        );
-                      }
-                    );
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            content: Text('현재 채팅 중입니다.\n홈 화면으로 돌아가시겠습니까?'),
+                            actions: <Widget>[
+                              RaisedButton(
+                                child: Text('예'),
+                                color: Color(0xFF0275D7),
+                                elevation: 5,
+                                onPressed: () {
+                                  Navigator.pop(context, "OK");
+                                  navBarState = globalKey.currentState;
+                                  navBarState.setPage(0);
+                                },
+                              ),
+                              RaisedButton(
+                                child: Text('아니오'),
+                                elevation: 5,
+                                onPressed: () {
+                                  Navigator.pop(context, "Cancel");
+                                },
+                              ),
+                            ],
+                          );
+                        });
                   } else {
                     navBarState = globalKey.currentState;
                     navBarState.setPage(0);
                   }
                   return null;
                 })));
-  }
-
-  showBackButtonDialog(BuildContext context) {
-    Widget continueButton = RaisedButton(
-      child: Text("예"),
-      color: Color(0xFF0275D7),
-      elevation: 5,
-      onPressed: () {
-        Navigator.pop(context);
-        navBarState = globalKey.currentState;
-        navBarState.setPage(0);
-      },
-    );
-
-    Widget cancelButton = RaisedButton(
-      child: Text("아니오"),
-      elevation: 5,
-      onPressed: () {
-        Navigator.pop(context);
-      },
-    );
-
-    AlertDialog alert = AlertDialog(
-      title: Text("유한누리"),
-      content: Text("현재 채팅이 활성화되어있습니다. \n홈 화면으로 돌아가시겠습니까?"),
-      actions: [
-        continueButton,
-        cancelButton,
-      ],
-    );
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
-      },
-    );
   }
 
   showLogoutButtonDialog(BuildContext context) {
@@ -375,7 +349,7 @@ class YuhanNuriState extends State<YuhanNuri> {
       child: Text("아니오"),
       elevation: 5,
       onPressed: () {
-        Navigator.pop(context);
+        Navigator.of(context, rootNavigator: true).pop('dialog');
       },
     );
 

@@ -16,6 +16,16 @@ CookieManager cm;
 
 // [0] 메인, [1] 예약, [2] 문의, [3] 마이페이지, [4] 채팅, [5] 만족도조사페이지
 // urls 배열 외의 외부url을 로드할 시 webview가 아닌 기기의 브라우저(크롬, 사파리)를 이용해 로드(하이퍼링크 등)
+<<<<<<< HEAD
+
+const urls = [
+  'http://yuhannuri.run.goorm.io/',
+  'http://yuhannuri.run.goorm.io/user/reservation',
+  'http://yuhannuri.run.goorm.io/user/question',
+  'http://yuhannuri.run.goorm.io/user/mypage',
+  'http://yuhannuri.run.goorm.io/user/mypage?chatting',
+  'http://yuhannuri.run.goorm.io/user/satisfaction',
+=======
 const Domain = 'https://counsel.yuhan.ac.kr/';
 const urls = [
   Domain,
@@ -24,7 +34,17 @@ const urls = [
   Domain + 'user/mypage',
   Domain + 'user/mypage?chatting',
   Domain + 'user/satisfaction',
+>>>>>>> f332b525d4c0fe48db84d267f57142ee100f6117
 ];
+
+// const urls = [
+//   'http://counsel.yuhan.ac.kr/',
+//   'http://counsel.yuhan.ac.kr/user/reservation',
+//   'http://counsel.yuhan.ac.kr/user/question',
+//   'http://counsel.yuhan.ac.kr/user/mypage',
+//   'http://counsel.yuhan.ac.kr/user/mypage?chatting',
+//   'http://counsel.yuhan.ac.kr/user/satisfaction',
+// ];
 
 class YuhanNuri extends StatefulWidget {
   final String cookie;
@@ -73,6 +93,36 @@ class YuhanNuriState extends State<YuhanNuri> {
         });
 
     cm = new CookieManager();
+<<<<<<< HEAD
+
+    KeyboardVisibilityController().onChange.listen((bool visible) {
+      if (visible) {
+        // 키보드 올라왔을 때
+        _webViewController.evaluateJavascript(
+            source: 'document.activeElement.scrollIntoView({block: "center"})');
+        // _webViewController.getUrl().then((url) => {
+        //       if (url != urls[3])
+        //         {
+        //           _webViewController.evaluateJavascript(
+        //               source:
+        //                   'document.activeElement.scrollIntoView({block: "center"})')
+        //         }
+        //     });
+      } else {
+        // 키보드가 내려갈 때
+        _webViewController.evaluateJavascript(
+            source: 'document.activeElement.blur()');
+        // _webViewController.getUrl().then((url) => {
+        //       if (url != urls[3])
+        //         {
+        //           _webViewController.evaluateJavascript(
+        //               source: 'document.activeElement.blur()')
+        //         }
+        //     });
+      }
+    });
+=======
+>>>>>>> f332b525d4c0fe48db84d267f57142ee100f6117
   }
 
   void gotoPage(String msg) {

@@ -58,8 +58,8 @@ class _LoginState extends State<Login> {
         Text(
           '아이디',
           style: TextStyle(
-              color: Colors.blueGrey[300],
-              fontSize: 13,
+              color: Color(0xFF9e9e9e),
+              fontSize: 16,
               fontWeight: FontWeight.bold),
         ),
         SizedBox(
@@ -68,12 +68,9 @@ class _LoginState extends State<Login> {
         Container(
           alignment: Alignment.centerLeft,
           decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(5),
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.black26, blurRadius: 6, offset: Offset(0, 2))
-              ]),
+            color: Colors.white,
+            border: Border.all(color: Color(0xFFd4d4d4), width: 1.5),
+          ),
           height: 60,
           child: TextField(
             controller: idTextBoxController,
@@ -85,7 +82,7 @@ class _LoginState extends State<Login> {
               contentPadding: EdgeInsets.only(top: 14),
               prefixIcon: Icon(
                 Icons.account_circle,
-                color: Color(0xFF81C0D5),
+                color: Color(0xFF7ac4ff),
               ),
               hintText: 'ID',
               hintStyle: TextStyle(color: Colors.black38),
@@ -103,8 +100,8 @@ class _LoginState extends State<Login> {
         Text(
           '비밀번호',
           style: TextStyle(
-              color: Colors.blueGrey[300],
-              fontSize: 13,
+              color: Color(0xFF9e9e9e),
+              fontSize: 16,
               fontWeight: FontWeight.bold),
         ),
         SizedBox(
@@ -113,12 +110,9 @@ class _LoginState extends State<Login> {
         Container(
           alignment: Alignment.centerLeft,
           decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(5),
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.black26, blurRadius: 6, offset: Offset(0, 2))
-              ]),
+            color: Colors.white,
+            border: Border.all(color: Color(0xFFd4d4d4), width: 1.5),
+          ),
           height: 60,
           child: TextField(
             controller: pwTextBoxController,
@@ -130,7 +124,7 @@ class _LoginState extends State<Login> {
               contentPadding: EdgeInsets.only(top: 14),
               prefixIcon: Icon(
                 Icons.lock,
-                color: Color(0xFF81C0D5),
+                color: Color(0xFF7ac4ff),
               ),
               hintText: 'Password',
               hintStyle: TextStyle(color: Colors.black38),
@@ -143,84 +137,95 @@ class _LoginState extends State<Login> {
 
   Widget buildLoginBtn() {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 25),
+      padding: EdgeInsets.symmetric(vertical: 0),
       width: double.infinity,
+      height: 60,
       child: RaisedButton(
-        elevation: 5,
         onPressed: () => {portalLogin(userID, userPassword, isAutoLogin)},
         padding: EdgeInsets.all(15),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
         color: Color(0xFF0275D8),
         child: Text('로그인',
             style: TextStyle(
-                color: Color(0xFFAFD9FE),
-                fontSize: 18,
+                color: Colors.white,
+                fontSize: 20,
                 fontWeight: FontWeight.bold)),
       ),
     );
   }
 
   Widget buildCheckAutoLogin(BuildContext context) {
-    return CheckboxListTile(
-      controlAffinity: ListTileControlAffinity.leading,
-      autofocus: true,
-      checkColor: Colors.lightBlue,
-      activeColor: Colors.white,
-      title: Text(
-        'Remember',
-        style:
-            TextStyle(color: Colors.blueGrey[300], fontWeight: FontWeight.bold),
-      ),
-      value: isAutoLogin,
-      onChanged: (bool newValue) {
-        setState(() {
-          isAutoLogin = newValue;
-        });
-      },
-      contentPadding: const EdgeInsets.only(left: 0.00),
+    return new Row(
+      children: <Widget>[
+        GestureDetector(
+            onTap: () {
+              setState(() {
+                isAutoLogin = !isAutoLogin;
+              });
+            },
+            child: isAutoLogin
+                ? Image.asset("assets/btnAuto-on.png", width: 20, height: 20)
+                : Image.asset("assets/btnAuto-off.png", width: 20, height: 20)),
+        new FlatButton(
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+            onPressed: () {
+              setState(() {
+                isAutoLogin = !isAutoLogin;
+              });
+            },
+            child: Text(
+              "자동 로그인",
+              style: new TextStyle(color: Color(0xFF9e9e9e), fontSize: 16),
+            ))
+      ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Color.fromARGB(255, 0, 115, 215),
+          toolbarHeight: 50,
+          title: new Text('로그인',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25)),
+        ),
         body: AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light,
-      child: GestureDetector(
-          child: Stack(children: <Widget>[
-        Container(
-          height: double.infinity,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Color(0xFFF0F0F0),
-          ),
-          child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(horizontal: 25, vertical: 120),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  '유한누리',
-                  style: TextStyle(
-                      fontFamily: 'jua',
-                      color: Color(0xFF3C3C3C),
-                      fontSize: 40,
-                      fontWeight: FontWeight.bold),
+          value: SystemUiOverlayStyle.light,
+          child: GestureDetector(
+              child: Stack(children: <Widget>[
+            Container(
+              height: double.infinity,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Color(0xFFfafbfc),
+              ),
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: 25, vertical: 50),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Container(
+                      child: new Image(
+                        image: AssetImage("assets/nuri_blue.png"),
+                      ),
+                      padding: EdgeInsets.only(
+                          bottom: 30.0, left: 60.0, right: 60.0),
+                    ),
+                    SizedBox(height: 30),
+                    buildId(context),
+                    SizedBox(height: 30),
+                    buildPassword(context),
+                    SizedBox(height: 5),
+                    buildCheckAutoLogin(context),
+                    SizedBox(height: 40),
+                    buildLoginBtn(),
+                  ],
                 ),
-                SizedBox(height: 30),
-                buildId(context),
-                SizedBox(height: 30),
-                buildPassword(context),
-                SizedBox(height: 7),
-                buildCheckAutoLogin(context),
-                SizedBox(height: 63),
-                buildLoginBtn(),
-              ],
-            ),
-          ),
-        )
-      ])),
-    ));
+              ),
+            )
+          ])),
+        ));
   }
 
   portalLogin(String userID, String userPassword, bool isAutoLogin) async {

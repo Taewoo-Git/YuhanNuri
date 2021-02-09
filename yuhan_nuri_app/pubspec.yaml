@@ -59,16 +59,18 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/logo.png
-    - assets/hi.png  
-    - assets/nuriicon.png  
+    - assets/nuri.png
+    - assets/nuri_blue.png
+    - assets/nuriicon.png
     - assets/sad_face.png
     - assets/social_media.png
     - assets/team_success.png
-    - assets/question.png
     - assets/mypage.png
-    - assets/nuri.png
     - assets/reservation.png
+    - assets/question.png
     - assets/home.png
+    - assets/btnAuto-on.png
+    - assets/btnAuto-off.png
     
     #   - images/a_dot_ham.jpeg
 

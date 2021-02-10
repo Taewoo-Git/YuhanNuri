@@ -64,57 +64,55 @@ class YuhanNuriState extends State<YuhanNuri> {
 
   void initState() {
     super.initState();
-
-    var initAndroidSetting = AndroidInitializationSettings('@mipmap/ic_launcher');
-    var initIosSetting = IOSInitializationSettings();
-    var initSetting = InitializationSettings(initAndroidSetting, initIosSetting);
+    const initAndroidSetting =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const initIosSetting = IOSInitializationSettings();
+    const initSetting = InitializationSettings(
+        android: initAndroidSetting, iOS: initIosSetting);
     FlutterLocalNotificationsPlugin().initialize(initSetting);
 
-    fcm.configure(
-      onMessage: (Map<String, dynamic> message) async {
-        print(message['notification']['body'].toString());
-        showNotificationWhenReceivePush(message['notification']['body'].toString());
-      },
-      onResume: (Map<String, dynamic> message) async {
-        gotoPage(message['data']['page']);
-      },
-      onLaunch: (Map<String, dynamic> message) async {
-        Timer(Duration(milliseconds: 1500), () {
-          gotoPage(message['data']['page']);
-        });
-      }
-    );
-    fcm.requestNotificationPermissions(
-      const IosNotificationSettings(sound: true,badge: true,alert: true,provisional: true)
-    );
+    const android = AndroidNotificationDetails(
+        'channelId', 'channelName', 'channelDescription');
+    const iOS = IOSNotificationDetails();
+    const platform = NotificationDetails(android: android, iOS: iOS);
 
+    fcm.configure(onMessage: (Map<String, dynamic> message) async {
+      if (Platform.isIOS) {
+        FlutterLocalNotificationsPlugin()
+            .show(0, '유한누리', message['aps']['alert']['body'], platform);
+      } else if (Platform.isAndroid) {
+        FlutterLocalNotificationsPlugin()
+            .show(0, '유한누리', message['notification']['body'], platform);
+      }
+    }, onResume: (Map<String, dynamic> message) async {
+      if (Platform.isIOS) {
+        goToPage(
+          message['page'],
+        );
+      } else if (Platform.isAndroid) {
+        goToPage(
+          message['data']['page'],
+        );
+      }
+    }, onLaunch: (Map<String, dynamic> message) async {
+      Timer(Duration(milliseconds: 1500), () {
+        if (Platform.isIOS) {
+          goToPage(
+            message['page'],
+          );
+        } else if (Platform.isAndroid) {
+          goToPage(
+            message['data']['page'],
+          );
+        }
+      });
+    });
+    fcm.requestNotificationPermissions(const IosNotificationSettings(
+        sound: true, badge: true, alert: true, provisional: true));
     cm = new CookieManager();
   }
 
-  Future<void> showNotificationWhenReceivePush(String str) async {
-    var android = AndroidNotificationDetails(
-        'channelId', 'channelName', 'channelDescription');
-    var iOS = IOSNotificationDetails();
-    var platform = NotificationDetails(android, iOS);
-
-    // await FlutterLocalNotificationsPlugin().show(0, 'title', 'body', platform);
-    await FlutterLocalNotificationsPlugin().show(0, '유한누리', str, platform);
-  }
-
-  showAlertWhenReceivePush(String str) async{
-    print('sex');
-    showDialog(
-      context: context,
-      builder: (builder){
-        return AlertDialog(
-          content: Text(str),
-        );
-      }
-    );
-
-  }
-
-  void gotoPage(String msg) {
+  void goToPage(String msg) {
     if (msg == "mypage" || msg == "satisfaction") {
       navBarState = globalKey.currentState;
       navBarState.setPage(3);
@@ -318,32 +316,31 @@ class YuhanNuriState extends State<YuhanNuri> {
   }
 
   showLogoutButtonDialog(BuildContext context) {
-    Widget continueButton = RaisedButton(
-      child: Text("예"),
-      color: Color(0xFF0275D7),
-      elevation: 5,
-      onPressed: () async {
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        prefs.remove('expires');
-        prefs.remove('cookie');
-        SystemChannels.platform.invokeMethod('SystemNavigator.pop');
-      },
-    );
-
-    Widget cancelButton = RaisedButton(
-      child: Text("아니오"),
-      elevation: 5,
-      onPressed: () {
-        Navigator.of(context, rootNavigator: true).pop('dialog');
-      },
-    );
-
     AlertDialog alert = AlertDialog(
       title: Text("유한누리"),
       content: Text("로그아웃 후 종료합니다."),
       actions: [
-        continueButton,
-        cancelButton,
+        RaisedButton(
+          child: Text("예"),
+          color: Color(0xFF0275D7),
+          elevation: 5,
+          onPressed: () async {
+            SharedPreferences prefs = await SharedPreferences.getInstance();
+            prefs.remove('expires');
+            prefs.remove('cookie');
+            // SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+            if (Platform.isAndroid)
+              SystemNavigator.pop();
+            else if (Platform.isIOS) exit(0);
+          },
+        ),
+        RaisedButton(
+          child: Text("아니오"),
+          elevation: 5,
+          onPressed: () {
+            Navigator.of(context, rootNavigator: true).pop('dialog');
+          },
+        )
       ],
     );
 

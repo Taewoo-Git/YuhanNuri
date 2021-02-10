@@ -4,6 +4,7 @@ import 'package:yuhan_nuri_app/screen/Splash.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   try {
     if (Platform.isAndroid || Platform.isIOS)
       runApp(Phoenix(child: SplashApp()));

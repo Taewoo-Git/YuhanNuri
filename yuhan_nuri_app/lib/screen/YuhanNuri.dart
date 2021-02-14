@@ -17,7 +17,7 @@ CookieManager cm;
 
 // [0] 메인, [1] 예약, [2] 문의, [3] 마이페이지, [4] 채팅, [5] 만족도조사페이지
 // urls 배열 외의 외부url을 로드할 시 webview가 아닌 기기의 브라우저(크롬, 사파리)를 이용해 로드(하이퍼링크 등)
-const Domain = 'https://yuhannuri.run.goorm.io/';
+const Domain = 'https://counsel.yuhan.ac.kr/';
 const urls = [
   Domain,
   Domain + 'user/reservation',
@@ -328,7 +328,6 @@ class YuhanNuriState extends State<YuhanNuri> {
             SharedPreferences prefs = await SharedPreferences.getInstance();
             prefs.remove('expires');
             prefs.remove('cookie');
-            // SystemChannels.platform.invokeMethod('SystemNavigator.pop');
             if (Platform.isAndroid)
               SystemNavigator.pop();
             else if (Platform.isIOS) exit(0);

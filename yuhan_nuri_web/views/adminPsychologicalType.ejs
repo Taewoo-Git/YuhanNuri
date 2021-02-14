@@ -37,6 +37,11 @@
 		.pr_30{
 			padding-right:30px;
 		}
+		.edit_block:focus{
+			outline: none;
+			box-shadow: none;
+			border-color: #d8dbe0;
+		}
 	</style>
 </head>
 <body class="c-app">
@@ -79,13 +84,13 @@
 									<div class="input-group-prepend">
 										<span class="input-group-text" id="question">유 형</span>
 									</div>
-									<input type="text" class="form-control" value="<%=testList[i].testname%>" readonly="true"
+									<input type="text" class="form-control edit_block" value="<%=testList[i].testname%>" readonly="true"
 										   placeholder="Question" aria-label="question" id="context<%=testList[i].testno%>" style="background-color:white!important;">
 									<button type="button" class="btn btn-danger ml-2" id="delete/<%=testList[i].testno%>" name="btnDelete">유형 삭제</button>
 								</div>
 							</div>
 							<div>
-								<textarea class="form-control pb-4" id="text<%=testList[i].testno%>" readonly="true"><%=testList[i].description%></textarea>
+								<textarea class="form-control pb-4 edit_block" id="text<%=testList[i].testno%>" readonly="true"><%=testList[i].description%></textarea>
 							</div>
 						</div>
 						<div class="form-check mb-3 add_check_btn">
@@ -95,12 +100,10 @@
 						</div>
 					</div>
 					<%}%>
-					<div class="card">
-						<div class="btn-group-vertical position-fixed fixed_btn_position">
-							<button type="button" class="btn btn-success" id="btnAdd">
-								유형 추가
-							</button>
-						</div>
+					<div class="btn-group-vertical position-fixed fixed_btn_position">
+						<button type="button" class="btn btn-success" id="btnInsertType">
+							유형 추가
+						</button>
 					</div>
                 </div>
             </div>
@@ -113,59 +116,82 @@
     </div>
 	<script src="/js/coreui.bundle.min.js"></script>
 	<script>
-		 $("button[name=btnDelete]").click(function(e){
-			 let deleteDialog = confirm("정말로 삭제하시겠습니까?");
-			 if(deleteDialog == true){
-				 let idVal = $(this).attr("id").split('/');
-					$.ajax({
-						url: '/admin/psychologicalType/1',
-						dataType: 'json',
-						type: 'POST',
-						data: {ajaxData:idVal[1]},
-						success: function(result) {
-							if(result.check == 'success'){
-								alert('삭제가 완료되었습니다.');
-							window.location.href = '/admin/psychologicalType';
-							}else{
-								alert('이미 삭제되었거나 문제가 발생하였습니다.');
-							window.location.href = '/admin/psychologicalType';
-							}
-						}
-					});
-			 }
-		 });
+		if(location.search.includes("refresh")) {
+			window.history.replaceState(null, null, window.location.pathname);
+
+			$('.c-body').prepend(`
+				<div class="alert alert-success alert-dismissible fade show successAlert" style="margin-bottom: 0px;" role="alert">
+					<strong>추가 완료!</strong> 유형이 정상적으로 추가되었습니다.
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+			`);
+
+			$(window).scrollTop(0);
+
+			$('.successAlert').eq(0).fadeOut(3000);
+		}
+		else window.history.replaceState(null, null, window.location.pathname);
 		
-		$("input[name=btnModify]").click(function(e){
-			if($(this).val() == '완 료'){
+		$("button[name=btnDelete]").click(function(e) {
+			let deleteDialog = confirm("정말로 삭제하시겠습니까?");
+			if(deleteDialog == true) {
+				$("button[name=btnDelete]").attr("disabled", "true");
+				let idVal = $(this).attr("id").split('/');
+				$.ajax({
+					url: '/admin/psychologicalType/1',
+					dataType: 'json',
+					type: 'POST',
+					data: {testno: idVal[1]},
+					success: function(result) {
+						if(result.check == 'success') {
+							alert('삭제가 완료되었습니다.');
+							window.location.reload(true);
+						}
+						else {
+							alert('이미 삭제되었거나 문제가 발생하였습니다.');
+							window.location.reload(true);
+						}
+					}
+				});
+			}
+		});
+		
+		$("input[name=btnModify]").click(function(e) {
+			if($(this).val() == '완 료') {
 				let btnIdVal = $(this).attr("id").split('-');
 				$(this).val("수 정");
 				$(this).attr('class','btn btn-primary');
 				$("#context"+btnIdVal[1]).attr("readonly", "true");
 				$("#text"+btnIdVal[1]).attr("readonly", "true");
-				var sendAjaxData = {
-					no : btnIdVal[1],
-					context : $("#context"+btnIdVal[1]).val(),
-					text : $("#text"+btnIdVal[1]).val()
+				$("#context"+btnIdVal[1]).toggleClass('edit_block');
+				$("#text"+btnIdVal[1]).toggleClass('edit_block');
+				let sendAjaxData = {
+					no: btnIdVal[1],
+					context: $("#context"+btnIdVal[1]).val(),
+					text: $("#text"+btnIdVal[1]).val()
 				};
 				$.ajax({
 					url: '/admin/psychologicalType/2',
 					dataType: 'json',
 					type: 'POST',
-					data: {ajaxData:JSON.stringify(sendAjaxData)},
-					success: function(result) {
-					}
+					data: sendAjaxData
 				});
-			}else{
+			}
+			else {
 				let btnIdVal = $(this).attr("id").split('-');
 				$(this).val("완 료");
 				$(this).attr('class','btn btn-success');
 				$("#context"+btnIdVal[1]).removeAttr("readonly");
 				$("#text"+btnIdVal[1]).removeAttr("readonly");
+				$("#context"+btnIdVal[1]).toggleClass('edit_block');
+				$("#text"+btnIdVal[1]).toggleClass('edit_block');
 			}
 		});
 		
-		$("#btnAdd").click(function(e){
-			$("#btnAdd").attr("disabled", true);
+		$("#btnInsertType").click(function(e) {
+			$("#btnInsertType").attr("disabled", true);
 			$("#cardList").append(`
 				<div class="card" id="newCard">
 					<div class="card-body">
@@ -196,21 +222,21 @@
 		
 		$('#cardList').on('click', '#btnDataAdd', function() {
 			var sendAjaxData = {
-					context : $("#inputContext").val(),
-					text : $("#inputText").val()
+				context: $("#inputContext").val(),
+				text: $("#inputText").val()
 			};
 			$.ajax({
 				url: '/admin/psychologicalType/3',
 				dataType: 'json',
 				type: 'POST',
-				data: {ajaxData:JSON.stringify(sendAjaxData)},
+				data: sendAjaxData,
 				success: function(result) {
-					if(result.check == 'success'){
-						alert('추가가 완료되었습니다.');
-						window.location.href = '/admin/psychologicalType';
-					}else{
+					if(result.check == 'success') {
+						location.replace(location.href + '?refresh');
+					}
+					else {
 						alert('이미 추가되었거나 문제가 발생하였습니다.');
-						window.location.href = '/admin/psychologicalType';
+						location.reload(true);
 					}
 				}
 			});
@@ -218,7 +244,7 @@
 		
 		$('#cardList').on('click', '#btnDataCancel', function() {
 			$("#newCard").remove();
-			$("#btnAdd").attr("disabled", false);
+			$("#btnInsertType").attr("disabled", false);
 		});
 	</script>
 </body>

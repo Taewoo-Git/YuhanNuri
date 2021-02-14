@@ -37,204 +37,179 @@
 		.pr_30{
 			padding-right:30px;
 		}
+		.edit_block:focus{
+			outline: none;
+			box-shadow: none;
+			border-color: #d8dbe0;
+		}
     </style>
 </head>
 <body class="c-app">
-    <div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
-        <%- include ('adminNav'); -%>
-        <button class="c-sidebar-minimizer c-class-toggler" type="button" data-target="_parent"
-            data-class="c-sidebar-minimized"></button>
-    </div>
-    <div class="c-wrapper c-fixed-components">
-        <header class="c-header c-header-light c-header-fixed c-header-with-subheader">
-            <button class="c-header-toggler c-class-toggler d-lg-none mfe-auto" type="button" data-target="#sidebar"
-                data-class="c-sidebar-show">
-                <i class="cil-hamburger-menu"></i>
-            </button><a class="c-header-brand d-lg-none" href="#">
-                <i class="cil-hamburger-menu"></i></a>
-            <button class="c-header-toggler c-class-toggler mfs-3 d-md-down-none" type="button" data-target="#sidebar"
-                data-class="c-sidebar-lg-show" responsive="true">
-                <i class="cil-hamburger-menu"></i>
-            </button>
+	<div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
+		<%- include ('adminNav'); -%>
+		<button class="c-sidebar-minimizer c-class-toggler" type="button" data-target="_parent"
+				data-class="c-sidebar-minimized"></button>
+	</div>
+	<div class="c-wrapper c-fixed-components">
+		<header class="c-header c-header-light c-header-fixed c-header-with-subheader">
+			<button class="c-header-toggler c-class-toggler d-lg-none mfe-auto" type="button" data-target="#sidebar"
+					data-class="c-sidebar-show">
+				<i class="cil-hamburger-menu"></i>
+			</button><a class="c-header-brand d-lg-none" href="#">
+			<i class="cil-hamburger-menu"></i></a>
+			<button class="c-header-toggler c-class-toggler mfs-3 d-md-down-none" type="button" data-target="#sidebar"
+					data-class="c-sidebar-lg-show" responsive="true">
+				<i class="cil-hamburger-menu"></i>
+			</button>
 			<ul class="c-header-nav ml-auto mr-4">
-        	<%- include ('adminAccount'); -%>
-            </ul>
-            <div class="c-subheader px-3">
-                <ol class="breadcrumb border-0 m-0">
-                    <li class="breadcrumb-item">예약</li>
-                    <li class="breadcrumb-item">양식 항목</li>
-                    <li class="breadcrumb-item active">자가진단 질문</li>
-                </ol>
-            </div>
-    </header>
-    <div class="c-body">
-        <main class="c-main">
-            <div class="container-fluid" style="width:70%!important;">
-                <div class="fade-in">
-                    <div class="card">
-						<div class="card-body">
-							<div class="d-flex justify-content-between">
-								<div>
-									<h4 class="card-title mb-0">자가진단 질문</h4>
+			<%- include ('adminAccount'); -%>
+			</ul>
+			<div class="c-subheader px-3">
+				<ol class="breadcrumb border-0 m-0">
+					<li class="breadcrumb-item">예약</li>
+					<li class="breadcrumb-item">양식 항목</li>
+					<li class="breadcrumb-item active">자가진단 질문</li>
+				</ol>
+			</div>
+		</header>
+		<div class="c-body">
+			<main class="c-main">
+				<div class="container-fluid" style="width:70%!important;">
+					<div class="fade-in">
+						<div class="card">
+							<div class="card-body">
+								<div class="d-flex justify-content-between">
+									<div>
+										<h4 class="card-title mb-0">자가진단 질문</h4>
+									</div>
 								</div>
 							</div>
-						</div>
-                        <div class="card-body list-group-item border-left-0 border-right-0 border-bottom-0" id="askList">
-                            <ul class="nav justify-content-center">
-                                <li class="nav-item disabled">
-                                    <a class="nav-link">매우 나쁨</a>
-                                </li>
-                                <li class="nav-item disabled">
-                                    <a class="nav-link">나쁨</a>
-                                </li>
-                                <li class="nav-item disabled">
-                                    <a class="nav-link">보통</a>
-                                </li>
-                                <li class="nav-item disabled">
-                                    <a class="nav-link ">좋음</a>
-                                </li>
-                                <li class="nav-item disabled">
-                                    <a class="nav-link ">
-                                        매우 좋음</a>
-                                </li>
-                            </ul>
-							<% result.forEach(function(v,i){%>
-								<div class="input-group mb-3" style="width:75%; margin:0 auto;" id="ask_<%=v.checkno%>">
-									<input type="text" class="form-control questionField" placeholder="질문을 입력해주세요." readonly style="background-color:white!important;"
-										aria-label="Example text with button addOn1" aria-describedby="button-addon1" oninput="updateAsk(ask_<%=v.checkno%>,this)"
-										   value="<%=unescape(v.checkname)%>">
-									<div class="input-group-append">
-										<button class="btn btn-outline-secondary remove_event_btn" type="button"
-											id="button-removeOn2" style="color:#f05454;" onClick="removeAsk(ask_<%=v.checkno%>,<%=v.checkno%>)">X</button>
+							<div class="card-body list-group-item border-left-0 border-right-0 border-bottom-0" id="askList">
+								<ul class="nav justify-content-center">
+									<li class="nav-item disabled">
+										<a class="nav-link">매우 나쁨</a>
+									</li>
+									<li class="nav-item disabled">
+										<a class="nav-link">나쁨</a>
+									</li>
+									<li class="nav-item disabled">
+										<a class="nav-link">보통</a>
+									</li>
+									<li class="nav-item disabled">
+										<a class="nav-link ">좋음</a>
+									</li>
+									<li class="nav-item disabled">
+										<a class="nav-link ">매우 좋음</a>
+									</li>
+								</ul>
+								<% result.forEach(function(v,i){%>
+									<div class="input-group mb-3" id="form_id_<%=v.checkno%>" style="width:75%; margin:0 auto;">
+										<input type="text" class="form-control valSelfCheck edit_block" placeholder="질문을 입력해주세요."
+											   style="background-color:white!important;" value="<%=unescape(v.checkname)%>" readonly>
+										<div class="input-group-append">
+											<button type="button" class="btn btn-outline-secondary btnDeleteSelfCheck" style="color:#f05454;">X</button>
+										</div>
 									</div>
-                            	</div>
-							<%})%>
-                        </div>
-						<div class="btn-group-vertical position-fixed fixed_btn_position">
-							<button type="button" class="btn btn-secondary" onClick="addAsk('#askList')">
-								질문 추가
-							</button>
-							<button class="btn btn-primary" value="save" onClick="saveList()">
-								저 장
-							</button>
+								<%})%>
+							</div>
+							<div class="btn-group-vertical position-fixed fixed_btn_position">
+								<button type="button" class="btn btn-secondary" id="btnInsertSelfCheck">
+									질문 추가
+								</button>
+								<button class="btn btn-primary" value="save" id="btnSave">
+									저 장
+								</button>
+							</div>
 						</div>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
+					</div>
+				</div>
+			</main>
+		</div>
     </div>
     <script src="/js/coreui.bundle.min.js"></script>
     <script>
-        let i = <%=max%>;
-        let cur_i = <%=max%>;
-        let askList = [
-			<% result.forEach(function(v, i) { %>
-			{
-				id:'ask_<%=v.checkno%>',
-				ask:'<%=v.checkname%>'
-			},
-			<% }); %>
-		];
-		
-        function addAsk(e) {
-            $(e).append(`
-				<div class="input-group mb-3" style="width:75%; margin:0 auto;" id="ask_${++i}">
-					<input type="text" class="form-control checkTitle" placeholder="질문을 입력해 주세요." style="background-color:white!important;"
-						aria-label="Example text with button addon" aria-describedby="button-addon1" oninput=updateAsk(ask_${i},this)>
-					<div class="input-group-append">
-						<button class="btn btn-outline-secondary" type="button" id="button-addon2"
-							style="color:#f05454;" onClick=removeAsk(ask_${i},${i})>X</button>
-					</div>
+		if(location.search.includes("refresh")) {
+			window.history.replaceState(null, null, window.location.pathname);
+
+			$('.c-body').prepend(`
+				<div class="alert alert-success alert-dismissible fade show successAlert" style="margin-bottom: 0px;" role="alert">
+					<strong>저장 완료!</strong> 질문이 정상적으로 저장되었습니다.
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
 				</div>
 			`);
-            askList.push({ id: `ask_${i}`, ask: '' });
-			cur_i = i;
+
+			$(window).scrollTop(0);
+
+			$('.successAlert').eq(0).fadeOut(3000);
+		}
+		else window.history.replaceState(null, null, window.location.pathname);
+		
+		$('#btnInsertSelfCheck').click(function(e) {
+			$('.card-body').last().append(`
+				<div class="input-group mb-3" id="form_id_null" style="width:75%; margin:0 auto;">
+					<input type="text" class="form-control valSelfCheck" placeholder="질문을 입력해 주세요." style="background-color:white!important;">
+					<div class="input-group-append">
+						<button type="button" class="btn btn-outline-secondary btnDeleteSelfCheck" style="color:#f05454;">X</button>
+					</div>
+				</div>
+			`)
 			
-			let asks = document.getElementsByClassName('checkTitle');
-			window.scrollBy(0, asks[asks.length - 1].getBoundingClientRect().bottom);
-        }
+			$('.btnDeleteSelfCheck').unbind('click');
+			$('.btnDeleteSelfCheck').bind('click', deleteSelfCheckEvent);
+			
+			window.scrollBy(0, document.getElementsByClassName('input-group')[document.getElementsByClassName('input-group').length - 1].getBoundingClientRect().bottom);
+		});
 		
-        function removeAsk(me,askno) {
-			--i;
-			if (i + 1 == cur_i) {
-				// 1 2 3에서 2번 카드를 지우면 3이 되어 이후 추가이벤트로 인해 생겨있던 카드 3과 생겨질 카드3에서 중복 발생하여 중복 제거하기 위함
-				i = cur_i;
-			}
-            const findMyIndex = askList.findIndex((v) => v.id === me.id);
-			if(askno > <%=max%>){
-	            askList.splice(findMyIndex, 1);
-			   $(me).remove();
-			}else{
-				askList.splice(findMyIndex, 1);
+		$('.btnDeleteSelfCheck').bind('click', deleteSelfCheckEvent);
+		
+		function deleteSelfCheckEvent() {
+			let parentForm = $(this).parents('.input-group')[0];
+			if(parentForm.id.split('form_id_')[1] !== 'null') {
 				$.ajax({
-					type:'POST',
-					dataType:'json',
-					url:'./noUseSelfCheck',
-					async:true,
-					data:{"noUse" : askno},
-					success:function(data){
-					}
+					type: 'POST',
+					url: './noUseSelfCheck',
+					dataType: 'json',
+					data: {'checkno': parentForm.id.split('form_id_')[1]}
 				});
-            	$(me).remove();
 			}
-        }
+			parentForm.remove();
+		}
 		
-        function updateAsk(parent,me) {
-            const findMyIndex = askList.findIndex((v) => v.id === parent.id);
-            askList[findMyIndex].ask = overidingEscape(me.value);
-        }
-		
-		function saveList(){
+		$('#btnSave').click(function(e) {
+			let selfCheckList = [];
+			
+			$('.input-group').each(function(index, element) {
+				if(element.id.split('form_id_')[1] === 'null') {
+					selfCheckList.push($(element).find('.valSelfCheck').val());
+				}
+			});
+			
 			$.ajax({
 				type: 'POST',
-				dataType: 'json',
 				url: './saveSelfCheckList',
-				async: true,
-				data: { sendAjax: JSON.stringify(askList) },
+				dataType: 'json',
+				data: { saveData: JSON.stringify(selfCheckList) },
 				success: function (data) {
-					if (data.state === 'ok') {
-						$('.c-main').prepend(`<div class="alert alert-success alert-dismissible fade show successAlert" role="alert">
-						  <strong>저장 완료!</strong> 질문이 정상적으로 저장되었습니다.
-						  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-							<span aria-hidden="true">&times;</span>
-						  </button>
-						</div>`);
-						
-						$('.checkTitle').each(function(index, item){ 
-							$(item).prop('readonly', true);
-						});
-						
+					if(data.state === 'ok') location.replace(location.href + '?refresh');
+					else {
+						$('.c-body').prepend(`
+							<div class="alert alert-danger alert-dismissible fade show failAlert" style="margin-bottom: 0px;" role="alert">
+								<strong>저장 실패!</strong> 다시 한번 확인해 주세요.
+								<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+						`);
+
 						$(window).scrollTop(0);
-						
-						$('.successAlert').eq(0).fadeOut(3000);
-					}
-					else{
-						$('.c-main').prepend(`<div class="alert alert-danger alert-dismissible fade show failAlert" role="alert">
-						  <strong>저장 실패!</strong> 다시 한번 확인해 주세요.
-						  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-							<span aria-hidden="true">&times;</span>
-						  </button>
-						</div>`);
-						
-						$(window).scrollTop(0);
-						
+
 						$('.failAlert').eq(0).fadeOut(3000);
 					}
 				},
 			});
-		}
-		
-		function overidingEscape(str) {
-			var map = {
-				'&': escape('&'),
-				'<': escape('<'),
-				'>': escape('>'),
-				'"': escape('"'),
-				"'": escape('\'')
-			};
-			return str.replace(/[&<>"']/g, function(m) { return map[m]; });
-		}
+		});
     </script>
 </body>
 </html>

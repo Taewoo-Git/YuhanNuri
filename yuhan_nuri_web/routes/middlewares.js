@@ -15,6 +15,6 @@ exports.isAdminLoggedIn = (req, res, next) => { // 관리자 로그인 정보 �
 }
 
 exports.isUserLoggedIn = (req, res, next) => { // 사용자 로그인 정보 확인 미들웨어
-	if(req.session.userInfo === undefined) res.redirect('/');
-	else next();
+	if(req.signedCookies._uid !== undefined || req.session._uid !== undefined) next();
+	else res.redirect('/');
 }

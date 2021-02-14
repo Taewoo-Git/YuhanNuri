@@ -8,12 +8,9 @@
 			<li class="c-sidebar-nav-item">
 				<a class="c-sidebar-nav-link" href="/admin">예약 대기 리스트</a>
 			</li>
-			
-				<li class="c-sidebar-nav-item">
-					<a class="c-sidebar-nav-link" href="/admin/myReservation">내 예약 리스트</a>
-				</li>
-			
-			
+			<li class="c-sidebar-nav-item">
+				<a class="c-sidebar-nav-link" href="/admin/myReservation">내 예약 리스트</a>
+			</li>
         </ul>
     </li>
 	<%}%>
@@ -84,14 +81,14 @@
 		<a class="c-sidebar-nav-link" href="/admin/chat" target="_top">
 			<i class="cil-user-plus pr_30"></i>
 				채팅 상담</a>
-		<a class="c-sidebar-nav-link" href="/admin/getAllChatLog" target="_top">
+		<a class="c-sidebar-nav-link" href="javascript:openExplanation('getAllChatLog');" target="_top">
 			<i class="cil-save pr_30"></i>
 				전체 채팅 내역 저장</a>
 	</li>
 	
 	<li class="c-sidebar-nav-title">만족도조사</li>
 	<li class="c-sidebar-nav-item">
-		<a class="c-sidebar-nav-link" href="/admin/getSatisfactionResult" target="_top">
+		<a class="c-sidebar-nav-link" href="javascript:openExplanation('getSatisfactionResult');" target="_top">
 			<i class="cil-save pr_30"></i>
 				만족도조사 내역 저장</a>
 	</li>
@@ -107,3 +104,20 @@
 	</li>
 	<%}%>
 </ul>
+<script>
+	function openExplanation(url) {
+		let popup = {
+			width: 500,
+			height: 480
+		};
+
+		let pos = {
+			x: (window.screen.width / 2) - (popup.width / 2),
+			y: (window.screen.height / 2) - (popup.height / 2) - 50
+		};
+		
+		window.open("/admin/explanation?url="+url, "FileSvaeExplanation",
+					"width="+popup.width+", height="+popup.height+", left="+pos.x+", top="+pos.y+
+					", toolbar=no, menubar=no, scrollbars=no, resizable=no", true);
+	}
+</script>

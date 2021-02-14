@@ -14,6 +14,25 @@
 				margin: 0 !important;
 				padding: 0 !important;
             }
+			.fade-text{
+				font-size:150%;
+				color:#494949;
+				margin-bottom:-20px;
+				animation: fadein-text 3s;
+  				-moz-animation: fadein-text 3s; /* Firefox */
+  				-webkit-animation: fadein-text 3s; /* Safari and Chrome */
+  				-o-animation: fadein-text 3s; /* Opera */
+			}
+			@keyframes fadein-text{
+				from{
+					opacity: 0;
+					transform: translateY(50%);
+				}
+				to{
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
 			.form-question{
 				margin-top:30px;
 				margin-bottom:10px;
@@ -22,45 +41,50 @@
 	</head>
 	<body>
 		<div class="container-fluid">
-			<div class="row" style="height:60px; margin-bottom:20px;">
-				<div class="col align-self-center">
-					<label style="font-size:180%;">만족도조사</label>
+			<div class="row pt-4">
+				<div class="fade-text col align-self-center text-center" style="color:#1a1a1a;">
+					<label>
+						<% let consultType = ['채팅', '화상', '전화', '대면']; %>
+						<% let subject = serial[0].typeno === null ? '심리검사' : consultType[serial[0].typeno - 1] + '상담' %>
+						<%=subject%> 만족도조사
+					</label>
 				</div>
 			</div>
 			<form method="POST" id="formList">
 				<div style="form align-self-center">
 					<input type="hidden" value="<%=serial[0].serialno%>" name="reservationNo">
 					<% for(let i=0; i<testAsk.length; i++){ %>
-						<div class="form-group">
-							<div class="form-group form-question">
-								<label id="satisfaction<%=i%>"><b><%= unescape(testAsk[i].ask) %></b></label><br/>
-								<input type="hidden" value="<%=testAsk[i].askno%>" id="satisfactionVal<%=i%>"/>
-							<% if(testAsk[i].choicetypename === "Radio"){ %>
-								<% for(let j=0; j<testAsk[i].choices.split('|').length; j++){ %>
-								<input type="radio" class="from-input mb-4" name="satisfactionAnswer<%=i%>"
-									   id="<%= 'mentalAnswer'+i+j %>" value="<%= testAsk[i].choices.split('|')[j] %>">
-								<label for="<%= 'mentalAnswer'+i+j %>"><%= unescape(testAsk[i].choices.split('|')[j]) %></label><br/>
-								<% } %>
+					<div class="form-group">
+						<div class="form-group form-question">
+							<label id="satisfaction<%=i%>"><b><%= unescape(testAsk[i].ask) %></b></label><br/>
+							<input type="hidden" value="<%=testAsk[i].askno%>" id="satisfactionVal<%=i%>"/>
+						<% if(testAsk[i].choicetypename === "Radio"){ %>
+							<% for(let j=0; j<testAsk[i].choices.split('|').length; j++){ %>
+							<input type="radio" class="from-input mb-4" name="satisfactionAnswer<%=i%>"
+								   id="<%= 'mentalAnswer'+i+j %>" value="<%= testAsk[i].choices.split('|')[j] %>">
+							<label for="<%= 'mentalAnswer'+i+j %>"><%= unescape(testAsk[i].choices.split('|')[j]) %></label><br/>
 							<% } %>
-							<% if(testAsk[i].choicetypename === "Check"){ %>
-								<% for(let j=0; j<testAsk[i].choices.split('|').length; j++){ %>
-								<input type="checkbox" class="from-input mb-4" name="satisfactionAnswer<%=i%>"
-									   id="<%= 'mentalAnswer'+i+j %>" value="<%= testAsk[i].choices.split('|')[j] %>">
-								<label for="<%= 'mentalAnswer'+i+j %>"><%= unescape(testAsk[i].choices.split('|')[j]) %></label><br/>
-								<% } %>
+						<% } %>
+						<% if(testAsk[i].choicetypename === "Check"){ %>
+							<% for(let j=0; j<testAsk[i].choices.split('|').length; j++){ %>
+							<input type="checkbox" class="from-input mb-4" name="satisfactionAnswer<%=i%>"
+								   id="<%= 'mentalAnswer'+i+j %>" value="<%= testAsk[i].choices.split('|')[j] %>">
+							<label for="<%= 'mentalAnswer'+i+j %>"><%= unescape(testAsk[i].choices.split('|')[j]) %></label><br/>
 							<% } %>
-							<% if(testAsk[i].choicetypename === "Normal"){ %>
-								<textarea class="form-control mb-4" placeholder="자유롭게 작성해 주세요." name="satisfactionAnswer<%=i%>"
-										  id="<%= 'mentalAnswer'+i %>" style="resize:none;"></textarea>
-							<% } %>
-							</div>
+						<% } %>
+						<% if(testAsk[i].choicetypename === "Normal"){ %>
+							<textarea class="form-control mb-4" placeholder="자유롭게 작성해 주세요." name="satisfactionAnswer<%=i%>"
+									  id="<%= 'mentalAnswer'+i %>" style="resize:none;"></textarea>
+						<% } %>
 						</div>
+					</div>
 					<% } %>
-					<input type="hidden" id="Fulldata" name="Fulldata" value="">
-						<input type="button" class="btn btn-primary pull-right" value="답변완료" id="btnSuccess" style="padding:.300rem .60rem;">
-						<br/>
-						<br/>
-						<br/>
+					<input type="hidden" id="answers" name="answers" value="">
+					<div class="row">
+						<div class="col text-right">
+							<input type="button" class="btn btn-submit btn-primary mb-4" id="btnSuccess" value="답변 완료">
+						</div>
+					</div>
 				</div>	
 			</form>
 		</div>
@@ -68,15 +92,15 @@
 			const windowHeight = window.innerHeight;
 			
 			$("#btnSuccess").click(function(e) {
-				let temp = getMentalAnswer();
+				let temp = getAnswer();
 				if(temp != undefined && temp != null){
-					$('#Fulldata').val(JSON.stringify(temp));
+					$('#answers').val(JSON.stringify(temp));
 					$("#formList").submit();
 					alert("답변이 완료되었습니다.");
 				}
 			});
 			
-			function getMentalAnswer() {
+			function getAnswer() {
 				let dynamic = [];
 
 				for(let i=0; i < <%= testAsk.length %>; i++) {

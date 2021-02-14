@@ -16,8 +16,8 @@ const helmet = require('helmet');
 const user = require('./routes/user');
 const admin = require('./routes/admin');
 
-const {deleteOneMonth, deleteFiveYear} = require('./routes/schedule');
-const {consultTodayPush, consultTomorrowPush} = require('./routes/fcm');
+const {DeleteOneMonth, DeleteFiveYear} = require('./routes/schedule');
+const {ConsultTodayPush, ConsultTomorrowPush} = require('./routes/fcm');
 
 const cookieParser = require('cookie-parser');
 
@@ -30,7 +30,7 @@ moment.tz.setDefault("Asia/Seoul");
 const db = require('./routes/database.js')();
 const connection = db.init();
 
-const ErrorLogger = require('./routes/logger_error.js');
+const Logger = require('./routes/logger.js');
 const logTimeFormat = "YYYY-MM-DD HH:mm:ss";
 
 const favicon = require('serve-favicon');
@@ -56,8 +56,8 @@ app.use('/uploads', express.static(path.join(__dirname,'/uploads')));
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 
-app.use(session({secret: process.env.COOKIE_SECRET, resave: false, saveUninitialized: false}));
-app.use(cookieParser('vaCzbAVeMy9pT7Uw'));
+app.use(session({secret: process.env.SESSION_SECRET, resave: false, saveUninitialized: false}));
+app.use(cookieParser(process.env.COOKIE_SECRET));
 
 app.use(helmet({
 	contentSecurityPolicy: false,
@@ -80,10 +80,10 @@ app.use('/admin', admin);
 options ? server = https.createServer(options, app).listen(443, () => {
 	console.log('YuhanNuri, Listening on port ' + 443);
 	
-	deleteOneMonth();
-	deleteFiveYear();
-	consultTodayPush();
-	consultTomorrowPush();
+	DeleteOneMonth();
+	DeleteFiveYear();
+	ConsultTodayPush();
+	ConsultTomorrowPush();
 }) : undefined;
 
 options ? http.createServer(function(req, res) {
@@ -95,20 +95,20 @@ options ? http.createServer(function(req, res) {
 : server = http.createServer(app).listen(80, () => {
 	console.log('YuhanNuri, Listening on port ' + 80);
 	
-	deleteOneMonth();
-	deleteFiveYear();
-	consultTodayPush();
-	consultTomorrowPush();
+	DeleteOneMonth();
+	DeleteFiveYear();
+	ConsultTodayPush();
+	ConsultTomorrowPush();
 });
 
 const io = require('./routes/socket.js')(server); // socket.js파일에 server를 미들웨어로 사용
 
 app.get('/', function (req, res) {
-	let selectHomeBoard = "select * from HomeBoard";
-
-	if(req.session.userInfo) {
+	if(req.signedCookies._uid !== undefined) req.session._uid = req.signedCookies._uid;
+	if(req.session._uid !== undefined) {
+		let selectHomeBoard = 'SELECT * FROM HomeBoard';
 		connection.execute(selectHomeBoard, (err, rows) => {
-			if(err) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);
+			if(err) Logger.Error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 			else {
 				res.render('main', {
 					data: rows
@@ -116,7 +116,6 @@ app.get('/', function (req, res) {
 			}
 		});
 	}
-	else if(req.signedCookies._uid != undefined) res.redirect('/user/auto');
 	else res.render('login');
 });
 

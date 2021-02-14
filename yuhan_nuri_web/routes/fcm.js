@@ -7,6 +7,7 @@ const sql_whoispost = "SELECT User.token FROM Reservation, User WHERE Reservatio
 const sql_AcceptedToken= "SELECT token FROM User WHERE stuno = (select stuno FROM Reservation WHERE serialno = ?)"; 
 const sql_notifyAnswer = "SELECT token FROM User WHERE stuno = (select stuno FROM QuestionBoard WHERE no = ?)";
 const sql_satisfaction = "SELECT token FROM User WHERE stuno = (select stuno FROM Reservation WHERE serialno = ?)";	
+const sql_notifyReservationCancel = "SELECT token FROM User WHERE stuno = ?";
 const fcm_admin = require('firebase-admin');
 
 var serviceAccount = require('../serviceAccountCredentials.json');
@@ -30,12 +31,12 @@ const moment = require('moment');
 require('moment-timezone'); 
 moment.tz.setDefault("Asia/Seoul");
 
-const ErrorLogger = require('./logger_error.js');
+const logger = require('./logger.js');
 const logTimeFormat = "YYYY-MM-DD HH:mm:ss";
 
-exports.reservationAcceptPush = (reservationNumber) => {
+exports.ReservationAcceptPush = (reservationNumber) => {
 	connection.execute(sql_AcceptedToken, [reservationNumber], (err, rows) => {
-		if(err) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);
+		if(err) logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 		else {
 			const fcm_target_token = rows[0].token;
 			const fcm_message = {
@@ -53,16 +54,16 @@ exports.reservationAcceptPush = (reservationNumber) => {
 				.then(function(response) {
 			})
 				.catch(function(error) {
-				ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${error}`);
+				logger.error.info(`[${moment().format(logTimeFormat)}] ${error}`);
 			});
 		}
 	}); 
 }
 
-exports.consultTomorrowPush = () => {
+exports.ConsultTomorrowPush = () => {
 	schedule.scheduleJob(everule, function() {
 		connection.execute(sql_whoispost, [moment().add(1, 'd').format("YYYY-MM-DD")], (err, rows) => {
-			if(err) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);
+			if(err) logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 			else {
 				for(var i = 0; i < rows.length; i++) {	
 					const fcm_target_token = rows[i].token;
@@ -81,7 +82,7 @@ exports.consultTomorrowPush = () => {
 						.then(function(response) {
 					})
 						.catch(function(error) {
-						ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${error}`);
+						logger.error.info(`[${moment().format(logTimeFormat)}] ${error}`);
 					});
 				}
 			}
@@ -89,10 +90,10 @@ exports.consultTomorrowPush = () => {
 	});
 }
 	
-exports.consultTodayPush = () => {
+exports.ConsultTodayPush = () => {
 	schedule.scheduleJob(todayRule, function() {
 		connection.execute(sql_whoispost, [moment().format("YYYY-MM-DD")], (err, rows) => {
-			if(err) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);
+			if(err) logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 			else {
 				for(var i = 0; i < rows.length; i++) {	
 					const fcm_target_token = rows[i].token;
@@ -111,7 +112,7 @@ exports.consultTodayPush = () => {
 						.then(function(response) {
 					})
 						.catch(function(error) {
-						ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${error}`);
+						logger.error.info(`[${moment().format(logTimeFormat)}] ${error}`);
 					});
 				}
 			}
@@ -119,9 +120,38 @@ exports.consultTodayPush = () => {
 	});
 }
 
-exports.answerPush = (tokenno) => {
+exports.NoticeReservationCancelPush = (stuno) => {
+	connection.execute(sql_notifyReservationCancel, [stuno], (err, rows) => {
+		if(err) logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
+		else{
+			const fcm_target_token = rows[0].token;
+			const fcm_message = {
+				token : fcm_target_token,
+				notification : {
+					title : '유한누리',
+					body : '예약이 취소되었습니다.',
+				},
+				data : {
+					click_action : 'FLUTTER_NOTIFICATION_CLICK',
+					page : 'mypage'
+					
+				}
+			};
+			
+			fcm_admin.messaging().send(fcm_message)
+				.then(function(response) {
+				
+			})
+				.catch(function(error){
+				logger.error.info(`[${moment().format(logTimeFormat)}] ${error}`);
+			});
+		}
+	});
+}
+
+exports.AnswerPush = (tokenno) => {
 	connection.execute(sql_notifyAnswer, [tokenno], (err, rows) => {	
-		if(err) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);
+		if(err) logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 		else {
 			const fcm_target_token = rows[0].token;
 			const fcm_message = {
@@ -139,15 +169,15 @@ exports.answerPush = (tokenno) => {
 				.then(function(response) {
 			})
 				.catch(function(error) {
-				ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${error}`);
+				logger.error.info(`[${moment().format(logTimeFormat)}] ${error}`);
 			});	
 		}
 	});
 };
 
-exports.satisfactionPush = (satisfactionNo) => {
+exports.SatisfactionPush = (satisfactionNo) => {
 	connection.execute(sql_satisfaction, [satisfactionNo], (err, rows) => {
-		if(err) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);
+		if(err) logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 		else {
 			const fcm_target_token = rows[0].token;
 			const fcm_message = {
@@ -165,7 +195,7 @@ exports.satisfactionPush = (satisfactionNo) => {
 				.then(function(response) {
 			 })
 				.catch(function(error) {
-				ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${error}`);
+				logger.error.info(`[${moment().format(logTimeFormat)}] ${error}`);
 			});	
 		}
 	});

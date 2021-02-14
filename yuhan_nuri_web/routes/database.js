@@ -6,7 +6,7 @@ const moment = require('moment');
 require('moment-timezone');
 moment.tz.setDefault("Asia/Seoul");
 
-const ErrorLogger = require('./logger_error.js');
+const logger = require('./logger.js');
 const logTimeFormat = "YYYY-MM-DD HH:mm:ss";
 
 module.exports = function() {
@@ -23,7 +23,7 @@ module.exports = function() {
 		},
 		open: function(conn, target) {
 			conn.getConnection(function(err) {
-				if(err) ErrorLogger.info(`[${moment().format(logTimeFormat)}] (${target}) MariaDB Connection ${err}`);
+				if(err) logger.error.info(`[${moment().format(logTimeFormat)}] (${target}) MariaDB Connection ${err}`);
 			});
 		}
 	}

@@ -153,26 +153,21 @@
 					dataType: "json",
 					url: "./finishedReservation",
 					async: true,
-					data: { "sendAjax" : $(`#${e.target.id}`).val() },
-					success: function (data) { 
-						if(data.state==='ok') {
-							window.location.reload();
-						}
+					data: {"serialno": $(`#${e.target.id}`).val()},
+					success: function (data) {
+						if(data.state === 'ok') window.location.reload(true);
 					}
 				});
-				
 			});
 		});
 		
 		$(function () {
 			$('#save_ReservationLog').click(function(e){
-				location.href='./getMyReservationHistory';
+				openExplanation('getMyReservationHistory');
 			});
-		});
-		
-		$(function () {
+			
 			$('#save_all_ReservationLog').click(function(e){
-				location.href='./getAllReservationHistory';
+				openExplanation('getAllReservationHistory');
 			});
 		});
 	
@@ -300,7 +295,8 @@
 					`);
 					$('#applyModal').append(`
 						<div class="modal-footer">
-							<button type="button" class="btn btn-info" data-dismiss="modal" id="print_pdf" value= "${data.serialno}" onclick="location.href = './getSimpleApplyFormPDF/' + ${data.serialno}">신청서 인쇄</button>
+							<button type="button" class="btn btn-info" data-dismiss="modal" id="print_pdf" value= "${data.serialno}" 
+							onclick="openExplanation('getSimpleApplyFormPDF/${data.serialno}')">신청서 인쇄</button>
 							<button type="button" class="btn btn-danger" data-dismiss="modal">닫기</button>
 						</div>
 					`);
@@ -391,7 +387,8 @@
 					}
 					$('#applyModal').append(`
 						<div class="modal-footer">
-							<button type="button" class="btn btn-info" data-dismiss="modal" id="print_pdf" value= "${data.serialno}" onclick="location.href = './getSimpleApplyFormPDF/' + ${data.serialno}">신청서 인쇄</button>
+							<button type="button" class="btn btn-info" data-dismiss="modal" id="print_pdf" value= "${data.serialno}" 
+							onclick="openExplanation('getSimpleApplyFormPDF/${data.serialno}')">신청서 인쇄</button>
 							<button type="button" class="btn btn-danger" data-dismiss="modal">닫기</button>
 						</div>
 					`);

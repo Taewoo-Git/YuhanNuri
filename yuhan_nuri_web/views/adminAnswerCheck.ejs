@@ -75,8 +75,6 @@
 												<td style="padding-right:30px;"><%=answerCheckList[0].stuname %></td>
 												<td style="padding-right:10px;"><b>질문일자</b></td>
 												<td style="padding-right:30px;"><%=answerCheckList[0].date %></td>
-												<td style="padding-right:10px;"><b>연락처</b></td>
-												<td style="padding-right:30px;"><%=answerCheckList[0].phonenum %></td>
 											</tr>
 											<tr>
 												<td><b>유형</b></td>
@@ -119,34 +117,34 @@
     </div>
 	<script src="/js/coreui.bundle.min.js"></script>
 	<script>
-		$("#btnUpdate").click(function(e){
-			if($("#btnUpdate").val() == "답변 수정"){
+		$("#btnUpdate").click(function(e) {
+			if($("#btnUpdate").val() == "답변 수정") {
 				$("#textAnswer").removeAttr("readonly");
 				$("#textAnswer").focus();
 				$("#btnUpdate").attr("class", "btn btn-primary");
 				$("#btnUpdate").val("수정 완료");
 				$("#textAnswer").css("border", "1px solid #BDBDBD");
-			}else{
+			}
+			else {
 				$.ajax({
 					url: '/admin/answerCheck/<%=answerNo%>',
 					dataType: 'json',
 					type: 'POST',
 					data: {content: $("#textAnswer").val()},
 					success: function(result) {
-						if(result.check == 'success'){
+						if(result.check == 'success') {
 							alert('수정이 완료되었습니다.');
 							window.location.reload(true);
-						}else{
+						}
+						else {
 							alert('이미 수정되었거나 문제가 발생하였습니다.');
 							window.location.reload(true);
 						}
 					}
 				});
 			}
-			
 		});
 	</script>
 </body>
-
 </html>
 

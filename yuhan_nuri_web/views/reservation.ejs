@@ -195,19 +195,14 @@
 	</head>
 	<body>
 		<div class="container-fluid">
-			<div class="row" style="height:50px; margin-bottom:20px;">
-				<div class="col mt-2 align-self-center">
-					<label style="font-size:180%;">예약</label>
-				</div>
-			</div>
 			<div class="tab-content">
 				<div class="tab-pane fade show active" id="applicationTab">
-					<div class="row" style="height: 60px;">
+					<div class="row pt-4">
 						<div class="fade-text col align-self-center text-center" style="color:#1a1a1a;">
-							<label>무엇을 원하시나요?</label>
+							<label>무엇을 도와드릴까요?</label>
 						</div>
 					</div>
-					<div class="row align-self-center" style="height: 40px; margin-bottom:40px;">
+					<div class="row align-self-center" style="height:40px; margin-bottom:40px;">
 						<div class="fade-app col text-center align-self-center">
 							<input type="radio" id="appMental" name="btnApp" class="btnClass">
 							<label for="appMental" class="mr-4" style="font-size:130%;">심리검사</label>
@@ -335,7 +330,7 @@
 								</div>
 							</div>
 						</div>
-						<div class="form-group text-right" style="margin-top:50px;"> 
+						<div class="form-group text-right"> 
 							<input type="button" class="btn btn-primary mb-2" id="btnFirstNext" value="다 음">
 						</div>
 						
@@ -381,7 +376,7 @@
 						<label>※ 상담시간 : 1회당 50분</label>
 					</div>
 					<div class="form-group text-right" style="margin-top:50px; margin-bottom:0!important; display:none;" id="divSecondNext"> 
-						<input type="button" class="btn btn-primary mb-2" id="btnSecondNext" style="margin-top:2px;" value="다 음">
+						<input type="button" class="btn btn-primary mb-4" id="btnSecondNext" value="다 음">
 					</div>
 				</div>
 				<div class="tab-pane fade" id="selfcheckTab">
@@ -394,24 +389,24 @@
 					</div>
 					
 					<div class="form-group text-right" style="margin-top:50px; margin-bottom:0!important;" id="divThirdNext"> 
-						<input type="button" class="btn btn-primary mb-2" id="btnThirdNext" style="margin-top:2px;" value="다 음">
+						<input type="button" class="btn btn-primary mb-4" id="btnThirdNext" value="다 음">
 					</div>
 				</div>
 				<div class="tab-pane fade" id="privacyTab">
-					<div class="row">
+					<div class="row pt-4">
 						<div class="col-title col">
-							<input type="checkbox" id="agreebox1" name="agreebox" class="btnClass"><label for="agreebox1" class="text-default"><label class="col-agreetext">(필수)
-							</label> 유한누리 이용약관 동의</label>
+							<input type="checkbox" id="agreebox1" name="agreebox" class="btnClass">
+							<label for="agreebox1" class="text-default" style="margin:0px;"><label class="col-agreetext" style="margin:0px;">(필수)</label> 상담 프로그램 이용 관련 동의</label>
 						</div>
 					</div>
 					<div class="row">
 						<div class="col-text col">
-							<div class="form-text form-control overflow-auto">
+							<div class="form-text form-control overflow-auto mt-2">
 								<p class="text-danger">
-									1. 비밀보장에 관한 약속
+									<b>1. 비밀보장에 관한 약속</b>
 								</p>
 								<p>
-									본 센터에서 이루어지는 모든 상담활동은 상담자 윤리강령에 근거하여 비밀 보장을 약속하며, 당사자 동의 없이 타인이나 센터 외부로 기록들이 공개되지 않습니다. 그러나 아래의 경우에는, 관련 의무 규정상 									가족이나 제3자에게 공개될 수 있습니다.<br/><br/>
+									본 센터에서 이루어지는 모든 상담활동은 상담자 윤리강령에 근거하여 비밀 보장을 약속하며, 당사자 동의 없이 타인이나 센터 외부로 기록들이 공개되지 않습니다. 그러나 아래의 경우에는, 관련 의무 규정상 가족이나 제3자에게 공개될 수 있습니다.<br/><br/>
 									1) 최근 당신이 아동학대 혹은 성인학대의 피해자나 가해자로 여겨질 만한 근거가 있는 경우<br/>
 									2) 당신이 자살하려고 하는 경우<br/>
 									3) 당신의 행동이 타인에게 위해를 가할 가능성이 있는 경우<br/>
@@ -420,18 +415,19 @@
 									6) 당신이 감염성이 있는 치명적 질병이 있고, 당신과의 관계로 인해 위험한 수준으로 그 질병에 노출된 제3자가 있는 경우<br/>
 								</p>
 								<p class="text-danger">
-									2. 상담내용 기록 및 녹음
+									<b>2. 상담내용 기록 및 녹음</b>
 								</p>
 								<p>
-									상담사의 자문과 교육을 목적으로 상담내용을 기록, 녹음할 수 있습니다. 기록, 녹음은 철저히 비밀유지로 관리되며 이 외의 목적으로 절대 사용하지 않습니다.
-									(녹음을 원치 않을 경우에는 상담사에게 요구할 수 있습니다.) 상담센터 내부에 관리되는 개인정보 및 기록물은 5년간 보관 후 폐기됩니다.
+									상담사의 자문과 교육을 목적으로 상담내용을 기록, 녹음할 수 있습니다. 기록, 녹음은 철저히 비밀유지로 관리되며 이 외의 목적으로 절대 활용되지 않습니다(녹음을 원치 않을 경우 상담사에게 요구할 수 있습니다). 상담센터 내부에 관리되는 개인정보 및 기록물은 5년간 보관 후 폐기됩니다.
 								</p>
 								<p class="text-danger">
-									3. 비대면 상담 관련 동의
+									<b>3. 비대면 상담 관련 동의</b>
 								</p>
 								<p>
-									비대면으로 이뤄지는 상담내용을 상담자의 동의 없이 참여자가 임의로 녹음, 녹화, 저장하여 공개 또는 유포하여서는 안 되며,
-									이러한 경우에는 그에 따른 민·형사상의 책임을 지게 될 수 있음을 알려드립니다.
+									비대면으로 이뤄지는 상담내용을 상담자의 동의 없이 참여자가 임의로 녹음, 녹화, 저장하여 공개 또는 유포하여서는 안 되며, 이러한 경우에는 그에 따른 민·형사상의 책임을 지게 될 수 있음을 알려드립니다.
+								</p>
+								<p class="text-danger">
+									※ 상위 제공된 상담 프로그램 이용 관련 동의를 거부할 권리가 있습니다. 그러나, 동의를 거부할 경우 관련 상담 프로그램 이용이 불가합니다.
 								</p>
 							</div>
 						</div>
@@ -439,55 +435,78 @@
 
 					<div class="row">
 						<div class="col-title col">
-						<input type="checkbox" id="agreebox2" name="agreebox" class="btnClass"><label for="agreebox2" class="text-default"><label class="col-agreetext">
-							(필수)</label> 개인정보 수집 및 이용 동의</label>
+						<input type="checkbox" id="agreebox2" name="agreebox" class="btnClass">
+							<label for="agreebox2" class="text-default" style="margin:0px; margin-bottom:5px;"><label class="col-agreetext" style="margin:0px;">(필수)</label> 개인정보 수집•이용 동의</label>
 						</div>
 					</div>
 					<div class="row">
 						<div class="col-text col">
-							<div class="form-text form-control overflow-auto">
-								<p class="text-danger">
-									1. 개인정보 수집 및 이용에 대한 동의
-								</p>
+							<div class="form-text form-control overflow-auto mt-2">
 								<p>
-									수집·이용항목: 성명/생년월일/성별/학과/학번/주소/이메일/연락처 <br/>
-									수집·이용목적: 상담 프로그램 제공에 필요한 내담자 이해, 본인 확인 및 연락 등의 절차에 이용, 행사 또는 프로그램 등의 안내, 센터 이용 현황 파악을 위한 통계 분석 <br/> 
-									개인정보 보유·이용기간: 최종 상담 프로그램 제공 종료일로부터 5년 보관 후 폐기 <br/>
+									<U>수집항목:</U> 성명, 생년월일, 성별, 학과, 학년, 학번, 이메일, 연락처<br/>
+									<U>수집목적:</U> 상담 프로그램 제공에 필요한 내담자 이해, 본인 확인 및 연락 등의 절차에 이용, 행사 또는 프로그램 등의 안내, 센터 이용 현황 파악을 위한 통계 분석<br/> 
+									<U>보유기간:</U> <b style="font-size:105%;">최종 상담 프로그램 제공 종료일로부터 5년 보관 후 폐기</b><br/>
 								</p>
 								<p class="text-danger">
-									2. 민감정보 처리에 대한 동의
+									※ 개인정보 수집·이용에 대한 동의를 거부할 권리가 있습니다. 그러나 동의를 거부할 경우 관련 상담 프로그램 이용이 불가합니다.
 								</p>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-title col">
+						<input type="checkbox" id="agreebox3" name="agreebox" class="btnClass">
+							<label for="agreebox3" class="text-default" style="margin:0px;"><label class="col-agreetext" style="margin:0px;">(필수)</label> 민감정보 수집•이용 동의</label>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-text col">
+							<div class="form-text form-control overflow-auto mt-2">
 								<p>
-									수집·이용항목: 방문 경위 및 프로그램 신청 계기, 상담기록, 심리검사 결과 등<br/>
-									수집·이용목적: 효과적인 상담 프로그램 제공에 이용<br/>
-									민감정보 보유·이용기간: 최종 상담 프로그램 제공 종료일로부터 5년 보관 후 폐기<br/>
+									<U>수집항목:</U> <b style="font-size:105%;">방문 경위 및 프로그램 신청 계기, 이전 상담경험, 휴학유무, 군대경험 유무, 종교, 주거지, 가족관계, 건강상태, 상담기록, 심리검사 결과</b><br/>
+									<U>수집목적:</U> 상담 프로그램 제공에 필요한 내담자 이해, 효과적인 상담 프로그램 제공에 이용<br/> 
+									<U>보유기간:</U> <b style="font-size:105%;">최종 상담 프로그램 제공 종료일로부터 5년 보관 후 폐기</b><br/>
 								</p>
 								<p class="text-danger">
-									3. 개인정보 제3자 제공동의
+									※ 민감정보 수집·이용에 대한 동의를 거부할 권리가 있습니다. 그러나 동의를 거부할 경우 관련 상담 프로그램 이용이 불가합니다.
 								</p>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-title col">
+						<input type="checkbox" id="agreebox4" name="agreebox" class="btnClass">
+							<label for="agreebox4" class="text-default" style="margin:0px;"><label class="col-agreetext" style="margin:0px;">(필수)</label> 개인정보 제3자 제공 동의</label>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-text col">
+							<div class="form-text form-control overflow-auto mt-2">
 								<p>
-									개인정보 제공처: 한국가이던스, 마음사랑, 인싸이트, 어세스타, 연우심리개발원, 게슈탈트포럼, 한국이고그램연구소, 한국심리연구소, 한국심리주식회사, 한국심리적성검사연구소(심리검사업체)<br/>
-									제공항목: 성명/생년월일/성별/학과/이메일/연락처/심리검사 결과<br/>
-									제공목적: 온라인 심리검사 제공 및 심리검사 결과 처리<br/>
-									수집·이용목적: 온라인 심리검사 제공 및 심리검사 결과를 처리하여 학생들에게 심리검사 해석 등의 서비스를 제공하기 위한 절차에 이용<br/>
-									개인정보 보유·이용기간: 이용목적이 달성된 후 폐기<br/>
+									<U>제공받는 기관:</U> <b style="font-size:105%;">한국가이던스, 마음사랑, 인싸이트, 어세스타, 연우심리개발원, 게슈탈트포럼, 한국이고그램연구소, 한국심리연구소, 한국심리주식회사, 한국심리적성검사연구소(심리검사업체)</b><br/>
+									<U>제공목적:</U> <b style="font-size:105%;">온라인 심리검사 제공 및 심리검사 결과 처리</b><br/>
+									<U>제공하는 항목:</U> 성명, 생년월일, 성별, 이메일, 연락처, 심리검사 결과<br/>
+									<U>보유기간:</U> <b style="font-size:105%;">최종 상담 프로그램 제공 종료일로부터 5년 보관 후 폐기</b><br/>
+								</p>
+								<p class="text-danger">
+									※ 개인정보 제3자 제공에 대한 동의를 거부할 권리가 있습니다. 그러나 동의를 거부할 경우 관련 상담 프로그램 이용이 불가합니다.
 								</p>
 							</div>
 						</div>
 					</div>
 					<div class="row">
 						<div class="col-text col">
-						<input type="checkbox" id="agreebox3" name="agreebox" class="btnClass">
-							<label for="agreebox3" class="text-default">유한누리 이용약관에 모두 동의합니다.</label>
+						<input type="checkbox" id="agreebox5" name="agreebox" class="btnClass">
+							<label for="agreebox5" class="text-default">상위 유한누리 이용약관에 모두 동의합니다.</label>
 							<p style="color:#768192; font-size:85%; margin-left:20px;">
-								동의 내용은 개인정보보호법 제15조에 근거하여 고지된 이외의 목적으로 활용되지 않으며, 당신은 제공된 개인정보의 이용을 거부할 수도 있습니다.
-								다만, 동의 거부 시 프로그램 참여가 불가합니다.
+								※ 만 14세 미만 학생의 경우 보호자(법정대리인)의 동의가 필요하나 본 상담 프로그램은 유한대학교 재학생만 이용 가능하므로 해당사항이 없습니다.
 							</p>
 						</div>
+						
 					</div>
 					<div class="row">
-						<div class="col text-right" style="margin-top:45px;">
-							<input type="button" class="btn btn-submit btn-primary mb-2" id="btnComplete" value="확 인">
+						<div class="col text-right">
+							<input type="button" class="btn btn-submit btn-primary mb-4" id="btnComplete" value="확 인">
 						</div>
 					</div>
 					
@@ -496,7 +515,7 @@
 		</div>
 		<script src="/socket.io/socket.io.js"></script>
 		<script>
-			const windowHeight = window.innerHeight;
+			const initHeight = document.body.clientHeight;
 			
 			const socket = io('/reservation');
 			let sendData = {}
@@ -558,13 +577,13 @@
 
 			socket.on('initPrivacy', function() {
 				$('input[name=agreebox]').click(function(){
-					if($("#agreebox3").is(":checked")){
-						if(!$("#agreebox2").is(":checked") || !$("#agreebox1").is(":checked")) {
-							$("input:checkbox[id='agreebox3']").prop("checked", false);
+					if($("#agreebox5").is(":checked")){
+						if(!$("#agreebox1").is(":checked") || !$("#agreebox2").is(":checked") || !$("#agreebox3").is(":checked") || !$("#agreebox4").is(":checked")) {
+							$("input:checkbox[id='agreebox5']").prop("checked", false);
 						}
 					}
 
-					if($("#agreebox1").is(":checked") && $("#agreebox2").is(":checked")) {
+					if($("#agreebox1").is(":checked") && $("#agreebox2").is(":checked") && $("#agreebox3").is(":checked") && $("#agreebox4").is(":checked")) {
 						$("input:checkbox[name=agreebox]").each(function() {
 							this.checked = true;
 						});
@@ -572,28 +591,32 @@
 					}
 				});
 
-				$('#agreebox3').click(function(e) {	// 모두 동의 버튼
-					if($("input:checkbox[id='agreebox3']").is(":checked") == false) {
+				$('#agreebox5').click(function(e) {	// 모두 동의 버튼
+					if($("input:checkbox[id='agreebox5']").is(":checked") == false) {
 						agreebox1.checked = true;
 						agreebox2.checked = true;
-						$("input:checkbox[id='agreebox3']").prop("checked", true);
+						agreebox3.checked = true;
+						agreebox4.checked = true;
+						$("input:checkbox[id='agreebox5']").prop("checked", true);
 						
 						$('#btnComplete').focus();
 					}
 					else{
 						agreebox1.checked = false;
 						agreebox2.checked = false;
-						$("input:checkbox[id='agreebox3']").prop("checked", false);
+						agreebox3.checked = false;
+						agreebox4.checked = false;
+						$("input:checkbox[id='agreebox5']").prop("checked", false);
 					}
 				});
 
 				$('#btnComplete').click(function(e) {
-					if($('#agreebox3').is(':checked') === true) {
+					if($('#agreebox5').is(':checked') === true) {
 						socket.emit('initComplete', sendData);
 					}
 					else{
 						alert("개인정보동의서를 모두 동의해야 신청이 가능합니다.");
-						document.getElementById("agreebox3").focus();
+						document.getElementById("agreebox5").focus();
 					}
 				});
 
@@ -778,7 +801,7 @@
                     let count = 0;
                     
                     const typeList = document.getElementsByClassName('btnType');
-					for(let i=0; i<typeList.length; i++) {
+					for(let i = 0; i < typeList.length; i++) {
 						if(typeList[i].className.includes("use")) count++;
 					}
                     
@@ -900,35 +923,35 @@
 			});
 
 			function applicationValidCheck() {
-				if($('#userCode').val() === ""){
+				if($('#userCode').val() === "") {
 					document.getElementById("userCode").focus();
 					alert("학번을 입력하세요.");
 					return false;
-				}else{
-					if($('#userName').val() === ""){
+				}else {
+					if($('#userName').val() === "") {
 						document.getElementById("userName").focus();
 						alert("이름을 입력하세요.");
 						return false;
-					}else{
-						if($('input:radio[name=userGender]').is(':checked') === false){
+					}else {
+						if($('input:radio[name=userGender]').is(':checked') === false) {
 							document.getElementById("genderFemale").focus();
 							alert("성별을 선택하세요.");
 							return false;
-						}else{
-							if($('#userEmail').val() === ""){
+						}else {
+							if($('#userEmail').val() === "") {
 								document.getElementById("userEmail").focus();
 								alert("이메일을 작성하세요.");
 								return false;
-							}else if(CheckEmail(document.getElementById("userEmail").value) === false){
+							}else if(CheckEmail(document.getElementById("userEmail").value) === false) {
 								document.getElementById("userEmail").focus();
 								alert("이메일의 형식을 확인하세요.");
 								return false;
-							}else{
-								if($('#appMental').is(':checked') === true && $('input:checkbox[name=psyTestList]').is(':checked') == false){
+							}else {
+								if($('#appMental').is(':checked') === true && $('input:checkbox[name=psyTestList]').is(':checked') == false) {
 									alert("심리검사 유형을 1개 이상 선택하세요.");
 									document.getElementById("psyTestType0").focus();
 									return false;
-								}else{
+								}else {
 									return true;
 								}
 							}
@@ -937,7 +960,7 @@
 				}
 			} // 간단 신청서 부분 유효성 검사
 
-			function CheckEmail(str){                                                 
+			function CheckEmail(str) {                                                 
 				const reg_email = /^([0-9a-zA-Z_\.-]+)@([0-9a-zA-Z_-]+)(\.[0-9a-zA-Z_-]+){1,2}$/;
 				if(!reg_email.test(str)) return false;
 				else return true;                        
@@ -1038,7 +1061,7 @@
 			}
 			
 			window.onresize = function(event) {
-				if(window.innerHeight === windowHeight) document.activeElement.blur();
+				if(document.body.clientHeight === initHeight) document.activeElement.blur();
 				else document.activeElement.scrollIntoView({block: "center"});
 			};
 

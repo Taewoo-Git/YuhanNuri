@@ -15,6 +15,10 @@
 			.fade-text{
 				font-size:150%;
 				color:#494949;
+				animation: fadein-text 3s;
+  				-moz-animation: fadein-text 3s; /* Firefox */
+  				-webkit-animation: fadein-text 3s; /* Safari and Chrome */
+  				-o-animation: fadein-text 3s; /* Opera */
 			}
 			.fade-app {
 				font-size:80%;
@@ -45,18 +49,13 @@
 		</style>
 	</head>
 	<body>
-		<form method="POST" style="height:inherit;">
-			<div class="container-fluid" style="height:inherit;">
-				<div class="row" style="height:50px;">
-					<div class="col mt-2 align-self-center">
-						<label style="font-size:180%;">문의</label>
-					</div>
+		<div class="container-fluid">
+			<div class="row pt-4" style="margin-bottom:10px;">
+				<div class="fade-text col align-self-center text-center" style="color:#1a1a1a;">
+					<label>무엇이든 물어보세요!</label>
 				</div>
-				<div class="row" style="height:60px; margin-bottom:30px;">
-					<div class="fade-text col align-self-center text-center">
-						<label>어떤 도움이 필요하세요?</label>
-					</div>
-				</div>
+			</div>
+			<form method="POST" style="height:inherit;">
 				<div class="form-group">
 					<label for="questionTypeList"><b>문의 유형</b></label>
 					<select class="form-control" id="questionTypeList" name="questionType">
@@ -64,24 +63,26 @@
 					  <option value="상담">상담 문의</option>
 					</select>
 				</div>
-				<div class="form-group" style="margin-bottom:30px;">
+				<div class="form-group">
 					<label><b>제목</b></label>
 					<input type="text" class="form-control form-control" placeholder="제목을 입력하세요." id="questionTitle" name="questionTitle" required>
 				</div>
-				<div class="form-group" style="margin-bottom:30px;">
+				<div class="form-group">
 					<label><b>내용</b></label>
 					<textarea class="form-control" id="questionText" name="questionText" placeholder="내용을 입력하세요." style="resize:none; height:500px;" required></textarea>
 				</div>
-				<div class="form-group text-right">
-					<input type="submit" class="btn btn-primary mb-2" id="btnNext" value="작 성">
+				<div class="row">
+					<div class="col text-right">
+						<input type="submit" class="btn btn-submit btn-primary mb-4" id="btnNext" value="작 성">
+					</div>
 				</div>
-			</div>
-		</form>
+			</form>
+		</div>
 		<script>
 			$(function() {
-				const windowHeight = window.innerHeight;
+				const initHeight = document.body.clientHeight;
 				const textareaY = document.getElementById('questionText').getBoundingClientRect().y;
-				$('#questionText').css('height', windowHeight - textareaY - $('#btnNext').height() - 60);
+				$('#questionText').css('height', initHeight - textareaY - $('#btnNext').height() - 54);
 				
 				$("#btnNext").click(function(){
 					if(!$('#questionTitle').val() == ""){
@@ -94,7 +95,7 @@
 				});
 				
 				window.onresize = function(event) {
-					if(window.innerHeight === windowHeight) document.activeElement.blur();
+					if(document.body.clientHeight === initHeight) document.activeElement.blur();
 					else document.activeElement.scrollIntoView({block: "center"});
 				};
 				

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>유한대학교 학생상담센터</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<script src="/js/jquery-latest.min.js"></script>
+		<link rel="stylesheet" href="/css/coreui.min.css">
+		<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
+		<style>
+			.toggle_wrap{
+				float: right;
+				margin-right: 1.25rem;
+				margin-top: 0.25rem;
+				font-size: 15px;
+			}
+			.font-size-15{
+				font-size: 15px;
+			}
+			.fixed_btn_position{
+				top: 25%;
+				left: 90%;
+			}
+			.toggle_normal_wrap{
+				float: right;
+				margin-top: 0.25rem;
+				font-size: 15px;
+			}
+			.pr_10{
+				padding-right: 10px;
+			}
+			.pr_30{
+				padding-right: 30px;
+			}
+			.edit_block:focus{
+				outline: none;
+				box-shadow: none;
+				border-color: #d8dbe0;
+			}
+    	</style>
+	</head>
+	<body class="c-app">
+		<div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show c-sidebar-unfoldable" id="sidebar">
+			<%- include ('adminNav'); -%>
+			<button
+				class="c-sidebar-minimizer c-class-toggler"
+				type="button"
+				data-target="_parent"
+				data-class="c-sidebar-minimized"
+			></button>
+		</div>
+		<div class="c-wrapper c-fixed-components">
+			<header class="c-header c-header-light c-header-fixed c-header-with-subheader">
+				<button class="c-header-toggler c-class-toggler d-lg-none mfe-auto" type="button" data-target="#sidebar"
+						data-class="c-sidebar-show">
+					<i class="cil-hamburger-menu"></i>
+				</button><a class="c-header-brand d-lg-none" href="#">
+					<i class="cil-hamburger-menu"></i></a>
+				<button class="c-header-toggler c-class-toggler mfs-3 d-md-down-none" type="button" data-target="#sidebar"
+					data-class="c-sidebar-lg-show" responsive="true">
+					<i class="cil-hamburger-menu"></i>
+				</button>
+				<ul class="c-header-nav ml-auto mr-4">
+				<%- include ('adminAccount'); -%>
+				</ul>
+				<div class="c-subheader px-3">
+					<ol class="breadcrumb border-0 m-0">
+						<li class="breadcrumb-item">예약</li>
+						<li class="breadcrumb-item">양식 항목</li>
+						<li class="breadcrumb-item active"><%=type.typename%> 질문</li>
+					</ol>
+				</div>
+			</header>
+			<div class="c-body">
+				<main class="c-main">
+					<div class="container-fluid">
+						<div class="row fade-in">
+							<div class="col-8 mx-auto">
+							<% result.forEach(function(v, i) { %>
+								<% if(v.choicetypeno === 2) { %>
+								<div class="card" id="card_id_<%=v.askno%>">
+									<div class="card-body">
+										<div class="input-group mb-3">
+											<div class="input-group-prepend">
+												<span class="input-group-text">질 문</span>
+											</div>
+											<input type="hidden" class="valCardType" value="2">
+											<input type="text" class="form-control valCardTitle edit_block" placeholder="Question" style="background-color:white!important;"
+												   value="<%=unescape(v.ask)%>" readonly>
+											<button type="button" class="btn btn-danger ml-2 btnDeleteCard">질문 삭제</button>
+										</div>
+									<% v.choice.split(',').forEach(function(b, j) { %>
+										<div class="form-check listChoice">
+											<input class="form-check-input mt-2" type="checkbox">
+											<label class="form-check-label">
+												<input type="text" class="form-control valChoiceList" placeholder="답" size=50 value="<%=unescape(b)%>">
+											</label>
+											<button type="button" class="btn btn-ghost-danger btnDeleteChoice">X</button>
+										</div>
+									<% }); %>
+									</div>
+									<div class="form-check mb-3">
+										<label class="form-check-label">
+											<button type="button" value="check" class="btn btn-success btnInsertChoice">추 가</button>
+										</label>
+									</div>
+								</div>
+								<% } %>
+								<% if(v.choicetypeno === 1) {%>
+								<div class="card" id="card_id_<%=v.askno%>">
+									<div class="card-body">
+										<div class="input-group mb-3">
+											<div class="input-group-prepend">
+												<span class="input-group-text">질 문</span>
+											</div>
+											<input type="hidden" class="valCardType" value="1">
+											<input type="text" class="form-control valCardTitle edit_block" placeholder="Question" style="background-color:white!important;"
+												   value="<%=unescape(v.ask)%>" readonly>
+											<button type="button" class="btn btn-danger ml-2 btnDeleteCard">질문 삭제</button>
+										</div>
+									<%v.choice.split(',').forEach(function(b, j) {%>
+										<div class="form-check listChoice">
+											<input class="form-check-input mt-2" type="radio">
+											<label class="form-check-label">
+												<input type="text" class="form-control valChoiceList" placeholder="답" size=50 value="<%=unescape(b)%>">
+											</label>
+											<button type="button" class="btn btn-ghost-danger btnDeleteChoice">X</button>
+										</div>
+									<% }); %>
+									</div>
+									<div class="form-check mb-3">
+										<label class="form-check-label">
+											<button type="button" value="radio" class="btn btn-success btnInsertChoice">추 가</button>
+										</label>
+									</div>
+								</div>
+								<% } %>
+								<% if(v.choicetypeno === 3) { %>
+								<div class="card" id="card_id_<%=v.askno%>">
+									<div class="card-body" style="padding-bottom: 5px!important;">
+										<div class="input-group mb-3">
+											<div class="input-group-prepend">
+												<span class="input-group-text">질 문</span>
+											</div>
+											<input type="hidden" class="valCardType" value="3">
+											<input type="text" class="form-control valCardTitle edit_block" placeholder="Question" style="background-color:white!important;"
+												   value="<%=unescape(v.ask)%>" readonly>
+											<button type="button" class="btn btn-danger ml-2 btnDeleteCard">질문 삭제</button>
+										</div>
+									</div>
+								</div>
+								<%}%>
+							<%});%>
+							</div>
+						</div>
+					</div>
+					<script>
+					</script>
+					<div class="btn-group-vertical position-fixed fixed_btn_position">
+						<button type="button" value="add_check_card" class="btn btn-secondary btnInsertCard">
+							다중 선택
+						</button>
+						<button type="button" value="add_radio_card" class="btn btn-secondary btnInsertCard">
+							단일 선택
+						</button>
+						<button type="button" value="add_nomal_card" class="btn btn-secondary btnInsertCard">
+							서술형
+						</button>
+						<button type="button" class="btn btn-primary" id="btnSave">
+							저 장
+						</button>
+					</div>
+				</main>
+				<footer class="c-footer">
+					<div><a href="https://coreui.io">CoreUI</a> &copy; 2020 creativeLabs.</div>
+					<div class="ml-auto">
+						Powered by&nbsp;<a href="https://coreui.io/">CoreUI</a>
+					</div>
+				</footer>
+			</div>
+		</div>
+		<script src="/js/coreui.bundle.min.js"></script>
+		<script>
+			const typename = $('.breadcrumb-item')[2].innerText.split(' ')[0];
+			
+			if(location.search.includes("refresh")) {
+				window.history.replaceState(null, null, window.location.pathname);
+				
+				$('.c-body').prepend(`
+					<div class="alert alert-success alert-dismissible fade show successAlert" style="margin-bottom: 0px;" role="alert">
+					  <strong>저장 완료!</strong> 질문이 정상적으로 저장되었습니다.
+					  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					  </button>
+					</div>
+				`);
+
+				$(window).scrollTop(0);
+
+				$('.successAlert').eq(0).fadeOut(3000);
+			}
+			else window.history.replaceState(null, null, window.location.pathname);
+			
+			if(<%=result.length%> === 0) {
+				$('.col-8').append(`
+					<div class="jumbotron jumbotron-fluid">
+						<div class="container" style="text-align: center;">
+							<h1 class="display-4">저장된 질문이 없습니다.</h1>
+						</div>
+					</div>
+				`);
+			}
+
+			$('.btnInsertCard').click(function(e) {
+				switch(e.target.value) {
+					case 'add_check_card':
+						if($('.jumbotron')) $('.jumbotron').remove();
+						$('.col-8').append(`
+							<div class="card">
+								<div class="card-body">
+									<div class="input-group mb-3">
+										<div class="input-group-prepend">
+											<span class="input-group-text">질 문</span>
+										</div>
+										<input type="hidden" class="valCardType" value="2">
+										<input type="text" class="form-control valCardTitle" placeholder="Question" style="background-color:white!important;">
+										<button type="button" class="btn btn-danger ml-2 btnDeleteCard">질문 취소</button>
+									</div>
+									<div class="form-check listChoice">
+										<input class="form-check-input mt-2" type="checkbox">
+										<label class="form-check-label">
+											<input type="text" class="form-control valChoiceList" placeholder="답" size=50>
+										</label>
+										<button type="button" class="btn btn-ghost-danger btnDeleteChoice">X</button>
+									</div>
+								</div>
+								<div class="form-check mb-3">
+									<label class="form-check-label">
+										<button type="button" value="check" class="btn btn-success btnInsertChoice">추 가</button>
+									</label>
+								</div>
+							</div>
+						`);
+						break;
+					case 'add_radio_card':
+						if($('.jumbotron')) $('.jumbotron').remove();
+						$('.col-8').append(`
+							<div class="card">
+								<div class="card-body">
+									<div class="input-group mb-3">
+										<div class="input-group-prepend">
+											<span class="input-group-text">질 문</span>
+										</div>
+										<input type="hidden" class="valCardType" value="1">
+										<input type="text" class="form-control valCardTitle" placeholder="Question" aria-label="question" style="background-color:white!important;">
+										<button type="button" class="btn btn-danger ml-2 btnDeleteCard">질문 취소</button>
+									</div>
+									<div class="form-check listChoice">
+										<input class="form-check-input mt-2" type="radio">
+										<label class="form-check-label">
+											<input type="text" class="form-control valChoiceList" placeholder="답" size=50>
+										</label>
+										<button type="button" class="btn btn-ghost-danger btnDeleteChoice">X</button>
+									</div>
+								</div>
+								<div class="form-check mb-3">
+									<label class="form-check-label">
+										<button type="button" value="radio" class="btn btn-success btnInsertChoice">추 가</button>
+									</label>
+								</div>
+							</div>
+						`);
+						break;
+					case 'add_nomal_card':
+						if($('.jumbotron')) $('.jumbotron').remove();
+						$('.col-8').append(`
+							<div class="card">
+								<div class="card-body" style="padding-bottom: 5px!important;">
+									<div class="input-group mb-3">
+										<div class="input-group-prepend">
+											<span class="input-group-text" id="question">질 문</span>
+										</div>
+										<input type="hidden" class="valCardType" value="3">
+										<input type="text" class="form-control valCardTitle" placeholder="Question" style="background-color:white!important;">
+										<button type="button" class="btn btn-danger ml-2 btnDeleteCard">질문 취소</button>
+									</div>
+								</div>
+							</div>
+						`);
+						break;
+					default:
+						break;
+				}
+				window.scrollBy(0, document.getElementsByClassName('card')[document.getElementsByClassName('card').length - 1].getBoundingClientRect().bottom);
+				
+				$('.btnInsertChoice').unbind('click');
+				$('.btnInsertChoice').bind('click', insertChoiceEvent);
+				
+				$('.btnDeleteChoice').unbind('click');
+				$('.btnDeleteChoice').bind('click', deleteChoiceEvent);
+				
+				$('.btnDeleteCard').unbind('click');
+				$('.btnDeleteCard').bind('click', deleteCardEvent);
+			});
+			
+			$('#btnSave').click(function(e) {
+				let tempObject = [];
+				
+				$('.card').each(function(index, element) {
+					let id = element.id === "" ? "card_id_null" : element.id;
+					let type = $(element).find('.valCardType').val();
+					let question = $(element).find('.valCardTitle').val();
+					let choices = [];
+					$(element).find('.valChoiceList').map(index => choices.push($(element).find('.valChoiceList')[index].value));
+					
+					tempObject.push({
+						id: id,
+						type: type,
+						question: question,
+						choices: choices,
+					});
+				});
+				
+				$.ajax({
+					type: 'POST',
+					url: '/admin/saveForm/<%=type.typeno%>',
+					dataType: 'json',
+					data: {saveData: JSON.stringify(tempObject)},
+					success: function (data) {
+						if(data.state === 'ok') location.replace(location.href + '?refresh');
+						else{
+							$('.c-body').prepend(`
+								<div class="alert alert-danger alert-dismissible fade show failAlert" style="margin-bottom: 0px;" role="alert">
+								  <strong>저장 실패!</strong> 다시 한번 확인해 주세요.
+								  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+									<span aria-hidden="true">&times;</span>
+								  </button>
+								</div>
+							`);
+
+							$(window).scrollTop(0);
+
+							$('.failAlert').eq(0).fadeOut(3000);
+						}
+					}
+				});
+			});
+			
+			$('.btnInsertChoice').bind('click', insertChoiceEvent);
+			
+			$('.btnDeleteChoice').bind('click', deleteChoiceEvent);
+			
+			$('.btnDeleteCard').bind('click', deleteCardEvent);
+			
+			function insertChoiceEvent() {
+				if($(this).val() === 'check') {
+					$(this).parents('.card').find('.listChoice').last().after(`
+						<div class="form-check listChoice">
+							<input class="form-check-input mt-2" type="checkbox">
+							<label class="form-check-label">
+								<input type="text" class="form-control valChoiceList" placeholder="답" size="50">
+							</label>
+							<button type="button" class="btn btn-ghost-danger btnDeleteChoice">X</button>
+						</div>
+					`);
+				}
+				else if($(this).val() === 'radio') {
+					$(this).parents('.card').find('.listChoice').last().after(`
+						<div class="form-check listChoice">
+							<input class="form-check-input mt-2" type="radio">
+							<label class="form-check-label">
+								<input type="text" class="form-control valChoiceList" placeholder="답" size="50">
+							</label>
+							<button type="button" class="btn btn-ghost-danger btnDeleteChoice">X</button>
+						</div>
+					`);
+				}
+				
+				$('.btnDeleteChoice').unbind('click');
+				$('.btnDeleteChoice').bind('click', deleteChoiceEvent);
+			}
+			
+			function deleteChoiceEvent() {
+				let listCount = $(this).parents('.card').find('.listChoice').length;
+				
+				if(listCount === 1) alert("적어도 한 개 이상의 답안이 필요합니다.");
+				else $(this).parents('.listChoice').remove();
+			}
+			
+			function deleteCardEvent() {
+				let idx = $('.btnDeleteCard').index(this);
+				
+				let askno = $('.card')[idx].id === "" ? null : $('.card')[idx].id.split('card_id_')[1];
+
+				$('.card')[idx].remove();
+				
+				if(askno !== null) {
+					$.ajax({
+						type: 'POST',
+						url: '/admin/noUseAsk',
+						dataType: 'json',
+						data:{'askno' : askno, 'typename': typename},
+					});
+				}
+				
+				if($('.card').length === 0) {
+					$('.col-8').append(`
+						<div class="jumbotron jumbotron-fluid">
+							<div class="container">
+								<h1 class="display-4">저장된 질문이 없습니다.</h1>
+							</div>
+						</div>
+					`);
+				}
+			}
+		</script>
+	</body>
+</html>

@@ -9,14 +9,14 @@ const moment = require('moment');
 require('moment-timezone');
 moment.tz.setDefault("Asia/Seoul");
 
-const ErrorLogger = require('./logger_error.js');
+const logger = require('./logger.js');
 const logTimeFormat = "YYYY-MM-DD HH:mm:ss";
 
 module.exports = (server) => {	
 	const io = socket(server, {
 		cookie: false
 	});
-	
+		
 	let reaction = io.of('/reaction');
 	
 	reaction.on('connection', function(socket) {
@@ -57,7 +57,7 @@ module.exports = (server) => {
 			
 			if(recvData.type == 1) {
 				connection.execute(selectSimpleApplyForm, [], (err, result) => {
-					if(err) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);
+					if(err) logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 					else {
 						let serialno = 0;
 						
@@ -74,7 +74,7 @@ module.exports = (server) => {
 						];
 						
 						connection.execute(insertSimpleApplyFormConsult, simpleApplyFormData, (insertSimpleApplyFormErr) => {
-							if(insertSimpleApplyFormErr) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${insertSimpleApplyFormErr}`);
+							if(insertSimpleApplyFormErr) logger.error.info(`[${moment().format(logTimeFormat)}] ${insertSimpleApplyFormErr}`);
 							else {
 								let reservationDate = [
 									serialno,
@@ -85,18 +85,18 @@ module.exports = (server) => {
 									recvData.time
 								];
 								connection.execute(insertReservationConsult, reservationDate, (insertReservationErr) => {
-									if(insertReservationErr) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${insertReservationErr}`);
+									if(insertReservationErr) logger.error.info(`[${moment().format(logTimeFormat)}] ${insertReservationErr}`);
 									else {
 										for(let i = 0; i < recvData.stuAnswer.length; i++) {
 											connection.execute(insertAnswerLogConsult, [serialno, recvData.stuAnswer[i].question, recvData.stuAnswer[i].answer], (insertAnswerLogErr) => {
-												if(insertAnswerLogErr) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${insertAnswerLogErr}`);
+												if(insertAnswerLogErr) logger.error.info(`[${moment().format(logTimeFormat)}] ${insertAnswerLogErr}`);
 											});
 										}
 										
 										if(recvData.selfcheckCode !== "") {
 											for(let i = 0; i < recvData.selfcheckCode.split(',').length; i++) {
 												connection.execute(insertSelfCheck, [serialno, recvData.selfcheckCode.split(',')[i], recvData.selfcheckNum.split(',')[i]], (insertSelfCheckErr) => {
-													if(insertSelfCheckErr) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${insertSelfCheckErr}`);
+													if(insertSelfCheckErr) logger.error.info(`[${moment().format(logTimeFormat)}] ${insertSelfCheckErr}`);
 												});
 											}
 										}
@@ -110,7 +110,7 @@ module.exports = (server) => {
 			}
 			else if(recvData.type == 2) {
 				connection.execute(selectSimpleApplyForm, [], (err, result) => {
-					if(err) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);
+					if(err) logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 					else {
 						let serialno = 0;
 						
@@ -127,20 +127,20 @@ module.exports = (server) => {
 						];
 						
 						connection.execute(insertSimpleApplyFormMental, simpleApplyFormData, (insertSimpleApplyFormErr) => {
-							if(insertSimpleApplyFormErr) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${insertSimpleApplyFormErr}`);
+							if(insertSimpleApplyFormErr) logger.error.info(`[${moment().format(logTimeFormat)}] ${insertSimpleApplyFormErr}`);
 							else {
 								connection.execute(insertReservationMental, [serialno, recvData.stuCode], (insertReservationErr) => {
-									if(insertReservationErr) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${insertReservationErr}`);
+									if(insertReservationErr) logger.error.info(`[${moment().format(logTimeFormat)}] ${insertReservationErr}`);
 									else {
 										for(let i = 0; i < recvData.stuAnswer.length; i++) {
 											connection.execute(insertAnswerLogMental, [serialno, recvData.stuAnswer[i].question, recvData.stuAnswer[i].answer], (insertAnswerLogErr) => {
-												if(insertAnswerLogErr) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${insertAnswerLogErr}`);
+												if(insertAnswerLogErr) logger.error.info(`[${moment().format(logTimeFormat)}] ${insertAnswerLogErr}`);
 											});
 										}
 										
 										for(let i = 0; i < recvData.psyTestList.split(',').length; i++) {
 											connection.execute(insertPsyTest, [serialno, recvData.psyTestList.split(',')[i]], (insertPsyTestErr) => {
-												if(insertPsyTestErr) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${insertPsyTestErr}`);
+												if(insertPsyTestErr) logger.error.info(`[${moment().format(logTimeFormat)}] ${insertPsyTestErr}`);
 											});
 										}
 										
@@ -158,7 +158,7 @@ module.exports = (server) => {
 			let selectCounselor = "SELECT empname, empid FROM Counselor WHERE positionno = 1 AND Counselor.use = 'Y'";
 
 			connection.execute(selectCounselor, [], (err, rows) => {
-				if(err) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);
+				if(err) logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 				else socket.emit('initReservation', rows);
 			});
 		});
@@ -167,28 +167,40 @@ module.exports = (server) => {
 			let selectCounselor = "SELECT DISTINCT(DATE(start)) AS possible FROM Schedule WHERE empid = ? AND DATE(start) > CURDATE() AND calendarId = 'Reservation'";
 
 			connection.execute(selectCounselor, [empid], (err, rows) => {
-				if(err) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);
+				if(err) logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 				else socket.emit('selectCounselor', rows);
 			});
 		});
 		
 		socket.on('selectDateTime', function(requestTime) {
-			const getCanCounselTime = "SELECT scheduleno, HOUR(start) as start, HOUR(end) as end FROM Schedule WHERE calendarId='Reservation' AND DATE(START) = ? AND empid = ?";
+			const getCanCounselTime = "SELECT scheduleno, HOUR(start) as start, HOUR(end) as end FROM Schedule WHERE calendarId='Reservation' AND DATE(start) = ? AND empid = ?";
+			
+			const subtractReservation = "select starttime from Reservation where date = ? and empid = ? and status = 1 and finished = 0";
 			
 			let scheduled_time = [];
 			
 			connection.execute(getCanCounselTime, [requestTime.date, requestTime.empid], (err, rows) => {
-				if (err) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);
+				if(err) logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 				else if(rows.length !== 0) {
-					scheduleCount = rows.length;
-					
-					rows.forEach((row, index) => {
-						for(let time = row.start; time < row.end; time++) {
-							scheduled_time.push(time);
+					connection.execute(subtractReservation, [requestTime.date, requestTime.empid], (error, results) => {
+						if(err) logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
+						else {
+							
+							rows.forEach((row, index) => {
+								for(let time = row.start; time < row.end; time++) {
+									scheduled_time.push(time);
+								}
+							});
+							
+							results.forEach((result, idx) => {
+								if(scheduled_time.indexOf(result.starttime) != -1) {
+									scheduled_time.splice(scheduled_time.indexOf(result.starttime), 1);	
+								}
+							});
+							
+							socket.emit('returnTime', scheduled_time);
 						}
 					});
-						
-					socket.emit('returnTime', scheduled_time);
 				}
 			});
 		});
@@ -197,7 +209,7 @@ module.exports = (server) => {
 			let selectSelfCheck = "SELECT checkno, checkname FROM SelfCheckList s WHERE s.use = 'Y'";
 
 			connection.execute(selectSelfCheck, [], (err, rows) => {
-				if(err) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);
+				if(err) logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 				else socket.emit('initSelfcheck', rows);
 			});
 		});
@@ -227,7 +239,7 @@ module.exports = (server) => {
 			let selectUser = "SELECT major, phonenum, birth FROM User WHERE stuno = ?";
 
 			connection.execute(selectUser, [socket.code], (err, rows) => {
-				if(err) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);
+				if(err) logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 				else {
 					socket.major = rows[0].major;
 					socket.phone = rows[0].phonenum;
@@ -248,12 +260,12 @@ module.exports = (server) => {
 			let selectLog = "SELECT chatlog FROM ConsultLog WHERE serialno = ?";
 			
 			connection.execute(selectSerialno, [waitingStudentCode[socket.myroom], socket.myroom], (err, rows) => {
-				if(err) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);
+				if(err) logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 				else {
 					if(rows[0] === undefined) socket.emit('outError');
 					else {
 						connection.execute(selectLog, [rows[0].serialno], (selectLogErr, selectLogRows) => {
-							if(selectLogErr) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${selectLogErr}`);
+							if(selectLogErr) logger.error.info(`[${moment().format(logTimeFormat)}] ${selectLogErr}`);
 							else if(selectLogRows.length != 0) socket.broadcast.to(socket.myroom).emit('okay', selectLogRows[0].chatlog);
 							else socket.broadcast.to(socket.myroom).emit('okay', null);
 						});
@@ -267,7 +279,7 @@ module.exports = (server) => {
 			let selectLog = "SELECT chatlog FROM ConsultLog WHERE serialno = ?";
 			
 			connection.execute(selectSerialno, [socket.code, socket.myroom], (err, rows) => {
-				if(err) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);
+				if(err) logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 				else {
 					connection.execute(selectLog, [rows[0].serialno], (selectLogErr, selectLogRows) => {
 						if(selectLogRows.length != 0) socket.broadcast.to(socket.myroom).emit('join', {stuinfo: {
@@ -321,18 +333,18 @@ module.exports = (server) => {
 			let insertLog = "INSERT INTO ConsultLog(serialno, chatlog, chatdate) VALUES(?, ?, CURDATE())";
 
 			connection.execute(selectSerialno, [data.stuno, data.empid], (err, rows) => {
-				if(err) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${err}`);
+				if(err) logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 				else {
 					connection.execute(selectLog, [rows[0].serialno], (selectLogErr, selectLogRows) => {
-						if(selectLogErr) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${selectLogErr}`);
+						if(selectLogErr) logger.error.info(`[${moment().format(logTimeFormat)}] ${selectLogErr}`);
 						else if(selectLogRows.length != 0) {
 							connection.execute(updateLog, [data.log, rows[0].serialno], (updateLogErr, updateLogRows) => {
-								if(updateLogErr) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${updateLogErr}`);
+								if(updateLogErr) logger.error.info(`[${moment().format(logTimeFormat)}] ${updateLogErr}`);
 							});
 						}
 						else {
 							connection.execute(insertLog, [rows[0].serialno, data.log], (insertLogErr, insertLogRows) => {
-								if(insertLogErr) ErrorLogger.info(`[${moment().format(logTimeFormat)}] ${insertLogErr}`);
+								if(insertLogErr) logger.error.info(`[${moment().format(logTimeFormat)}] ${insertLogErr}`);
 							});
 						}
 					});

@@ -93,8 +93,6 @@
 											<td style="padding-right:30px;"><%=val.stuname %></td>
 											<td style="padding-right:10px;"><b>질문일자</b></td>
 											<td style="padding-right:30px;"><%let dateArr = val.date.split('-');%><%=dateArr[0]+"년 "+dateArr[1]+"월 "+dateArr[2]+"일"%></td>
-											<td style="padding-right:10px;"><b>연락처</b></td>
-											<td style="padding-right:30px;"><%=val.phonenum %></td>
 										</tr>
 									</table>
 									<label style="font-size:120%;"><b>제 목</b></label>
@@ -122,12 +120,12 @@
 		let updateNumber;
 		
 		function exitModal(){
-			document.querySelector('#message-text').value='';
+			document.querySelector('#message-text').value = '';
 		}
 		
 		function giveData(str){
-			updateNumber=str;
-			document.querySelector('#message-text').value='';
+			updateNumber = str;
+			document.querySelector('#message-text').value = '';
 		}
 		
 		$(function () {
@@ -140,29 +138,32 @@
 						async: true,
 						data: {"sendData": $('#message-text').val(), "sendNumber": updateNumber},
 						success: function (data) { 
-							if(data.state==='ok') {
-								window.location.reload();
-							}else if(data.state==='overlapped') {
+							if(data.state === 'ok') window.location.reload(true);
+							else if(data.state === 'overlap') {
 								$('#close_modal').trigger('click');
-								$('.c-main').prepend(`<div class="alert alert-warning alert-dismissible fade show" role="alert">
-							  <strong>오류</strong> 이미 처리되었거나 문제가 발생하였습니다. <a href="#" class="alert-link" onClick="history.go(0)">새로고침</a>을 눌러주세요
-							  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-								<span aria-hidden="true">&times;</span>
-							  </button>
-							</div>`);
-							}else {
-								$('.c-main').prepend(`<div class="alert alert-danger alert-dismissible fade show" role="alert">
-							  <strong>오류</strong> 이미 처리되었거나 문제가 발생하였습니다.
-							  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-								<span aria-hidden="true">&times;</span>
-							  </button>
-							</div>`);
+								$('.c-body').prepend(`
+									<div class="alert alert-warning alert-dismissible fade show" style="margin-bottom:0px;" role="alert">
+										<strong>답변 실패!</strong> 이미 처리되었거나 문제가 발생하였습니다, <a href="#" class="alert-link" onClick="location.reload(true);">새로고침</a>을 눌러주세요.
+										<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+											<span aria-hidden="true">&times;</span>
+										</button>
+									</div>
+								`);
+							}
+							else {
+								$('.c-body').prepend(`
+									<div class="alert alert-danger alert-dismissible fade show" style="margin-bottom:0px;" role="alert">
+										<strong>답변 실패!</strong> 이미 처리되었거나 문제가 발생하였습니다.
+										<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+											<span aria-hidden="true">&times;</span>
+										</button>
+									</div>
+								`);
 							}
 						}
 					});
-				}else {
-					alert("내용을 입력하세요.");
 				}
+				else alert("내용을 입력하세요.");
 			});
 		});
 	</script>

@@ -157,7 +157,7 @@
 					dataType: "json",
 					url: "./admin/accessReservation",
 					async: true,
-					data: { "sendAjax" : $(`#${e.target.id}`).val() },
+					data: {"serialno": $(`#${e.target.id}`).val()},
 					success: function (data) {
 						socket.emit("confirm", $(`#${e.target.id}`).val());
 						window.location.reload();
@@ -168,11 +168,11 @@
 		
 		$('button.cancel-btn').click(function(e){
 			$.ajax({
-				type:'POST',
-				dataType:'json',
-				url:'./admin/cancelReservation',
-				async:true,
-				data: { "sendAjax" : $(`#${e.target.id}`).val() },
+				type: 'POST',
+				dataType: 'json',
+				url: './admin/cancelReservation',
+				async: true,
+				data: {"serialno": $(`#${e.target.id}`).val()},
 				success:function(data){
 					if(data.state === "ok"){
 						socket.emit('cancel', $(`#${e.target.id}`).val());
@@ -244,7 +244,8 @@
 					`);
 					$('#applyModal').append(`
 						<div class="modal-footer">
-							<button type="button" class="btn btn-info" data-dismiss="modal" id="print_pdf" value=" ${data.serialno}" onclick="location.href = './admin/getSimpleApplyFormPDF/' + ${data.serialno}">신청서 인쇄</button>
+							<button type="button" class="btn btn-info" data-dismiss="modal" id="print_pdf" value=" ${data.serialno}"
+							onclick="openExplanation('getSimpleApplyFormPDF/${data.serialno}')">신청서 인쇄</button>
 							<button type="button" class="btn btn-danger" data-dismiss="modal">닫기</button>
 						</div>
 					`);
@@ -335,7 +336,8 @@
 					}
 					$('#applyModal').append(`
 						<div class="modal-footer">
-							<button type="button" class="btn btn-info" data-dismiss="modal" id="print_pdf" value=" ${data.serialno}" onclick="location.href = './admin/getSimpleApplyFormPDF/' + ${data.serialno}">신청서 인쇄</button>
+							<button type="button" class="btn btn-info" data-dismiss="modal" id="print_pdf" value=" ${data.serialno}"
+							onclick="openExplanation('getSimpleApplyFormPDF/${data.serialno}')">신청서 인쇄</button>
 							<button type="button" class="btn btn-danger" data-dismiss="modal">닫기</button>
 						</div>
 					`);

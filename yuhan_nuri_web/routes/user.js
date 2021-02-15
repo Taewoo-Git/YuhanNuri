@@ -347,7 +347,9 @@ let getUserInfo = function(userId, password) {
 				stuPhoneNum: tempInfo[5]
 			};
 			//console.log(result.response.req._header); // Header 확인 로그
-			resolve(userInfo);
+			
+			if(userInfo.stuCode.trim() === "") reject("Login Fail");
+			else resolve(userInfo);
 		})
 			.catch(function(err) {
 			reject("Login Fail");

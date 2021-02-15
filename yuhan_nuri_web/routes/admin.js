@@ -150,7 +150,7 @@ router.post('/explanation', isAdminLoggedIn, (req, res, next) => {
 	}
 
 	if(fileUrl.includes("getSimpleApplyFormPDF")) {
-		let serialno = type.split('/')[1];
+		let serialno = fileUrl.split('/')[1];
 
 		connection.execute(selectStuname, [serialno], (err1, rows) => {
 			if(err1) logger.error.info(`[${moment().format(logTimeFormat)}] ${err1}`);

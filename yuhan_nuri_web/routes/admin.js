@@ -115,6 +115,10 @@ router.post('/login', function(req, res, next) { //POST /user
 	});
 });
 
+router.get('/myname', isAdminLoggedIn, (req, res, next) => {
+	res.json({name: req.session.adminInfo.empname});
+});
+
 router.get('/explanation', isAdminLoggedIn, (req, res, next) => {
 	res.render('adminExplanation');
 });

@@ -191,7 +191,7 @@
 				url: './saveSelfCheckList',
 				dataType: 'json',
 				data: { saveData: JSON.stringify(selfCheckList) },
-				success: function (data) {
+				success: function(data) {
 					if(data.state === 'ok') location.replace(location.href + '?refresh');
 					else {
 						$('.c-body').prepend(`

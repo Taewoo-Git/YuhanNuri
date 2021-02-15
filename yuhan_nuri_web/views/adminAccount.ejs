@@ -1,3 +1,4 @@
+<a id="myname" style="font-weight:bold;padding-bottom:2px;color:gray;"></a>
 <li class="c-header-nav-item dropdown">
 	<a class="c-header-nav-link" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
 		<div class="c-avatar" style="font-size:20px;"><i class="cil-settings"></i></div>
@@ -14,3 +15,12 @@
 		</a>
 	</div>
 </li>
+<script>
+	$.ajax({
+		type: 'GET',
+		url: '/admin/myname',
+		success: function(result) {
+			$('#myname').text(result.name + "님");
+		}
+	});
+</script>

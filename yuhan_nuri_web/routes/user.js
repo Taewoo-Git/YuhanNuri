@@ -308,7 +308,7 @@ router.post('/mypage', isUserLoggedIn, function (req, res, next) { //POST /user/
 	});
 });
 
-router.get('/test', function (req, res) {
+/*router.get('/temp', function (req, res) {
 	const userId = req.query.id;
     const password = req.query.pwd;
 	
@@ -318,7 +318,7 @@ router.get('/test', function (req, res) {
 	}, function(error) {
 		res.json(error)
 	});
-});
+});*/
 
 let getUserInfo = function(userId, password) {
 	return new Promise(function (resolve, reject) {
@@ -326,7 +326,7 @@ let getUserInfo = function(userId, password) {
 		let userInfo = null; // 사용자 정보
 		let url = 'http://portal.yuhan.ac.kr/user/loginProcess.face?userId=' + userId + '&password=' + password; // 로그인 세션 URL
 		
-		cheerio.set('browser', 'chrome'); // 브라우저 설정
+		cheerio.set('browser', 'android'); // user-agent 설정
 		cheerio.fetch(url)
 			.then(function(result) {
 			if(result.response.cookies.EnviewSessionId) {
@@ -346,6 +346,7 @@ let getUserInfo = function(userId, password) {
 				stuEmail: tempInfo[6],
 				stuPhoneNum: tempInfo[5]
 			};
+			//console.log(result.response.req._header); // Header 확인 로그
 			resolve(userInfo);
 		})
 			.catch(function(err) {

@@ -233,7 +233,7 @@
 			$('#sendUpdatedDate').val(new Date().toISOString().substring(0, 10));
 		});
 		
-		$('.showModalMental').click(function(e) {
+		/*$('.showModalMental').click(function(e) {
 			$.ajax({
 				type:'POST',
 				dataType:'json',
@@ -282,7 +282,7 @@
 							$('#modalPart').append(`
 								<div class="form-group">
 									<label class="col-form-label"><b>${unescape(data.asks.split('|')[i])}</b></label>
-									<label class="form-control">${data.answers.split('|')[i]}</label>
+									<label class="form-control">${data.answers.split('|')[i].replace(/,/g, ", ")}</label>
 								</div>
 							`);
 						}
@@ -290,7 +290,7 @@
 					$('#modalPart').append(`
 						<div class="form-group">
 							<label class="col-form-label"><b>신청 심리검사</b></label>
-							<label class="form-control">${data.testnames}</label>
+							<label class="form-control">${data.testnames.replace(/,/g, ", ")}</label>
 						</div>
 					`);
 					$('#applyModal').append(`
@@ -302,7 +302,7 @@
 					`);
 				}
 			});
-		});
+		});*/
 		
 		$('.showModalConsult').click(function(e) {
 			$.ajax({
@@ -352,7 +352,7 @@
 							$('#modalPart').append(`
 								<div class="form-group">
 									<label class="col-form-label"><b>${unescape(data.asks.split('|')[i])}</b></label>
-									<label class="form-control">${data.answers.split('|')[i]}</label>
+									<label class="form-control">${data.answers.split('|')[i].replace(/,/g, ", ")}</label>
 								</div>
 							`);
 						}

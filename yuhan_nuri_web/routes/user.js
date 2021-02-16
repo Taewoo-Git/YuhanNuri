@@ -83,11 +83,9 @@ router.post('/question', isUserLoggedIn, function (req, res) { //POST /user/ques
 	let questionText = req.body.questionText;
 	let questionType = req.body.questionType;
 	
-	let questionInfoSql = "insert into QuestionBoard(stuno, type, date, title, content) values (?, ?, ?, ?, ?)";
+	let questionInfoSql = "insert into QuestionBoard(stuno, type, date, title, content) values (?, ?, CURDATE(), ?, ?)";
 	
-	let nowMoment = moment().format("YYYYMMDD");
-	
-	connection.execute(questionInfoSql, [req.session._uid, questionType, nowMoment, questionTitle, questionText], (err, result) => {
+	connection.execute(questionInfoSql, [req.session._uid, questionType, questionTitle, questionText], (err, result) => {
 		if(err) {
 			logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 			next(err);
@@ -100,7 +98,7 @@ router.get('/satisfaction', isUserLoggedIn, function (req, res) { //GET /user/sa
 	if(req.signedCookies._uid !== undefined) req.session._uid = req.signedCookies._uid;
 	
 	let selectTestAsk = "SELECT DISTINCT a.askno, a.ask, t.choicetypename, (SELECT GROUP_CONCAT(choice SEPARATOR '|') FROM ChoiceList WHERE askno = a.askno) AS 'choices' " +
-						"FROM AskList a, ChoiceType t WHERE a.typeno = 3 AND a.choicetypeno = t.choicetypeno AND a.use ='Y'";
+						"FROM AskList a, ChoiceType t WHERE a.typeno = 3 AND a.choicetypeno = t.choicetypeno AND a.use ='Y' ORDER BY a.askno";
 	
 	let selectReservationNo = "SELECT serialno, typeno FROM Reservation WHERE stuno = ? AND research = 0 LIMIT 1";
 	
@@ -119,9 +117,8 @@ router.post('/satisfaction', isUserLoggedIn, function (req, res, next) { //POST 
 	if(req.signedCookies._uid !== undefined) req.session._uid = req.signedCookies._uid;
 	
 	let insertAnswerLogResearch = "INSERT INTO AnswerLog(serialno, askno, choiceanswer) VALUES(?, ?, ?)";
-	let updateReservationResearch = "UPDATE Reservation SET research = 1, researchdatetime = ? WHERE serialno = ?";
+	let updateReservationResearch = "UPDATE Reservation SET research = 1, researchdatetime = NOW() WHERE serialno = ?";
 	let dataList = JSON.parse(req.body.answers);
-	let nowDateTime = moment().format("YYYY-MM-DD HH:mm:ss");
 	
 	for(let i = 0; i < dataList.length; i++) {
 		connection.execute(insertAnswerLogResearch, [req.body.reservationNo, dataList[i].question, dataList[i].answer], (err) => {
@@ -129,7 +126,7 @@ router.post('/satisfaction', isUserLoggedIn, function (req, res, next) { //POST 
 		});
 	}
 	
-	connection.execute(updateReservationResearch, [nowDateTime, req.body.reservationNo], (err) => {
+	connection.execute(updateReservationResearch, [req.body.reservationNo], (err) => {
 		if(err) logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 		else res.send("<script>window.location.href = '/user/mypage';</script>");
 	});
@@ -291,12 +288,11 @@ router.post('/mypage', isUserLoggedIn, function (req, res, next) { //POST /user/
 	
 	let userReservationNum = req.body.btnCancelReservation;
 	let reservationStatusSelect = 'SELECT status, finished FROM Reservation WHERE serialno = ?';
-	// let reservationCancelSql = 'UPDATE Reservation SET status = 1, finished = 1, research = 1 WHERE serialno = ?';
-	
 	let reservationCancelSql = 'DELETE FROM Reservation WHERE serialno = ?';
+	
 	connection.execute(reservationStatusSelect, [userReservationNum], (err1, result1) => {
 		if(err1) logger.error.info(`[${moment().format(logTimeFormat)}] ${err1}`);
-		else {
+		else if(result1.length > 0) {
 			if(result1[0].status === 0 && result1[0].finished === 0){
 				connection.execute(reservationCancelSql, [userReservationNum], (err2, result2) => {
 					if(err2) logger.error.info(`[${moment().format(logTimeFormat)}] ${err2}`);
@@ -305,6 +301,7 @@ router.post('/mypage', isUserLoggedIn, function (req, res, next) { //POST /user/
 			}
 			else res.send("<script>alert('접수가 이미 완료되었거나 취소되었습니다.'); window.location.href = '/user/mypage';</script>");
 		}
+		else res.send("<script>alert('접수가 이미 완료되었거나 취소되었습니다.'); window.location.href = '/user/mypage';</script>");
 	});
 });
 

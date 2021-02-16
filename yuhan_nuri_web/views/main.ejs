@@ -5,41 +5,42 @@
 		<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
 		<script src="/js/jquery-latest.min.js"></script>
 		<script src="/js/bootstrap.min.js"></script>
+		<script src="/lib/tinymce_5.6.1/tinymce/js/tinymce/tinymce.min.js"></script>
 		<link rel="stylesheet" href="/css/bootstrap.min.css">
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 		<style>
-			body,html,img{
+			body, html, img{
 				height: 100% !important;
 				width: 100% !important;
 				margin: 0 !important;
 				padding: 0 !important;
 			}
 			.content-style{
-				color:#747474;
+				color: #747474;
 			}
-			.content-style label{
-				color:#222222;
+			.tab-pane > p{
+				padding: 10px;
+				margin: 0 !important;
 			}
-			.content-style h2{
-				color:#222222;
+			hr {
+				margin-top: 0 !important;
 			}
 		</style>
 	</head>
 	<body>
-	<div class="container-fluid">
-		<div class="row pt-2">
+		<div class="pt-2">
 			<div class="form" style="width:100%;">
 				<ul class="nav nav-tabs">
-  					<li class="nav-item ml-3">
+					<li class="nav-item" style="margin-left:16px!important;">
 						<a class="nav-link active" data-toggle="tab" href="#공지사항">공지사항</a>
-  					</li>
-  					<li class="nav-item">
+					</li>
+					<li class="nav-item">
 						<a class="nav-link" data-toggle="tab" href="#이용안내">이용안내</a>
-  					</li>
+					</li>
 				</ul>
 			</div>
 		</div>
-		<div class="tab-content m-1 mt-3 content-style">
+		<div class="tab-content content-style">
 			<div class="tab-pane fade show active" id="공지사항">
 				<%- data[0].content%>
 			</div>
@@ -47,6 +48,8 @@
 				<%- data[1].content%>
 			</div>	
 		</div>
-		</div>
 	</body>
+	<script>
+		$('img').parents('p').css('padding', '0');
+	</script>
 </html>

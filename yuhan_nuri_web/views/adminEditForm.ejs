@@ -24,48 +24,48 @@
 		.tox-tinymce-aux{
 			width:0px !important;
 		}
-		.sk-chase{
+		.loading{
 			width: 100px;
 			height: 100px;
 			position: relative;
-			animation: sk-chase 2.5s infinite linear both;
+			animation: loading 2.5s infinite linear both;
 		}
-		.sk-chase-dot{
+		.loading-dot{
 			width: 100%;
 			height: 100%;
 			position: absolute;
 			left: 0;
 			top: 0; 
-			animation: sk-chase-dot 2.0s infinite ease-in-out both; 
+			animation: loading-dot 2.0s infinite ease-in-out both; 
 		}
-		.sk-chase-dot:before{
+		.loading-dot:before{
 			content: '';
 			display: block;
 			width: 25%;
 			height: 25%;
 			background-color: #0275d8;
 			border-radius: 100%;
-			animation: sk-chase-dot-before 2.0s infinite ease-in-out both; 
+			animation: loading-dot-before 2.0s infinite ease-in-out both; 
 		}
-		.sk-chase-dot:nth-child(1){ animation-delay: -1.1s; }
-		.sk-chase-dot:nth-child(2){ animation-delay: -1.0s; }
-		.sk-chase-dot:nth-child(3){ animation-delay: -0.9s; }
-		.sk-chase-dot:nth-child(4){ animation-delay: -0.8s; }
-		.sk-chase-dot:nth-child(5){ animation-delay: -0.7s; }
-		.sk-chase-dot:nth-child(6){ animation-delay: -0.6s; }
-		.sk-chase-dot:nth-child(1):before{ animation-delay: -1.1s; }
-		.sk-chase-dot:nth-child(2):before{ animation-delay: -1.0s; }
-		.sk-chase-dot:nth-child(3):before{ animation-delay: -0.9s; }
-		.sk-chase-dot:nth-child(4):before{ animation-delay: -0.8s; }
-		.sk-chase-dot:nth-child(5):before{ animation-delay: -0.7s; }
-		.sk-chase-dot:nth-child(6):before{ animation-delay: -0.6s; }
-		@keyframes sk-chase{
+		.loading-dot:nth-child(1){ animation-delay: -1.1s; }
+		.loading-dot:nth-child(2){ animation-delay: -1.0s; }
+		.loading-dot:nth-child(3){ animation-delay: -0.9s; }
+		.loading-dot:nth-child(4){ animation-delay: -0.8s; }
+		.loading-dot:nth-child(5){ animation-delay: -0.7s; }
+		.loading-dot:nth-child(6){ animation-delay: -0.6s; }
+		.loading-dot:nth-child(1):before{ animation-delay: -1.1s; }
+		.loading-dot:nth-child(2):before{ animation-delay: -1.0s; }
+		.loading-dot:nth-child(3):before{ animation-delay: -0.9s; }
+		.loading-dot:nth-child(4):before{ animation-delay: -0.8s; }
+		.loading-dot:nth-child(5):before{ animation-delay: -0.7s; }
+		.loading-dot:nth-child(6):before{ animation-delay: -0.6s; }
+		@keyframes loading{
 			100%{ transform: rotate(360deg); } 
 		}
-		@keyframes sk-chase-dot{
+		@keyframes loading-dot{
 			80%, 100%{ transform: rotate(360deg); } 
 		}
-		@keyframes sk-chase-dot-before{
+		@keyframes loading-dot-before{
 			50%{
 				transform: scale(0.4);
 			}
@@ -76,13 +76,13 @@
 	</style>
 </head>
 <body class="c-app">
-	<div class="sk-chase" style="position: absolute; margin-left: 50%; margin-top: 300px;">
-		<div class="sk-chase-dot"></div>
-		<div class="sk-chase-dot"></div>
-		<div class="sk-chase-dot"></div>
-		<div class="sk-chase-dot"></div>
-		<div class="sk-chase-dot"></div>
-		<div class="sk-chase-dot"></div>
+	<div class="loading" style="position: absolute; margin-left: 50%; margin-top: 300px;">
+		<div class="loading-dot"></div>
+		<div class="loading-dot"></div>
+		<div class="loading-dot"></div>
+		<div class="loading-dot"></div>
+		<div class="loading-dot"></div>
+		<div class="loading-dot"></div>
 	</div>
     <div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
         <%- include ('adminNav'); -%>
@@ -173,65 +173,34 @@
 		tinymce.init({
 			selector: "textarea.tinymce",
 			
-			language:"ko_KR",
+			language: "ko_KR",
 
 			height: 800,
-
-			statubar: true,
+			
+			menubar: false,
 			
 			plugins: [
-				"advlist autolink link lists charmap print preview hr anchor pagebreak",
-				"searchreplace visualblocks visualchars fullscreen insertdatetime nonbreaking",
-				"table contextmenu directionality emoticons paste textcolor image imagetools save"
-			], // advlist
+				"autolink link lists charmap preview hr fullscreen",
+				"table emoticons paste textcolor image imagetools save"
+			],
+			
+			fontsize_formats: "8pt 9pt 10pt 11pt 12pt 14pt 18pt 24pt 30pt 36pt 48pt 60pt 72pt 96pt",
 
 			/* toolbar */
-			toolbar: "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link | print preview  fullpage | forecolor backcolor emoticons  image save" ,
-			// 뒤로 가기 앞으로 가기 | 텍스트 변경 select | 굵게 기울게 | 왼쪽 정렬 가운데 정렬 오른쪽 정렬 양쪽 정렬 | 기호 리스트 숫자 리스트 내어쓰기 들여쓰기
-			// 링크 | 출력 미리보기 풀페이지 | 
+			toolbar: "undo redo | fontsizeselect | forecolor backcolor | bold italic Underline Strikethrough Superscript Subscript | alignleft aligncenter alignright alignjustify | " +
+					 "bullist numlist | hr link emoticons charmap image table insertdatetime | fullscreen preview save" ,
 			
 			images_upload_handler: image_handler,
 			
-			/* style */
-			style_formats: [
-				{title: "Headers", items: [
-					{title: "Header 1", format: "h1"},
-					{title: "Header 2", format: "h2"},
-					{title: "Header 3", format: "h3"},
-					{title: "Header 4", format: "h4"},
-					{title: "Header 5", format: "h5"},
-					{title: "Header 6", format: "h6"}
-				]},
-				{title: "Inline", items: [
-					{title: "Bold", icon: "bold", format: "bold"},
-					{title: "Italic", icon: "italic", format: "italic"},
-					{title: "Underline", icon: "underline", format: "underline"},
-					{title: "Strikethrough", icon: "strikethrough", format: "strikethrough"},
-					{title: "Superscript", icon: "superscript", format: "superscript"},
-					{title: "Subscript", icon: "subscript", format: "subscript"},
-				]},
-				{title: "Blocks", items: [
-					{title: "Paragraph", format: "p"},
-					{title: "Blockquote", format: "blockquote"},
-					{title: "Div", format: "div"},
-					{title: "Pre", format: "pre"}
-				]},
-				{title: "Alignment", items: [
-					{title: "Left", icon: "alignleft", format: "alignleft"},
-					{title: "Center", icon: "aligncenter", format: "aligncenter"},
-					{title: "Right", icon: "alignright", format: "alignright"},
-					{title: "Justify", icon: "alignjustify", format: "alignjustify"}
-				]}
-			],
-			
 			init_instance_callback: function(editor) {
     			editor.setContent(`<%-result%>`);
-				$('.sk-chase').remove();
+				$('.loading').remove();
 				$('#tinyCard').show();
   			},
 			
 			save_onsavecallback: function() {
-				let content=tinymce.get("textEditor").getContent();
+				let content = tinymce.get("textEditor").getContent();
+				console.log(content);
 				$.ajax({
 					type: "POST",
 					dataType: "json",

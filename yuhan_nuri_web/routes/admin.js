@@ -140,14 +140,14 @@ router.post('/explanation', isAdminLoggedIn, (req, res, next) => {
 		case "getMyReservationHistory":
 			fileType = "내 예약 내역";
 			break;
-		case "getSatisfactionResult":
-			fileType = "만족도조사"
-			break;
 		case "getAllReservationHistory":
 			fileType = "전체 예약 내역";
 			break;
 		case "getAllChatLog":
 			fileType = "전체 채팅 내역";
+			break;
+		case "getSatisfactionResult":
+			fileType = "만족도조사"
 			break;
 		default:
 			break;
@@ -201,7 +201,6 @@ router.post("/readReservedSchedule", isAdminLoggedIn, function(req, res, next) {
 	
 	// 수락이 된 것만 스케줄에 표시가 됨
 	const sql_maxIdInSchedule = "SELECT MAX(scheduleno) as maxIdValue FROM Schedule";
-	const date_format = "YYYY-MM-DD HH:mm:ss";
 	
 	let maxid = 0;
 	let empid = req.session.adminInfo.empid;
@@ -276,12 +275,35 @@ router.post("/readMySchedule", isAdminLoggedIn, function(req, res, next) {
 // 자신의 스케줄을 변경하는 부분
 router.post("/updateSchedule", isAdminLoggedIn, function(req, res, next) {
 	const datetime_format = "YYYY-MM-DD HH:mm:ss";
-	
 	let sql_updateSchedule = "UPDATE Schedule SET ";
-
 	let data = JSON.parse(req.body.sendAjax);
-	
 	let empid = req.session.adminInfo.empid;
+	
+	const sql_getSchedule = "SELECT calendarId, title, start, end FROM Schedule WHERE scheduleno = ?";
+
+	connection.execute(sql_getSchedule, [data.id], (err, result) => {
+		if(err) {
+			logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
+			next(err);
+		}
+		else {
+			let scheduleType = "";
+			let beforeScheduleContent = "";
+			
+			switch(result[0].calendarId){
+				case "Reservation":
+					scheduleType = "예약 가능 시간";
+					break;
+				case "Meeting":
+					scheduleType = "회의";
+					break;
+			}
+
+			beforeScheduleContent = `[${data.id}번] [${result[0].start} ~ ${result[0].end}] [${result[0].title}] [${scheduleType}]`;
+
+			logger.schedule.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${beforeScheduleContent} 스케줄을 수정 시작.`);
+		}
+	});
 	
 	if(data.changes.hasOwnProperty("start")) data.changes.start = moment(new Date(data.changes.start._date)).format(datetime_format);
 	if(data.changes.hasOwnProperty("end")) data.changes.end = moment(new Date(data.changes.end._date)).format(datetime_format);
@@ -294,7 +316,6 @@ router.post("/updateSchedule", isAdminLoggedIn, function(req, res, next) {
 	});
 
 	sql_updateSchedule = sql_updateSchedule.slice(0, -1); // 마지막, 지움
-
 	sql_updateSchedule += ` WHERE scheduleno = ${data.id} AND empid = '${empid}'`;
 
 	connection.execute(sql_updateSchedule, values, (err, rows) => {
@@ -304,9 +325,31 @@ router.post("/updateSchedule", isAdminLoggedIn, function(req, res, next) {
 		}
 		else {
 			res.json({state: "ok"});
-			logger.schedule.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 스케줄을 수정.`);
+			connection.execute(sql_getSchedule, [data.id], (err, result) => {
+				if(err) {
+					logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
+					next(err);
+				}
+				else {
+					let scheduleType = "";
+					let afterScheduleContent = "";
+
+					switch(result[0].calendarId){
+						case "Reservation":
+							scheduleType = "예약 가능 시간";
+							break;
+						case "Meeting":
+							scheduleType = "회의";
+							break;
+					}
+
+					afterScheduleContent = `[${data.id}번] [${result[0].start} ~ ${result[0].end}] [${result[0].title}] [${scheduleType}]`;
+
+					logger.schedule.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${afterScheduleContent} 스케줄로 수정 완료.`);
+				}
+			});
 		}
-	});	
+	});
 });
 
 // 스케줄 삭제
@@ -315,6 +358,31 @@ router.post("/deleteSchedule", isAdminLoggedIn, function(req, res, next) {
 	let session_empid = req.session.adminInfo.empid;
 	
 	const sql_deleteSchedule = "DELETE FROM Schedule WHERE scheduleno = ?";
+	const sql_getDeleteSchedule = "SELECT calendarId, title, start, end FROM Schedule WHERE scheduleno = ?";
+	
+	connection.execute(sql_getDeleteSchedule, [data.id], (err, result) => {
+		if(err) {
+			logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
+			next(err);
+		}
+		else {
+			let scheduleType = "";
+			let deleteScheduleContent = "";
+			
+			switch(result[0].calendarId) {
+				case "Reservation":
+					scheduleType = "예약 가능 시간";
+					break;
+				case "Meeting":
+					scheduleType = "회의";
+					break;
+			}
+
+			deleteScheduleContent = `[${data.id}번] [${result[0].start} ~ ${result[0].end}] [${result[0].title}] [${scheduleType}]`;
+
+			logger.schedule.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${deleteScheduleContent} 스케줄을 삭제.`);
+		}
+	});
 	
 	connection.execute(sql_deleteSchedule, [data.id], (err) => {
 		if(err) {
@@ -323,7 +391,6 @@ router.post("/deleteSchedule", isAdminLoggedIn, function(req, res, next) {
 		}
 		else {
 			res.json({state: "ok"});
-			logger.schedule.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 스케줄을 삭제.`);
 		}
 	});
 });
@@ -345,10 +412,8 @@ router.post("/createSchedule", isAdminLoggedIn, function(req, res, next) {
 	let start = moment(new Date(data.start)).format(datetime_format);
 	let end = moment(new Date(data.end)).format(datetime_format);
 	
-	
 	let startIndex = moment(new Date(data.start)).format(date_format);
 	let endIndex = moment(new Date(data.end)).format(date_format);
-	
 	
 	let location = "";
 	
@@ -363,7 +428,7 @@ router.post("/createSchedule", isAdminLoggedIn, function(req, res, next) {
 				logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 				next(err);
 			}
-			else{
+			else {
 				if(row.length > 0) {
 					for(let rownum = 0; rownum < row.length; rownum++){
 						for(let time = row[rownum].start; time <= row[rownum].end; time++) {
@@ -394,7 +459,19 @@ router.post("/createSchedule", isAdminLoggedIn, function(req, res, next) {
 								}
 								else {
 									res.json({state: "ok"});
-									logger.schedule.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 스케줄을 생성.`);
+									
+									let scheduleType = "";
+
+									switch(data.calendarId){
+										case "Reservation" :
+											scheduleType = "예약 가능 시간";
+											break;
+										case "Meeting" :
+											scheduleType = "회의";
+											break;
+									}
+									
+									logger.schedule.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid}) 님이 [${start} ~ ${end}] [${scheduleType}] 스케줄을 생성.`);
 								}
 							});
 						}
@@ -408,7 +485,18 @@ router.post("/createSchedule", isAdminLoggedIn, function(req, res, next) {
 						}
 						else {
 							res.json({state: "ok"});
-							logger.schedule.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 스케줄을 생성.`);
+							let scheduleType = "";
+
+							switch(data.calendarId){
+								case "Reservation" :
+									scheduleType = "예약 가능 시간";
+									break;
+								case "Meeting" :
+									scheduleType = "회의";
+									break;
+							}
+							
+							logger.schedule.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid}) 님이 [${start} ~ ${end}] [${scheduleType}] 스케줄을 생성.`);
 						}
 					});
 				}
@@ -675,13 +763,13 @@ router.get('/answerCheck/:no', isAdminLoggedIn, function(req, res) {
 });
 
 router.post('/answerCheck/:no', isAdminLoggedIn, function(req, res) {
-	var updateAnswer = "UPDATE QuestionBoard SET answer = ?, empname = ?, answerdate = ? WHERE no = ?";
+	var updateAnswer = "UPDATE QuestionBoard SET answer = ?, empname = ?, answerdate = CURDATE() WHERE no = ?";
 	
-	connection.execute(updateAnswer, [req.body.content, req.session.adminInfo.empname, moment().format("YYYYMMDD"), req.params.no], (err, rows) => {
+	connection.execute(updateAnswer, [req.body.content, req.session.adminInfo.empname, req.params.no], (err, rows) => {
 		if(err) logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 		else {
 			res.json({check: 'success'});
-			logger.question.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${req.params.no}번 문의 답변 수정.`);
+			logger.question.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${req.params.no}번 문의 답변을 수정.`);
 		}
 	});
 });
@@ -727,7 +815,7 @@ router.post('/saveQuestion', isAdminLoggedIn, function(req, res, next) {
 	const sendData = req.body.sendData;
 	const sendNumber = req.body.sendNumber;
 	
-	const updateQuestion = 'UPDATE QuestionBoard SET empname = ?, answerdate = ?, answer = ? WHERE no = ?';
+	const updateQuestion = 'UPDATE QuestionBoard SET empname = ?, answerdate = CURDATE(), answer = ? WHERE no = ?';
 	
 	const selectAnswer = 'SELECT answer FROM QuestionBoard WHERE no = ?';
 	
@@ -738,7 +826,7 @@ router.post('/saveQuestion', isAdminLoggedIn, function(req, res, next) {
 		}
 		else {
 			if(result[0].answer === null){
-				connection.execute(updateQuestion, [req.session.adminInfo.empname, moment().format("YYYYMMDD"), sendData, sendNumber], (err, rows) => {
+				connection.execute(updateQuestion, [req.session.adminInfo.empname, sendData, sendNumber], (err, rows) => {
 					if(err) {
 						logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 						next(err);
@@ -746,7 +834,7 @@ router.post('/saveQuestion', isAdminLoggedIn, function(req, res, next) {
 					else {
 						AnswerPush(sendNumber);
 						res.json({state: 'ok'});
-						logger.question.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${sendNumber}번 문의 답변 등록.`);
+						logger.question.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${sendNumber}번 문의 답변을 등록.`);
 					}
 				});
 			}
@@ -805,7 +893,9 @@ router.post("/saveBoard/:type", isAdminLoggedIn, function(req, res, next) {
 		allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img']),
 		allowedAttributes: { // 기존 값 a: ['href'], img: ['src']
 			a: ['href'],
-			img: ['src', 'width', 'height'] 
+			p: ['style'],
+			span: ['style'],
+			img: ['src', 'width', 'height']
 		}
 	});
 	
@@ -1202,11 +1292,11 @@ router.get('/getMyReservationHistory', isAdminLoggedIn, (req, res, next) => {
 	const PsyTestWorksheet = workbook.addWorksheet("심리검사 내역");
 	const ReservationWorksheet = workbook.addWorksheet("상담 내역");
 	
-	const sql_selectPsyTestLog="SELECT simple.stuno, simple.stuname, user.major, simple.gender, simple.birth, simple.email, simple.date, GROUP_CONCAT(psyTList.testname) AS testname " + 
+	const sql_selectPsyTestLog="SELECT simple.stuno, simple.stuname, user.major, user.phonenum, simple.gender, simple.birth, simple.email, simple.date, GROUP_CONCAT(psyTList.testname SEPARATOR ', ') AS testname " + 
 		  "FROM SimpleApplyForm simple JOIN PsyTest psyT ON simple.serialno = psyT.serialno JOIN PsyTestList psyTList ON psyT.testno = psyTList.testno " + 
 		  "JOIN User user ON simple.stuno = user.stuno GROUP BY simple.serialno ORDER BY simple.date;";
 	
-	const sql_selectReservationLog="SELECT simple.date, reserv.stuno, simple.stuname, simple.gender, user.major, user.email, " +
+	const sql_selectReservationLog="SELECT simple.date, reserv.stuno, simple.stuname, simple.gender, user.major, user.phonenum, user.email, " +
 		  "simple.birth, contype.typename, Counselor.empname, reserv.date AS reservdate, reserv.starttime, reserv.finished " +
 		  "FROM Reservation reserv JOIN SimpleApplyForm simple ON reserv.serialno = simple.serialno JOIN ConsultType contype " +
 		  "ON reserv.typeno = contype.typeno JOIN User user ON reserv.stuno = user.stuno, Counselor " +
@@ -1215,32 +1305,34 @@ router.get('/getMyReservationHistory', isAdminLoggedIn, (req, res, next) => {
 	const fileName=`유한대학교 학생상담센터 내 예약 내역.xlsx`;
 	
 	PsyTestWorksheet.columns = [
-		{header: '신청 날짜', key: 'date', width: 15},
+		{header: '신청일자', key: 'date', width: 15},
 		{header: '학번', key: 'stuno', width: 15},
 		{header: '학과', key: 'major', width : 20},
 		{header: '학생', key: 'stuname', width: 10},
 		{header: '성별', key: 'gender', width: 5},
 		{header: '생년월일', key: 'birth', width: 15},
+		{header: '연락처', key: 'phonenum', width: 15},
 		{header: '이메일', key: 'email', width: 20},
 		{header: '심리검사 목록', key: 'testname', width: 30}
 	];
 	
 	ReservationWorksheet.columns = [
-		{header: '신청 날짜', key: 'date', width: 15},
+		{header: '신청일자', key: 'date', width: 15},
 		{header: '학번', key: 'stuno', width: 15},
 		{header: '학과', key: 'major', width : 20},
 		{header: '학생', key: 'stuname', width: 10},
 		{header: '성별', key: 'gender', width: 5},
 		{header: '생년월일', key: 'birth', width: 15},
+		{header: '연락처', key: 'phonenum', width: 15},
 		{header: '이메일', key: 'email', width: 20},
-		{header: '예약일', key: "reservdate", width: 15},
-		{header: '예약시간', key: "starttime", width: 10},
-		{header: '상담사', key: "empname", width: 10},
 		{header: '유형', key: "typename", width: 10},
+		{header: '상담사', key: "empname", width: 10},
+		{header: '예약일자', key: "reservdate", width: 15},
+		{header: '예약시간', key: "starttime", width: 10},
 		{header: '상담 완료 여부', key: 'finished', width: 15},
 	];
 	
-	let rangeColumn1 = ['A1','B1','C1','D1','E1','F1','G1','H1'];
+	let rangeColumn1 = ['A1','B1','C1','D1','E1','F1','G1','H1','I1'];
 	
 	rangeColumn1.forEach((item, index) => {
 		PsyTestWorksheet.getCell(item).fill = {
@@ -1250,7 +1342,7 @@ router.get('/getMyReservationHistory', isAdminLoggedIn, (req, res, next) => {
 		};
 	});
 	
-	let rangeColumn2 = ['A1','B1','C1','D1','E1','F1','G1','H1','I1','J1','K1','L1'];
+	let rangeColumn2 = ['A1','B1','C1','D1','E1','F1','G1','H1','I1','J1','K1','L1','M1'];
 	
 	rangeColumn2.forEach((item, index) => {
 		ReservationWorksheet.getCell(item).fill = {
@@ -1310,7 +1402,7 @@ router.get('/getSatisfactionResult', isAdminLoggedIn, (req, res, next) => {
 	const satisfactionWorkSheet = workbook.addWorksheet("만족도조사 결과");
 	
 	const sql_getSatisfationResult = "SELECT Reservation.stuno, Counselor.empname, SimpleApplyForm.stuname, " +
-		  "SimpleApplyForm.gender, SimpleApplyForm.birth, SimpleApplyForm.email, " +
+		  "SimpleApplyForm.gender, SimpleApplyForm.birth, SimpleApplyForm.email, User.phonenum, " +
 		  "User.major, Reservation.date, DATE(Reservation.researchdatetime) AS researchdatetime, ConsultType.typename, " +
 		  "Reservation.serialno, Reservation.starttime, AskList.ask, AnswerLog.choiceanswer " + 
 		  "FROM Reservation JOIN SimpleApplyForm ON Reservation.serialno = SimpleApplyForm.serialno LEFT JOIN ConsultType ON " + 
@@ -1323,22 +1415,23 @@ router.get('/getSatisfactionResult', isAdminLoggedIn, (req, res, next) => {
 
 	const fileName = `유한대학교 학생상담센터 만족도조사 내역.xlsx`;
 	satisfactionWorkSheet.columns = [
-		{header: '작성일', key: "researchdatetime", width: 20},
+		{header: '참여일자', key: "researchdatetime", width: 15},
 		{header: '학번', key: "stuno", width: 15},
 		{header: '학과', key: "major", width: 20},
 		{header: '학생', key: "stuname", width: 10},
 		{header: '성별', key: 'gender', width: 5},
 		{header: '생년월일', key: "birth", width: 15},
+		{header: '연락처', key: 'phonenum', width: 15},
 		{header: '이메일', key: "email", width: 20},
-		{header: '예약일', key: "date", width: 15},
-		{header: '예약시간', key: "starttime", width: 10},
-		{header: '상담사', key: "empname", width: 10},
 		{header: '유형', key: "typename", width: 10},
+		{header: '상담사', key: "empname", width: 10},
+		{header: '예약일자', key: "date", width: 15},
+		{header: '예약시간', key: "starttime", width: 10},
 		{header: '질문', key: "ask", width: 25},
 		{header: '답변', key: "choiceanswer", width: 25}
 	];
 	
-	let rangeColumn = ['A1','B1','C1','D1','E1','F1','G1','H1','I1','J1','K1','L1','M1'];
+	let rangeColumn = ['A1','B1','C1','D1','E1','F1','G1','H1','I1','J1','K1','L1','M1','N1'];
 	
 	rangeColumn.forEach((item, index) => {
 		satisfactionWorkSheet.getCell(item).fill = {
@@ -1356,13 +1449,18 @@ router.get('/getSatisfactionResult', isAdminLoggedIn, (req, res, next) => {
 				let oldSerialno = 0;
 				
 				rows.forEach((row, index) => {
+					row.choiceanswer = row.choiceanswer.replace(/,/g, ", ");
+					
 					if(oldSerialno !== row.serialno) {
 						if(row.typename === null){
 							row.typename = "심리검사";
 							row.date = "-";
+							row.starttime = "-";
+							row.empname = "-";
 						}
 						
 						oldSerialno = row.serialno;
+						
 						delete row.serialno;
 						
 						satisfactionWorkSheet.addRow(row);
@@ -1373,9 +1471,12 @@ router.get('/getSatisfactionResult', isAdminLoggedIn, (req, res, next) => {
 						row.major = "";
 						row.empname = "";
 						row.stuname = "";
+						row.gender = "";
 						row.birth = "";
+						row.phonenum = "";
 						row.email = "";
 						row.date = "";
+						row.starttime = "";
 						row.typename = "";
 						
 						delete row.serialno;
@@ -1412,45 +1513,47 @@ router.get('/getAllReservationHistory', isAdminLoggedIn, (req, res, next) => {
 	const PsyTestWorksheet = workbook.addWorksheet("심리검사 내역");
 	const ReservationWorksheet = workbook.addWorksheet("상담 내역");
 
-	const sql_selectPsyTestLog="SELECT simple.stuno, simple.stuname, user.major, simple.gender, simple.birth, simple.email, simple.date, GROUP_CONCAT(psyTList.testname) AS testname " + 
+	const sql_selectPsyTestLog="SELECT simple.stuno, simple.stuname, user.major, simple.gender, simple.birth, user.phonenum, simple.email, simple.date, GROUP_CONCAT(psyTList.testname SEPARATOR ', ') AS testname " + 
 		  "FROM SimpleApplyForm simple JOIN PsyTest psyT ON simple.serialno = psyT.serialno JOIN PsyTestList psyTList ON psyT.testno = psyTList.testno " + 
-		  "JOIN User user ON simple.stuno = user.stuno GROUP BY simple.serialno ORDER BY simple.date;";
+		  "JOIN User user ON simple.stuno = user.stuno GROUP BY simple.serialno ORDER BY simple.date";
 	
-	const sql_selectReservationLog="SELECT simple.date, reserv.stuno, simple.stuname, simple.gender, user.major, user.email, " +
+	const sql_selectReservationLog="SELECT simple.date, reserv.stuno, simple.stuname, simple.gender, user.major, user.email, user.phonenum, " +
 		  "simple.birth, contype.typename, Counselor.empname, reserv.date AS reservdate, reserv.starttime, reserv.finished " +
 		  "FROM Reservation reserv JOIN SimpleApplyForm simple ON reserv.serialno = simple.serialno JOIN ConsultType contype " +
 		  "ON reserv.typeno = contype.typeno JOIN User user ON reserv.stuno = user.stuno, Counselor " +
-		  "WHERE NOT reserv.typeno IS NULL AND reserv.status = 1 AND Counselor.empid = reserv.empid ORDER BY simple.date, reservdate, reserv.starttime;";
+		  "WHERE NOT reserv.typeno IS NULL AND reserv.status = 1 AND Counselor.empid = reserv.empid ORDER BY simple.date, reservdate, reserv.starttime";
 	
 	const fileName=`유한대학교 학생상담센터 전체 예약 내역.xlsx`;
 	
 	PsyTestWorksheet.columns = [
-		{header: '신청 날짜', key: 'date', width: 15},
+		{header: '신청일자', key: 'date', width: 15},
 		{header: '학번', key: 'stuno', width: 15},
 		{header: '학과', key: 'major', width : 20},
 		{header: '학생', key: 'stuname', width: 10},
 		{header: '성별', key: 'gender', width: 5},
 		{header: '생년월일', key: 'birth', width: 15},
+		{header: '연락처', key: 'phonenum', width: 15},
 		{header: '이메일', key: 'email', width: 20},
 		{header: '심리검사 목록', key: 'testname', width: 30}
 	];
 	
 	ReservationWorksheet.columns = [
-		{header: '신청 날짜', key: 'date', width: 15},
+		{header: '신청일자', key: 'date', width: 15},
 		{header: '학번', key: 'stuno', width: 15},
 		{header: '학과', key: 'major', width : 20},
 		{header: '학생', key: 'stuname', width: 10},
 		{header: '성별', key: 'gender', width: 5},
 		{header: '생년월일', key: 'birth', width: 15},
+		{header: '연락처', key: 'phonenum', width: 15},
 		{header: '이메일', key: 'email', width: 20},
-		{header: '예약일', key: "reservdate", width: 15},
-		{header: '예약시간', key: "starttime", width: 10},
-		{header: '상담사', key: "empname", width: 10},
 		{header: '유형', key: "typename", width: 10},
+		{header: '상담사', key: "empname", width: 10},
+		{header: '예약일자', key: "reservdate", width: 15},
+		{header: '예약시간', key: "starttime", width: 10},
 		{header: '상담 완료 여부', key: 'finished', width: 15},
 	];
 	
-	let rangeColumn1 = ['A1','B1','C1','D1','E1','F1','G1','H1'];
+	let rangeColumn1 = ['A1','B1','C1','D1','E1','F1','G1','H1','I1'];
 	
 	rangeColumn1.forEach((item, index) => {
 		PsyTestWorksheet.getCell(item).fill = {
@@ -1460,7 +1563,7 @@ router.get('/getAllReservationHistory', isAdminLoggedIn, (req, res, next) => {
 		};
 	});
 	
-	let rangeColumn2 = ['A1','B1','C1','D1','E1','F1','G1','H1','I1','J1','K1','L1'];
+	let rangeColumn2 = ['A1','B1','C1','D1','E1','F1','G1','H1','I1','J1','K1','L1','M1'];
 	
 	rangeColumn2.forEach((item, index) => {
 		ReservationWorksheet.getCell(item).fill = {
@@ -1516,7 +1619,7 @@ router.get('/getAllChatLog', isAccessDenied, (req, res, next) => {
 	
 	let empid = req.session.adminInfo.empid;
 	
-	const sql_selectAllChatLog = "SELECT r.stuno, u.stuname, u.major, u.email, s.birth, s.gender, c.chatlog, c.chatdate, cs.empname " +
+	const sql_selectAllChatLog = "SELECT r.stuno, u.stuname, u.major, u.email, s.birth, u.phonenum, s.gender, c.chatlog, c.chatdate, cs.empname " +
 		  "FROM Reservation r, ConsultLog c, User u, Counselor cs, SimpleApplyForm s " +
 		  "WHERE r.serialno = c.serialno AND u.stuno = r.stuno AND r.empid = cs.empid AND s.serialno = r.serialno " +
 		  "ORDER BY c.chatdate;";
@@ -1526,18 +1629,19 @@ router.get('/getAllChatLog', isAccessDenied, (req, res, next) => {
 	const fileName = `유한대학교 학생상담센터 전체 채팅 내역.xlsx`;
 	
 	ChatLogWorksheet.columns = [
-		{header: '최종 상담 일자', key: 'chatdate', width: 15},
+		{header: '최종상담일자', key: 'chatdate', width: 15},
 		{header: '학번', key: 'stuno', width: 15},
 		{header: '학과', key: 'major', width: 20},
 		{header: '학생', key: 'stuname', width: 10},
 		{header: '성별', key: 'gender', width: 5},
 		{header: '생년월일', key: "birth", width: 15},
+		{header: '연락처', key: 'phonenum', width: 15},
 		{header: '이메일', key: "email", width: 20},
 		{header: '상담사', key: 'empname', width: 10},
 		{header: '내용', key: 'chatlog', width: 80}
 	];
 	
-	let rangeColumn = ['A1','B1','C1','D1','E1','F1','G1','H1','I1'];
+	let rangeColumn = ['A1','B1','C1','D1','E1','F1','G1','H1','I1','J1'];
 	
 	rangeColumn.forEach((item, index) => {
 		ChatLogWorksheet.getCell(item).fill = {
@@ -1707,12 +1811,12 @@ router.get('/getSimpleApplyFormPDF/:serialNo', isAdminLoggedIn, (req, res, next)
 
 							doc
 								.fontSize(12)
-								.text(`신청 일자: ${ConsultRows[0].date}`, {align: 'right'})
+								.text(`신청일자: ${ConsultRows[0].date}`, {align: 'right'})
 								.moveDown(0.8);
 							
 							doc
 								.fontSize(12)
-								.text(`상담 유형: ${applyType}`, {align: 'right'})
+								.text(`상담유형: ${applyType}`, {align: 'right'})
 								.moveDown(2);
 
 							doc
@@ -1743,12 +1847,12 @@ router.get('/getSimpleApplyFormPDF/:serialNo', isAdminLoggedIn, (req, res, next)
 								.moveDown(0.5);
 							doc
 								.fontSize(10)
-								.text(`휴대폰 번호: ${ConsultRows[0].phonenum}`, {align: 'left'})
+								.text(`연락처: ${ConsultRows[0].phonenum}`, {align: 'left'})
 								.moveDown(0.5);
 
 							doc
 								.fontSize(10)
-								.text(`이메일 주소: ${ConsultRows[0].email}`, {align : 'left'})
+								.text(`이메일: ${ConsultRows[0].email}`, {align : 'left'})
 								.moveDown(2);
 
 							asks.forEach(function (v, i) {
@@ -1759,7 +1863,7 @@ router.get('/getSimpleApplyFormPDF/:serialNo', isAdminLoggedIn, (req, res, next)
 
 								doc
 									.fontSize(8)
-									.text(answers[i], {align: 'left'})
+									.text(answers[i].replace(/,/g, ", "), {align: 'left'})
 									.moveDown();
 
 								if(i === asks.length - 1) doc.moveDown(2);

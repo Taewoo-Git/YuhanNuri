@@ -142,8 +142,7 @@
 					dragBgColor: '#ff008c',
 					borderColor: '#ff008c'
 					
-				}
-				,
+				},
 				{
 					id: 'Finished',
 					name: '종료',
@@ -157,12 +156,12 @@
 
 			// 캘린더 내용 DB에서 읽어서 캘린터에 설정	
 			$.ajax({
-				type : "POST",
-				dataType : "json",
-				url : "./readMySchedule",
-				async : true,
-				data : {},
-				success : function(data){
+				type: "POST",
+				dataType: "json",
+				url: "./readMySchedule",
+				async: true,
+				data: {},
+				success: function(data) {
 					let mySchedules = [];
 
 					data.schedules.forEach((row) => {
@@ -171,17 +170,18 @@
 
 						mySchedules.push(row);
 					});
+					
 					calendar.createSchedules(mySchedules);
 				}
 			});
 
 			$.ajax({
 				type: "POST",
-				datatype : "json",
-				url : "./readReservedSchedule",
-				async : true,
-				data : {},
-				success : function(data){
+				datatype: "json",
+				url: "./readReservedSchedule",
+				async: true,
+				data: {},
+				success: function(data) {
 					let reservedSchedules = [];
 
 					data.reserved.forEach((row, index) => {
@@ -198,9 +198,7 @@
 			calendar.on('beforeCreateSchedule', scheduleData => {
 				const schedule = { // 해당 객체의 형태로 db를 구성해야 할 것 같음
 					calendarId: scheduleData.calendarId,
-
 					title: scheduleData.title,
-
 					start: scheduleData.start,
 					end: scheduleData.end,
 					category: scheduleData.isAllDay ? 'allday' : 'time',
@@ -208,13 +206,12 @@
 				};
 
 				let sendAjax = {
-
-					calendarId : schedule.calendarId,
-					title : schedule.title,
-					start : schedule.start._date.toString(),
-					end : schedule.end._date.toString(),
-					category : schedule.category,
-					location : schedule.location
+					calendarId: schedule.calendarId,
+					title: schedule.title,
+					start: schedule.start._date.toString(),
+					end: schedule.end._date.toString(),
+					category: schedule.category,
+					location: schedule.location
 				};
 
 				if(schedule.calendarId == "Reserved" || schedule.calendarId == "Finished"){
@@ -227,18 +224,18 @@
 					dataType: "json",
 					url: "./createSchedule",
 					async: true,
-					data: { "sendAjax" : JSON.stringify(sendAjax) },
-					success: function (data) { 	
-						if(data.state === "ok"){
+					data: {"sendAjax": JSON.stringify(sendAjax)},
+					success: function(data) { 	
+						if(data.state === "ok") {
 							alert("스케줄 추가가 완료되었습니다.");
 							calendar.createSchedules([schedule]);
-							window.location.reload();
-						}else if(data.state === "diff"){
+							window.location.reload(true);
+						}else if(data.state === "diff") {
 							alert("예약 가능한 일정 추가는 날짜가 같아야 합니다.");
-						}else if(data.state === "duplicate"){
+						}else if(data.state === "duplicate") {
 							alert("중복되는 스케줄이 존재합니다.");
-						}else if(data.state === "inputerrtime"){
-							alert("스케줄 시간을 잘못 입력하셨습니다.");
+						}else if(data.state === "fail") {
+							alert("스케줄 시간을 잘못 입력하였습니다.");
 						}
 					}
 				});
@@ -246,7 +243,7 @@
 			});
 			
 			calendar.on('beforeUpdateSchedule', event => {
-				const { schedule, changes } = event;
+				const {schedule, changes} = event;
 
 				if(schedule.calendarId == "Reserved" || schedule.calendarId == "Finished"){
 					alert("예약 관련 스케줄은 수정할 수 없습니다.");
@@ -275,9 +272,9 @@
 				}
 
 				let sendAjax = {
-					id : schedule.id,
-					changes : changes,
-					schedule : schedule
+					id: schedule.id,
+					changes: changes,
+					schedule: schedule
 				}
 
 				if('state' in changes){
@@ -287,53 +284,51 @@
 
 				if(changeCnt > 0){
 					$.ajax({
-						type : "POST",
-						dataType : "json",
-						url : "./updateSchedule",
-						async : true,
-						data : {"sendAjax" : JSON.stringify(sendAjax)},
-						success : function(data){
-							if(data.state === "ok"){
+						type: "POST",
+						dataType: "json",
+						url: "./updateSchedule",
+						async: true,
+						data: {"sendAjax" : JSON.stringify(sendAjax)},
+						success: function(data) {
+							if(data.state === "ok") {
 								alert("스케줄 수정이 완료되었습니다.");
 								calendar.updateSchedule(schedule.id, schedule.calendarId, changes);
+								setTimeout(edit_popup, 1000);
 							}
-							else if(data.state === "deny"){
+							else if(data.state === "deny") {
 								alert("이미 예약이 있어 수정할 수 없습니다.");
 							}
 						}
 					});
 				}
-				else{
+				else {
 					alert("스케줄 변경 사항이 없습니다.");
 					return;
 				}
 			});
 
 			calendar.on('beforeDeleteSchedule', scheduleData => {
-				const { schedule } = scheduleData;
-
-				if(schedule.calendarId == "Reserved" || schedule.calendarId == "Finished"){
+				const {schedule} = scheduleData;
+				
+				if(schedule.calendarId == "Reserved" || schedule.calendarId == "Finished") {
 					alert("예약 관련 스케줄은 삭제할 수 없습니다.");
 					return;
 				}
 
-				let sendAjax = {
-					id : schedule.id
-				}
-
 				$.ajax({
-					type : "POST",
-					dataType : "json",
-					url : "./deleteSchedule",
-					async : true,
-					data : {"sendAjax" : JSON.stringify(sendAjax)},
-					success : function(data){
-						if(data.state === "deny"){
+					type: "POST",
+					dataType: "json",
+					url: "./deleteSchedule",
+					async: true,
+					data: {"sendAjax": JSON.stringify({id: schedule.id})},
+					success: function(data) {
+						if(data.state === "deny") {
 							alert("이미 예약이 있어 삭제할 수 없습니다.");
 						}
-						else if(data.state === "ok"){
+						else if(data.state === "ok") {
 							alert("스케줄 삭제가 완료되었습니다.");
 							calendar.deleteSchedule(schedule.id, schedule.calendarId);
+							setTimeout(edit_popup, 1000);
 						}
 					}
 				});
@@ -353,6 +348,21 @@
 				calendar.next();
 				date.textContent = `${calendar.getDate().getFullYear()}-${calendar.getDate().getMonth() + 1}`;
 			});
+			
+			setTimeout(edit_popup, 1000);
+			
+			function edit_popup() {
+				$('.tui-full-calendar-weekday-schedule-title').click(function(e) {
+					let icon_color = $('.tui-full-calendar-popup-container').find('.tui-full-calendar-icon.tui-full-calendar-calendar-dot').last().css('background-color');
+					
+					if(icon_color === "rgb(255, 0, 140)" || icon_color === "rgb(112, 112, 112)") {
+						$('.tui-full-calendar-section-button').css('display', 'none');
+						let top = $('.tui-full-calendar-floating-layer').last().css('top');
+						$('.tui-full-calendar-floating-layer').last().css('top', (parseInt(top.split('.')[0]) + 20).toString() + "." + top.split('.')[1]);
+					}
+					else $('.tui-full-calendar-section-button').css('display', 'block');
+				});
+			}
 		</script>	
 	</body>
 </html>

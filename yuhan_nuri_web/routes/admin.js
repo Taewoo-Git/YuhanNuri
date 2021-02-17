@@ -15,7 +15,7 @@ const multer = require('multer');
 const schedule = require('node-schedule');
 const pdfDocument = require('pdfkit');
 
-const {ReservationAcceptPush, AnswerPush, SatisfactionPush, NoticeReservationCancelPush} = require('./fcm'); 
+const {ReservationAcceptPush, ReservationCancelPush, AnswerPush, SatisfactionPush} = require('./fcm'); 
 const {isAdminLoggedIn, isAccessDenied} = require('./middlewares');  
 
 const excel = require('exceljs');
@@ -165,7 +165,7 @@ router.post('/explanation', isAdminLoggedIn, (req, res, next) => {
 					if(err2) logger.error.info(`[${moment().format(logTimeFormat)}] ${err2}`);
 					else {
 						res.send("<script>opener.location.href = '/admin/" + fileUrl + "'; window.close();</script>");
-						logger.file.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${fileType}을(를) 저장.`);
+						logger.file.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${fileType} 저장.`);
 					}
 				});
 			}
@@ -176,7 +176,7 @@ router.post('/explanation', isAdminLoggedIn, (req, res, next) => {
 			if(err1) logger.error.info(`[${moment().format(logTimeFormat)}] ${err1}`);
 			else {
 				res.send("<script>opener.location.href = '/admin/" + fileUrl + "'; window.close();</script>");
-				logger.file.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${fileType}을(를) 저장.`);
+				logger.file.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${fileType} 저장.`);
 			}
 		});
 	}
@@ -274,78 +274,58 @@ router.post("/readMySchedule", isAdminLoggedIn, function(req, res, next) {
 
 // 자신의 스케줄을 변경하는 부분
 router.post("/updateSchedule", isAdminLoggedIn, function(req, res, next) {
-	const datetime_format = "YYYY-MM-DD HH:mm:ss";
 	let sql_updateSchedule = "UPDATE Schedule SET ";
 	let data = JSON.parse(req.body.sendAjax);
 	let empid = req.session.adminInfo.empid;
 	
 	const sql_getSchedule = "SELECT calendarId, title, start, end FROM Schedule WHERE scheduleno = ?";
 
-	connection.execute(sql_getSchedule, [data.id], (err, result) => {
-		if(err) {
-			logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
-			next(err);
+	connection.execute(sql_getSchedule, [data.id], (err1, result1) => {
+		if(err1) {
+			logger.error.info(`[${moment().format(logTimeFormat)}] ${err1}`);
+			next(err1);
 		}
 		else {
-			let scheduleType = "";
-			let beforeScheduleContent = "";
-			
-			switch(result[0].calendarId){
-				case "Reservation":
-					scheduleType = "예약 가능 시간";
-					break;
-				case "Meeting":
-					scheduleType = "회의";
-					break;
-			}
+			if(data.changes.hasOwnProperty("start")) data.changes.start = moment(new Date(data.changes.start._date)).format("YYYY-MM-DD HH:mm:ss");
+			if(data.changes.hasOwnProperty("end")) data.changes.end = moment(new Date(data.changes.end._date)).format("YYYY-MM-DD HH:mm:ss");
 
-			beforeScheduleContent = `[${data.id}번] [${result[0].start} ~ ${result[0].end}] [${result[0].title}] [${scheduleType}]`;
+			let keys = Object.keys(data.changes);
+			let values = Object.values(data.changes);
 
-			logger.schedule.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${beforeScheduleContent} 스케줄을 수정 시작.`);
-		}
-	});
-	
-	if(data.changes.hasOwnProperty("start")) data.changes.start = moment(new Date(data.changes.start._date)).format(datetime_format);
-	if(data.changes.hasOwnProperty("end")) data.changes.end = moment(new Date(data.changes.end._date)).format(datetime_format);
+			keys.forEach((item, index) => {
+				sql_updateSchedule += (item.toString() +  " = ?,");
+			});
 
-	let keys = Object.keys(data.changes);
-	let values = Object.values(data.changes);
+			sql_updateSchedule = sql_updateSchedule.slice(0, -1); // 마지막, 지움
+			sql_updateSchedule += ` WHERE scheduleno = ${data.id} AND empid = '${empid}'`;
 
-	keys.forEach((item, index) => {
-		sql_updateSchedule += (item.toString() +  " = ?,");
-	});
-
-	sql_updateSchedule = sql_updateSchedule.slice(0, -1); // 마지막, 지움
-	sql_updateSchedule += ` WHERE scheduleno = ${data.id} AND empid = '${empid}'`;
-
-	connection.execute(sql_updateSchedule, values, (err, rows) => {
-		if(err) {
-			logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
-			next(err);
-		}
-		else {
-			res.json({state: "ok"});
-			connection.execute(sql_getSchedule, [data.id], (err, result) => {
-				if(err) {
-					logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
-					next(err);
+			connection.execute(sql_updateSchedule, values, (err2, result2) => {
+				if(err2) {
+					logger.error.info(`[${moment().format(logTimeFormat)}] ${err2}`);
+					next(err2);
 				}
 				else {
-					let scheduleType = "";
-					let afterScheduleContent = "";
+					res.json({state: "ok"});
+					
+					connection.execute(sql_getSchedule, [data.id], (err3, result3) => {
+						if(err3) {
+							logger.error.info(`[${moment().format(logTimeFormat)}] ${err3}`);
+							next(err3);
+						}
+						else {
+							let beforeScheduleType = result1[0].calendarId === "Reservation" ? "예약" : "회의";
+							
+							let afterScheduleType = result3[0].calendarId === "Reservation" ? "예약" : "회의";
+							
+							let beforeScheduleContent = `[${result1[0].start.split(':')[0]}시 ~ ${result1[0].end.split(":")[0].split(' ')[1]}시] [${result1[0].title}] ${beforeScheduleType}`;
 
-					switch(result[0].calendarId){
-						case "Reservation":
-							scheduleType = "예약 가능 시간";
-							break;
-						case "Meeting":
-							scheduleType = "회의";
-							break;
-					}
+							let afterScheduleContent = `[${result3[0].start.split(':')[0]}시 ~ ${result3[0].end.split(":")[0].split(' ')[1]}시] [${result3[0].title}] ${afterScheduleType}`;
 
-					afterScheduleContent = `[${data.id}번] [${result[0].start} ~ ${result[0].end}] [${result[0].title}] [${scheduleType}]`;
-
-					logger.schedule.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${afterScheduleContent} 스케줄로 수정 완료.`);
+							logger.schedule
+								.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ` +
+									  `[${data.id}번] ${beforeScheduleContent} 스케줄을 ${afterScheduleContent} 스케줄로 수정.`);
+						}
+					});
 				}
 			});
 		}
@@ -355,7 +335,6 @@ router.post("/updateSchedule", isAdminLoggedIn, function(req, res, next) {
 // 스케줄 삭제
 router.post("/deleteSchedule", isAdminLoggedIn, function(req, res, next) {
 	let data = JSON.parse(req.body.sendAjax);
-	let session_empid = req.session.adminInfo.empid;
 	
 	const sql_deleteSchedule = "DELETE FROM Schedule WHERE scheduleno = ?";
 	const sql_getDeleteSchedule = "SELECT calendarId, title, start, end FROM Schedule WHERE scheduleno = ?";
@@ -366,31 +345,21 @@ router.post("/deleteSchedule", isAdminLoggedIn, function(req, res, next) {
 			next(err);
 		}
 		else {
-			let scheduleType = "";
-			let deleteScheduleContent = "";
-			
-			switch(result[0].calendarId) {
-				case "Reservation":
-					scheduleType = "예약 가능 시간";
-					break;
-				case "Meeting":
-					scheduleType = "회의";
-					break;
-			}
-
-			deleteScheduleContent = `[${data.id}번] [${result[0].start} ~ ${result[0].end}] [${result[0].title}] [${scheduleType}]`;
-
-			logger.schedule.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${deleteScheduleContent} 스케줄을 삭제.`);
-		}
-	});
-	
-	connection.execute(sql_deleteSchedule, [data.id], (err) => {
-		if(err) {
-			logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
-			next(err);
-		}
-		else {
-			res.json({state: "ok"});
+			connection.execute(sql_deleteSchedule, [data.id], (err) => {
+				if(err) {
+					logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
+					next(err);
+				}
+				else {
+					res.json({state: "ok"});
+					
+					let scheduleType = result[0].calendarId === "Reservation" ? "예약" : "회의";
+					let deleteScheduleContent = `[${data.id}번] [${result[0].start.split(":")[0]}시 ~ ${result[0].end.split(":")[0].split(' ')[1]}시] [${result[0].title}] ${scheduleType}`;
+					
+					logger.schedule
+						.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${deleteScheduleContent} 스케줄 삭제.`);
+				}
+			});
 		}
 	});
 });
@@ -417,86 +386,53 @@ router.post("/createSchedule", isAdminLoggedIn, function(req, res, next) {
 	
 	let location = "";
 	
-	let session_empid = req.session.adminInfo.empid;
-	
 	if(data.location != undefined) location = data.location;
 	
 	if(startIndex != endIndex) res.json({state: "diff"});
 	else {
-		connection.execute(sql_getAlreadyScheduled, [startIndex, session_empid], (err, row) => {
-			if(err) {
-				logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
-				next(err);
+		connection.execute(sql_getAlreadyScheduled, [startIndex, req.session.adminInfo.empid], (err1, result1) => {
+			if(err1) {
+				logger.error.info(`[${moment().format(logTimeFormat)}] ${err1}`);
+				next(err1);
 			}
 			else {
-				if(row.length > 0) {
-					for(let rownum = 0; rownum < row.length; rownum++){
-						for(let time = row[rownum].start; time <= row[rownum].end; time++) {
+				if(result1.length > 0) {
+					for(let rownum = 0; rownum < result1.length; rownum++){
+						for(let time = result1[rownum].start; time <= result1[rownum].end; time++) {
 							if(scheduled_hour.lastIndexOf(time) == -1){
 								scheduled_hour.push(time); // 이건 기존 스케줄 표에서 가져온 스케줄
 							}
 						}
 					}
-					
-					let created_start = new Date(start).getHours();
-					let created_end = new Date(end).getHours();
-					
-					// 이건 입력한 스케줄
-					for(let time = created_start; time <= created_end; time++) {
-						createad_hour.push(time);
-					}
-					
-					if(createad_hour.length == 1) res.json({state : "inputerrtime"});
-					else {
-						let isDuplicateArray = createad_hour.filter((item) => scheduled_hour.includes(item));
-					
-						if(isDuplicateArray.length > 1) res.json({state: "duplicate"});
-						else {
-							connection.execute(sql_createSchedule, [empid, data.calendarId, data.title, data.category, start, end, location], (err) => {
-								if(err) {
-									logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
-									next(err);
-								}
-								else {
-									res.json({state: "ok"});
-									
-									let scheduleType = "";
-
-									switch(data.calendarId){
-										case "Reservation" :
-											scheduleType = "예약 가능 시간";
-											break;
-										case "Meeting" :
-											scheduleType = "회의";
-											break;
-									}
-									
-									logger.schedule.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid}) 님이 [${start} ~ ${end}] [${scheduleType}] 스케줄을 생성.`);
-								}
-							});
-						}
-					}
 				}
+					
+				let created_start = new Date(start).getHours();
+				let created_end = new Date(end).getHours();
+
+				// 이건 입력한 스케줄
+				for(let time = created_start; time <= created_end; time++) {
+					createad_hour.push(time);
+				}
+
+				if(createad_hour.length == 1)
+					res.json({state: "fail"});
+				else if(createad_hour.filter((item) => scheduled_hour.includes(item)).length > 1)
+					res.json({state: "duplicate"});
 				else {
-					connection.execute(sql_createSchedule, [empid, data.calendarId, data.title, data.category, start, end, location], (err) => {
-						if(err) {
-							logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
-							next(err);
+					connection.execute(sql_createSchedule, [empid, data.calendarId, data.title, data.category, start, end, location], (err2, result2) => {
+						if(err2) {
+							logger.error.info(`[${moment().format(logTimeFormat)}] ${err2}`);
+							next(err2);
 						}
 						else {
 							res.json({state: "ok"});
-							let scheduleType = "";
 
-							switch(data.calendarId){
-								case "Reservation" :
-									scheduleType = "예약 가능 시간";
-									break;
-								case "Meeting" :
-									scheduleType = "회의";
-									break;
-							}
+							let scheduleType = data.calendarId === "Reservation" ? "예약" : "회의";
 							
-							logger.schedule.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid}) 님이 [${start} ~ ${end}] [${scheduleType}] 스케줄을 생성.`);
+							let createScheduleContent = `[${result2.insertId}번] [${start.split(":")[0]}시 ~ ${end.split(":")[0].split(' ')[1]}시] [${data.title}] ${scheduleType}`;
+							
+							logger.schedule
+								.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${createScheduleContent} 스케줄 생성.`);
 						}
 					});
 				}
@@ -506,31 +442,36 @@ router.post("/createSchedule", isAdminLoggedIn, function(req, res, next) {
 });
 
 router.post("/accessReservation", isAdminLoggedIn, function(req, res, next) { //POST /admin/accessReservation
-	const setAccessReservationData = "UPDATE Reservation SET status = 1, finished = ?, empid = ? WHERE serialno = ?";
-	const isPsyTest = "SELECT typeno FROM Reservation WHERE serialno = ?";
+	const updateReservation = "UPDATE Reservation SET status = 1, finished = ?, empid = ? WHERE serialno = ?";
+	const selectReservation = "SELECT * FROM Reservation WHERE serialno = ?";
 	
 	let serialno = req.body.serialno;
 	let empid = req.session.adminInfo.empid;
 	
-	connection.execute(isPsyTest, [serialno], (err, row) => {
-		if(err) {
-			logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
-			next(err);
+	connection.execute(selectReservation, [serialno], (err1, rows1) => {
+		if(err1) {
+			logger.error.info(`[${moment().format(logTimeFormat)}] ${err1}`);
+			next(err1);
 		}
 		else {
-			let psyTestno = 0;
+			let isFinish = rows1[0].typeno === null ? 1 : 0;
 			
-			if(row[0].typeno === null) psyTestno = 1;
+			let typename = getTypeName(rows1[0].typeno);
+            
+            let printConsult = `[${serialno}번] [${rows1[0].date} ${rows1[0].starttime}시] ${typename}`;
+            let printPsyTest = `[${serialno}번] ${typename}`;
+
+            let printing = typename === "심리검사" ? printPsyTest : printConsult;
 			
-			connection.execute(setAccessReservationData, [psyTestno, empid, serialno], (err, rows) => {
-				if(err) {
-					logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
-					next(err);
+			connection.execute(updateReservation, [isFinish, empid, serialno], (err2, rows2) => {
+				if(err2) {
+					logger.error.info(`[${moment().format(logTimeFormat)}] ${err2}`);
+					next(err2);
 				}
 				else {
 					ReservationAcceptPush(serialno);
-					res.json({getReservation: rows});
-					logger.reservation.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${serialno}번 예약을 확정.`);
+					res.json({getReservation: rows2});
+					logger.reservation.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${printing} 예약 확정.`);
 				}
 			});
 		}
@@ -538,11 +479,12 @@ router.post("/accessReservation", isAdminLoggedIn, function(req, res, next) { //
 });
 
 router.post("/cancelReservation", isAdminLoggedIn, function(req, res, next) { //POST /admin/cancelReservation
-	const onlyDeleteReservation = "DELETE FROM Reservation WHERE serialno = ?";
-	const selectStuNum = "SELECT stuno FROM Reservation WHERE serialno = ?";
+	const deleteReservation = "DELETE FROM Reservation WHERE serialno = ?";
+	const selectReservation = "SELECT * FROM Reservation WHERE serialno = ?";
+	
 	let serialno = req.body.serialno;
 	
-	connection.execute(selectStuNum, [serialno], (err1, rows1) => {
+	connection.execute(selectReservation, [serialno], (err1, rows1) => {
 		if(err1) {
 			logger.error.info(`[${moment().format(logTimeFormat)}] ${err1}`);
 			next(err1);
@@ -551,16 +493,22 @@ router.post("/cancelReservation", isAdminLoggedIn, function(req, res, next) { //
 			if(rows1.length > 0) {
 				let stuno = rows1[0].stuno;
 				
-				NoticeReservationCancelPush(stuno);
+				let typename = getTypeName(rows1[0].typeno);
+                
+                let printConsult = `[${serialno}번] [${rows1[0].date} ${rows1[0].starttime}시] ${typename}`;
+                let printPsyTest = `[${serialno}번] ${typename}`;
 				
-				connection.execute(onlyDeleteReservation, [serialno], (err2, rows2) => {
+				let printing = typename === "심리검사" ? printPsyTest : printConsult;
+				
+				connection.execute(deleteReservation, [serialno], (err2, rows2) => {
 					if(err2) {
 						logger.error.info(`[${moment().format(logTimeFormat)}] ${err2}`);
 						next(err2);
 					}
 					else {
+						ReservationCancelPush(stuno);
 						res.json({state: "ok"});
-						logger.reservation.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${serialno}번 예약을 취소.`);
+						logger.reservation.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${printing} 예약 취소.`);
 					}
 				});
 			}
@@ -623,6 +571,7 @@ router.get("/schedule", isAdminLoggedIn, function(req, res, next) { //GET /admin
 
 router.get("/settings", isAccessDenied, function(req, res, next) {
 	const sql_selectCounselor="select empid, empname, positionno from Counselor where Counselor.use = 'Y'";
+	
 	connection.execute(sql_selectCounselor, (err, rows) => {
 		if(err) {
 			logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
@@ -640,7 +589,6 @@ router.post('/uploadFile', isAdminLoggedIn, upload.single('file'), function(req,
 
 router.get('/logout', isAdminLoggedIn, function(req, res) { //GET /user/logout
     req.session.destroy();
-	res.clearCookie('isAutoLogin');
     res.redirect('/');
 });
 
@@ -725,7 +673,7 @@ router.post('/psychologicalType/:type', isAdminLoggedIn, function(req, res) {
 			if(err) logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 			else {
 				res.send({check: 'success'});
-				logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${recvData}번 심리검사 유형을 삭제.`);
+				logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 [${recvData}번] 심리검사 유형 삭제.`);
 			}
 		});
 	}
@@ -736,7 +684,7 @@ router.post('/psychologicalType/:type', isAdminLoggedIn, function(req, res) {
 		
 		connection.execute(updatePsyTestType, [recvNum], (err, rows) => {
 			if(err) logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
-			else logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${recvNum}번 심리검사 유형을 수정.`);
+			else logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 [${recvNum}번] 심리검사 유형 수정.`);
 		});
 	}
 	else {
@@ -747,7 +695,7 @@ router.post('/psychologicalType/:type', isAdminLoggedIn, function(req, res) {
 			if(err) logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 			else {
 				res.send({check: 'success'});
-				logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${rows.insertId}번 심리검사 유형을 생성.`);
+				logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 [${rows.insertId}번] 심리검사 유형 생성.`);
 			}
 		});
 	}
@@ -769,7 +717,7 @@ router.post('/answerCheck/:no', isAdminLoggedIn, function(req, res) {
 		if(err) logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 		else {
 			res.json({check: 'success'});
-			logger.question.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${req.params.no}번 문의 답변을 수정.`);
+			logger.question.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 [${req.params.no}번] 문의 답변 수정.`);
 		}
 	});
 });
@@ -796,19 +744,33 @@ router.post('/finishedReservation', isAdminLoggedIn, function(req, res, next) {
 	const serialno = req.body.serialno;
 	const empid = req.session.adminInfo.empid;
 	
-	const sql_updateFinishReservation = "UPDATE Reservation SET finished = 1 WHERE serialno = ? and empid = ?";
+	const updateReservation = "UPDATE Reservation SET finished = 1 WHERE serialno = ? and empid = ?";
 	
-	connection.execute(sql_updateFinishReservation, [serialno, empid], (err, rows) => {
-		if(err) {
-			logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
-			next(err);
+	const selectReservation = "SELECT * FROM Reservation WHERE serialno = ?";
+	
+	connection.execute(selectReservation, [serialno], (err1, rows1) => {
+		if(err1) {
+			logger.error.info(`[${moment().format(logTimeFormat)}] ${err1}`);
+			next(err1);
 		}
 		else {
-			SatisfactionPush(serialno);
-			res.json({state: 'ok'});
-			logger.reservation.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${serialno}번 예약을 종결.`);
+			let typename = getTypeName(rows1[0].typeno);
+			
+			let printing = `[${serialno}번] [${rows1[0].date} ${rows1[0].starttime}시] ${typename}`;
+			
+			connection.execute(updateReservation, [serialno, empid], (err2, rows2) => {
+				if(err2) {
+					logger.error.info(`[${moment().format(logTimeFormat)}] ${err2}`);
+					next(err2);
+				}
+				else {
+					SatisfactionPush(serialno);
+					res.json({state: 'ok'});
+					logger.reservation.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${printing} 예약 종결.`);
+				}
+			});
 		}
-	})
+	});
 });
 
 router.post('/saveQuestion', isAdminLoggedIn, function(req, res, next) {
@@ -834,7 +796,7 @@ router.post('/saveQuestion', isAdminLoggedIn, function(req, res, next) {
 					else {
 						AnswerPush(sendNumber);
 						res.json({state: 'ok'});
-						logger.question.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${sendNumber}번 문의 답변을 등록.`);
+						logger.question.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 [${sendNumber}번] 문의 답변 등록.`);
 					}
 				});
 			}
@@ -848,42 +810,42 @@ router.get("/board/:type", isAdminLoggedIn, function(req, res, next) {
 	const sql_readBoard = "select * from HomeBoard where no = ?";
 	const sql_findFormTypes = "select typename from AskType";
 	
+	let type = decodeURIComponent(req.params.type);
 	let types = [];
-	let type = 0;
-	const paramType = decodeURIComponent(req.params.type);
 	
-	connection.execute(sql_findFormTypes, (err, rows) => {
-		if(err) {
-			logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
-			next(err);
-		}
-		else types=rows;
-	});
-	
-	connection.execute(sql_readBoard, [paramType], (err, rows) => {
-		if(err){
-			logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
-			next(err);
+	connection.execute(sql_findFormTypes, (err1, rows1) => {
+		if(err1) {
+			logger.error.info(`[${moment().format(logTimeFormat)}] ${err1}`);
+			next(err1);
 		}
 		else {
-			if(rows.length == 0) next(err);
-			else {
-				const strType = paramType === '1' ? '공지사항' : '이용안내';
-				
-				if(rows[0].content === '' || rows[0].content == null) {
-					rows[0].content = '';
-					res.render('adminEditForm', {result: rows[0].content, type: [paramType, strType], types: types});
+			types = rows1;
+			connection.execute(sql_readBoard, [type], (err2, rows2) => {
+				if(err2){
+					logger.error.info(`[${moment().format(logTimeFormat)}] ${err2}`);
+					next(err2);
 				}
-				else res.render('adminEditForm', {result: rows[0].content, type: [paramType,strType], types: types});
-			}
+				else {
+					if(rows2.length == 0) next(err2);
+					else {
+						const typename = parseInt(type) === 1 ? '공지사항' : '이용안내';
+
+						if(rows2[0].content === '' || rows2[0].content == null) {
+							rows2[0].content = '';
+							res.render('adminEditForm', {result: rows2[0].content, type: [type, typename], types: types});
+						}
+						else res.render('adminEditForm', {result: rows2[0].content, type: [type, typename], types: types});
+					}
+				}
+			});
 		}
-	})
+	});
 });
 
 router.post("/saveBoard/:type", isAdminLoggedIn, function(req, res, next) {
 	const sendAjax = req.body.sendAjax;
-	const paramType = decodeURIComponent(req.params.type);
-	const boardType = paramType === 1 ? '공지사항' : '이용안내';
+	const type = decodeURIComponent(req.params.type);
+	const typename = parseInt(type) === 1 ? '공지사항' : '이용안내';
 	
 	const updateBoard = "update HomeBoard set empid = ?, date = CURDATE(), content = ? where no = ?";
 	
@@ -899,14 +861,14 @@ router.post("/saveBoard/:type", isAdminLoggedIn, function(req, res, next) {
 		}
 	});
 	
-	connection.execute(updateBoard, [empId, secureXSSContent, paramType], (err, rows) => {
+	connection.execute(updateBoard, [empId, secureXSSContent, type], (err, rows) => {
 		if(err) {
 			logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 			next(err);
 		}
 		else {
 			res.json({state: 'ok'});
-			logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${boardType}을(를) 수정.`);
+			logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${typename} 수정.`);
 		}
 	});
 });
@@ -916,17 +878,17 @@ router.get("/form/:type", isAdminLoggedIn, function(req, res, next) {
 	
     const selectAskList = "select *, (select GROUP_CONCAT(choice) from ChoiceList where askno = a.askno order by choiceno) as choice from AskList a where typeno = ? AND a.use = 'Y'";
 	
-	const paramType = decodeURIComponent(req.params.type);
+	const type = decodeURIComponent(req.params.type);
 	
-	connection.execute(selectAskType, [paramType], (err1, rows1) => {
+	connection.execute(selectAskType, [type], (err1, rows1) => {
 		if(err1) {
 			logger.error.info(`[${moment().format(logTimeFormat)}] ${err1}`);
 			next(err1);
 		}
 		else {
 			if(rows1.length !== 0) {
-				if(paramType === '1' || paramType === '2' || paramType === '3') {
-					connection.execute(selectAskList, [paramType], (err2, rows2) => {
+				if(type === '1' || type === '2' || type === '3') {
+					connection.execute(selectAskList, [type], (err2, rows2) => {
 						if(err2) {
 							logger.error.info(`[${moment().format(logTimeFormat)}] ${err2}`);
 							next(err2);
@@ -943,7 +905,7 @@ router.post('/saveForm/:type', isAdminLoggedIn, function(req, res, next) {
 	
     const saveData = JSON.parse(req.body.saveData);
 	
-	const paramType = parseInt(req.params.type);
+	const type = parseInt(req.params.type);
 	
 	const selectAskList = "SELECT askno FROM AskList WHERE askno = ?";
 	
@@ -953,11 +915,11 @@ router.post('/saveForm/:type', isAdminLoggedIn, function(req, res, next) {
 	
 	const insertChoiceList = "INSERT INTO ChoiceList(askno, typeno, choice) VALUES ?";
 	
-	let type_name = "";
+	let typename = "";
 	
-	if(paramType === 1) type_name = "상담예약";
-	else if(paramType === 2) type_name = "심리검사";
-	else if(paramType === 3) type_name = "만족도조사";
+	if(type === 1) typename = "상담예약";
+	else if(type === 2) typename = "심리검사";
+	else if(type === 3) typename = "만족도조사";
 	
 	saveData.forEach(function(value, index) {
 		let values = [];
@@ -966,36 +928,36 @@ router.post('/saveForm/:type', isAdminLoggedIn, function(req, res, next) {
 		
 		connection.execute(selectAskList, [askno], (err1, result1) => {
 			if(err1) {
-				logger.error.info(`1[${moment().format(logTimeFormat)}] ${err1}`);
+				logger.error.info(`[${moment().format(logTimeFormat)}] ${err1}`);
 				next(err1);
 			}
 			else {
 				if(result1.length === 0) {
-					connection.execute(insertAskList, [paramType, parseInt(value.type), value.question], (err2, result2) => {
+					connection.execute(insertAskList, [type, parseInt(value.type), value.question], (err2, result2) => {
 						if(err2) {
-							logger.error.info(`2[${moment().format(logTimeFormat)}] ${err2}`);
+							logger.error.info(`[${moment().format(logTimeFormat)}] ${err2}`);
 							next(err2);
 						}
 						else {
 							if(parseInt(value.type) !== 3) {
 								value.choices.forEach(val => {
-									values.push([result2.insertId, paramType, val]);
+									values.push([result2.insertId, type, val]);
 								});
 								
 								connection.query(insertChoiceList, [values], (err3) => {
 									if(err3) {
-										logger.error.info(`3[${moment().format(logTimeFormat)}] ${err3}`);
+										logger.error.info(`[${moment().format(logTimeFormat)}] ${err3}`);
 										next(err3);
 									}
 									else if(index === saveData.length - 1) {
 										res.json({state: 'ok'});
-										logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${type_name} 질문을 수정.`);
+										logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${typename} 질문 수정.`);
 									}
 								});
 							}
 							else if(parseInt(value.type) === 3 && index === saveData.length - 1) {
 								res.json({state: 'ok'});
-								logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${type_name} 질문을 수정.`);
+								logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${typename} 질문 수정.`);
 							}
 						}
 					});
@@ -1004,22 +966,22 @@ router.post('/saveForm/:type', isAdminLoggedIn, function(req, res, next) {
 					if(parseInt(value.type) !== 3) {
 						connection.execute(deleteChoiceList, [result1[0].askno], (err2) => {
 							if(err2) {
-								logger.error.info(`4[${moment().format(logTimeFormat)}] ${err2}`);
+								logger.error.info(`[${moment().format(logTimeFormat)}] ${err2}`);
 								next(err2);
 							}
 							else {
 								value.choices.forEach(val => {
-									values.push([result1[0].askno, paramType, val]);
+									values.push([result1[0].askno, type, val]);
 								});
 								
 								connection.query(insertChoiceList, [values], (err3) => {
 									if(err3) {
-										logger.error.info(`5[${moment().format(logTimeFormat)}] ${err3}`);
+										logger.error.info(`[${moment().format(logTimeFormat)}] ${err3}`);
 										next(err3);
 									}
 									else if(index === saveData.length - 1) {
 										res.json({state: 'ok'});
-										logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${type_name} 질문을 수정.`);
+										logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${typename} 질문 수정.`);
 									}
 								});
 							}
@@ -1027,7 +989,7 @@ router.post('/saveForm/:type', isAdminLoggedIn, function(req, res, next) {
 					}
 					else if(parseInt(value.type) === 3 && index === saveData.length - 1) {
 						res.json({state: 'ok'});
-						logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${type_name} 질문을 수정.`);
+						logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${typename} 질문 수정.`);
 					}
 				}
 			}
@@ -1045,7 +1007,7 @@ router.post('/noUseAsk', isAdminLoggedIn, function(req, res, next) {
 			logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 			next(err);
 		}
-		else logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${askno}번 ${type_name} 질문을 삭제.`);
+		else logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 [${askno}번] ${type_name} 질문 삭제.`);
 	});
 });
 
@@ -1066,12 +1028,12 @@ router.get('/signUp', isAccessDenied, function(req, res, next) {
 });
 
 router.post('/signUp', isAccessDenied, (req, res, next) => {
-	const sql_addCounselor = "insert into Counselor(empid,emppwd,empname,positionno) values(?, ?, ?, ?)";
+	const sql_addCounselor = "insert into Counselor(empid, emppwd, empname, positionno) values(?, ?, ?, ?)";
 	const sql_checkEmpId = "select empid, Counselor.use isUse from Counselor where empid = ?";
 	
 	const empId = req.body.id.trim();
 	const empPwd = req.body.password.trim();
-	const isEmp = req.body.isEmp ? true : false;
+	const empCode = req.body.isEmp ? 1 : 2;
 	const empName = req.body.name.trim();
 	
 	connection.execute(sql_checkEmpId, [empId], (err, rows) => {
@@ -1087,27 +1049,20 @@ router.post('/signUp', isAccessDenied, (req, res, next) => {
 						next(err);
 					}
 					else {
-						if(isEmp) {
-							connection.execute(sql_addCounselor, [empId, hashPwd, empName, 1], (err, rows) => {
-								if(err) {
-									logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
-									next(err);
-								}
-							});
-							res.redirect('/admin');
-						}
-						else {
-							connection.execute(sql_addCounselor, [empId, hashPwd, empName, 2], (err, rows) => {
-								if(err) {
-									logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
-									next(err);
-								}
-							});
-							res.redirect('/admin');
-						}
+						connection.execute(sql_addCounselor, [empId, hashPwd, empName, empCode], (err, rows) => {
+                            if(err) {
+                                logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
+                                next(err);
+                            }
+                            else {
+                                res.redirect('/admin');
+
+                                logger.account.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 [${empId}] 계정 등록.`);
+                            }
+                        });
 					}
 				});
-				logger.account.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${empName}(${empId})님을 등록.`);
+				
 			}
 			else {
 				if(rows[0].isUse === 'Y') res.send("<script>alert('이미 존재하는 아이디입니다.'); window.location.href = '/admin/signUp';</script>");
@@ -1150,7 +1105,7 @@ router.post('/noUseSelfCheck', isAdminLoggedIn, (req, res, next) => {
 			logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 			next(err);
 		}
-		else logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${checkno}번 자가진단 질문을 삭제.`);
+		else logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 [${checkno}번] 자가진단 질문 삭제.`);
 	});
 });
 
@@ -1174,7 +1129,7 @@ router.post('/saveSelfCheckList', isAdminLoggedIn, (req, res, next) => {
 			}
 			else {
 				res.json({state: 'ok'});
-				logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 자가진단 질문을 수정.`);
+				logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 자가진단 질문 수정.`);
 			}
 		});
 	}
@@ -1185,18 +1140,23 @@ router.post('/updateCounselor', isAccessDenied, (req, res, next) => {
 	const updateName = req.body.updateEmpName;
 	const updatePosition = req.body.position;
 	
-	const sql_updateCounselor = "update Counselor set empname = ?, positionno = ? where empid = ?";
+	const updateCounselor = "update Counselor set empname = ?, positionno = ? where empid = ?";
 	
-	connection.execute(sql_updateCounselor, [updateName, updatePosition, updateId], (err, rows) => {
-		if(err) {
-			logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
-			next(err);
-		}
-		else {
-			res.send("<script>window.location.href = '/admin/settings';</script>");
-			logger.account.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${updateName}(${updateId})님을 수정.`);
-		}
-	});
+	if(updateId == "admin") {
+		res.send("<script>alert('관리자 계정은 수정할 수 없습니다.'); window.location.href = '/admin/settings';</script>");
+	}
+	else {
+		connection.execute(updateCounselor, [updateName, updatePosition, updateId], (err, rows) => {
+			if(err) {
+				logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
+				next(err);
+			}
+			else {
+				res.send("<script>window.location.href = '/admin/settings';</script>");
+				logger.account.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 [${updateId}] 계정 수정.`);
+			}
+		});
+	}
 });
 
 router.post('/deleteCounselor', isAccessDenied, (req, res, next) => {
@@ -1205,51 +1165,59 @@ router.post('/deleteCounselor', isAccessDenied, (req, res, next) => {
 	
 	const updateAccountUse = "update Counselor set Counselor.use = 'N' where empid = ?";
 	
-	connection.execute(updateAccountUse, [delEmpId], (err, rows) => {
-		if(err) {
-			logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
-			next(err);
-		}
-		else {
-			res.json('ok');
-			logger.account.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${delEmpName}(${delEmpId})님을 삭제.`);
-		}
-	});
+	if(delEmpId == "admin") {
+		res.json('no');
+	}
+	else {
+		connection.execute(updateAccountUse, [delEmpId], (err, rows) => {
+			if(err) {
+				logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
+				next(err);
+			}
+			else {
+				res.json('ok');
+				logger.account.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 [${delEmpId}] 계정 삭제.`);
+			}
+		});
+	}
 });
 
 router.get('/changePassword', isAdminLoggedIn, (req, res, next) => {
 	res.render('adminChangePwd');
 });
 
-router.post('/updatePassword', isAdminLoggedIn, (req, res, next) => {
-	const sql_checkPassword = "select emppwd from Counselor where empid = ?";
-	const sql_updatePassword = "update Counselor set emppwd = ? where empid = ?";
+router.post('/changePassword', isAdminLoggedIn, (req, res, next) => {
+	const selectPassword = "select emppwd from Counselor where empid = ?";
+	const updatePassword = "update Counselor set emppwd = ? where empid = ?";
 	
 	const empid = req.session.adminInfo.empid;
-	const empCurrentPwd = req.body.currentPw.trim();
-	const empUpdatePwd = req.body.updatePw.trim();
+	const currentPassword = req.body.currentPw.trim();
+	const newPassword = req.body.updatePw.trim();
 	
-	connection.execute(sql_checkPassword, [empid], (err, rows) => {
+	connection.execute(selectPassword, [empid], (err, rows) => {
 		if(err) {
 			logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 			next(err);
 		}
 		else {
-			bcrypt.compare(empCurrentPwd, rows[0].emppwd).then(function(result) {
-				if(result){
-					bcrypt.hash(empUpdatePwd, 12, function(err, hashPwd) {
+			bcrypt.compare(currentPassword, rows[0].emppwd).then(function(result) {
+				if(result) {
+					bcrypt.hash(newPassword, 12, function(err, encryptPassword) {
 						if(err) {
 							logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 							next(err);
 						}
 						else {
-							connection.execute(sql_updatePassword, [hashPwd, empid], (err, rows) => {
+							connection.execute(updatePassword, [encryptPassword, empid], (err) => {
 								if(err) {
 									logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 									next(err);
 								}
+								else {
+									res.send("<script>alert('패스워드가 정상적으로 변경되었습니다. \\n다시 로그인을 부탁드립니다.'); window.location.href = '/admin/logout';</script>");
+									logger.account.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 패스워드 수정.`);
+								}
 							});
-							res.send("<script>alert('패스워드가 정상적으로 변경되었습니다. \n재 로그인을 부탁드립니다.'); window.location.href = '/admin/logout';</script>");
 						}
 					});
 				}
@@ -1267,14 +1235,34 @@ router.post('/updateReservation', isAdminLoggedIn, (req, res, next) => {
 	
 	const updateReservation = "UPDATE Reservation SET typeno = ?, date = ?, starttime = ? WHERE serialno = ?";
 	
-	connection.execute(updateReservation, [updateType, updateDate, updateTime, updateNo], (err, rows) => {
-		if(err) {
-			logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
-			next(err);
+	const selectReservation = "SELECT * FROM Reservation WHERE serialno = ?";
+	
+	connection.execute(selectReservation, [updateNo], (err1, rows1) => {
+		if(err1) {
+			logger.error.info(`[${moment().format(logTimeFormat)}] ${err1}`);
+			next(err1);
 		}
 		else {
-			res.json('success');
-			logger.reservation.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${updateNo}번 예약을 수정.`);
+			let beforeTypeName = getTypeName(rows1[0].typeno);
+			
+			let afterTypeName = getTypeName(updateType);
+			
+			connection.execute(updateReservation, [updateType, updateDate, updateTime, updateNo], (err2, rows2) => {
+				if(err2) {
+					logger.error.info(`[${moment().format(logTimeFormat)}] ${err2}`);
+					next(err2);
+				}
+				else {
+					res.json('success');
+					
+					let before = `[${updateNo}번] [${rows1[0].date} ${rows1[0].starttime}시] ${beforeTypeName}`;
+					
+					let after = `[${updateDate} ${updateTime}시] ${afterTypeName}`;
+					
+					logger.reservation
+						.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${before} 예약을 ${after} 예약으로 수정.`);
+				}
+			});
 		}
 	});
 });
@@ -1292,7 +1280,8 @@ router.get('/getMyReservationHistory', isAdminLoggedIn, (req, res, next) => {
 	const PsyTestWorksheet = workbook.addWorksheet("심리검사 내역");
 	const ReservationWorksheet = workbook.addWorksheet("상담 내역");
 	
-	const sql_selectPsyTestLog="SELECT simple.stuno, simple.stuname, user.major, user.phonenum, simple.gender, simple.birth, simple.email, simple.date, GROUP_CONCAT(psyTList.testname SEPARATOR ', ') AS testname " + 
+	const sql_selectPsyTestLog="SELECT simple.stuno, simple.stuname, user.major, user.phonenum, simple.gender, " +
+		  "simple.birth, simple.email, simple.date, GROUP_CONCAT(psyTList.testname SEPARATOR ', ') AS testname " + 
 		  "FROM SimpleApplyForm simple JOIN PsyTest psyT ON simple.serialno = psyT.serialno JOIN PsyTestList psyTList ON psyT.testno = psyTList.testno " + 
 		  "JOIN User user ON simple.stuno = user.stuno GROUP BY simple.serialno ORDER BY simple.date;";
 	
@@ -1923,5 +1912,28 @@ router.get('/getSimpleApplyFormPDF/:serialNo', isAdminLoggedIn, (req, res, next)
 		}
 	});
 });
+
+function getTypeName(typeno) {
+	let typename;
+
+	switch(parseInt(typeno)) {
+		case 1:
+			typename = "채팅상담"
+			break;
+		case 2:
+			typename = "화상상담"
+			break;
+		case 3:
+			typename = "전화상담"
+			break;
+		case 4:
+			typename = "대면상담"
+			break;
+		default:
+			typename = "심리검사"
+			break;
+	}
+	return typename;
+}
 
 module.exports = router;

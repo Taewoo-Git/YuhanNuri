@@ -167,7 +167,7 @@
 															<button type="button" class="btn btn-secondary ml-1" style="pointer-events: none;" disabled>삭제</button>
 															<% }else { %>
 															<button type="button" class="btn btn-success" data-toggle="modal" data-target="#updateModal"
-																	onClick="giveInformation('<%=v.empname%>','<%=v.positionno%>','<%=v.empid%>')">수정</button>
+																	onClick="giveInformation('<%=v.empname%>', '<%=v.positionno%>', '<%=v.empid%>')">수정</button>
 															<button type="button" class="btn btn-danger ml-1" data-toggle="modal" data-target="#deleteModal"
 																	onClick="checkDelete('<%=v.empid%>', '<%=v.empname%>')">삭제</button>
 															<% } %>
@@ -191,11 +191,11 @@
     </div>
     <script src="/js/coreui.bundle.min.js"></script>
     <script>
-		let checkId="";
-		let checkName="";
+		let checkId = "";
+		let checkName = "";
 		
-		const setChoiceType=(chType)=>{
-			choiceType=chType;
+		const setChoiceType = (chType) => {
+			choiceType = chType;
 		}
 		
 		function exitModal(e){
@@ -203,39 +203,41 @@
 		}
 		
 		function checkDelete(id, name){
-			checkId=id;
-			checkName=name;
+			checkId = id;
+			checkName = name;
 			$('#deleteError').text('');
-			document.querySelector('#delete-type').value='';
+			document.querySelector('#delete-type').value = '';
 		}
 		
-		function deleteCheck(deleteType){
-			const deleteItem=$(deleteType).val();
+		function deleteCheck(deleteType) {
+			const deleteItem = $(deleteType).val();
 			
-			if(deleteItem===checkId){
+			if(deleteItem === checkId){
 				$.ajax({
-					type:'POST',
-					dataType:'json',
-					url:'./deleteCounselor',
-					async:true,
-					data:{"deleteId": checkId, "deleteName": checkName},
-					success:function(data){
-						if(data==='ok'){
+					type: 'POST',
+					dataType: 'json',
+					url: './deleteCounselor',
+					async: true,
+					data: {"deleteId": checkId, "deleteName": checkName},
+					success: function(data) {
+						if(data === 'ok') {
 							window.location.reload();
+						}
+						else if(data === 'no') {
+							alert("관리자 계정은 삭제할 수 없습니다.");
 						}
 					}
 				});
-				item="";
 			}else {
-				$('#deleteError').css('color','#f05454');
+				$('#deleteError').css('color', '#f05454');
 				$('#deleteError').text('아이디가 일치하지 않습니다.');
 			}
 		}
 		
-		function giveInformation(name,position,id){
-			document.querySelector('#update-name').value=name;
+		function giveInformation(name, position, id) {
+			document.querySelector('#update-name').value = name;
 			$("#positionList").val(position).prop("selected", true);
-			document.querySelector('#empIdToken').value=id;
+			document.querySelector('#empIdToken').value = id;
 		}
     </script>
 </body>

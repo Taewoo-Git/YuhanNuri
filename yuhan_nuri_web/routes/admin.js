@@ -901,13 +901,15 @@ router.get("/form/:type", isAdminLoggedIn, function(req, res, next) {
 	});
 });
 
-router.post('/saveForm/:type', isAdminLoggedIn, function(req, res, next) {
-	
+router.post('/saveForm/:type', isAdminLoggedIn, async function(req, res, next) {
     const saveData = JSON.parse(req.body.saveData);
 	
-	const type = parseInt(req.params.type);
+	if(saveData.length === 0) {
+		res.json({state: 'ok'});
+		return;
+	}
 	
-	const selectAskList = "SELECT askno FROM AskList WHERE askno = ?";
+	const type = parseInt(req.params.type);
 	
 	const insertAskList = "INSERT INTO AskList(typeno, choicetypeno, ask, AskList.use) VALUES(?, ?, ?, 'Y')";
 	
@@ -921,81 +923,81 @@ router.post('/saveForm/:type', isAdminLoggedIn, function(req, res, next) {
 	else if(type === 2) typename = "심리검사";
 	else if(type === 3) typename = "만족도조사";
 	
-	saveData.forEach(function(value, index) {
+	saveData.forEach(async function(value, index) {
 		let values = [];
-		
-		const askno = parseInt(value.id.split('card_id_')[1]);
-		
-		connection.execute(selectAskList, [askno], (err1, result1) => {
-			if(err1) {
-				logger.error.info(`[${moment().format(logTimeFormat)}] ${err1}`);
-				next(err1);
-			}
-			else {
-				if(result1.length === 0) {
-					connection.execute(insertAskList, [type, parseInt(value.type), value.question], (err2, result2) => {
-						if(err2) {
-							logger.error.info(`[${moment().format(logTimeFormat)}] ${err2}`);
-							next(err2);
+		await saveFormIterator(parseInt(value.id.split('card_id_')[1]))
+		.then((result) => {
+			return new Promise(async function(resolve, reject) {
+				if(result.isNew) {
+					await connection.execute(insertAskList, [type, parseInt(value.type), value.question], (err, row) => {
+						if(err) {
+							logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
+							next(err);
 						}
-						else {
-							if(parseInt(value.type) !== 3) {
-								value.choices.forEach(val => {
-									values.push([result2.insertId, type, val]);
-								});
-								
-								connection.query(insertChoiceList, [values], (err3) => {
-									if(err3) {
-										logger.error.info(`[${moment().format(logTimeFormat)}] ${err3}`);
-										next(err3);
-									}
-									else if(index === saveData.length - 1) {
-										res.json({state: 'ok'});
-										logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${typename} 질문 수정.`);
-									}
-								});
-							}
-							else if(parseInt(value.type) === 3 && index === saveData.length - 1) {
-								res.json({state: 'ok'});
-								logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${typename} 질문 수정.`);
-							}
-						}
+						else resolve(row.insertId);
 					});
 				}
-				else { // 중복
-					if(parseInt(value.type) !== 3) {
-						connection.execute(deleteChoiceList, [result1[0].askno], (err2) => {
-							if(err2) {
-								logger.error.info(`[${moment().format(logTimeFormat)}] ${err2}`);
-								next(err2);
-							}
-							else {
-								value.choices.forEach(val => {
-									values.push([result1[0].askno, type, val]);
-								});
-								
-								connection.query(insertChoiceList, [values], (err3) => {
-									if(err3) {
-										logger.error.info(`[${moment().format(logTimeFormat)}] ${err3}`);
-										next(err3);
-									}
-									else if(index === saveData.length - 1) {
-										res.json({state: 'ok'});
-										logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${typename} 질문 수정.`);
-									}
-								});
-							}
-						});
+				else {
+					await connection.execute(deleteChoiceList, [result.id], (err) => {
+						if(err) {
+							logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
+							next(err);
+						}
+						else resolve(result.id);
+					});
+				}
+			});
+		})
+		.then((num) => {
+			if(parseInt(value.type) !== 3) {
+				value.choices.forEach(val => {
+					values.push([num, type, val]);
+				});
+
+				connection.query(insertChoiceList, [values], (err) => {
+					if(err) {
+						logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
+						next(err);
 					}
-					else if(parseInt(value.type) === 3 && index === saveData.length - 1) {
+					else if(index === saveData.length - 1) {
 						res.json({state: 'ok'});
 						logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${typename} 질문 수정.`);
 					}
-				}
+				});
 			}
+			else if(parseInt(value.type) === 3 && index === saveData.length - 1) { // 서술형
+				res.json({state: 'ok'});
+				logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${typename} 질문 수정.`);
+			}
+		})
+		.catch((err) => {
+			next(err);
 		});
 	});
 });
+
+function saveFormIterator(asknum) {
+	const selectAskList = "SELECT askno FROM AskList WHERE askno = ?";
+	return new Promise(function(resolve, reject) {
+		connection.execute(selectAskList, [asknum], async (err, result) => {
+			if(err) {
+				logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
+				reject(err);
+			}
+			else if(result.length === 0) {
+				resolve({
+					isNew: true,
+				});
+			}
+			else {
+				resolve({
+					isNew: false,
+					id: result[0].askno
+				});
+			}
+		});
+    });
+}
 
 router.post('/noUseAsk', isAdminLoggedIn, function(req, res, next) {
 	let askno = req.body.askno;

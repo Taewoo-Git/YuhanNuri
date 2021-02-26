@@ -313,6 +313,7 @@
 					`);
 					
 					$('#closeChatBtn').click(function(e) {
+						isProgress = false;
 						socket.emit('finish');
 						location.reload(true);
 					});

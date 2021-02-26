@@ -119,8 +119,12 @@ app.get('/', function (req, res) {
 	else res.render('login');
 });
 
-app.get('/app', function(req,res){
+app.get('/app', function(req, res) {
 	res.download('./public/res/app/YuhanNuri.apk');
+});
+
+app.get('/ios', function(req, res) {
+	res.send("<script>window.location.assign('itms-services://?action=download-manifest&url=https://counsel.yuhan.ac.kr/res/app/manifest.plist')</script>");
 });
 
 app.use((req, res, next) => {

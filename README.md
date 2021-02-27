@@ -1,73 +1,20 @@
 # YuhanNuri
 Yuhan University Psychotherapy Application
 
-### 2020.08.12 ~ 2020.08.19
-* 개발 환경 구축 ✔
-* 데이터베이스 임시 설계 ✔
-* WebView 및 Notification 구현 (Flutter) ✔
-* 예약 시스템 구현
-* 로그인 기능 구현 ✔
+## MOBILE
+|<img src="https://user-images.githubusercontent.com/59400030/109376806-56555980-790a-11eb-8f97-9c575163d61c.jpg"/>|<img src="https://user-images.githubusercontent.com/59400030/109376805-55bcc300-790a-11eb-80d2-4ef59b661516.jpg"/>|<img src="https://user-images.githubusercontent.com/59400030/109376804-55242c80-790a-11eb-840a-25aa74220f98.jpg"/>|<img src="https://user-images.githubusercontent.com/59400030/109376803-548b9600-790a-11eb-9b32-5e81dabec7ea.jpg"/>|
+|-|-|-|-|
+|<img src="https://user-images.githubusercontent.com/59400030/109376801-53f2ff80-790a-11eb-895b-6d6068aab8ea.jpg"/>|<img src="https://user-images.githubusercontent.com/59400030/109376800-53f2ff80-790a-11eb-91c9-03137d7c142f.jpg"/>|<img src="https://user-images.githubusercontent.com/59400030/109376799-535a6900-790a-11eb-86e7-657cb683666b.jpg"/>|<img src="https://user-images.githubusercontent.com/59400030/109376798-52c1d280-790a-11eb-9505-57e971633c1c.jpg"/>|
+|<img src="https://user-images.githubusercontent.com/59400030/109376797-52293c00-790a-11eb-8133-ef446dd1fc3b.jpg"/>|<img src="https://user-images.githubusercontent.com/59400030/109376796-52293c00-790a-11eb-81e0-e9fc9312c144.jpg"/>|<img src="https://user-images.githubusercontent.com/59400030/109376795-5190a580-790a-11eb-9b43-36cb65329149.jpg"/>|<img src="https://user-images.githubusercontent.com/59400030/109376793-50f80f00-790a-11eb-95d8-cbb0ae1d955b.jpg"/>|
+|<img src="https://user-images.githubusercontent.com/59400030/109376791-50f80f00-790a-11eb-9a54-5fb065418752.jpg"/>|<img src="https://user-images.githubusercontent.com/59400030/109377737-91f32200-7910-11eb-897e-3a1e92829fc0.jpg"/>|<img src="https://user-images.githubusercontent.com/59400030/109376789-4f2e4b80-790a-11eb-887a-5c5a1267a8f4.jpg"/>|<img src="https://user-images.githubusercontent.com/59400030/109376788-4f2e4b80-790a-11eb-9ad3-34c8c965ddbd.jpg"/>|
+|<img src="https://user-images.githubusercontent.com/59400030/109388098-5a07d100-7948-11eb-8c8e-3f7dd9a0d5ac.jpg"/>|<img src="https://user-images.githubusercontent.com/59400030/109377684-4476b500-7910-11eb-8098-f0a3fe8c7a15.jpg"/>|<img src="https://user-images.githubusercontent.com/59400030/109376781-4d648800-790a-11eb-90a4-40855e2ca35a.jpg"/>|<img src="https://user-images.githubusercontent.com/59400030/109376777-4b9ac480-790a-11eb-8449-b506770333d2.jpg"/>|
 
-### 2020.08.19 ~ 2020.08.26
-* 예약 시스템 구현
-* 로그인 세션 이슈 해결 ✔
-* WebView 내의 데이터 가져오기 (Flutter)
-* Notification 백그라운드 처리 (Flutter)
-* Socket.IO를 통한 채팅 기능 구현 ✔
-* Node.JS 라우팅 처리를 통한 코드 분할 ✔
-
-### 2020.08.26 ~ 2020.09.02
-* 예약 시스템 상세화(사용자 및 관리자)
-* WebView 내의 데이터 가져오기 (Flutter) ⛔
-* Notification 백그라운드 처리 (Flutter) ⛔
-* 텍스트 박스 클릭 시 WebView 자동 스크롤 (Flutter) ✔
-* 클라이언트 자동 로그인 쿠키 적용 ✔
-
-### 2020.09.02 ~ 2020.09.09
-* 예약 시스템, 관리자 부분 논리적 오류 해결 ⛔
-* 예약 시스템, 사용자 부분 임시 프론트엔드 적용 및 기능 상세 구현
-* 신청서 관련 데이테베이스 ERD 추가 작성 ✔
-* 모바일에서 로그인 레이아웃 적용 및 기능 구현 (Flutter) ✔
-* WebView 내의 쿠키 가져오기 및 설정하기 (Flutter) ✔
-
-### 2020.09.09 ~ 2020.09.16
-* 예약 시스템, 관리자 부분 심리검사 질문 작성 폼 구현 및 DB 구축
-* 예약 시스템, 사용자 부분 개인정보 제공 동의 및 심리검사 답변 작성 폼 구현
-* 모바일 프로세스 종료되어도 특정 변수 유지하기 (Flutter) ✔
-
-### 2020.09.16 ~ 2020.09.27
-* 예약 시스템, 관리자 부분 심리검사 질문 작성 폼 구현 및 DB 구축
-* 예약 시스템, 사용자 부분 개인정보 제공 동의 및 심리검사 답변 작성 폼 구현
-* WebView에서 가져온 쿠키 기간 설정 (Flutter) ✔
-* WebView 접근 시 쿠키 보내기 (Flutter) ✔
-
-### 2020.09.27 ~ 2020.10.08
-* 예약 시스템, 관리자 부분 심리검사 질문 작성 폼 구현 및 DB 구축 ✔
-* 예약 시스템, 사용자 부분 개인정보 제공 동의 및 심리검사 답변 작성 폼 구현 ⛔
-* WebView 뒤로가기 처리 (Flutter) ✔
-* WebView에서 텍스트박스 클릭 시 발생하는 스크롤 이슈 해결 (Flutter) ✔
-* WebView 패키지 Flutter InAppWebView로 변경 (Flutter) ✔
-
-### 2020.10.08 ~ 2020.10.21
-* 채팅 시스템 상세화 및 채팅 룸 설정 ✔
-* WebView 텍스트 박스 선택 시 발생하는 뒤로가기 이슈 해결 (Flutter)
-* FCM 개발 (Flutter)
-
-### 2020.10.21 ~ 2020.11.01
-* 홈, 문의 메뉴 마무리 ✔
-* WebView 텍스트 박스 선택 시 발생하는 뒤로가기 이슈 해결 (Flutter) ✔
-* FCM 개발 (Flutter) ✔
-
-### 2020.11.01 ~ 2020.11.09
-* 예약, 마이페이지 메뉴 마무리
-* FCM 적용 및 마무리 (Flutter) ✔
-
-### 2020.11.09 ~ 2020.11.17
-* 홈, 예약, 문의, 마이페이지 메뉴 마무리 ✔
-* 데이테베이스 구조 변경 ✔
-* DAO를 통한 비즈니스 로직 분리 ⛔
-
-### 2020.11.17 ~
-* 프로토타입 안내
-* 요구사항 반영
-* 서버 이관 작업
+## WEB
+|<img src="https://user-images.githubusercontent.com/59400030/109377783-e6969d00-7910-11eb-8d8c-338666d2b0ce.png"/>|<img src="https://user-images.githubusercontent.com/59400030/109377784-e8606080-7910-11eb-97ba-b288e66a88e6.png"/>|
+|-|-|
+|<img src="https://user-images.githubusercontent.com/59400030/109377786-e9918d80-7910-11eb-940c-214a0aafa99c.png"/>|<img src="https://user-images.githubusercontent.com/59400030/109377787-ea2a2400-7910-11eb-8b8e-0e0fcd1bc73b.png"/>|
+|<img src="https://user-images.githubusercontent.com/59400030/109377788-eac2ba80-7910-11eb-9143-87da3f3c2d25.png"/>|<img src="https://user-images.githubusercontent.com/59400030/109377790-eb5b5100-7910-11eb-8eb5-806ffb20fc14.png"/>|
+|<img src="https://user-images.githubusercontent.com/59400030/109377792-ebf3e780-7910-11eb-8b10-c4bf043c2c6d.png"/>|<img src="https://user-images.githubusercontent.com/59400030/109377794-ec8c7e00-7910-11eb-9d0e-f804a4f14580.png"/>|
+|<img src="https://user-images.githubusercontent.com/59400030/109377795-ec8c7e00-7910-11eb-8663-94165933e795.png"/>|<img src="https://user-images.githubusercontent.com/59400030/109377796-ed251480-7910-11eb-9fff-f42d2bef23f2.png"/>|
+|<img src="https://user-images.githubusercontent.com/59400030/109377797-edbdab00-7910-11eb-9883-1223ea8f166e.png"/>|<img src="https://user-images.githubusercontent.com/59400030/109377798-ee564180-7910-11eb-954f-fa8281e27455.png"/>|
+|<img src="https://user-images.githubusercontent.com/59400030/109377799-eeeed800-7910-11eb-9153-6f7e4e583861.png"/>|<img src="https://user-images.githubusercontent.com/59400030/109377800-eeeed800-7910-11eb-9336-399b93cfa076.png"/>|

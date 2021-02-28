@@ -1,5 +1,5 @@
 name: yuhan_nuri_app
-description: A new Flutter project.
+description: Yuhan University Psychotherapy Application.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
@@ -40,10 +40,10 @@ dev_dependencies:
   introduction_screen: ^1.0.7
   flutter_inappwebview: ^4.0.0+4
   progress_dialog: ^1.2.4
-  oktoast : ^ 2.3.2
+  oktoast : ^2.3.2
   vibration: ^1.4.0
-  url_launcher: 5.4.11
-  flutter_phoenix: "^0.1.0"
+  url_launcher: ^5.7.10
+  flutter_phoenix: ^0.1.0
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

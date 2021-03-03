@@ -143,7 +143,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                       IconButton(
                         icon: Icon(Icons.logout),
                         onPressed: () {
-                          logoutDialog(context);
+                          logoutDialog();
                         },
                       )
                     ],
@@ -183,7 +183,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                           callback: (args) async {
                             String command = args[0].toString();
                             if (command == "alert") {
-                              webAlertDialog(context, args[1].toString());
+                              webAlertDialog(args[1].toString());
                             } else if (command == "replaceHome") {
                               Future.delayed(Duration(milliseconds: 300), () {
                                 navBarState = globalKey.currentState;
@@ -195,10 +195,10 @@ class YuhanNuriState extends State<YuhanNuri> {
                             } else if (command == "reLogin") {
                               String myToken = await fcm.getToken();
                               if (args[1].toString() != myToken) {
-                                reLoginDialog(context);
+                                reLoginDialog();
                               }
                             } else if (command == "openInput") {
-                              openInputDialog(context, args[1].toString());
+                              openInputDialog(args[1].toString());
                             }
                           });
                     },
@@ -259,6 +259,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                           setState(() {
                             appBarText = 'MY';
                           });
+                          chattingDialog();
                           break;
                         default:
                           break;
@@ -281,46 +282,13 @@ class YuhanNuriState extends State<YuhanNuri> {
                     }
                     return Future.value(true);
                   }
-                  bool isChatting = await webViewController.evaluateJavascript(
-                      source:
-                          'document.getElementById("chattingCard") != null ? true : false;');
-                  if (isChatting) {
-                    Vibration.vibrate();
-                    showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            content: Text('현재 채팅 중입니다.\n홈 화면으로 돌아가시겠습니까?'),
-                            actions: <Widget>[
-                              RaisedButton(
-                                child: Text('예'),
-                                color: Color(0xFF0275D7),
-                                elevation: 5,
-                                onPressed: () {
-                                  Navigator.pop(context, "OK");
-                                  navBarState = globalKey.currentState;
-                                  navBarState.setPage(0);
-                                },
-                              ),
-                              RaisedButton(
-                                child: Text('아니오'),
-                                elevation: 5,
-                                onPressed: () {
-                                  Navigator.pop(context, "Cancel");
-                                },
-                              ),
-                            ],
-                          );
-                        });
-                  } else {
-                    navBarState = globalKey.currentState;
-                    navBarState.setPage(0);
-                  }
+                  navBarState = globalKey.currentState;
+                  navBarState.setPage(0);
                   return null;
                 })));
   }
 
-  openInputDialog(BuildContext context, String strTextInfo) {
+  void openInputDialog(String strTextInfo) {
     Map<String, dynamic> objTextInfo = jsonDecode(strTextInfo);
 
     String txtTitle = objTextInfo['title'].toString();
@@ -374,34 +342,97 @@ class YuhanNuriState extends State<YuhanNuri> {
     );
   }
 
-  tempDialog(BuildContext context) {
-    showDialog(
-      barrierColor: Colors.white.withOpacity(0),
-      //barrierDismissible: false,
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("테스트"),
-          insetPadding: EdgeInsets.all(0),
-          content: Stack(
-            overflow: Overflow.visible,
-            children: <Widget>[
-              Container(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height,
-                child: RaisedButton(
-                  child: Text("Button"),
-                  onPressed: () {},
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
+  void chattingDialog() {
+    List<Widget> msg = [];
+    TextEditingController _controller = TextEditingController();
+    bool isInput = false;
+
+    showGeneralDialog(
+        transitionBuilder: (context, a1, a2, widget) {
+          final curvedValue = Curves.easeInOutBack.transform(a1.value) - 1.0;
+          return Transform(
+            transform: Matrix4.translationValues(0.0, curvedValue * -200, 0.0),
+            child: Opacity(
+              opacity: a1.value,
+              child: StatefulBuilder(builder: (context, StateSetter _setState) {
+                return new WillPopScope(
+                    onWillPop: closeChatting,
+                    child: Scaffold(
+                        appBar: AppBar(
+                          backgroundColor: Color.fromARGB(255, 0, 115, 215),
+                          toolbarHeight: 50,
+                          title: new Text("채팅 상담",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 20)),
+                        ),
+                        body: Column(
+                          children: <Widget>[
+                            Column(
+                              children: msg,
+                            ),
+                            Expanded(
+                                child: Container(
+                                    alignment: Alignment.bottomCenter,
+                                    child: Row(
+                                        mainAxisSize: MainAxisSize.max,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          Flexible(
+                                              child: new TextField(
+                                            controller: _controller,
+                                            decoration: InputDecoration(
+                                                hintText: "메시지 전송...",
+                                                border: InputBorder.none,
+                                                focusedBorder: InputBorder.none,
+                                                enabledBorder: InputBorder.none,
+                                                errorBorder: InputBorder.none,
+                                                disabledBorder:
+                                                    InputBorder.none,
+                                                fillColor: Color(0xFFEAEAEA),
+                                                filled: true),
+                                            onChanged: (value) {
+                                              _setState(() {
+                                                if (value.isEmpty)
+                                                  isInput = false;
+                                                else
+                                                  isInput = true;
+                                              });
+                                            },
+                                          )),
+                                          Container(
+                                              color: Color(0xFFEAEAEA),
+                                              child: IconButton(
+                                                  icon: Icon(Icons.send),
+                                                  color: Color.fromARGB(
+                                                      255, 0, 115, 215),
+                                                  onPressed: isInput
+                                                      ? () => _setState(() {
+                                                            msg.add(sendMessage(
+                                                                _controller
+                                                                    .value
+                                                                    .text));
+                                                            _controller.clear();
+                                                            isInput = false;
+                                                          })
+                                                      : null)),
+                                        ])))
+                          ],
+                        )));
+              }),
+            ),
+          );
+        },
+        transitionDuration: Duration(milliseconds: 350),
+        context: context,
+        barrierDismissible: false,
+        barrierColor: Colors.black.withOpacity(0),
+        pageBuilder: (context, animation1, animation2) {
+          return null;
+        });
   }
 
-  logoutDialog(BuildContext context) {
+  void logoutDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -435,7 +466,7 @@ class YuhanNuriState extends State<YuhanNuri> {
     );
   }
 
-  reLoginDialog(BuildContext context) {
+  void reLoginDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -460,7 +491,7 @@ class YuhanNuriState extends State<YuhanNuri> {
     );
   }
 
-  webAlertDialog(BuildContext context, String message) {
+  void webAlertDialog(String message) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -480,5 +511,128 @@ class YuhanNuriState extends State<YuhanNuri> {
         );
       },
     );
+  }
+
+  Row sendMessage(String msg) {
+    DateTime now = DateTime.now();
+    String nowHour = now.hour.toString();
+    String nowMinute = now.minute.toString();
+    if (nowHour.length == 1) nowHour = "0" + nowHour;
+    if (nowMinute.length == 1) nowMinute = "0" + nowMinute;
+    return new Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+      Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+        Container(
+            margin: EdgeInsets.only(top: 15, right: 15),
+            child: Text(
+              "나",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            )),
+        Row(children: [
+          Container(
+            height: 50,
+            alignment: Alignment.bottomRight,
+            padding: EdgeInsets.only(right: 5),
+            child: Text(
+              nowHour + ":" + nowMinute,
+              style: TextStyle(color: Color.fromARGB(130, 0, 0, 0)),
+            ),
+          ),
+          Container(
+              margin: EdgeInsets.only(top: 3, right: 10),
+              decoration: new BoxDecoration(
+                  color: Color.fromARGB(255, 0, 115, 215),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(10.0),
+                    topRight: Radius.circular(10.0),
+                    bottomLeft: Radius.circular(10.0),
+                    bottomRight: Radius.circular(10.0),
+                  )),
+              alignment: Alignment.center,
+              height: 50,
+              padding: EdgeInsets.all(10),
+              child: new Text(msg,
+                  style: TextStyle(color: Colors.white, fontSize: 15))),
+        ])
+      ])
+    ]);
+  }
+
+  /*Row recvMessage(String msg) {
+    DateTime now = DateTime.now();
+    String nowHour = now.hour.toString();
+    String nowMinute = now.minute.toString();
+    if (nowHour.length == 1) nowHour = "0" + nowHour;
+    if (nowMinute.length == 1) nowMinute = "0" + nowMinute;
+    return new Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+      Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+        Container(
+            margin: EdgeInsets.only(top: 15, right: 15),
+            child: Text(
+              "나",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            )),
+        Row(children: [
+          Container(
+            height: 50,
+            alignment: Alignment.bottomRight,
+            padding: EdgeInsets.only(right: 5),
+            child: Text(
+              nowHour + ":" + nowMinute,
+              style: TextStyle(color: Color.fromARGB(130, 0, 0, 0)),
+            ),
+          ),
+          Container(
+              margin: EdgeInsets.only(top: 3, right: 10),
+              decoration: new BoxDecoration(
+                  color: Color.fromARGB(255, 0, 115, 215),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(10.0),
+                    topRight: Radius.circular(10.0),
+                    bottomLeft: Radius.circular(10.0),
+                    bottomRight: Radius.circular(10.0),
+                  )),
+              alignment: Alignment.center,
+              height: 50,
+              padding: EdgeInsets.all(10),
+              child: new Text(msg,
+                  style: TextStyle(color: Colors.white, fontSize: 15))),
+        ])
+      ])
+    ]);
+  }*/
+
+  Future<bool> closeChatting() {
+    Vibration.vibrate();
+    return showDialog(
+        context: context,
+        builder: (context) {
+          FocusScope.of(context).unfocus();
+          return AlertDialog(
+            content: Text('채팅 상담을 종료하시겠습니까?'),
+            actions: <Widget>[
+              RaisedButton(
+                child: Text('예'),
+                color: Color(0xFF0275D7),
+                elevation: 5,
+                onPressed: () {
+                  Navigator.pop(context, true);
+                },
+              ),
+              RaisedButton(
+                child: Text('아니오'),
+                elevation: 5,
+                onPressed: () {
+                  Navigator.pop(context, false);
+                },
+              ),
+            ],
+          );
+        });
   }
 }

@@ -345,6 +345,7 @@ class YuhanNuriState extends State<YuhanNuri> {
   void chattingDialog() {
     List<Widget> msg = [];
     TextEditingController _controller = TextEditingController();
+    ScrollController _scroll = ScrollController();
     bool isInput = false;
 
     showGeneralDialog(
@@ -356,69 +357,90 @@ class YuhanNuriState extends State<YuhanNuri> {
               opacity: a1.value,
               child: StatefulBuilder(builder: (context, StateSetter _setState) {
                 return new WillPopScope(
-                    onWillPop: closeChatting,
-                    child: Scaffold(
-                        appBar: AppBar(
-                          backgroundColor: Color.fromARGB(255, 0, 115, 215),
-                          toolbarHeight: 50,
-                          title: new Text("채팅 상담",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 20)),
-                        ),
-                        body: Column(
-                          children: <Widget>[
-                            Column(
-                              children: msg,
+                  onWillPop: closeChatting,
+                  child: Scaffold(
+                      appBar: AppBar(
+                        backgroundColor: Color.fromARGB(255, 0, 115, 215),
+                        toolbarHeight: 50,
+                        title: new Text("채팅 상담",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 20)),
+                      ),
+                      body: Column(
+                        children: <Widget>[
+                          Expanded(
+                            child: NotificationListener<
+                                OverscrollIndicatorNotification>(
+                              onNotification:
+                                  (OverscrollIndicatorNotification overscroll) {
+                                overscroll.disallowGlow();
+                                return;
+                              },
+                              child: SingleChildScrollView(
+                                controller: _scroll,
+                                padding: EdgeInsets.only(bottom: 15),
+                                child: Column(
+                                  children: msg,
+                                ),
+                              ),
                             ),
-                            Expanded(
-                                child: Container(
-                                    alignment: Alignment.bottomCenter,
-                                    child: Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          Flexible(
-                                              child: new TextField(
-                                            controller: _controller,
-                                            decoration: InputDecoration(
-                                                hintText: "메시지 전송...",
-                                                border: InputBorder.none,
-                                                focusedBorder: InputBorder.none,
-                                                enabledBorder: InputBorder.none,
-                                                errorBorder: InputBorder.none,
-                                                disabledBorder:
-                                                    InputBorder.none,
-                                                fillColor: Color(0xFFEAEAEA),
-                                                filled: true),
-                                            onChanged: (value) {
-                                              _setState(() {
-                                                if (value.isEmpty)
-                                                  isInput = false;
-                                                else
-                                                  isInput = true;
-                                              });
-                                            },
-                                          )),
-                                          Container(
-                                              color: Color(0xFFEAEAEA),
-                                              child: IconButton(
-                                                  icon: Icon(Icons.send),
-                                                  color: Color.fromARGB(
-                                                      255, 0, 115, 215),
-                                                  onPressed: isInput
-                                                      ? () => _setState(() {
-                                                            msg.add(sendMessage(
-                                                                _controller
-                                                                    .value
-                                                                    .text));
-                                                            _controller.clear();
-                                                            isInput = false;
-                                                          })
-                                                      : null)),
-                                        ])))
-                          ],
-                        )));
+                          ),
+                          Container(
+                            color: Color(0xFFEAEAEA),
+                            alignment: Alignment.bottomCenter,
+                            child: Row(
+                              children: [
+                                Flexible(
+                                    child: new TextField(
+                                  keyboardType: TextInputType.multiline,
+                                  maxLines: 4,
+                                  minLines: 1,
+                                  controller: _controller,
+                                  decoration: InputDecoration(
+                                    hintText: "메시지 전송...",
+                                    border: InputBorder.none,
+                                    focusedBorder: InputBorder.none,
+                                    enabledBorder: InputBorder.none,
+                                    errorBorder: InputBorder.none,
+                                    disabledBorder: InputBorder.none,
+                                    fillColor: Color(0xFFEAEAEA),
+                                    filled: true,
+                                  ),
+                                  onChanged: (value) {
+                                    _setState(() {
+                                      if (value.isEmpty)
+                                        isInput = false;
+                                      else
+                                        isInput = true;
+                                    });
+                                  },
+                                )),
+                                Container(
+                                  child: IconButton(
+                                      icon: Icon(Icons.send),
+                                      color: Color.fromARGB(255, 0, 115, 215),
+                                      onPressed: isInput
+                                          ? () => _setState(() {
+                                                msg.add(sendMessage(
+                                                    _controller.value.text));
+                                                _scroll.animateTo(
+                                                    _scroll.position
+                                                            .maxScrollExtent +
+                                                        100,
+                                                    duration: Duration(
+                                                        milliseconds: 500),
+                                                    curve: Curves.ease);
+                                                _controller.clear();
+                                                isInput = false;
+                                              })
+                                          : null),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      )),
+                );
               }),
             ),
           );
@@ -519,9 +541,11 @@ class YuhanNuriState extends State<YuhanNuri> {
     String nowMinute = now.minute.toString();
     if (nowHour.length == 1) nowHour = "0" + nowHour;
     if (nowMinute.length == 1) nowMinute = "0" + nowMinute;
+
     return new Row(mainAxisAlignment: MainAxisAlignment.end, children: [
       Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
         Container(
+            decoration: BoxDecoration(),
             margin: EdgeInsets.only(top: 15, right: 15),
             child: Text(
               "나",
@@ -530,10 +554,8 @@ class YuhanNuriState extends State<YuhanNuri> {
                 fontSize: 16,
               ),
             )),
-        Row(children: [
+        Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
           Container(
-            height: 50,
-            alignment: Alignment.bottomRight,
             padding: EdgeInsets.only(right: 5),
             child: Text(
               nowHour + ":" + nowMinute,
@@ -542,19 +564,15 @@ class YuhanNuriState extends State<YuhanNuri> {
           ),
           Container(
               margin: EdgeInsets.only(top: 3, right: 10),
+              padding: EdgeInsets.only(top: 7, bottom: 10, right: 10, left: 10),
+              constraints: BoxConstraints(
+                  minWidth: 0.0, maxWidth: 275.0, minHeight: 20.0),
               decoration: new BoxDecoration(
                   color: Color.fromARGB(255, 0, 115, 215),
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(10.0),
-                    topRight: Radius.circular(10.0),
-                    bottomLeft: Radius.circular(10.0),
-                    bottomRight: Radius.circular(10.0),
-                  )),
-              alignment: Alignment.center,
-              height: 50,
-              padding: EdgeInsets.all(10),
+                  borderRadius: BorderRadius.all(Radius.circular(10.0))),
               child: new Text(msg,
-                  style: TextStyle(color: Colors.white, fontSize: 15))),
+                  style: TextStyle(
+                      color: Colors.white, fontSize: 15, height: 1.3))),
         ])
       ])
     ]);

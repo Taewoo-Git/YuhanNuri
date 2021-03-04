@@ -24,12 +24,10 @@ const urls = [
   Domain + 'user/reservation',
   Domain + 'user/question',
   Domain + 'user/mypage',
-  Domain + 'user/mypage?chatting',
   Domain + 'user/mypage?question',
+  Domain + 'user/mypage?chatting',
   Domain + 'user/satisfaction',
 ];
-
-String appBarText = '홈';
 
 class YuhanNuri extends StatefulWidget {
   final String cookie;
@@ -54,9 +52,16 @@ class _DummyState extends State<YuhanNuri> {
 }
 
 class YuhanNuriState extends State<YuhanNuri> {
+  static List<String> page = ["홈", "예약", "문의", "MY"];
+  String selected = page[0];
+
   Map<String, String> header;
-  InAppWebViewController webViewController;
-  CurvedNavigationBarState navBarState;
+
+  InAppWebViewController _webView;
+  ScrollController _scroll = ScrollController();
+  StateSetter chatState;
+
+  CurvedNavigationBarState nav;
   GlobalKey globalKey = new GlobalKey();
   bool isExit = false;
 
@@ -89,40 +94,21 @@ class YuhanNuriState extends State<YuhanNuri> {
       }
     }, onResume: (Map<String, dynamic> message) async {
       if (Platform.isIOS) {
-        goToPage(
-          message['page'],
-        );
+        pushClick(message['page']);
       } else if (Platform.isAndroid) {
-        goToPage(
-          message['data']['page'],
-        );
+        pushClick(message['data']['page']);
       }
     }, onLaunch: (Map<String, dynamic> message) async {
       Timer(Duration(milliseconds: 1500), () {
         if (Platform.isIOS) {
-          goToPage(
-            message['page'],
-          );
+          pushClick(message['page']);
         } else if (Platform.isAndroid) {
-          goToPage(
-            message['data']['page'],
-          );
+          pushClick(message['data']['page']);
         }
       });
     });
     fcm.requestNotificationPermissions(const IosNotificationSettings(
         sound: true, badge: true, alert: true, provisional: true));
-  }
-
-  void goToPage(String msg) {
-    if (msg == "mypage" || msg == "satisfaction") {
-      navBarState = globalKey.currentState;
-      navBarState.setPage(3);
-    } else if (msg == "question") {
-      navBarState = globalKey.currentState;
-      navBarState.setPage(3);
-      webViewController.loadUrl(url: urls[5], headers: header);
-    }
   }
 
   @override
@@ -136,7 +122,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                   appBar: AppBar(
                     backgroundColor: Color.fromARGB(255, 0, 115, 215),
                     toolbarHeight: 50,
-                    title: new Text(appBarText,
+                    title: new Text(selected,
                         style: TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 25)),
                     actions: <Widget>[
@@ -161,7 +147,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                     ),
                     initialUrl: urls[0],
                     initialHeaders: header,
-                    onLoadStart: (webViewController, url) {
+                    onLoadStart: (_webView, url) {
                       if (!urls.contains(url)) {
                         if (url.contains("browser_fallback_url")) {
                           url = url
@@ -169,38 +155,22 @@ class YuhanNuriState extends State<YuhanNuri> {
                               .split("#Intent")[0]
                               .replaceAll("intent://", "https://");
                         }
-                        webViewController.stopLoading();
+                        _webView.stopLoading();
                         launch(url, forceWebView: false);
-                        navBarState = globalKey.currentState;
-                        navBarState.setPage(0);
+                        nav = globalKey.currentState;
+                        nav.setPage(0);
                       }
                     },
                     onWebViewCreated: (controller) {
-                      webViewController = controller;
-                      webViewController.loadUrl(url: urls[0], headers: header);
-                      webViewController.addJavaScriptHandler(
-                          handlerName: 'PageHandler',
-                          callback: (args) async {
-                            String command = args[0].toString();
-                            if (command == "alert") {
-                              webAlertDialog(args[1].toString());
-                            } else if (command == "replaceHome") {
-                              Future.delayed(Duration(milliseconds: 300), () {
-                                navBarState = globalKey.currentState;
-                                navBarState.setPage(0);
-                              });
-                            } else if (command == "replaceMypage") {
-                              navBarState = globalKey.currentState;
-                              navBarState.setPage(3);
-                            } else if (command == "reLogin") {
-                              String myToken = await fcm.getToken();
-                              if (args[1].toString() != myToken) {
-                                reLoginDialog();
-                              }
-                            } else if (command == "openInput") {
-                              openInputDialog(args[1].toString());
-                            }
-                          });
+                      _webView = controller;
+                      _webView.loadUrl(url: urls[0], headers: header);
+                      _webView.addJavaScriptHandler(
+                        handlerName: 'mobileHandler',
+                        callback: (args) {
+                          String command = args[0].toString();
+                          callByWeb(command, args);
+                        },
+                      );
                     },
                   ))),
                   bottomNavigationBar: CurvedNavigationBar(
@@ -231,46 +201,18 @@ class YuhanNuriState extends State<YuhanNuri> {
                     ],
                     animationDuration: const Duration(milliseconds: 300),
                     onTap: (int index) {
-                      switch (index) {
-                        case 0:
-                          webViewController.loadUrl(
-                              url: urls[0], headers: header);
-                          setState(() {
-                            appBarText = '홈';
-                          });
-                          break;
-                        case 1:
-                          webViewController.loadUrl(
-                              url: urls[1], headers: header);
-                          setState(() {
-                            appBarText = '예약';
-                          });
-                          break;
-                        case 2:
-                          webViewController.loadUrl(
-                              url: urls[2], headers: header);
-                          setState(() {
-                            appBarText = '문의';
-                          });
-                          break;
-                        case 3:
-                          webViewController.loadUrl(
-                              url: urls[3], headers: header);
-                          setState(() {
-                            appBarText = 'MY';
-                          });
-                          chattingDialog();
-                          break;
-                        default:
-                          break;
-                      }
+                      _webView.loadUrl(url: urls[index], headers: header);
+                      setState(() {
+                        selected = page[index];
+                      });
+                      if (index == 3) chattingDialog(); // temp code
                     },
                     animationCurve: Curves.easeOut,
                     height: 55.0,
                   ),
                 ),
                 onWillPop: () async {
-                  if (await webViewController.getUrl() == urls[0]) {
+                  if (await _webView.getUrl() == urls[0]) {
                     if (!isExit) {
                       isExit = true;
                       Timer(Duration(milliseconds: 2000), () {
@@ -282,10 +224,110 @@ class YuhanNuriState extends State<YuhanNuri> {
                     }
                     return Future.value(true);
                   }
-                  navBarState = globalKey.currentState;
-                  navBarState.setPage(0);
+                  nav = globalKey.currentState;
+                  nav.setPage(0);
                   return null;
                 })));
+  }
+
+  void pushClick(String msg) {
+    if (msg == "mypage" || msg == "satisfaction") {
+      nav = globalKey.currentState;
+      nav.setPage(3);
+    } else if (msg == "question") {
+      nav = globalKey.currentState;
+      nav.setPage(3);
+      _webView.loadUrl(url: urls[4], headers: header);
+    }
+  }
+
+  void logoutDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("유한누리"),
+          content: Text(
+            "자동 로그인을 해제하고,\n로그아웃을 하시겠습니까?",
+            style: TextStyle(height: 1.3),
+          ),
+          actions: [
+            RaisedButton(
+              child: Text("예"),
+              color: Color(0xFF0275D7),
+              elevation: 5,
+              onPressed: () async {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                prefs.remove('expires');
+                prefs.remove('cookie');
+                if (Platform.isAndroid)
+                  SystemNavigator.pop();
+                else if (Platform.isIOS) exit(0);
+              },
+            ),
+            RaisedButton(
+              child: Text("아니오"),
+              elevation: 5,
+              onPressed: () {
+                Navigator.of(context, rootNavigator: true).pop('dialog');
+              },
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  void autoLogoutDialog() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove('expires');
+    prefs.remove('cookie');
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return WillPopScope(
+            onWillPop: () => Phoenix.rebirth(context),
+            child: AlertDialog(
+              title: Text("유한누리"),
+              content: Text(
+                "다른 기기에서 로그인하여\n자동으로 로그아웃 되었습니다.",
+                style: TextStyle(height: 1.3),
+              ),
+              actions: [
+                RaisedButton(
+                  child: Text("확인"),
+                  color: Color(0xFF0275D7),
+                  elevation: 5,
+                  onPressed: () {
+                    Phoenix.rebirth(context);
+                  },
+                ),
+              ],
+            ));
+      },
+    );
+  }
+
+  void webAlertDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("유한누리"),
+          content: Text(message),
+          actions: [
+            RaisedButton(
+              child: Text("확인"),
+              color: Color(0xFF0275D7),
+              elevation: 5,
+              onPressed: () async {
+                Navigator.of(context, rootNavigator: true).pop('dialog');
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void openInputDialog(String strTextInfo) {
@@ -323,7 +365,7 @@ class YuhanNuriState extends State<YuhanNuri> {
               color: Color(0xFF0275D7),
               elevation: 5,
               onPressed: () async {
-                await webViewController.evaluateJavascript(
+                await _webView.evaluateJavascript(
                     source:
                         "\$('#" + txtElement + "').val('" + txtValue + "')");
                 Navigator.of(context, rootNavigator: true).pop('dialog');
@@ -344,193 +386,111 @@ class YuhanNuriState extends State<YuhanNuri> {
 
   void chattingDialog() {
     List<Widget> msg = [];
-    TextEditingController _controller = TextEditingController();
-    ScrollController _scroll = ScrollController();
     bool isInput = false;
+    TextEditingController _txtEdit = TextEditingController();
 
     showGeneralDialog(
-        transitionBuilder: (context, a1, a2, widget) {
-          final curvedValue = Curves.easeInOutBack.transform(a1.value) - 1.0;
-          return Transform(
-            transform: Matrix4.translationValues(0.0, curvedValue * -200, 0.0),
-            child: Opacity(
-              opacity: a1.value,
-              child: StatefulBuilder(builder: (context, StateSetter _setState) {
-                return new WillPopScope(
-                  onWillPop: closeChatting,
-                  child: Scaffold(
-                      appBar: AppBar(
-                        backgroundColor: Color.fromARGB(255, 0, 115, 215),
-                        toolbarHeight: 50,
-                        title: new Text("채팅 상담",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 20)),
+      transitionBuilder: (context, a1, a2, widget) {
+        final curvedValue = Curves.easeInOutBack.transform(a1.value) - 1.0;
+        return Transform(
+          transform: Matrix4.translationValues(0.0, curvedValue * -200, 0.0),
+          child: Opacity(
+            opacity: a1.value,
+            child: StatefulBuilder(builder: (context, StateSetter _setState) {
+              chatState = _setState;
+              return new WillPopScope(
+                onWillPop: closeChatting,
+                child: Scaffold(
+                  appBar: AppBar(
+                    backgroundColor: Color.fromARGB(255, 0, 115, 215),
+                    toolbarHeight: 50,
+                    title: new Text("채팅상담",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 20)),
+                  ),
+                  body: Column(children: <Widget>[
+                    Expanded(
+                      child:
+                          NotificationListener<OverscrollIndicatorNotification>(
+                        onNotification:
+                            (OverscrollIndicatorNotification overscroll) {
+                          overscroll.disallowGlow();
+                          return;
+                        },
+                        child: SingleChildScrollView(
+                          controller: _scroll,
+                          padding: EdgeInsets.only(bottom: 15),
+                          child: Column(
+                            children: msg,
+                          ),
+                        ),
                       ),
-                      body: Column(
-                        children: <Widget>[
-                          Expanded(
-                            child: NotificationListener<
-                                OverscrollIndicatorNotification>(
-                              onNotification:
-                                  (OverscrollIndicatorNotification overscroll) {
-                                overscroll.disallowGlow();
-                                return;
-                              },
-                              child: SingleChildScrollView(
-                                controller: _scroll,
-                                padding: EdgeInsets.only(bottom: 15),
-                                child: Column(
-                                  children: msg,
-                                ),
-                              ),
-                            ),
+                    ),
+                    Container(
+                      color: Color(0xFFEAEAEA),
+                      alignment: Alignment.bottomCenter,
+                      child: Row(children: [
+                        Flexible(
+                            child: new TextField(
+                          keyboardType: TextInputType.multiline,
+                          maxLines: 4,
+                          minLines: 1,
+                          controller: _txtEdit,
+                          decoration: InputDecoration(
+                            hintText: "메시지 전송...",
+                            border: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            errorBorder: InputBorder.none,
+                            disabledBorder: InputBorder.none,
+                            fillColor: Color(0xFFEAEAEA),
+                            filled: true,
                           ),
-                          Container(
-                            color: Color(0xFFEAEAEA),
-                            alignment: Alignment.bottomCenter,
-                            child: Row(
-                              children: [
-                                Flexible(
-                                    child: new TextField(
-                                  keyboardType: TextInputType.multiline,
-                                  maxLines: 4,
-                                  minLines: 1,
-                                  controller: _controller,
-                                  decoration: InputDecoration(
-                                    hintText: "메시지 전송...",
-                                    border: InputBorder.none,
-                                    focusedBorder: InputBorder.none,
-                                    enabledBorder: InputBorder.none,
-                                    errorBorder: InputBorder.none,
-                                    disabledBorder: InputBorder.none,
-                                    fillColor: Color(0xFFEAEAEA),
-                                    filled: true,
-                                  ),
-                                  onChanged: (value) {
-                                    _setState(() {
-                                      if (value.isEmpty)
+                          onChanged: (value) {
+                            _setState(() {
+                              if (value.isEmpty)
+                                isInput = false;
+                              else
+                                isInput = true;
+                            });
+                          },
+                        )),
+                        Container(
+                          child: IconButton(
+                              icon: Icon(Icons.send),
+                              color: Color.fromARGB(255, 0, 115, 215),
+                              onPressed: isInput
+                                  ? () => _setState(() {
+                                        msg.add(
+                                            sendMessage(_txtEdit.value.text));
+                                        msg.add(recvMessage(
+                                            "홍길동", _txtEdit.value.text));
+                                        _scroll.animateTo(
+                                            _scroll.position.maxScrollExtent +
+                                                100,
+                                            duration:
+                                                Duration(milliseconds: 500),
+                                            curve: Curves.ease);
+                                        _txtEdit.clear();
                                         isInput = false;
-                                      else
-                                        isInput = true;
-                                    });
-                                  },
-                                )),
-                                Container(
-                                  child: IconButton(
-                                      icon: Icon(Icons.send),
-                                      color: Color.fromARGB(255, 0, 115, 215),
-                                      onPressed: isInput
-                                          ? () => _setState(() {
-                                                msg.add(sendMessage(
-                                                    _controller.value.text));
-                                                _scroll.animateTo(
-                                                    _scroll.position
-                                                            .maxScrollExtent +
-                                                        100,
-                                                    duration: Duration(
-                                                        milliseconds: 500),
-                                                    curve: Curves.ease);
-                                                _controller.clear();
-                                                isInput = false;
-                                              })
-                                          : null),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      )),
-                );
-              }),
-            ),
-          );
-        },
-        transitionDuration: Duration(milliseconds: 350),
-        context: context,
-        barrierDismissible: false,
-        barrierColor: Colors.black.withOpacity(0),
-        pageBuilder: (context, animation1, animation2) {
-          return null;
-        });
-  }
-
-  void logoutDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("유한누리"),
-          content: Text("로그아웃 후 종료합니다."),
-          actions: [
-            RaisedButton(
-              child: Text("예"),
-              color: Color(0xFF0275D7),
-              elevation: 5,
-              onPressed: () async {
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                prefs.remove('expires');
-                prefs.remove('cookie');
-                if (Platform.isAndroid)
-                  SystemNavigator.pop();
-                else if (Platform.isIOS) exit(0);
-              },
-            ),
-            RaisedButton(
-              child: Text("아니오"),
-              elevation: 5,
-              onPressed: () {
-                Navigator.of(context, rootNavigator: true).pop('dialog');
-              },
-            )
-          ],
+                                      })
+                                  : null),
+                        ),
+                      ]),
+                    ),
+                  ]),
+                ),
+              );
+            }),
+          ),
         );
       },
-    );
-  }
-
-  void reLoginDialog() {
-    showDialog(
+      transitionDuration: Duration(milliseconds: 350),
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("유한누리"),
-          content: Text("다른 기기에서 로그인을 하여\n새 로그인이 필요합니다."),
-          actions: [
-            RaisedButton(
-              child: Text("확인"),
-              color: Color(0xFF0275D7),
-              elevation: 5,
-              onPressed: () async {
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                prefs.remove('expires');
-                prefs.remove('cookie');
-                Phoenix.rebirth(context);
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void webAlertDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("유한누리"),
-          content: Text(message),
-          actions: [
-            RaisedButton(
-              child: Text("확인"),
-              color: Color(0xFF0275D7),
-              elevation: 5,
-              onPressed: () async {
-                Navigator.of(context, rootNavigator: true).pop('dialog');
-              },
-            ),
-          ],
-        );
+      barrierDismissible: false,
+      barrierColor: Colors.black.withOpacity(0),
+      pageBuilder: (context, animation1, animation2) {
+        return null;
       },
     );
   }
@@ -578,79 +538,104 @@ class YuhanNuriState extends State<YuhanNuri> {
     ]);
   }
 
-  /*Row recvMessage(String msg) {
+  Row recvMessage(String name, String msg) {
     DateTime now = DateTime.now();
     String nowHour = now.hour.toString();
     String nowMinute = now.minute.toString();
     if (nowHour.length == 1) nowHour = "0" + nowHour;
     if (nowMinute.length == 1) nowMinute = "0" + nowMinute;
-    return new Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-      Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+
+    return new Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Container(
-            margin: EdgeInsets.only(top: 15, right: 15),
+            decoration: BoxDecoration(),
+            margin: EdgeInsets.only(top: 15, left: 15),
             child: Text(
-              "나",
+              name + " 선생님",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),
             )),
-        Row(children: [
+        Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
           Container(
-            height: 50,
-            alignment: Alignment.bottomRight,
-            padding: EdgeInsets.only(right: 5),
+              margin: EdgeInsets.only(top: 3, left: 10),
+              padding: EdgeInsets.only(top: 7, bottom: 10, right: 10, left: 10),
+              constraints: BoxConstraints(
+                  minWidth: 0.0, maxWidth: 275.0, minHeight: 20.0),
+              decoration: new BoxDecoration(
+                  color: Color(0xFFEAEAEA),
+                  borderRadius: BorderRadius.all(Radius.circular(10.0))),
+              child: new Text(msg,
+                  style: TextStyle(
+                      color: Color(0xFF656565), fontSize: 15, height: 1.3))),
+          Container(
+            padding: EdgeInsets.only(left: 5),
             child: Text(
               nowHour + ":" + nowMinute,
               style: TextStyle(color: Color.fromARGB(130, 0, 0, 0)),
             ),
           ),
-          Container(
-              margin: EdgeInsets.only(top: 3, right: 10),
-              decoration: new BoxDecoration(
-                  color: Color.fromARGB(255, 0, 115, 215),
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(10.0),
-                    topRight: Radius.circular(10.0),
-                    bottomLeft: Radius.circular(10.0),
-                    bottomRight: Radius.circular(10.0),
-                  )),
-              alignment: Alignment.center,
-              height: 50,
-              padding: EdgeInsets.all(10),
-              child: new Text(msg,
-                  style: TextStyle(color: Colors.white, fontSize: 15))),
         ])
       ])
     ]);
-  }*/
+  }
 
   Future<bool> closeChatting() {
     Vibration.vibrate();
     return showDialog(
-        context: context,
-        builder: (context) {
-          FocusScope.of(context).unfocus();
-          return AlertDialog(
-            content: Text('채팅 상담을 종료하시겠습니까?'),
-            actions: <Widget>[
-              RaisedButton(
-                child: Text('예'),
-                color: Color(0xFF0275D7),
-                elevation: 5,
-                onPressed: () {
-                  Navigator.pop(context, true);
-                },
-              ),
-              RaisedButton(
-                child: Text('아니오'),
-                elevation: 5,
-                onPressed: () {
-                  Navigator.pop(context, false);
-                },
-              ),
-            ],
-          );
+      context: context,
+      builder: (context) {
+        FocusScope.of(context).unfocus();
+        return AlertDialog(
+          title: Text("유한누리"),
+          content: Text('채팅상담을 종료하시겠습니까?'),
+          actions: <Widget>[
+            RaisedButton(
+              child: Text('예'),
+              color: Color(0xFF0275D7),
+              elevation: 5,
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+            ),
+            RaisedButton(
+              child: Text('아니오'),
+              elevation: 5,
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void callByWeb(String command, List<dynamic> args) async {
+    switch (command) {
+      case "alert":
+        webAlertDialog(args[1].toString());
+        break;
+      case "replaceHome":
+        Future.delayed(Duration(milliseconds: 300), () {
+          nav = globalKey.currentState;
+          nav.setPage(0);
         });
+        break;
+      case "replaceMypage":
+        nav = globalKey.currentState;
+        nav.setPage(3);
+        break;
+      case "isToken":
+        String myToken = await fcm.getToken();
+        if (args[1].toString() != myToken) autoLogoutDialog();
+        break;
+      case "openInput":
+        openInputDialog(args[1].toString());
+        break;
+      default:
+        break;
+    }
   }
 }

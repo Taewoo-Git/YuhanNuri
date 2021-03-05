@@ -65,9 +65,7 @@ class YuhanNuriState extends State<YuhanNuri> {
   GlobalKey globalKey = new GlobalKey();
   bool isExit = false;
 
-  final itemsList = ['시스템 문의', '상담 문의'];
-  var selectedItem = '시스템 문의';
-  int currentIndex=0;
+  int bodyIndex = 0;
 
   YuhanNuriState(String cookieParam) {
     header = {'Cookie': '$cookieParam'};
@@ -138,12 +136,9 @@ class YuhanNuriState extends State<YuhanNuri> {
                       )
                     ],
                   ),
-                  //scaffold의 body에 위젯 형식의 리스트를 설정
-                  //indexedStack : 자식을 여럿 가지는 위젯이며
-                  //                바텀내비게이션바를 탭해서 화면이 바껴도 다른 화면들의 상태가 유지 됨
                   body: IndexedStack(
-                    index: currentIndex,
-                    children: [buildWebView(),buildQuestionPage()],
+                    index: bodyIndex,
+                    children: [buildWebView(), buildQuestionPage()],
                   ),
                   bottomNavigationBar: CurvedNavigationBar(
                     key: globalKey,
@@ -173,29 +168,12 @@ class YuhanNuriState extends State<YuhanNuri> {
                     ],
                     animationDuration: const Duration(milliseconds: 300),
                     onTap: (int index) {
-                      
-                      //2번을 누르면 새로 만든 페이지를 보여주기 위해 currentIndex를 1로
-                      //0,1,3 은 웹뷰 페이지를 보여줘야 해서 0으로
-                      //currentIndex는 body의 리스트안에 있는 위젯의 인덱스
-                      //여기서 설정한 currentIndex에 해당하는 위젯이 body에 보이게 됨
-                      //현재 구조에서 바텀네비게이션바를 탭하면서 이동하면 한가지 단점이 있음
-                      //문의에서 다른 페이지 이동 시(ex. 홈 -> 문의 -> 마페로 이동한다 가정)
-                      //문의활성화 상태에서 마페 탭 누르면 홈 화면이 잠깐 보였다가 마페로 이동함 => 웹뷰가 살아있어서 그럼
-                      //웹뷰랑 혼동해서 사용하느라 어쩔 수 없음
-                      if(index == 2){
-                        setState(() {
-                          currentIndex=1;
-                          selected = page[index];
-                        });
-                      }else{
-                        _webView.loadUrl(url: urls[index], headers: header);
-                        setState(() {
-                          currentIndex=0;
-                          selected = page[index];
-                        });
-                        if (index == 3) chattingDialog(); // temp code
-                      }
-                      
+                      setState(() {
+                        bodyIndex = (index == 2) ? 1 : 0;
+                        selected = page[index];
+                      });
+
+                      if (index == 3) chattingDialog(); // temp code
                     },
                     animationCurve: Curves.easeOut,
                     height: 55.0,
@@ -218,6 +196,161 @@ class YuhanNuriState extends State<YuhanNuri> {
                   nav.setPage(0);
                   return null;
                 })));
+  }
+
+  Widget buildWebView() {
+    return Center(
+        child: SafeArea(
+            child: InAppWebView(
+      initialOptions: InAppWebViewGroupOptions(
+        crossPlatform: InAppWebViewOptions(
+          debuggingEnabled: true,
+          supportZoom: false,
+          horizontalScrollBarEnabled: false,
+          clearCache: true,
+        ),
+      ),
+      initialUrl: urls[0],
+      initialHeaders: header,
+      onLoadStart: (webViewController, url) {
+        if (!urls.contains(url)) {
+          if (url.contains("browser_fallback_url")) {
+            url = url
+                .toString()
+                .split("#Intent")[0]
+                .replaceAll("intent://", "https://");
+          }
+          _webView.stopLoading();
+          launch(url, forceWebView: false);
+          nav = globalKey.currentState;
+          nav.setPage(0);
+        }
+      },
+      onWebViewCreated: (controller) {
+        _webView = controller;
+        _webView.loadUrl(url: urls[0], headers: header);
+        _webView.addJavaScriptHandler(
+          handlerName: 'mobileHandler',
+          callback: (args) {
+            String command = args[0].toString();
+            callByWeb(command, args);
+          },
+        );
+      },
+    )));
+  }
+
+  Widget buildQuestionPage() {
+    List<String> itemsList = ["시스템 문의", "상담 문의"];
+    String selectedItem = itemsList[0];
+
+    TextEditingController _title = TextEditingController();
+    TextEditingController _content = TextEditingController();
+
+    return StatefulBuilder(builder: (context, StateSetter _setState) {
+      return SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                  margin: const EdgeInsets.fromLTRB(40, 30, 40, 20),
+                  child: Text(
+                    "무엇이든 물어보세요!",
+                    style: TextStyle(fontSize: 25),
+                  )),
+            ),
+            Container(
+              margin: const EdgeInsets.fromLTRB(15, 10, 15, 10),
+              child: Column(
+                children: [
+                  Container(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "문의 유형",
+                      style:
+                          TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Container(
+                    child: DropdownButton(
+                      isExpanded: true,
+                      items: itemsList.map((e) {
+                        return DropdownMenuItem(value: e, child: Text(e));
+                      }).toList(),
+                      value: selectedItem,
+                      onChanged: (value) {
+                        _setState(() {
+                          selectedItem = value;
+                        });
+                      },
+                    ),
+                  )
+                ],
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.fromLTRB(15, 10, 15, 10),
+              child: Column(
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "제목",
+                      style:
+                          TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  TextField(
+                    controller: _title,
+                    decoration: InputDecoration(
+                        border: OutlineInputBorder(), hintText: "제목을 입력하세요."),
+                  )
+                ],
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.fromLTRB(15, 10, 15, 10),
+              child: Column(
+                children: [
+                  Container(
+                    alignment: Alignment.centerLeft,
+                    margin: const EdgeInsets.only(bottom: 10),
+                    child: Text(
+                      "내용",
+                      style:
+                          TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  TextField(
+                    controller: _content,
+                    maxLines: 10,
+                    decoration: InputDecoration(
+                        border: OutlineInputBorder(), hintText: "내용을 입력하세요."),
+                  )
+                ],
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.only(right: 15),
+              alignment: Alignment.centerRight,
+              child: RaisedButton(
+                child: Text(
+                  "작성",
+                  style: TextStyle(color: Colors.white),
+                ),
+                color: Color(0xFF0275D7),
+                onPressed: () {
+                  print(
+                      'selected : $selectedItem \ntitle : ${_title.value.text}\ncontent : ${_content.value.text}');
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   void pushClick(String msg) {
@@ -628,180 +761,4 @@ class YuhanNuriState extends State<YuhanNuri> {
         break;
     }
   }
-
-
-
-  Widget buildWebView(){
-    return Center(
-      child: SafeArea(
-        child: InAppWebView(
-          initialOptions: InAppWebViewGroupOptions(
-            crossPlatform: InAppWebViewOptions(
-              debuggingEnabled: true,
-              supportZoom: false,
-              horizontalScrollBarEnabled: false,
-              clearCache: true,
-            ),
-          ),
-          initialUrl: urls[0],
-          initialHeaders: header,
-          onLoadStart: (webViewController, url) {
-      
-            if (!urls.contains(url)) {
-              if (url.contains("browser_fallback_url")) {
-                url = url
-                    .toString()
-                    .split("#Intent")[0]
-                    .replaceAll("intent://", "https://");
-              }
-              _webView.stopLoading();
-              launch(url, forceWebView: false);
-              nav = globalKey.currentState;
-              nav.setPage(0);
-            }
-          },
-          onWebViewCreated: (controller) {
-
-            _webView = controller;
-            _webView.loadUrl(url: urls[0], headers: header);
-            _webView.addJavaScriptHandler(
-              handlerName: 'mobileHandler',
-              callback: (args) {
-                String command = args[0].toString();
-                callByWeb(command, args);
-              },
-            );
-          },
-        )
-      )
-    );
-  }
-
-  Widget buildQuestionPage(){
-
-    TextEditingController titleController = TextEditingController();
-    TextEditingController contentController = TextEditingController();
-    return SingleChildScrollView(
-
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              margin: const EdgeInsets.fromLTRB(40, 30, 40, 20),
-              child: Text('무엇이든 물어보세요!',
-                style: TextStyle(
-                  fontSize: 25
-                ),
-              )
-            ),
-          ),
-          Container(
-            margin: const EdgeInsets.fromLTRB(15, 10, 15, 10),
-            child: Column(
-              
-              children: [
-                Container(
-                  alignment: Alignment.centerLeft,
-                  child: Text('문의 유형',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold
-                    ),
-                  ),
-                ),
-                Container(
-                  // margin: EdgeInsets.symmetric(horizontal: 30),
-                  // color: Colors.amber,
-                  child: DropdownButton(isExpanded: true,
-                    items: itemsList.map((e){
-                      return DropdownMenuItem(
-                        value:e,
-                        child:Text(e)
-                      );
-                    }).toList(),
-                    value: selectedItem,
-                    onChanged: (value){
-                      setState(() {
-                        selectedItem=value;
-                      });
-                    },
-                  ),
-                )
-              ],
-            ),
-          ),
-          Container(
-            margin: const EdgeInsets.fromLTRB(15, 10, 15, 10),
-            child: Column(
-              children: [
-                Container(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  alignment: Alignment.centerLeft,
-                  child: Text('제목',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold
-                    ),
-                  ),
-                ),
-                TextField(
-                  controller: titleController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: '제목을 입력하세요.'
-                  ),
-                )
-              ],
-            ),
-          ),
-          Container(
-            margin: const EdgeInsets.fromLTRB(15, 10, 15, 10),
-            child: Column(
-              children: [
-                Container(
-                  alignment: Alignment.centerLeft,
-                  margin: const EdgeInsets.only(bottom: 10),
-                  child: Text('내용',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold
-                    ),
-                  ),
-                ),
-                TextField(
-                  controller: contentController,
-                  maxLines: 10,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: '내용을 입력하세요.'
-                  ),
-                )
-              ],
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.only(right:15),
-            alignment: Alignment.centerRight,
-            child: RaisedButton(
-              child: Text('작성',
-                  style: TextStyle(color: Colors.white),
-                ),
-              color: Color(0xFF0275D7),
-              onPressed: (){
-                //print안에 있는 것처럼 입력 값 사용하시면 됩니당.
-                print('selected : $selectedItem \ntitle : ${titleController.value.text}\ncontent : ${contentController.value.text}');
-              },
-            ),
-          ),
-
-        ],
-      ),
-    );
-
-  }
-
-
-
-
 }

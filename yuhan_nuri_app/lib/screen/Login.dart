@@ -1,47 +1,44 @@
 import 'dart:io';
+import 'YuhanNuri.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
-import 'package:yuhan_nuri_app/screen/YuhanNuri.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:progress_dialog/progress_dialog.dart';
 import 'package:oktoast/oktoast.dart';
-
-String userID = "";
-String userPassword = "";
-bool isAutoLogin = true;
-String myCookie = "";
-TextEditingController idTextBoxController;
-TextEditingController pwTextBoxController;
+import 'package:progress_dialog/progress_dialog.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OKToast(
-        position: ToastPosition.bottom,
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'YuhanNuri',
-          home: Login(title: 'YuhanNuri Login'),
-        ));
+      position: ToastPosition.bottom,
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'YuhanNuri',
+        home: Login(),
+      ),
+    );
   }
 }
 
 class Login extends StatefulWidget {
-  Login({this.title});
-  final String title;
   @override
-  _LoginState createState() => _LoginState();
+  LoginState createState() => LoginState();
 }
 
-class _LoginState extends State<Login> {
+class LoginState extends State<Login> {
+  String userID = "";
+  String userPassword = "";
+  bool isAutoLogin = true;
+
+  TextEditingController _iD = TextEditingController();
+  TextEditingController _pw = TextEditingController();
+
   ProgressDialog progressDialog;
 
   @override
   void initState() {
     super.initState();
-    idTextBoxController = TextEditingController();
-    pwTextBoxController = TextEditingController();
     setProgressDialog();
   }
 
@@ -73,7 +70,7 @@ class _LoginState extends State<Login> {
           ),
           height: 60,
           child: TextField(
-            controller: idTextBoxController,
+            controller: _iD,
             onChanged: (value) => userID = value,
             keyboardType: TextInputType.emailAddress,
             style: TextStyle(color: Colors.black87),
@@ -115,7 +112,7 @@ class _LoginState extends State<Login> {
           ),
           height: 60,
           child: TextField(
-            controller: pwTextBoxController,
+            controller: _pw,
             onChanged: (value) => userPassword = value,
             obscureText: true,
             style: TextStyle(color: Colors.black87),
@@ -144,11 +141,11 @@ class _LoginState extends State<Login> {
         onPressed: () => {portalLogin(userID, userPassword, isAutoLogin)},
         padding: EdgeInsets.all(15),
         color: Color(0xFF0275D8),
-        child: Text('로그인',
-            style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold)),
+        child: Text(
+          '로그인',
+          style: TextStyle(
+              color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
@@ -207,7 +204,7 @@ class _LoginState extends State<Login> {
                   children: <Widget>[
                     Container(
                       child: new Image(
-                        image: AssetImage("assets/nuri_blue.png"),
+                        image: AssetImage("assets/nuriBlue.png"),
                       ),
                       padding: EdgeInsets.only(
                           bottom: 30.0, left: 60.0, right: 60.0),
@@ -228,50 +225,57 @@ class _LoginState extends State<Login> {
         ));
   }
 
-  portalLogin(String userID, String userPassword, bool isAutoLogin) async {
+  void portalLogin(String userID, String userPassword, bool isAutoLogin) async {
     progressDialog.show();
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    String strToken = await fcm.getToken();
 
     http.Response res = await http.Client().post(
-      Uri.parse('https://yuhannuri.run.goorm.io/user/mobile'),
+      Uri.parse('https://yuhannuri.run.goorm.io/user'),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
         'Accept': 'application/json; charset=utf-8',
       },
       body: {
+        'userToken': strToken,
         'userId': userID.trim(),
         'password': userPassword.trim(),
-        'isAutoLogin': isAutoLogin.toString(),
-        'myToken': await fcm.getToken()
+        'isAutoLogin': isAutoLogin.toString()
       },
     );
 
-    if (res.body == "null") {
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      if (res.body == "success") {
+        Cookie cookie = Cookie.fromSetCookieValue(res.headers['set-cookie']);
+
+        if (isAutoLogin) {
+          DateTime expires = cookie.expires.add(new Duration(days: 30));
+          prefs.setString('Token', strToken);
+          prefs.setString('Cookie', cookie.toString());
+          prefs.setString('Expires', expires.toString());
+        }
+        progressDialog.hide();
+
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (BuildContext context) => YuhanNuri(
+              cookie: cookie.toString(),
+            ),
+          ),
+        );
+      } else if (res.body == "fail") {
+        FocusManager.instance.primaryFocus.unfocus();
+        progressDialog.hide();
+        showToast("아이디와 패스워드를 확인하세요.", textPadding: EdgeInsets.all(10));
+        _iD.clear();
+        _pw.clear();
+      }
+    } else {
       FocusManager.instance.primaryFocus.unfocus();
       progressDialog.hide();
-      showToast("아이디와 패스워드를 확인하세요.");
-      idTextBoxController.clear();
-      pwTextBoxController.clear();
-      return;
-    }
-
-    if (res.statusCode == 200) {
-      Cookie cookie = Cookie.fromSetCookieValue(res.headers['set-cookie']);
-
-      if (isAutoLogin) {
-        DateTime dateTime = cookie.expires.add(new Duration(days: 30));
-        prefs.setString('cookie', cookie.toString());
-        prefs.setString('expires', dateTime.toString());
-      }
-      progressDialog.hide();
-
-      Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (BuildContext context) => YuhanNuri(
-                cookie: cookie.toString(),
-              )));
-    } else {
-      throw Exception();
+      showToast("서버 점검 중입니다.\n잠시 후 다시 시도해 주세요.",
+          textPadding: EdgeInsets.all(10));
     }
   }
 }

@@ -34,7 +34,6 @@ dev_dependencies:
   flutter_local_notifications: ^4.0.0
   curved_navigation_bar: ^0.3.3
   http: ^0.12.2
-  toast: ^0.1.5
   shared_preferences: ^0.5.10
   splashscreen: ^1.2.0
   introduction_screen: ^1.0.7
@@ -44,6 +43,7 @@ dev_dependencies:
   vibration: ^1.4.0
   url_launcher: ^5.7.10
   flutter_phoenix: ^0.1.0
+  flutter_keyboard_visibility: ^4.0.6
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -59,17 +59,17 @@ flutter:
   assets:
     - assets/logo.png
     - assets/nuri.png
-    - assets/nuri_blue.png
+    - assets/nuriBlue.png
     - assets/nuriicon.png
-    - assets/sad_face.png
-    - assets/social_media.png
-    - assets/team_success.png
-    - assets/mypage.png
+    - assets/home.png
     - assets/reservation.png
     - assets/question.png
-    - assets/home.png
+    - assets/mypage.png
     - assets/btnAuto-on.png
     - assets/btnAuto-off.png
+    - assets/intro_welcome.jpg
+    - assets/intro_consult.jpg
+    - assets/intro_app.jpg
     
     #   - images/a_dot_ham.jpeg
 

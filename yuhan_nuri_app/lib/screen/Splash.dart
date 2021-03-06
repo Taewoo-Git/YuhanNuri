@@ -1,10 +1,10 @@
 import 'dart:async';
+import 'Login.dart';
+import 'YuhanNuri.dart';
+import 'Introduce.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'Introduce.dart';
-import 'YuhanNuri.dart';
-import 'Login.dart';
 
 class SplashApp extends StatelessWidget {
   @override
@@ -28,50 +28,56 @@ class Splash extends StatefulWidget {
 }
 
 class SplashState extends State<Splash> {
-  checkFirstSeen() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool _seen = (prefs.getBool('seen') ?? false);
+  void initSetting(SharedPreferences prefs) {
+    String cookie = prefs.getString('Cookie') ?? "";
+    DateTime expires = prefs.getString('Expires') == null
+        ? DateTime.now().subtract(new Duration(days: 1))
+        : DateTime.parse(prefs.getString('Expires'));
 
-    if (_seen) {
-      checkHavingCookie();
-    } else {
-      prefs.setBool('seen', true);
-      Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (BuildContext context) => IntroduceScreenApp()));
-    }
-  }
+    if (!expires.isAfter(DateTime.now())) {
+      prefs.remove('Token');
+      prefs.remove('Cookie');
+      prefs.remove('Expires');
 
-  checkHavingCookie() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    String cookieParam = (prefs.getString('cookie') ?? "NoCookie");
-    String str = (prefs.getString('expires') ?? DateTime.now().toString());
-    DateTime resetDay = DateTime.parse(str);
-
-    if (!resetDay.isAfter(DateTime.now())) {
-      prefs.remove('expires');
-      prefs.remove('cookie');
-      cookieParam = "NoCookie";
+      cookie = "";
     }
 
-    if (cookieParam != "NoCookie") {
-      Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (BuildContext context) => YuhanNuri(
-                cookie: cookieParam,
-              )));
-    } else {
+    if (cookie.isEmpty) {
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => LoginApp()));
+        context,
+        MaterialPageRoute(
+          builder: (context) => LoginApp(),
+        ),
+      );
+    } else {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (BuildContext context) => YuhanNuri(
+            cookie: cookie,
+          ),
+        ),
+      );
     }
   }
 
   @override
   void initState() {
     super.initState();
-    new Timer(new Duration(milliseconds: 3000), () => {checkFirstSeen()});
+    new Timer(new Duration(milliseconds: 2000), () async {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      bool isFirst = prefs.getBool('intro') ?? true;
+
+      if (isFirst) {
+        prefs.setBool('intro', false);
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (BuildContext context) => IntroduceApp()));
+      } else {
+        initSetting(prefs);
+      }
+    });
   }
 
-  splashScreen(BuildContext context) {
+  Widget buildSplash(BuildContext context) {
     return Scaffold(
       body: Center(
         child: Column(
@@ -105,7 +111,7 @@ class SplashState extends State<Splash> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: splashScreen(context),
+      body: buildSplash(context),
     );
   }
 }

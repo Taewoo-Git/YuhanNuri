@@ -1,18 +1,20 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:vibration/vibration.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 
 final FirebaseMessaging fcm = FirebaseMessaging();
 
@@ -30,21 +32,21 @@ const urls = [
 ];
 
 class YuhanNuri extends StatefulWidget {
-  final String cookie;
   final String title;
+  final String cookie;
 
   YuhanNuri({Key key, this.title, this.cookie}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
     if (Platform.isWindows)
-      return _DummyState();
+      return DummyState();
     else
       return YuhanNuriState(cookie);
   }
 }
 
-class _DummyState extends State<YuhanNuri> {
+class DummyState extends State<YuhanNuri> {
   @override
   Widget build(BuildContext context) {
     return null;
@@ -57,18 +59,19 @@ class YuhanNuriState extends State<YuhanNuri> {
 
   Map<String, String> header;
 
-  InAppWebViewController _webView;
+  int bodyIndex = 0;
+  List<InAppWebViewController> _webView = [null, null, null, null];
   ScrollController _scroll = ScrollController();
-  StateSetter chatState;
 
   CurvedNavigationBarState nav;
   GlobalKey globalKey = new GlobalKey();
   bool isExit = false;
 
-  int bodyIndex = 0;
+  StateSetter msgState;
+  List<Widget> msgList = [];
 
-  YuhanNuriState(String cookieParam) {
-    header = {'Cookie': '$cookieParam'};
+  YuhanNuriState(String cookie) {
+    header = {'Cookie': '$cookie'};
   }
 
   void initState() {
@@ -85,6 +88,8 @@ class YuhanNuriState extends State<YuhanNuri> {
         'channelId', 'channelName', 'channelDescription');
     const iOS = IOSNotificationDetails();
     const platform = NotificationDetails(android: android, iOS: iOS);
+
+    var keyboardVisibilityController = KeyboardVisibilityController();
 
     fcm.configure(onMessage: (Map<String, dynamic> message) async {
       if (Platform.isIOS) {
@@ -109,96 +114,113 @@ class YuhanNuriState extends State<YuhanNuri> {
         }
       });
     });
+
     fcm.requestNotificationPermissions(const IosNotificationSettings(
         sound: true, badge: true, alert: true, provisional: true));
+
+    keyboardVisibilityController.onChange.listen((bool visible) {
+      if (visible && selected == "MY") {
+        Timer(Duration(milliseconds: 500), () {
+          _scroll.animateTo(_scroll.position.maxScrollExtent + 100,
+              duration: Duration(milliseconds: 500), curve: Curves.ease);
+        });
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    syncToken(context);
     return OKToast(
-        position: ToastPosition.bottom,
-        child: MaterialApp(
-            debugShowCheckedModeBanner: false,
-            home: WillPopScope(
-                child: Scaffold(
-                  appBar: AppBar(
-                    backgroundColor: Color.fromARGB(255, 0, 115, 215),
-                    toolbarHeight: 50,
-                    title: new Text(selected,
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 25)),
-                    actions: <Widget>[
-                      IconButton(
-                        icon: Icon(Icons.logout),
-                        onPressed: () {
-                          logoutDialog();
-                        },
-                      )
-                    ],
-                  ),
-                  body: IndexedStack(
-                    index: bodyIndex,
-                    children: [buildWebView(), buildQuestionPage()],
-                  ),
-                  bottomNavigationBar: CurvedNavigationBar(
-                    key: globalKey,
-                    index: 0,
-                    backgroundColor: Color.fromARGB(255, 0, 115, 215),
-                    items: <Widget>[
-                      Image(
-                        image: AssetImage('assets/home.png'),
-                        fit: BoxFit.cover,
-                        height: 30,
-                      ),
-                      Image(
-                        image: AssetImage('assets/reservation.png'),
-                        fit: BoxFit.cover,
-                        height: 30,
-                      ),
-                      Image(
-                        image: AssetImage('assets/question.png'),
-                        fit: BoxFit.cover,
-                        height: 30,
-                      ),
-                      Image(
-                        image: AssetImage('assets/mypage.png'),
-                        fit: BoxFit.cover,
-                        height: 30,
-                      ),
-                    ],
-                    animationDuration: const Duration(milliseconds: 300),
-                    onTap: (int index) {
-                      setState(() {
-                        bodyIndex = (index == 2) ? 1 : 0;
-                        selected = page[index];
-                      });
-
-                      if (index == 3) chattingDialog(); // temp code
-                    },
-                    animationCurve: Curves.easeOut,
-                    height: 55.0,
-                  ),
+      position: ToastPosition.bottom,
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: WillPopScope(
+          child: Scaffold(
+            appBar: AppBar(
+              backgroundColor: Color.fromARGB(255, 0, 115, 215),
+              toolbarHeight: 50,
+              title: new Text(selected,
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25)),
+              actions: <Widget>[
+                IconButton(
+                  icon: Icon(Icons.logout),
+                  onPressed: () {
+                    logoutDialog();
+                  },
+                )
+              ],
+            ),
+            body: IndexedStack(
+              index: bodyIndex,
+              children: [
+                buildWebView(0),
+                buildWebView(1),
+                buildQuestionPage(),
+                buildWebView(3)
+              ],
+            ),
+            bottomNavigationBar: CurvedNavigationBar(
+              key: globalKey,
+              index: 0,
+              backgroundColor: Color.fromARGB(255, 0, 115, 215),
+              items: <Widget>[
+                Image(
+                  image: AssetImage('assets/home.png'),
+                  fit: BoxFit.cover,
+                  height: 30,
                 ),
-                onWillPop: () async {
-                  if (await _webView.getUrl() == urls[0]) {
-                    if (!isExit) {
-                      isExit = true;
-                      Timer(Duration(milliseconds: 2000), () {
-                        isExit = false;
-                      });
-                      showToast("뒤로 가기 버튼을 한 번 더\n누르면 앱을 종료합니다.",
-                          textPadding: EdgeInsets.all(10));
-                      return Future.value(false);
-                    }
-                    return Future.value(true);
-                  }
-                  nav = globalKey.currentState;
-                  nav.setPage(0);
-                  return null;
-                })));
+                Image(
+                  image: AssetImage('assets/reservation.png'),
+                  fit: BoxFit.cover,
+                  height: 30,
+                ),
+                Image(
+                  image: AssetImage('assets/question.png'),
+                  fit: BoxFit.cover,
+                  height: 30,
+                ),
+                Image(
+                  image: AssetImage('assets/mypage.png'),
+                  fit: BoxFit.cover,
+                  height: 30,
+                ),
+              ],
+              animationDuration: const Duration(milliseconds: 300),
+              onTap: (int index) {
+                setState(() {
+                  bodyIndex = index;
+                  selected = page[index];
+                  //if (index == 3) chattingDialog(); // temp code
+                });
+              },
+              animationCurve: Curves.easeOut,
+              height: 55.0,
+            ),
+          ),
+          onWillPop: () {
+            if (bodyIndex == 0) {
+              if (!isExit) {
+                isExit = true;
+                Timer(Duration(milliseconds: 2000), () {
+                  isExit = false;
+                });
+                showToast("뒤로 가기 버튼을 한 번 더\n누르면 앱을 종료합니다.",
+                    textPadding: EdgeInsets.all(10));
+                return Future.value(false);
+              }
+              return Future.value(true);
+            }
+            nav = globalKey.currentState;
+            nav.setPage(0);
+            return null;
+          },
+        ),
+      ),
+    );
   }
 
-  Widget buildWebView() {
+  Widget buildWebView(int index) {
     return Center(
         child: SafeArea(
             child: InAppWebView(
@@ -210,9 +232,11 @@ class YuhanNuriState extends State<YuhanNuri> {
           clearCache: true,
         ),
       ),
-      initialUrl: urls[0],
+      initialUrl: urls[index],
       initialHeaders: header,
-      onLoadStart: (webViewController, url) {
+      onLoadStart: (controller, url) {
+        _webView[index] = controller;
+
         if (!urls.contains(url)) {
           if (url.contains("browser_fallback_url")) {
             url = url
@@ -220,20 +244,17 @@ class YuhanNuriState extends State<YuhanNuri> {
                 .split("#Intent")[0]
                 .replaceAll("intent://", "https://");
           }
-          _webView.stopLoading();
+          controller.stopLoading();
           launch(url, forceWebView: false);
-          nav = globalKey.currentState;
-          nav.setPage(0);
+          controller.evaluateJavascript(
+              source: "window.location.reload(true);");
         }
-      },
-      onWebViewCreated: (controller) {
-        _webView = controller;
-        _webView.loadUrl(url: urls[0], headers: header);
-        _webView.addJavaScriptHandler(
+
+        controller.addJavaScriptHandler(
           handlerName: 'mobileHandler',
           callback: (args) {
             String command = args[0].toString();
-            callByWeb(command, args);
+            workCallByWeb(command, args);
           },
         );
       },
@@ -241,8 +262,8 @@ class YuhanNuriState extends State<YuhanNuri> {
   }
 
   Widget buildQuestionPage() {
-    List<String> itemsList = ["시스템 문의", "상담 문의"];
-    String selectedItem = itemsList[0];
+    List<String> typeList = ["시스템 문의", "상담 문의"];
+    String selectedType = typeList[0];
 
     TextEditingController _title = TextEditingController();
     TextEditingController _content = TextEditingController();
@@ -275,13 +296,13 @@ class YuhanNuriState extends State<YuhanNuri> {
                   Container(
                     child: DropdownButton(
                       isExpanded: true,
-                      items: itemsList.map((e) {
+                      items: typeList.map((e) {
                         return DropdownMenuItem(value: e, child: Text(e));
                       }).toList(),
-                      value: selectedItem,
+                      value: selectedType,
                       onChanged: (value) {
                         _setState(() {
-                          selectedItem = value;
+                          selectedType = value;
                         });
                       },
                     ),
@@ -343,7 +364,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                 color: Color(0xFF0275D7),
                 onPressed: () {
                   print(
-                      'selected : $selectedItem \ntitle : ${_title.value.text}\ncontent : ${_content.value.text}');
+                      'selected : $selectedType \ntitle : ${_title.value.text}\ncontent : ${_content.value.text}');
                 },
               ),
             ),
@@ -360,8 +381,14 @@ class YuhanNuriState extends State<YuhanNuri> {
     } else if (msg == "question") {
       nav = globalKey.currentState;
       nav.setPage(3);
-      _webView.loadUrl(url: urls[4], headers: header);
+      _webView[3].loadUrl(url: urls[4], headers: header);
     }
+  }
+
+  void removePreferences(SharedPreferences prefs) {
+    prefs.remove('Token');
+    prefs.remove('Cookie');
+    prefs.remove('Expires');
   }
 
   void logoutDialog() {
@@ -381,8 +408,22 @@ class YuhanNuriState extends State<YuhanNuri> {
               elevation: 5,
               onPressed: () async {
                 SharedPreferences prefs = await SharedPreferences.getInstance();
-                prefs.remove('expires');
-                prefs.remove('cookie');
+
+                http.Client().post(
+                  Uri.parse(Domain + 'user/mobile'),
+                  headers: {
+                    'Content-Type':
+                        'application/x-www-form-urlencoded; charset=UTF-8',
+                    'Accept': 'application/json; charset=utf-8',
+                  },
+                  body: {
+                    'command': 'logout',
+                    'userToken': prefs.getString('Token')
+                  },
+                );
+
+                removePreferences(prefs);
+
                 if (Platform.isAndroid)
                   SystemNavigator.pop();
                 else if (Platform.isIOS) exit(0);
@@ -401,19 +442,62 @@ class YuhanNuriState extends State<YuhanNuri> {
     );
   }
 
-  void autoLogoutDialog() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.remove('expires');
-    prefs.remove('cookie');
+  void autoLogoutDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return WillPopScope(
+          onWillPop: () => Phoenix.rebirth(context),
+          child: AlertDialog(
+            title: Text("유한누리"),
+            content: Text(
+              "다른 기기에서 로그인하여\n자동으로 로그아웃 되었습니다.",
+              style: TextStyle(height: 1.3),
+            ),
+            actions: [
+              RaisedButton(
+                child: Text("확인"),
+                color: Color(0xFF0275D7),
+                elevation: 5,
+                onPressed: () {
+                  Phoenix.rebirth(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void syncToken(BuildContext context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    http.Response res = await http.Client().post(
+      Uri.parse(Domain + 'user/mobile'),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'Accept': 'application/json; charset=utf-8',
+      },
+      body: {'command': 'login', 'userToken': prefs.getString('Token')},
+    );
+
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      if (res.body == "again") {
+        removePreferences(prefs);
+        autoLogoutDialog();
+      }
+    } else {
+      removePreferences(prefs);
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return WillPopScope(
             onWillPop: () => Phoenix.rebirth(context),
             child: AlertDialog(
               title: Text("유한누리"),
               content: Text(
-                "다른 기기에서 로그인하여\n자동으로 로그아웃 되었습니다.",
+                "서버 점검 중입니다.\n잠시 후 다시 시도해 주세요.",
                 style: TextStyle(height: 1.3),
               ),
               actions: [
@@ -426,9 +510,11 @@ class YuhanNuriState extends State<YuhanNuri> {
                   },
                 ),
               ],
-            ));
-      },
-    );
+            ),
+          );
+        },
+      );
+    }
   }
 
   void webAlertDialog(String message) {
@@ -488,9 +574,9 @@ class YuhanNuriState extends State<YuhanNuri> {
               color: Color(0xFF0275D7),
               elevation: 5,
               onPressed: () async {
-                await _webView.evaluateJavascript(
-                    source:
-                        "\$('#" + txtElement + "').val('" + txtValue + "')");
+                await _webView[bodyIndex].evaluateJavascript(
+                    source: "\$('#$txtElement').val('$txtValue')");
+
                 Navigator.of(context, rootNavigator: true).pop('dialog');
               },
             ),
@@ -508,9 +594,8 @@ class YuhanNuriState extends State<YuhanNuri> {
   }
 
   void chattingDialog() {
-    List<Widget> msg = [];
     bool isInput = false;
-    TextEditingController _txtEdit = TextEditingController();
+    TextEditingController _msg = TextEditingController();
 
     showGeneralDialog(
       transitionBuilder: (context, a1, a2, widget) {
@@ -520,7 +605,7 @@ class YuhanNuriState extends State<YuhanNuri> {
           child: Opacity(
             opacity: a1.value,
             child: StatefulBuilder(builder: (context, StateSetter _setState) {
-              chatState = _setState;
+              msgState = _setState;
               return new WillPopScope(
                 onWillPop: closeChatting,
                 child: Scaffold(
@@ -544,7 +629,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                           controller: _scroll,
                           padding: EdgeInsets.only(bottom: 15),
                           child: Column(
-                            children: msg,
+                            children: msgList,
                           ),
                         ),
                       ),
@@ -558,7 +643,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                           keyboardType: TextInputType.multiline,
                           maxLines: 4,
                           minLines: 1,
-                          controller: _txtEdit,
+                          controller: _msg,
                           decoration: InputDecoration(
                             hintText: "메시지 전송...",
                             border: InputBorder.none,
@@ -584,17 +669,21 @@ class YuhanNuriState extends State<YuhanNuri> {
                               color: Color.fromARGB(255, 0, 115, 215),
                               onPressed: isInput
                                   ? () => _setState(() {
-                                        msg.add(
-                                            sendMessage(_txtEdit.value.text));
-                                        msg.add(recvMessage(
-                                            "홍길동", _txtEdit.value.text));
+                                        String input = _msg.value.text;
+
+                                        msgList.add(sendMessage(input));
+
                                         _scroll.animateTo(
                                             _scroll.position.maxScrollExtent +
                                                 100,
                                             duration:
                                                 Duration(milliseconds: 500),
                                             curve: Curves.ease);
-                                        _txtEdit.clear();
+
+                                        // await _webView.evaluateJavascript(
+                                        //     source: "sendMessage('$input');");
+
+                                        _msg.clear();
                                         isInput = false;
                                       })
                                   : null),
@@ -618,7 +707,7 @@ class YuhanNuriState extends State<YuhanNuri> {
     );
   }
 
-  Row sendMessage(String msg) {
+  Widget sendMessage(String msg) {
     DateTime now = DateTime.now();
     String nowHour = now.hour.toString();
     String nowMinute = now.minute.toString();
@@ -646,22 +735,24 @@ class YuhanNuriState extends State<YuhanNuri> {
             ),
           ),
           Container(
-              margin: EdgeInsets.only(top: 3, right: 10),
-              padding: EdgeInsets.only(top: 7, bottom: 10, right: 10, left: 10),
-              constraints: BoxConstraints(
-                  minWidth: 0.0, maxWidth: 275.0, minHeight: 20.0),
-              decoration: new BoxDecoration(
-                  color: Color.fromARGB(255, 0, 115, 215),
-                  borderRadius: BorderRadius.all(Radius.circular(10.0))),
-              child: new Text(msg,
-                  style: TextStyle(
-                      color: Colors.white, fontSize: 15, height: 1.3))),
+            margin: EdgeInsets.only(top: 3, right: 10),
+            padding: EdgeInsets.only(top: 7, bottom: 10, right: 10, left: 10),
+            constraints:
+                BoxConstraints(minWidth: 0.0, maxWidth: 275.0, minHeight: 20.0),
+            decoration: new BoxDecoration(
+                color: Color.fromARGB(255, 0, 115, 215),
+                borderRadius: BorderRadius.all(Radius.circular(10.0))),
+            child: new Text(
+              msg,
+              style: TextStyle(color: Colors.white, fontSize: 15, height: 1.3),
+            ),
+          ),
         ])
       ])
     ]);
   }
 
-  Row recvMessage(String name, String msg) {
+  Widget recvMessage(String name, String msg) {
     DateTime now = DateTime.now();
     String nowHour = now.hour.toString();
     String nowMinute = now.minute.toString();
@@ -699,8 +790,8 @@ class YuhanNuriState extends State<YuhanNuri> {
               style: TextStyle(color: Color.fromARGB(130, 0, 0, 0)),
             ),
           ),
-        ])
-      ])
+        ]),
+      ]),
     ]);
   }
 
@@ -718,8 +809,10 @@ class YuhanNuriState extends State<YuhanNuri> {
               child: Text('예'),
               color: Color(0xFF0275D7),
               elevation: 5,
-              onPressed: () {
+              onPressed: () async {
                 Navigator.pop(context, true);
+                await _webView[3]
+                    .evaluateJavascript(source: "closeChatting();");
               },
             ),
             RaisedButton(
@@ -735,7 +828,7 @@ class YuhanNuriState extends State<YuhanNuri> {
     );
   }
 
-  void callByWeb(String command, List<dynamic> args) async {
+  void workCallByWeb(String command, List<dynamic> args) async {
     switch (command) {
       case "alert":
         webAlertDialog(args[1].toString());
@@ -750,12 +843,16 @@ class YuhanNuriState extends State<YuhanNuri> {
         nav = globalKey.currentState;
         nav.setPage(3);
         break;
-      case "isToken":
-        String myToken = await fcm.getToken();
-        if (args[1].toString() != myToken) autoLogoutDialog();
-        break;
       case "openInput":
         openInputDialog(args[1].toString());
+        break;
+      case "openChatting":
+        chattingDialog();
+        break;
+      case "recvChatting":
+        msgState(() {
+          msgList.add(recvMessage(args[1].toString(), args[2].toString()));
+        });
         break;
       default:
         break;

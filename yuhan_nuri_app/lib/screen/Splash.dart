@@ -1,10 +1,12 @@
 import 'dart:async';
-import 'Login.dart';
-import 'YuhanNuri.dart';
-import 'Introduce.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'Login.dart';
+import 'YuhanNuri.dart';
+import 'Introduce.dart';
 
 class SplashApp extends StatelessWidget {
   @override
@@ -43,10 +45,9 @@ class SplashState extends State<Splash> {
     }
 
     if (cookie.isEmpty) {
-      Navigator.pushReplacement(
-        context,
+      Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => LoginApp(),
+          builder: (BuildContext context) => LoginApp(),
         ),
       );
     } else {

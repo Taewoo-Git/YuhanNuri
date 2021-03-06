@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -15,6 +16,11 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+
+import 'Home.dart';
+import 'Reservation.dart';
+import 'Question.dart';
+import 'Mypage.dart';
 
 final FirebaseMessaging fcm = FirebaseMessaging();
 
@@ -57,21 +63,29 @@ class YuhanNuriState extends State<YuhanNuri> {
   static List<String> page = ["홈", "예약", "문의", "MY"];
   String selected = page[0];
 
-  Map<String, String> header;
-
   int bodyIndex = 0;
-  List<InAppWebViewController> _webView = [null, null, null, null];
-  ScrollController _scroll = ScrollController();
+  List<Widget> bodyBuilder;
+
+  Home bodyHome = Home();
+  Reservation bodyReservation = Reservation();
+  Question bodyQuestion = Question();
+  Mypage bodyMypage = Mypage();
+
+  bool isExit = false;
 
   CurvedNavigationBarState nav;
   GlobalKey globalKey = new GlobalKey();
-  bool isExit = false;
 
-  StateSetter msgState;
-  List<Widget> msgList = [];
+  Map<String, String> header;
+
+  var keyboardVisibilityController = KeyboardVisibilityController();
 
   YuhanNuriState(String cookie) {
-    header = {'Cookie': '$cookie'};
+    header = {
+      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+      "Accept": "*/*; charset=utf-8",
+      "Cookie": "$cookie"
+    };
   }
 
   void initState() {
@@ -88,8 +102,6 @@ class YuhanNuriState extends State<YuhanNuri> {
         'channelId', 'channelName', 'channelDescription');
     const iOS = IOSNotificationDetails();
     const platform = NotificationDetails(android: android, iOS: iOS);
-
-    var keyboardVisibilityController = KeyboardVisibilityController();
 
     fcm.configure(onMessage: (Map<String, dynamic> message) async {
       if (Platform.isIOS) {
@@ -117,20 +129,30 @@ class YuhanNuriState extends State<YuhanNuri> {
 
     fcm.requestNotificationPermissions(const IosNotificationSettings(
         sound: true, badge: true, alert: true, provisional: true));
-
-    keyboardVisibilityController.onChange.listen((bool visible) {
-      if (visible && selected == "MY") {
-        Timer(Duration(milliseconds: 500), () {
-          _scroll.animateTo(_scroll.position.maxScrollExtent + 100,
-              duration: Duration(milliseconds: 500), curve: Curves.ease);
-        });
-      }
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    syncToken(context);
+    //syncToken(context);
+    keyboardVisibilityController.onChange.listen((bool visible) {
+      if (visible && bodyMypage.isChatting) {
+        Timer(Duration(milliseconds: 500), () {
+          bodyMypage.scroll.animateTo(
+              bodyMypage.scroll.position.maxScrollExtent + 100,
+              duration: Duration(milliseconds: 500),
+              curve: Curves.ease);
+        });
+      } else if (!visible) {
+        FocusScope.of(context).unfocus();
+      }
+    });
+    keyboardVisibilityController.onChange.listen((bool visible) {});
+    bodyBuilder = [
+      bodyHome.getBuild(),
+      bodyReservation.getBuild(),
+      bodyQuestion.getBuild(),
+      bodyMypage.getBuild()
+    ];
     return OKToast(
       position: ToastPosition.bottom,
       child: MaterialApp(
@@ -151,15 +173,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                 )
               ],
             ),
-            body: IndexedStack(
-              index: bodyIndex,
-              children: [
-                buildWebView(0),
-                buildWebView(1),
-                buildQuestionPage(),
-                buildWebView(3)
-              ],
-            ),
+            body: bodyBuilder[bodyIndex],
             bottomNavigationBar: CurvedNavigationBar(
               key: globalKey,
               index: 0,
@@ -191,7 +205,6 @@ class YuhanNuriState extends State<YuhanNuri> {
                 setState(() {
                   bodyIndex = index;
                   selected = page[index];
-                  //if (index == 3) chattingDialog(); // temp code
                 });
               },
               animationCurve: Curves.easeOut,
@@ -235,8 +248,6 @@ class YuhanNuriState extends State<YuhanNuri> {
       initialUrl: urls[index],
       initialHeaders: header,
       onLoadStart: (controller, url) {
-        _webView[index] = controller;
-
         if (!urls.contains(url)) {
           if (url.contains("browser_fallback_url")) {
             url = url
@@ -261,127 +272,13 @@ class YuhanNuriState extends State<YuhanNuri> {
     )));
   }
 
-  Widget buildQuestionPage() {
-    List<String> typeList = ["시스템 문의", "상담 문의"];
-    String selectedType = typeList[0];
-
-    TextEditingController _title = TextEditingController();
-    TextEditingController _content = TextEditingController();
-
-    return StatefulBuilder(builder: (context, StateSetter _setState) {
-      return SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                  margin: const EdgeInsets.fromLTRB(40, 30, 40, 20),
-                  child: Text(
-                    "무엇이든 물어보세요!",
-                    style: TextStyle(fontSize: 25),
-                  )),
-            ),
-            Container(
-              margin: const EdgeInsets.fromLTRB(15, 10, 15, 10),
-              child: Column(
-                children: [
-                  Container(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "문의 유형",
-                      style:
-                          TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  Container(
-                    child: DropdownButton(
-                      isExpanded: true,
-                      items: typeList.map((e) {
-                        return DropdownMenuItem(value: e, child: Text(e));
-                      }).toList(),
-                      value: selectedType,
-                      onChanged: (value) {
-                        _setState(() {
-                          selectedType = value;
-                        });
-                      },
-                    ),
-                  )
-                ],
-              ),
-            ),
-            Container(
-              margin: const EdgeInsets.fromLTRB(15, 10, 15, 10),
-              child: Column(
-                children: [
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 10),
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "제목",
-                      style:
-                          TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  TextField(
-                    controller: _title,
-                    decoration: InputDecoration(
-                        border: OutlineInputBorder(), hintText: "제목을 입력하세요."),
-                  )
-                ],
-              ),
-            ),
-            Container(
-              margin: const EdgeInsets.fromLTRB(15, 10, 15, 10),
-              child: Column(
-                children: [
-                  Container(
-                    alignment: Alignment.centerLeft,
-                    margin: const EdgeInsets.only(bottom: 10),
-                    child: Text(
-                      "내용",
-                      style:
-                          TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  TextField(
-                    controller: _content,
-                    maxLines: 10,
-                    decoration: InputDecoration(
-                        border: OutlineInputBorder(), hintText: "내용을 입력하세요."),
-                  )
-                ],
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.only(right: 15),
-              alignment: Alignment.centerRight,
-              child: RaisedButton(
-                child: Text(
-                  "작성",
-                  style: TextStyle(color: Colors.white),
-                ),
-                color: Color(0xFF0275D7),
-                onPressed: () {
-                  print(
-                      'selected : $selectedType \ntitle : ${_title.value.text}\ncontent : ${_content.value.text}');
-                },
-              ),
-            ),
-          ],
-        ),
-      );
-    });
-  }
-
   void pushClick(String msg) {
     if (msg == "mypage" || msg == "satisfaction") {
       nav = globalKey.currentState;
-      nav.setPage(3);
+      nav.setPage(1);
     } else if (msg == "question") {
       nav = globalKey.currentState;
       nav.setPage(3);
-      _webView[3].loadUrl(url: urls[4], headers: header);
     }
   }
 
@@ -392,6 +289,7 @@ class YuhanNuriState extends State<YuhanNuri> {
   }
 
   void logoutDialog() {
+    Vibration.vibrate();
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -411,11 +309,7 @@ class YuhanNuriState extends State<YuhanNuri> {
 
                 http.Client().post(
                   Uri.parse(Domain + 'user/mobile'),
-                  headers: {
-                    'Content-Type':
-                        'application/x-www-form-urlencoded; charset=UTF-8',
-                    'Accept': 'application/json; charset=utf-8',
-                  },
+                  headers: header,
                   body: {
                     'command': 'logout',
                     'userToken': prefs.getString('Token')
@@ -433,7 +327,7 @@ class YuhanNuriState extends State<YuhanNuri> {
               child: Text("아니오"),
               elevation: 5,
               onPressed: () {
-                Navigator.of(context, rootNavigator: true).pop('dialog');
+                Navigator.pop(context, true);
               },
             )
           ],
@@ -475,10 +369,7 @@ class YuhanNuriState extends State<YuhanNuri> {
 
     http.Response res = await http.Client().post(
       Uri.parse(Domain + 'user/mobile'),
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        'Accept': 'application/json; charset=utf-8',
-      },
+      headers: header,
       body: {'command': 'login', 'userToken': prefs.getString('Token')},
     );
 
@@ -530,7 +421,7 @@ class YuhanNuriState extends State<YuhanNuri> {
               color: Color(0xFF0275D7),
               elevation: 5,
               onPressed: () async {
-                Navigator.of(context, rootNavigator: true).pop('dialog');
+                Navigator.pop(context, true);
               },
             ),
           ],
@@ -546,9 +437,10 @@ class YuhanNuriState extends State<YuhanNuri> {
     String txtHint = objTextInfo['value'].toString().isEmpty
         ? objTextInfo['hint'].toString()
         : objTextInfo['value'].toString();
-    String txtElement = objTextInfo['element'].toString();
 
-    String txtValue = "";
+    //String txtElement = objTextInfo['element'].toString();
+
+    //String txtValue = "";
 
     showDialog(
       context: context,
@@ -563,7 +455,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                 decoration:
                     new InputDecoration(labelText: txtTitle, hintText: txtHint),
                 onChanged: (value) {
-                  txtValue = value;
+                  //txtValue = value;
                 },
               ))
             ],
@@ -574,254 +466,16 @@ class YuhanNuriState extends State<YuhanNuri> {
               color: Color(0xFF0275D7),
               elevation: 5,
               onPressed: () async {
-                await _webView[bodyIndex].evaluateJavascript(
-                    source: "\$('#$txtElement').val('$txtValue')");
-
-                Navigator.of(context, rootNavigator: true).pop('dialog');
+                Navigator.pop(context, true);
               },
             ),
             RaisedButton(
               child: Text("취소"),
               elevation: 5,
               onPressed: () {
-                Navigator.of(context, rootNavigator: true).pop('dialog');
+                Navigator.pop(context, true);
               },
             )
-          ],
-        );
-      },
-    );
-  }
-
-  void chattingDialog() {
-    bool isInput = false;
-    TextEditingController _msg = TextEditingController();
-
-    showGeneralDialog(
-      transitionBuilder: (context, a1, a2, widget) {
-        final curvedValue = Curves.easeInOutBack.transform(a1.value) - 1.0;
-        return Transform(
-          transform: Matrix4.translationValues(0.0, curvedValue * -200, 0.0),
-          child: Opacity(
-            opacity: a1.value,
-            child: StatefulBuilder(builder: (context, StateSetter _setState) {
-              msgState = _setState;
-              return new WillPopScope(
-                onWillPop: closeChatting,
-                child: Scaffold(
-                  appBar: AppBar(
-                    backgroundColor: Color.fromARGB(255, 0, 115, 215),
-                    toolbarHeight: 50,
-                    title: new Text("채팅상담",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 20)),
-                  ),
-                  body: Column(children: <Widget>[
-                    Expanded(
-                      child:
-                          NotificationListener<OverscrollIndicatorNotification>(
-                        onNotification:
-                            (OverscrollIndicatorNotification overscroll) {
-                          overscroll.disallowGlow();
-                          return;
-                        },
-                        child: SingleChildScrollView(
-                          controller: _scroll,
-                          padding: EdgeInsets.only(bottom: 15),
-                          child: Column(
-                            children: msgList,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      color: Color(0xFFEAEAEA),
-                      alignment: Alignment.bottomCenter,
-                      child: Row(children: [
-                        Flexible(
-                            child: new TextField(
-                          keyboardType: TextInputType.multiline,
-                          maxLines: 4,
-                          minLines: 1,
-                          controller: _msg,
-                          decoration: InputDecoration(
-                            hintText: "메시지 전송...",
-                            border: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            errorBorder: InputBorder.none,
-                            disabledBorder: InputBorder.none,
-                            fillColor: Color(0xFFEAEAEA),
-                            filled: true,
-                          ),
-                          onChanged: (value) {
-                            _setState(() {
-                              if (value.isEmpty)
-                                isInput = false;
-                              else
-                                isInput = true;
-                            });
-                          },
-                        )),
-                        Container(
-                          child: IconButton(
-                              icon: Icon(Icons.send),
-                              color: Color.fromARGB(255, 0, 115, 215),
-                              onPressed: isInput
-                                  ? () => _setState(() {
-                                        String input = _msg.value.text;
-
-                                        msgList.add(sendMessage(input));
-
-                                        _scroll.animateTo(
-                                            _scroll.position.maxScrollExtent +
-                                                100,
-                                            duration:
-                                                Duration(milliseconds: 500),
-                                            curve: Curves.ease);
-
-                                        // await _webView.evaluateJavascript(
-                                        //     source: "sendMessage('$input');");
-
-                                        _msg.clear();
-                                        isInput = false;
-                                      })
-                                  : null),
-                        ),
-                      ]),
-                    ),
-                  ]),
-                ),
-              );
-            }),
-          ),
-        );
-      },
-      transitionDuration: Duration(milliseconds: 350),
-      context: context,
-      barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(0),
-      pageBuilder: (context, animation1, animation2) {
-        return null;
-      },
-    );
-  }
-
-  Widget sendMessage(String msg) {
-    DateTime now = DateTime.now();
-    String nowHour = now.hour.toString();
-    String nowMinute = now.minute.toString();
-    if (nowHour.length == 1) nowHour = "0" + nowHour;
-    if (nowMinute.length == 1) nowMinute = "0" + nowMinute;
-
-    return new Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-      Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-        Container(
-            decoration: BoxDecoration(),
-            margin: EdgeInsets.only(top: 15, right: 15),
-            child: Text(
-              "나",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            )),
-        Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-          Container(
-            padding: EdgeInsets.only(right: 5),
-            child: Text(
-              nowHour + ":" + nowMinute,
-              style: TextStyle(color: Color.fromARGB(130, 0, 0, 0)),
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.only(top: 3, right: 10),
-            padding: EdgeInsets.only(top: 7, bottom: 10, right: 10, left: 10),
-            constraints:
-                BoxConstraints(minWidth: 0.0, maxWidth: 275.0, minHeight: 20.0),
-            decoration: new BoxDecoration(
-                color: Color.fromARGB(255, 0, 115, 215),
-                borderRadius: BorderRadius.all(Radius.circular(10.0))),
-            child: new Text(
-              msg,
-              style: TextStyle(color: Colors.white, fontSize: 15, height: 1.3),
-            ),
-          ),
-        ])
-      ])
-    ]);
-  }
-
-  Widget recvMessage(String name, String msg) {
-    DateTime now = DateTime.now();
-    String nowHour = now.hour.toString();
-    String nowMinute = now.minute.toString();
-    if (nowHour.length == 1) nowHour = "0" + nowHour;
-    if (nowMinute.length == 1) nowMinute = "0" + nowMinute;
-
-    return new Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Container(
-            decoration: BoxDecoration(),
-            margin: EdgeInsets.only(top: 15, left: 15),
-            child: Text(
-              name + " 선생님",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            )),
-        Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-          Container(
-              margin: EdgeInsets.only(top: 3, left: 10),
-              padding: EdgeInsets.only(top: 7, bottom: 10, right: 10, left: 10),
-              constraints: BoxConstraints(
-                  minWidth: 0.0, maxWidth: 275.0, minHeight: 20.0),
-              decoration: new BoxDecoration(
-                  color: Color(0xFFEAEAEA),
-                  borderRadius: BorderRadius.all(Radius.circular(10.0))),
-              child: new Text(msg,
-                  style: TextStyle(
-                      color: Color(0xFF656565), fontSize: 15, height: 1.3))),
-          Container(
-            padding: EdgeInsets.only(left: 5),
-            child: Text(
-              nowHour + ":" + nowMinute,
-              style: TextStyle(color: Color.fromARGB(130, 0, 0, 0)),
-            ),
-          ),
-        ]),
-      ]),
-    ]);
-  }
-
-  Future<bool> closeChatting() {
-    Vibration.vibrate();
-    return showDialog(
-      context: context,
-      builder: (context) {
-        FocusScope.of(context).unfocus();
-        return AlertDialog(
-          title: Text("유한누리"),
-          content: Text('채팅상담을 종료하시겠습니까?'),
-          actions: <Widget>[
-            RaisedButton(
-              child: Text('예'),
-              color: Color(0xFF0275D7),
-              elevation: 5,
-              onPressed: () async {
-                Navigator.pop(context, true);
-                await _webView[3]
-                    .evaluateJavascript(source: "closeChatting();");
-              },
-            ),
-            RaisedButton(
-              child: Text('아니오'),
-              elevation: 5,
-              onPressed: () {
-                Navigator.pop(context, false);
-              },
-            ),
           ],
         );
       },
@@ -847,15 +501,20 @@ class YuhanNuriState extends State<YuhanNuri> {
         openInputDialog(args[1].toString());
         break;
       case "openChatting":
-        chattingDialog();
+        //chattingDialog();
         break;
       case "recvChatting":
-        msgState(() {
-          msgList.add(recvMessage(args[1].toString(), args[2].toString()));
-        });
+        // msgState(() {
+        //   msgList.add(recvMessage(args[1].toString(), args[2].toString()));
+        // });
         break;
       default:
         break;
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 }

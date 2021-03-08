@@ -174,7 +174,7 @@ class LoginState extends State<Login> {
             },
             child: Text(
               "자동 로그인",
-              style: new TextStyle(color: Color(0xFF9e9e9e), fontSize: 16),
+              style: new TextStyle(color: Color(0xFF9E9E9E), fontSize: 16),
             ))
       ],
     );
@@ -184,7 +184,7 @@ class LoginState extends State<Login> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: Color.fromARGB(255, 0, 115, 215),
+          backgroundColor: Color(0xFF0073D7),
           toolbarHeight: 50,
           title: new Text('로그인',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25)),

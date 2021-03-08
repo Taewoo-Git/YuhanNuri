@@ -160,7 +160,7 @@ class YuhanNuriState extends State<YuhanNuri> {
         home: WillPopScope(
           child: Scaffold(
             appBar: AppBar(
-              backgroundColor: Color.fromARGB(255, 0, 115, 215),
+              backgroundColor: Color(0xFF0073D7),
               toolbarHeight: 50,
               title: new Text(selected,
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25)),
@@ -177,7 +177,7 @@ class YuhanNuriState extends State<YuhanNuri> {
             bottomNavigationBar: CurvedNavigationBar(
               key: globalKey,
               index: 0,
-              backgroundColor: Color.fromARGB(255, 0, 115, 215),
+              backgroundColor: Color(0xFF0073D7),
               items: <Widget>[
                 Image(
                   image: AssetImage('assets/home.png'),

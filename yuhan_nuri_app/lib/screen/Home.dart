@@ -43,7 +43,7 @@ class Home {
                     Container(
                       child: IconButton(
                         icon: Icon(Icons.search),
-                        color: Color.fromARGB(255, 0, 115, 215),
+                        color: Color(0xFF0073D7),
                         onPressed: () {},
                       ),
                     )
@@ -52,13 +52,6 @@ class Home {
               ),
               Column(
                 children: noticeList,
-              ),
-              Center(
-                heightFactor: 3.5,
-                child: CircularProgressIndicator(
-                  backgroundColor: Color(0xFFFFFFFF),
-                  strokeWidth: 3,
-                ),
               ),
             ],
           ),
@@ -82,6 +75,8 @@ Widget setNotice() {
           title: Text(
             "시스템 정기점검 알림",
             style: TextStyle(fontSize: 20),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           subtitle: Text(
             "03.06",

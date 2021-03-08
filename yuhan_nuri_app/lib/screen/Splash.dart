@@ -16,7 +16,7 @@ class SplashApp extends StatelessWidget {
       DeviceOrientation.portraitUp,
     ]);
     SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(statusBarColor: Color.fromARGB(255, 0, 115, 215)));
+        SystemUiOverlayStyle(statusBarColor: Color(0xFF0073D7)));
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Splash(),

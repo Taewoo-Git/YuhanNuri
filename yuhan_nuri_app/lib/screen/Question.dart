@@ -23,14 +23,15 @@ class Question {
             children: [
               Center(
                 child: Container(
-                    margin: const EdgeInsets.fromLTRB(40, 30, 40, 20),
-                    child: Text(
-                      "무엇이든 물어보세요!",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontFamily: 'jua',
-                      ),
-                    )),
+                  margin: const EdgeInsets.fromLTRB(40, 30, 40, 20),
+                  child: Text(
+                    "무엇이든 물어보세요!",
+                    style: TextStyle(
+                      fontSize: 25,
+                      fontFamily: 'jua',
+                    ),
+                  ),
+                ),
               ),
               Container(
                 margin: const EdgeInsets.fromLTRB(15, 10, 15, 10),

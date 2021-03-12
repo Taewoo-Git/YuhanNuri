@@ -46,6 +46,7 @@ dev_dependencies:
   flutter_keyboard_visibility: ^4.0.6
   flutter_html: ^0.8.2
   custom_switch: ^0.0.1
+  grouped_buttons: ^1.0.4
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -69,6 +70,10 @@ flutter:
     - assets/mypage.png
     - assets/btnAuto-on.png
     - assets/btnAuto-off.png
+    - assets/btnCheck-on.png
+    - assets/btnCheck-off.png
+    - assets/btnDescription-on.png
+    - assets/btnDescription-off.png
     - assets/intro_welcome.jpg
     - assets/intro_consult.jpg
     - assets/intro_app.jpg

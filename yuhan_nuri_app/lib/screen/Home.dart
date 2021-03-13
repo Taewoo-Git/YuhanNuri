@@ -85,21 +85,21 @@ Widget setNotice() {
           children: [
             Divider(height: 1, indent: 10, endIndent: 10, color: Colors.black),
             Container(
-                alignment: Alignment.centerLeft,
-                margin: EdgeInsets.all(10),
-                padding: EdgeInsets.all(10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Html(
-                      padding: EdgeInsets.all(0),
-                      data: "<p>Hello <b>Flutter</b></p>",
-                      onLinkTap: (url) {
-                        print("Opening $url...");
-                      },
-                    ),
-                  ],
-                )),
+              alignment: Alignment.centerLeft,
+              margin: EdgeInsets.all(10),
+              padding: EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Html(
+                    data: """<p>Hello <b>Flutter</b></p>""",
+                    onLinkTap: (url) {
+                      print("Opening $url");
+                    },
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),

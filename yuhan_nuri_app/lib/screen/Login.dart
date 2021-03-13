@@ -139,10 +139,12 @@ class LoginState extends State<Login> {
       padding: EdgeInsets.symmetric(vertical: 0),
       width: double.infinity,
       height: 60,
-      child: RaisedButton(
+      child: ElevatedButton(
         onPressed: () => {portalLogin(userID, userPassword, isAutoLogin)},
-        padding: EdgeInsets.all(15),
-        color: Color(0xFF0275D8),
+        style: ElevatedButton.styleFrom(
+          primary: Color(0xFF0275D7),
+          padding: EdgeInsets.all(15),
+        ),
         child: Text(
           '로그인',
           style: TextStyle(
@@ -153,29 +155,36 @@ class LoginState extends State<Login> {
   }
 
   Widget buildCheckAutoLogin(BuildContext context) {
-    return new Row(
+    return Row(
       children: <Widget>[
         GestureDetector(
-            onTap: () {
-              setState(() {
-                isAutoLogin = !isAutoLogin;
-              });
-            },
-            child: isAutoLogin
-                ? Image.asset("assets/btnAuto-on.png", width: 20, height: 20)
-                : Image.asset("assets/btnAuto-off.png", width: 20, height: 20)),
-        new FlatButton(
-            splashColor: Colors.transparent,
-            highlightColor: Colors.transparent,
-            onPressed: () {
-              setState(() {
-                isAutoLogin = !isAutoLogin;
-              });
-            },
-            child: Text(
-              "자동 로그인",
-              style: new TextStyle(color: Color(0xFF9E9E9E), fontSize: 16),
-            ))
+          onTap: () {
+            setState(() {
+              isAutoLogin = !isAutoLogin;
+            });
+          },
+          child: isAutoLogin
+              ? Image.asset("assets/btnAuto-on.png", width: 20, height: 20)
+              : Image.asset("assets/btnAuto-off.png", width: 20, height: 20),
+        ),
+        TextButton(
+          onPressed: () {
+            setState(() {
+              isAutoLogin = !isAutoLogin;
+            });
+          },
+          child: Text(
+            "자동 로그인",
+            style: TextStyle(
+              color: Color(0xFF9E9E9E),
+              fontSize: 16,
+            ),
+          ),
+          style: ButtonStyle(
+            overlayColor:
+                MaterialStateColor.resolveWith((states) => Colors.transparent),
+          ),
+        ),
       ],
     );
   }

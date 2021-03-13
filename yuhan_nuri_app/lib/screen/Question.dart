@@ -125,20 +125,15 @@ class Question {
               Container(
                 margin: EdgeInsets.only(right: 15, bottom: 10),
                 alignment: Alignment.centerRight,
-                child: RaisedButton(
+                child: ElevatedButton(
+                  onPressed: () {},
                   child: Text(
                     "등 록",
                     style: TextStyle(color: Colors.white, fontSize: 17),
                   ),
-                  color: Color(0xFF0275D7),
-                  elevation: 5,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5.0),
+                  style: ElevatedButton.styleFrom(
+                    primary: Color(0xFF0275D7),
                   ),
-                  onPressed: () {
-                    print(
-                        'selected : $selectedType \ntitle : ${_title.value.text}\ncontent : ${_content.value.text}');
-                  },
                 ),
               ),
             ],

@@ -203,8 +203,30 @@ class YuhanNuriState extends State<YuhanNuri> {
               animationDuration: const Duration(milliseconds: 300),
               onTap: (int index) {
                 setState(() {
+                  int tempIndex = bodyIndex;
                   bodyIndex = index;
                   selected = page[index];
+
+                  switch (tempIndex) {
+                    case 0:
+                      bodyHome = Home();
+                      bodyBuilder[tempIndex] = bodyHome.getBuild();
+                      break;
+                    case 1:
+                      bodyReservation = Reservation();
+                      bodyBuilder[tempIndex] = bodyReservation.getBuild();
+                      break;
+                    case 2:
+                      bodyQuestion = Question();
+                      bodyBuilder[tempIndex] = bodyQuestion.getBuild();
+                      break;
+                    case 3:
+                      bodyMypage = Mypage();
+                      bodyBuilder[tempIndex] = bodyMypage.getBuild();
+                      break;
+                    default:
+                      break;
+                  }
                 });
               },
               animationCurve: Curves.easeOut,
@@ -300,10 +322,7 @@ class YuhanNuriState extends State<YuhanNuri> {
             style: TextStyle(height: 1.3),
           ),
           actions: [
-            RaisedButton(
-              child: Text("예"),
-              color: Color(0xFF0275D7),
-              elevation: 5,
+            ElevatedButton(
               onPressed: () async {
                 SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -322,13 +341,20 @@ class YuhanNuriState extends State<YuhanNuri> {
                   SystemNavigator.pop();
                 else if (Platform.isIOS) exit(0);
               },
+              child: Text("예"),
+              style: ElevatedButton.styleFrom(
+                primary: Color(0xFF0275D7),
+              ),
             ),
-            RaisedButton(
-              child: Text("아니오"),
-              elevation: 5,
+            ElevatedButton(
               onPressed: () {
                 Navigator.pop(context, true);
               },
+              child: Text("아니오"),
+              style: ElevatedButton.styleFrom(
+                primary: Color(0xFFE6E6E6),
+                onPrimary: Colors.black,
+              ),
             )
           ],
         );
@@ -349,13 +375,14 @@ class YuhanNuriState extends State<YuhanNuri> {
               style: TextStyle(height: 1.3),
             ),
             actions: [
-              RaisedButton(
-                child: Text("확인"),
-                color: Color(0xFF0275D7),
-                elevation: 5,
+              ElevatedButton(
                 onPressed: () {
                   Phoenix.rebirth(context);
                 },
+                child: Text("확인"),
+                style: ElevatedButton.styleFrom(
+                  primary: Color(0xFF0275D7),
+                ),
               ),
             ],
           ),
@@ -392,13 +419,14 @@ class YuhanNuriState extends State<YuhanNuri> {
                 style: TextStyle(height: 1.3),
               ),
               actions: [
-                RaisedButton(
-                  child: Text("확인"),
-                  color: Color(0xFF0275D7),
-                  elevation: 5,
+                ElevatedButton(
                   onPressed: () {
                     Phoenix.rebirth(context);
                   },
+                  child: Text("확인"),
+                  style: ElevatedButton.styleFrom(
+                    primary: Color(0xFF0275D7),
+                  ),
                 ),
               ],
             ),
@@ -416,13 +444,14 @@ class YuhanNuriState extends State<YuhanNuri> {
           title: Text("유한누리"),
           content: Text(message),
           actions: [
-            RaisedButton(
-              child: Text("확인"),
-              color: Color(0xFF0275D7),
-              elevation: 5,
-              onPressed: () async {
+            ElevatedButton(
+              onPressed: () {
                 Navigator.pop(context, true);
               },
+              child: Text("확인"),
+              style: ElevatedButton.styleFrom(
+                primary: Color(0xFF0275D7),
+              ),
             ),
           ],
         );
@@ -461,21 +490,25 @@ class YuhanNuriState extends State<YuhanNuri> {
             ],
           ),
           actions: [
-            RaisedButton(
-              child: Text("완료"),
-              color: Color(0xFF0275D7),
-              elevation: 5,
-              onPressed: () async {
-                Navigator.pop(context, true);
-              },
-            ),
-            RaisedButton(
-              child: Text("취소"),
-              elevation: 5,
+            ElevatedButton(
               onPressed: () {
                 Navigator.pop(context, true);
               },
-            )
+              child: Text("완료"),
+              style: ElevatedButton.styleFrom(
+                primary: Color(0xFF0275D7),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+              child: Text("취소"),
+              style: ElevatedButton.styleFrom(
+                primary: Color(0xFFE6E6E6),
+                onPrimary: Colors.black,
+              ),
+            ),
           ],
         );
       },

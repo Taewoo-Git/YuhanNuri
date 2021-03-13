@@ -296,12 +296,12 @@ class Mypage {
                             strokeWidth: 3.5,
                           ),
                         ),
-                        RaisedButton(
-                          child: Text("Test"),
+                        ElevatedButton(
                           onPressed: () {
                             chattingDialog(context);
                             isChatting = true;
                           },
+                          child: Text("Test"),
                         ),
                       ],
                     ),
@@ -521,22 +521,26 @@ class Mypage {
         return AlertDialog(
           title: Text("유한누리"),
           content: Text('채팅상담을 종료하시겠습니까?'),
-          actions: <Widget>[
-            RaisedButton(
-              child: Text('예'),
-              color: Color(0xFF0275D7),
-              elevation: 5,
-              onPressed: () async {
+          actions: [
+            ElevatedButton(
+              onPressed: () {
                 isChatting = false;
                 Navigator.pop(context, true);
               },
+              child: Text('예'),
+              style: ElevatedButton.styleFrom(
+                primary: Color(0xFF0275D7),
+              ),
             ),
-            RaisedButton(
-              child: Text('아니오'),
-              elevation: 5,
+            ElevatedButton(
               onPressed: () {
                 Navigator.pop(context, false);
               },
+              child: Text('아니오'),
+              style: ElevatedButton.styleFrom(
+                primary: Color(0xFFE6E6E6),
+                onPrimary: Colors.black,
+              ),
             ),
           ],
         );

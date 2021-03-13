@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:grouped_buttons/grouped_buttons.dart';
 
 class Reservation {
@@ -44,9 +45,9 @@ class Reservation {
                 Container(
                   margin: EdgeInsets.only(top: 10),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      FlatButton(
+                      TextButton(
                         onPressed: () {
                           setState(() {
                             btnPsycho = "assets/btnCheck-on.png";
@@ -72,12 +73,19 @@ class Reservation {
                             ),
                             Text(
                               "심리검사",
-                              style: TextStyle(color: Colors.black),
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 15.5,
+                              ),
                             ),
                           ],
                         ),
+                        style: ButtonStyle(
+                          overlayColor: MaterialStateColor.resolveWith(
+                              (states) => Colors.transparent),
+                        ),
                       ),
-                      FlatButton(
+                      TextButton(
                         onPressed: () {
                           setState(() {
                             btnConsult = "assets/btnCheck-on.png";
@@ -108,9 +116,16 @@ class Reservation {
                             ),
                             Text(
                               "상담예약",
-                              style: TextStyle(color: Colors.black),
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 15.5,
+                              ),
                             ),
                           ],
+                        ),
+                        style: ButtonStyle(
+                          overlayColor: MaterialStateColor.resolveWith(
+                              (states) => Colors.transparent),
                         ),
                       ),
                     ],
@@ -133,8 +148,7 @@ class Reservation {
         child: Container(
           color: Colors.yellow,
           child: Center(
-            child: RaisedButton(
-              child: Text("스케줄 확인"),
+            child: ElevatedButton(
               onPressed: () {
                 setState(() {
                   pageController.nextPage(
@@ -142,6 +156,7 @@ class Reservation {
                       curve: Curves.fastLinearToSlowEaseIn);
                 });
               },
+              child: Text("스케줄 확인"),
             ),
           ),
         ),
@@ -155,8 +170,7 @@ class Reservation {
         child: Container(
           color: Colors.green,
           child: Center(
-            child: RaisedButton(
-              child: Text("자가 진단"),
+            child: ElevatedButton(
               onPressed: () {
                 setState(() {
                   pageController.nextPage(
@@ -164,6 +178,7 @@ class Reservation {
                       curve: Curves.fastLinearToSlowEaseIn);
                 });
               },
+              child: Text("자가 진단"),
             ),
           ),
         ),
@@ -172,21 +187,413 @@ class Reservation {
   }
 
   Widget privacyPage() {
+    String agree1 = "assets/btnCheck-off.png";
+    String agree2 = "assets/btnCheck-off.png";
+    String agree3 = "assets/btnCheck-off.png";
+    String agree4 = "assets/btnCheck-off.png";
+    String agree5 = "assets/btnCheck-off.png";
+
     return StatefulBuilder(builder: (context, StateSetter setState) {
-      return SizedBox.expand(
+      return SingleChildScrollView(
         child: Container(
-          color: Colors.blue,
-          child: Center(
-            child: RaisedButton(
-              child: Text("개인정보 제공 동의"),
-              onPressed: () {
-                setState(() {
-                  pageController.animateToPage(0,
-                      duration: Duration(milliseconds: 1000),
-                      curve: Curves.fastLinearToSlowEaseIn);
-                });
-              },
-            ),
+          padding: EdgeInsets.fromLTRB(10, 15, 10, 13),
+          child: Column(
+            children: [
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    if (agree1 == "assets/btnCheck-off.png")
+                      agree1 = "assets/btnCheck-on.png";
+                    else
+                      agree1 = "assets/btnCheck-off.png";
+                  });
+                },
+                child: Row(
+                  children: [
+                    Container(
+                      margin: EdgeInsets.only(right: 15),
+                      child: Image(
+                        image: AssetImage(agree1),
+                        width: 18,
+                      ),
+                    ),
+                    Text(
+                      "(필수)  ",
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF0275D7),
+                      ),
+                    ),
+                    Text(
+                      "상담 프로그램 이용 관련 동의",
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                style: ButtonStyle(
+                  overlayColor: MaterialStateColor.resolveWith(
+                      (states) => Colors.transparent),
+                ),
+              ),
+              Container(
+                height: 200,
+                margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
+                padding: EdgeInsets.only(top: 5, bottom: 5),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(15.0),
+                  ),
+                ),
+                alignment: Alignment.centerLeft,
+                child: NotificationListener<OverscrollIndicatorNotification>(
+                  onNotification: (OverscrollIndicatorNotification overscroll) {
+                    overscroll.disallowGlow();
+                    return;
+                  },
+                  child: SingleChildScrollView(
+                    child: Html(
+                      data: """
+<div>
+<b style="color:#d9534f;">1. 비밀보장에 관한 약속</b>
+<p>
+본 센터에서 이루어지는 모든 상담활동은 상담자 윤리강령에 근거하여 비밀 보장을 약속하며, 당사자 동의 없이 타인이나 센터 외부로 기록들이 공개되지 않습니다. 그러나 아래의 경우에는, 관련 의무 규정상 가족이나 제3자에게 공개될 수 있습니다.</br></br>
+1) 최근 당신이 아동학대 혹은 성인학대의 피해자나 가해자로 여겨질 만한 근거가 있는 경우</br></br>
+2) 당신이 자살하려고 하는 경우</br></br>
+3) 당신의 행동이 타인에게 위해를 가할 가능성이 있는 경우</br></br>
+4) 법정에서 증언을 위해 당신의 기록을 공개해 줄 것을 상담자에게 요청하는 경우</br></br>
+5) 상담 내용이 자문과 교육의 목적으로 상담 수퍼바이저에게 공개하는 경우</br></br>
+6) 당신이 감염성이 있는 치명적 질병이 있고, 당신과의 관계로 인해 위험한 수준으로 그 질병에 노출된 제3자가 있는 경우</br>
+</p>
+<b style="color:#d9534f;">2. 상담내용 기록 및 녹음</b>
+<p>
+상담사의 자문과 교육을 목적으로 상담내용을 기록, 녹음할 수 있습니다. 기록, 녹음은 철저히 비밀유지로 관리되며 이 외의 목적으로 절대 활용되지 않습니다(녹음을 원치 않을 경우 상담사에게 요구할 수 있습니다). 상담센터 내부에 관리되는 개인정보 및 기록물은 5년간 보관 후 폐기됩니다.<br/>
+</p>
+<b style="color:#d9534f;">3. 비대면 상담 관련 동의</b>
+<p>
+비대면으로 이뤄지는 상담내용을 상담자의 동의 없이 참여자가 임의로 녹음, 녹화, 저장하여 공개 또는 유포하여서는 안 되며, 이러한 경우에는 그에 따른 민·형사상의 책임을 지게 될 수 있음을 알려드립니다.<br/>
+</p>
+<p style="color:#d9534f;">
+※ 상위 제공된 상담 프로그램 이용 관련 동의를 거부할 권리가 있습니다. 그러나, 동의를 거부할 경우 관련 상담 프로그램 이용이 불가합니다.
+</p>
+</div>
+                    """,
+                    ),
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    if (agree2 == "assets/btnCheck-off.png")
+                      agree2 = "assets/btnCheck-on.png";
+                    else
+                      agree2 = "assets/btnCheck-off.png";
+                  });
+                },
+                child: Row(
+                  children: [
+                    Container(
+                      margin: EdgeInsets.only(right: 15),
+                      child: Image(
+                        image: AssetImage(agree2),
+                        width: 18,
+                      ),
+                    ),
+                    Text(
+                      "(필수)  ",
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF0275D7),
+                      ),
+                    ),
+                    Text(
+                      "개인정보 수집·이용 동의",
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                style: ButtonStyle(
+                  overlayColor: MaterialStateColor.resolveWith(
+                      (states) => Colors.transparent),
+                ),
+              ),
+              Container(
+                height: 200,
+                margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
+                padding: EdgeInsets.only(top: 5, bottom: 5),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(15.0),
+                  ),
+                ),
+                alignment: Alignment.centerLeft,
+                child: NotificationListener<OverscrollIndicatorNotification>(
+                  onNotification: (OverscrollIndicatorNotification overscroll) {
+                    overscroll.disallowGlow();
+                    return;
+                  },
+                  child: SingleChildScrollView(
+                    child: Html(
+                      data: """
+<div>
+<b style="color:#d9534f;">1. 비밀보장에 관한 약속</b>
+<p>
+본 센터에서 이루어지는 모든 상담활동은 상담자 윤리강령에 근거하여 비밀 보장을 약속하며, 당사자 동의 없이 타인이나 센터 외부로 기록들이 공개되지 않습니다. 그러나 아래의 경우에는, 관련 의무 규정상 가족이나 제3자에게 공개될 수 있습니다.</br></br>
+1) 최근 당신이 아동학대 혹은 성인학대의 피해자나 가해자로 여겨질 만한 근거가 있는 경우</br></br>
+2) 당신이 자살하려고 하는 경우</br></br>
+3) 당신의 행동이 타인에게 위해를 가할 가능성이 있는 경우</br></br>
+4) 법정에서 증언을 위해 당신의 기록을 공개해 줄 것을 상담자에게 요청하는 경우</br></br>
+5) 상담 내용이 자문과 교육의 목적으로 상담 수퍼바이저에게 공개하는 경우</br></br>
+6) 당신이 감염성이 있는 치명적 질병이 있고, 당신과의 관계로 인해 위험한 수준으로 그 질병에 노출된 제3자가 있는 경우</br>
+</p>
+<b style="color:#d9534f;">2. 상담내용 기록 및 녹음</b>
+<p>
+상담사의 자문과 교육을 목적으로 상담내용을 기록, 녹음할 수 있습니다. 기록, 녹음은 철저히 비밀유지로 관리되며 이 외의 목적으로 절대 활용되지 않습니다(녹음을 원치 않을 경우 상담사에게 요구할 수 있습니다). 상담센터 내부에 관리되는 개인정보 및 기록물은 5년간 보관 후 폐기됩니다.<br/>
+</p>
+<b style="color:#d9534f;">3. 비대면 상담 관련 동의</b>
+<p>
+비대면으로 이뤄지는 상담내용을 상담자의 동의 없이 참여자가 임의로 녹음, 녹화, 저장하여 공개 또는 유포하여서는 안 되며, 이러한 경우에는 그에 따른 민·형사상의 책임을 지게 될 수 있음을 알려드립니다.<br/>
+</p>
+<p style="color:#d9534f;">
+※ 상위 제공된 상담 프로그램 이용 관련 동의를 거부할 권리가 있습니다. 그러나, 동의를 거부할 경우 관련 상담 프로그램 이용이 불가합니다.
+</p>
+</div>
+                    """,
+                    ),
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    if (agree3 == "assets/btnCheck-off.png")
+                      agree3 = "assets/btnCheck-on.png";
+                    else
+                      agree3 = "assets/btnCheck-off.png";
+                  });
+                },
+                child: Row(
+                  children: [
+                    Container(
+                      margin: EdgeInsets.only(right: 15),
+                      child: Image(
+                        image: AssetImage(agree3),
+                        width: 18,
+                      ),
+                    ),
+                    Text(
+                      "(필수)  ",
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF0275D7),
+                      ),
+                    ),
+                    Text(
+                      "민감정보 수집·이용 동의",
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                style: ButtonStyle(
+                  overlayColor: MaterialStateColor.resolveWith(
+                      (states) => Colors.transparent),
+                ),
+              ),
+              Container(
+                height: 200,
+                margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
+                padding: EdgeInsets.only(top: 5, bottom: 5),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(15.0),
+                  ),
+                ),
+                alignment: Alignment.centerLeft,
+                child: NotificationListener<OverscrollIndicatorNotification>(
+                  onNotification: (OverscrollIndicatorNotification overscroll) {
+                    overscroll.disallowGlow();
+                    return;
+                  },
+                  child: SingleChildScrollView(
+                    child: Html(
+                      data: """
+<div>
+<b style="color:#d9534f;">1. 비밀보장에 관한 약속</b>
+<p>
+본 센터에서 이루어지는 모든 상담활동은 상담자 윤리강령에 근거하여 비밀 보장을 약속하며, 당사자 동의 없이 타인이나 센터 외부로 기록들이 공개되지 않습니다. 그러나 아래의 경우에는, 관련 의무 규정상 가족이나 제3자에게 공개될 수 있습니다.</br></br>
+1) 최근 당신이 아동학대 혹은 성인학대의 피해자나 가해자로 여겨질 만한 근거가 있는 경우</br></br>
+2) 당신이 자살하려고 하는 경우</br></br>
+3) 당신의 행동이 타인에게 위해를 가할 가능성이 있는 경우</br></br>
+4) 법정에서 증언을 위해 당신의 기록을 공개해 줄 것을 상담자에게 요청하는 경우</br></br>
+5) 상담 내용이 자문과 교육의 목적으로 상담 수퍼바이저에게 공개하는 경우</br></br>
+6) 당신이 감염성이 있는 치명적 질병이 있고, 당신과의 관계로 인해 위험한 수준으로 그 질병에 노출된 제3자가 있는 경우</br>
+</p>
+<b style="color:#d9534f;">2. 상담내용 기록 및 녹음</b>
+<p>
+상담사의 자문과 교육을 목적으로 상담내용을 기록, 녹음할 수 있습니다. 기록, 녹음은 철저히 비밀유지로 관리되며 이 외의 목적으로 절대 활용되지 않습니다(녹음을 원치 않을 경우 상담사에게 요구할 수 있습니다). 상담센터 내부에 관리되는 개인정보 및 기록물은 5년간 보관 후 폐기됩니다.<br/>
+</p>
+<b style="color:#d9534f;">3. 비대면 상담 관련 동의</b>
+<p>
+비대면으로 이뤄지는 상담내용을 상담자의 동의 없이 참여자가 임의로 녹음, 녹화, 저장하여 공개 또는 유포하여서는 안 되며, 이러한 경우에는 그에 따른 민·형사상의 책임을 지게 될 수 있음을 알려드립니다.<br/>
+</p>
+<p style="color:#d9534f;">
+※ 상위 제공된 상담 프로그램 이용 관련 동의를 거부할 권리가 있습니다. 그러나, 동의를 거부할 경우 관련 상담 프로그램 이용이 불가합니다.
+</p>
+</div>
+                    """,
+                    ),
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    if (agree4 == "assets/btnCheck-off.png")
+                      agree4 = "assets/btnCheck-on.png";
+                    else
+                      agree4 = "assets/btnCheck-off.png";
+                  });
+                },
+                child: Row(
+                  children: [
+                    Container(
+                      margin: EdgeInsets.only(right: 15),
+                      child: Image(
+                        image: AssetImage(agree4),
+                        width: 18,
+                      ),
+                    ),
+                    Text(
+                      "(필수)  ",
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF0275D7),
+                      ),
+                    ),
+                    Text(
+                      "개인정보 제3자 제공 동의",
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                style: ButtonStyle(
+                  overlayColor: MaterialStateColor.resolveWith(
+                      (states) => Colors.transparent),
+                ),
+              ),
+              Container(
+                height: 200,
+                margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
+                padding: EdgeInsets.only(top: 5, bottom: 5),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(15.0),
+                  ),
+                ),
+                alignment: Alignment.centerLeft,
+                child: NotificationListener<OverscrollIndicatorNotification>(
+                  onNotification: (OverscrollIndicatorNotification overscroll) {
+                    overscroll.disallowGlow();
+                    return;
+                  },
+                  child: SingleChildScrollView(
+                    child: Html(
+                      data: """
+<div>
+<b style="color:#d9534f;">1. 비밀보장에 관한 약속</b>
+<p>
+본 센터에서 이루어지는 모든 상담활동은 상담자 윤리강령에 근거하여 비밀 보장을 약속하며, 당사자 동의 없이 타인이나 센터 외부로 기록들이 공개되지 않습니다. 그러나 아래의 경우에는, 관련 의무 규정상 가족이나 제3자에게 공개될 수 있습니다.</br></br>
+1) 최근 당신이 아동학대 혹은 성인학대의 피해자나 가해자로 여겨질 만한 근거가 있는 경우</br></br>
+2) 당신이 자살하려고 하는 경우</br></br>
+3) 당신의 행동이 타인에게 위해를 가할 가능성이 있는 경우</br></br>
+4) 법정에서 증언을 위해 당신의 기록을 공개해 줄 것을 상담자에게 요청하는 경우</br></br>
+5) 상담 내용이 자문과 교육의 목적으로 상담 수퍼바이저에게 공개하는 경우</br></br>
+6) 당신이 감염성이 있는 치명적 질병이 있고, 당신과의 관계로 인해 위험한 수준으로 그 질병에 노출된 제3자가 있는 경우</br>
+</p>
+<b style="color:#d9534f;">2. 상담내용 기록 및 녹음</b>
+<p>
+상담사의 자문과 교육을 목적으로 상담내용을 기록, 녹음할 수 있습니다. 기록, 녹음은 철저히 비밀유지로 관리되며 이 외의 목적으로 절대 활용되지 않습니다(녹음을 원치 않을 경우 상담사에게 요구할 수 있습니다). 상담센터 내부에 관리되는 개인정보 및 기록물은 5년간 보관 후 폐기됩니다.<br/>
+</p>
+<b style="color:#d9534f;">3. 비대면 상담 관련 동의</b>
+<p>
+비대면으로 이뤄지는 상담내용을 상담자의 동의 없이 참여자가 임의로 녹음, 녹화, 저장하여 공개 또는 유포하여서는 안 되며, 이러한 경우에는 그에 따른 민·형사상의 책임을 지게 될 수 있음을 알려드립니다.<br/>
+</p>
+<p style="color:#d9534f;">
+※ 상위 제공된 상담 프로그램 이용 관련 동의를 거부할 권리가 있습니다. 그러나, 동의를 거부할 경우 관련 상담 프로그램 이용이 불가합니다.
+</p>
+</div>
+                    """,
+                    ),
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    if (agree5 == "assets/btnCheck-off.png") {
+                      agree1 = "assets/btnCheck-on.png";
+                      agree2 = "assets/btnCheck-on.png";
+                      agree3 = "assets/btnCheck-on.png";
+                      agree4 = "assets/btnCheck-on.png";
+                      agree5 = "assets/btnCheck-on.png";
+                    } else {
+                      agree1 = "assets/btnCheck-off.png";
+                      agree2 = "assets/btnCheck-off.png";
+                      agree3 = "assets/btnCheck-off.png";
+                      agree4 = "assets/btnCheck-off.png";
+                      agree5 = "assets/btnCheck-off.png";
+                    }
+                  });
+                },
+                child: Row(
+                  children: [
+                    Container(
+                      margin: EdgeInsets.only(right: 15),
+                      child: Image(
+                        image: AssetImage(agree5),
+                        width: 18,
+                      ),
+                    ),
+                    Text(
+                      "상위 유한누리 이용약간에 모두 동의합니다.",
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                style: ButtonStyle(
+                  overlayColor: MaterialStateColor.resolveWith(
+                      (states) => Colors.transparent),
+                ),
+              ),
+            ],
           ),
         ),
       );
@@ -238,16 +645,7 @@ class Reservation {
           Container(
             margin: EdgeInsets.only(top: 15, right: 15),
             alignment: Alignment.centerRight,
-            child: RaisedButton(
-              child: Text(
-                "다 음",
-                style: TextStyle(color: Colors.white, fontSize: 17),
-              ),
-              color: Color(0xFF0275D7),
-              elevation: 5,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5.0),
-              ),
+            child: ElevatedButton(
               onPressed: () {
                 setState(() {
                   pageController.nextPage(
@@ -255,6 +653,13 @@ class Reservation {
                       curve: Curves.fastLinearToSlowEaseIn);
                 });
               },
+              child: Text(
+                "다 음",
+                style: TextStyle(color: Colors.white, fontSize: 17),
+              ),
+              style: ElevatedButton.styleFrom(
+                primary: Color(0xFF0275D7),
+              ),
             ),
           ),
         ],
@@ -278,16 +683,7 @@ class Reservation {
           Container(
             margin: EdgeInsets.only(right: 15),
             alignment: Alignment.centerRight,
-            child: RaisedButton(
-              child: Text(
-                "다 음",
-                style: TextStyle(color: Colors.white, fontSize: 17),
-              ),
-              color: Color(0xFF0275D7),
-              elevation: 5,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5.0),
-              ),
+            child: ElevatedButton(
               onPressed: () {
                 setState(() {
                   pageController.nextPage(
@@ -295,6 +691,13 @@ class Reservation {
                       curve: Curves.fastLinearToSlowEaseIn);
                 });
               },
+              child: Text(
+                "다 음",
+                style: TextStyle(color: Colors.white, fontSize: 17),
+              ),
+              style: ElevatedButton.styleFrom(
+                primary: Color(0xFF0275D7),
+              ),
             ),
           ),
         ],
@@ -325,8 +728,7 @@ class Reservation {
               Text("MBTI"),
             ],
           ),
-          FlatButton(
-            minWidth: 10,
+          TextButton(
             onPressed: () {
               setState(() {
                 openDescription(
@@ -336,6 +738,10 @@ class Reservation {
             child: Image(
               image: AssetImage("assets/btnDescription-on.png"),
               width: 18,
+            ),
+            style: ButtonStyle(
+              overlayColor: MaterialStateColor.resolveWith(
+                  (states) => Colors.transparent),
             ),
           ),
         ],
@@ -495,14 +901,16 @@ class Reservation {
               height: 1.3,
             ),
           ),
+          contentPadding: EdgeInsets.fromLTRB(24, 24, 24, 15),
           actions: [
-            RaisedButton(
-              child: Text("확인"),
-              color: Color(0xFF0275D7),
-              elevation: 5,
-              onPressed: () async {
+            ElevatedButton(
+              onPressed: () {
                 Navigator.pop(context, true);
               },
+              child: Text("확인"),
+              style: ElevatedButton.styleFrom(
+                primary: Color(0xFF0275D7),
+              ),
             ),
           ],
         );

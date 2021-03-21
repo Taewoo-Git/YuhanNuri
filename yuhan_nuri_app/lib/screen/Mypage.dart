@@ -284,8 +284,7 @@ class Mypage {
                       },
                     ),
                   ),
-                  Container(
-                    color: Color(0xFFF0F0F0),
+                  SingleChildScrollView(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -305,7 +304,7 @@ class Mypage {
                         ),
                       ],
                     ),
-                  )
+                  ),
                 ],
               ),
             ),

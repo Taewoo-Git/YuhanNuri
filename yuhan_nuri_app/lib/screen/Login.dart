@@ -8,6 +8,7 @@ import 'package:progress_dialog/progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'YuhanNuri.dart';
+import 'Domain.dart';
 
 class LoginApp extends StatelessWidget {
   @override
@@ -243,7 +244,7 @@ class LoginState extends State<Login> {
     String strToken = await fcm.getToken();
 
     http.Response res = await http.Client().post(
-      Uri.parse('https://yuhannuri.run.goorm.io/user'),
+      Uri.parse(Domain.url + "user"),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
         'Accept': 'application/json; charset=utf-8',

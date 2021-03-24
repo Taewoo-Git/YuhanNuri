@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:oktoast/oktoast.dart';
@@ -21,21 +20,9 @@ import 'Home.dart';
 import 'Reservation.dart';
 import 'Question.dart';
 import 'Mypage.dart';
+import 'Domain.dart';
 
 final FirebaseMessaging fcm = FirebaseMessaging();
-
-// [0] 메인, [1] 예약, [2] 문의, [3] 마이페이지, [4] 채팅, [5] 만족도조사
-// urls 배열 외의 외부url을 로드할 시 webview가 아닌 기기의 브라우저(크롬, 사파리)를 이용해 로드(하이퍼링크 등)
-const Domain = 'https://yuhannuri.run.goorm.io/';
-const urls = [
-  Domain,
-  Domain + 'user/reservation',
-  Domain + 'user/question',
-  Domain + 'user/mypage',
-  Domain + 'user/mypage?question',
-  Domain + 'user/mypage?chatting',
-  Domain + 'user/satisfaction',
-];
 
 class YuhanNuri extends StatefulWidget {
   final String title;
@@ -148,7 +135,7 @@ class YuhanNuriState extends State<YuhanNuri> {
     });
     keyboardVisibilityController.onChange.listen((bool visible) {});
     bodyBuilder = [
-      bodyHome.getBuild(),
+      bodyHome.getBuild(header),
       bodyReservation.getBuild(),
       bodyQuestion.getBuild(),
       bodyMypage.getBuild()
@@ -202,31 +189,33 @@ class YuhanNuriState extends State<YuhanNuri> {
               ],
               animationDuration: const Duration(milliseconds: 300),
               onTap: (int index) {
+                switch (bodyIndex) {
+                  case 0:
+                    if (bodyIndex == index)
+                      return;
+                    else {
+                      bodyHome = Home();
+                      bodyBuilder[bodyIndex] = bodyHome.getBuild(header);
+                    }
+                    break;
+                  case 1:
+                    bodyReservation = Reservation();
+                    bodyBuilder[bodyIndex] = bodyReservation.getBuild();
+                    break;
+                  case 2:
+                    bodyQuestion = Question();
+                    bodyBuilder[bodyIndex] = bodyQuestion.getBuild();
+                    break;
+                  case 3:
+                    bodyMypage = Mypage();
+                    bodyBuilder[bodyIndex] = bodyMypage.getBuild();
+                    break;
+                  default:
+                    break;
+                }
                 setState(() {
-                  int tempIndex = bodyIndex;
                   bodyIndex = index;
                   selected = page[index];
-
-                  switch (tempIndex) {
-                    case 0:
-                      bodyHome = Home();
-                      bodyBuilder[tempIndex] = bodyHome.getBuild();
-                      break;
-                    case 1:
-                      bodyReservation = Reservation();
-                      bodyBuilder[tempIndex] = bodyReservation.getBuild();
-                      break;
-                    case 2:
-                      bodyQuestion = Question();
-                      bodyBuilder[tempIndex] = bodyQuestion.getBuild();
-                      break;
-                    case 3:
-                      bodyMypage = Mypage();
-                      bodyBuilder[tempIndex] = bodyMypage.getBuild();
-                      break;
-                    default:
-                      break;
-                  }
                 });
               },
               animationCurve: Curves.easeOut,
@@ -253,45 +242,6 @@ class YuhanNuriState extends State<YuhanNuri> {
         ),
       ),
     );
-  }
-
-  Widget buildWebView(int index) {
-    return Center(
-        child: SafeArea(
-            child: InAppWebView(
-      initialOptions: InAppWebViewGroupOptions(
-        crossPlatform: InAppWebViewOptions(
-          debuggingEnabled: true,
-          supportZoom: false,
-          horizontalScrollBarEnabled: false,
-          clearCache: true,
-        ),
-      ),
-      initialUrl: urls[index],
-      initialHeaders: header,
-      onLoadStart: (controller, url) {
-        if (!urls.contains(url)) {
-          if (url.contains("browser_fallback_url")) {
-            url = url
-                .toString()
-                .split("#Intent")[0]
-                .replaceAll("intent://", "https://");
-          }
-          controller.stopLoading();
-          launch(url, forceWebView: false);
-          controller.evaluateJavascript(
-              source: "window.location.reload(true);");
-        }
-
-        controller.addJavaScriptHandler(
-          handlerName: 'mobileHandler',
-          callback: (args) {
-            String command = args[0].toString();
-            workCallByWeb(command, args);
-          },
-        );
-      },
-    )));
   }
 
   void pushClick(String msg) {
@@ -327,7 +277,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                 SharedPreferences prefs = await SharedPreferences.getInstance();
 
                 http.Client().post(
-                  Uri.parse(Domain + 'user/mobile'),
+                  Uri.parse(Domain.url + 'user/mobile'),
                   headers: header,
                   body: {
                     'command': 'logout',
@@ -395,7 +345,7 @@ class YuhanNuriState extends State<YuhanNuri> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     http.Response res = await http.Client().post(
-      Uri.parse(Domain + 'user/mobile'),
+      Uri.parse(Domain.url + 'user/mobile'),
       headers: header,
       body: {'command': 'login', 'userToken': prefs.getString('Token')},
     );

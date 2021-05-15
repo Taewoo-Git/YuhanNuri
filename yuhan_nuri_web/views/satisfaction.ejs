@@ -14,6 +14,9 @@
 				margin: 0 !important;
 				padding: 0 !important;
             }
+			textarea[readonly] {
+				background-color: #fff !important;
+			}
 			.fade-text{
 				font-size:150%;
 				color:#494949;
@@ -61,20 +64,20 @@
 						<% if(testAsk[i].choicetypename === "Radio"){ %>
 							<% for(let j=0; j<testAsk[i].choices.split('|').length; j++){ %>
 							<input type="radio" class="from-input mb-4" name="satisfactionAnswer<%=i%>"
-								   id="<%= 'mentalAnswer'+i+j %>" value="<%= testAsk[i].choices.split('|')[j] %>">
-							<label for="<%= 'mentalAnswer'+i+j %>"><%= unescape(testAsk[i].choices.split('|')[j]) %></label><br/>
+								   id="<%= 'satisfactionSurvey'+i+j %>" value="<%= testAsk[i].choices.split('|')[j] %>">
+							<label for="<%= 'satisfactionSurvey'+i+j %>"><%= unescape(testAsk[i].choices.split('|')[j]) %></label><br/>
 							<% } %>
 						<% } %>
 						<% if(testAsk[i].choicetypename === "Check"){ %>
 							<% for(let j=0; j<testAsk[i].choices.split('|').length; j++){ %>
 							<input type="checkbox" class="from-input mb-4" name="satisfactionAnswer<%=i%>"
-								   id="<%= 'mentalAnswer'+i+j %>" value="<%= testAsk[i].choices.split('|')[j] %>">
-							<label for="<%= 'mentalAnswer'+i+j %>"><%= unescape(testAsk[i].choices.split('|')[j]) %></label><br/>
+								   id="<%= 'satisfactionSurvey'+i+j %>" value="<%= testAsk[i].choices.split('|')[j] %>">
+							<label for="<%= 'satisfactionSurvey'+i+j %>"><%= unescape(testAsk[i].choices.split('|')[j]) %></label><br/>
 							<% } %>
 						<% } %>
 						<% if(testAsk[i].choicetypename === "Normal"){ %>
 							<textarea class="form-control" placeholder="자유롭게 작성해 주세요." name="satisfactionAnswer<%=i%>"
-									  id="<%= 'mentalAnswer'+i %>" style="resize:none;margin-bottom:50px!important;"></textarea>
+									  id="<%= 'satisfactionSurvey'+i %>" style="resize:none;margin-bottom:50px!important;" readonly></textarea>
 						<% } %>
 						</div>
 					</div>
@@ -89,14 +92,23 @@
 			</form>
 		</div>
 		<script>
-			const windowHeight = window.innerHeight;
+			$('textarea').focus(function(e) {
+				$(this).blur();
+				let textInfo = {
+					element: e.target.id,
+					title: $(this).parent('div').text().trim(),
+					hint: e.target.placeholder.trim(),
+					value: $(this).val().trim()
+				}
+				window.flutter_inappwebview.callHandler('mobileHandler', 'openInput', JSON.stringify(textInfo));
+			});
 			
 			$("#btnSuccess").click(function(e) {
 				let temp = getAnswer();
 				if(temp != undefined && temp != null){
 					$('#answers').val(JSON.stringify(temp));
-					$("#formList").submit();
-					alert("답변이 완료되었습니다.");
+					$('#formList').submit();
+					window.flutter_inappwebview.callHandler('mobileHandler', 'alert', '답변이 완료되었습니다.');
 				}
 			});
 			
@@ -111,7 +123,7 @@
 						let checkAnswer = $('input[name=satisfactionAnswer'+i+']:checked').val();
 						if(checkAnswer != undefined) temp.answer = $('input[name=satisfactionAnswer'+i+']:checked').val();
 						else {
-							alert('답변하지 않은 질문이 있습니다.');
+							window.flutter_inappwebview.callHandler('mobileHandler', 'alert', '답변하지 않은 질문이 있습니다.');
 							$('input[name=satisfactionAnswer'+i+']').focus();
 							dynamic.length = 0;
 							return null;
@@ -125,7 +137,7 @@
 
 						if(checkAnswer.length !== 0) temp.answer = checkAnswer.toString();
 						else {
-							alert('답변하지 않은 질문이 있습니다.');
+							window.flutter_inappwebview.callHandler('mobileHandler', 'alert', '답변하지 않은 질문이 있습니다.');
 							$('input:checkbox[name=satisfactionAnswer'+i+']').focus();
 							dynamic.length = 0;
 							return null;
@@ -135,7 +147,7 @@
 						let txt = $('[name=satisfactionAnswer'+i+']').val();
 						if(txt !== "") temp.answer = $('[name=satisfactionAnswer'+i+']').val();
 						else {
-							alert('답변하지 않은 질문이 있습니다.');
+							window.flutter_inappwebview.callHandler('mobileHandler', 'alert', '답변하지 않은 질문이 있습니다.');
 							$('[name=satisfactionAnswer'+i+']').focus();
 							dynamic.length = 0;
 							return null;
@@ -146,19 +158,6 @@
 				}
 				return dynamic;
 			}
-			
-			window.onresize = function(event) {
-				if(window.innerHeight === windowHeight) document.activeElement.blur();
-				else document.activeElement.scrollIntoView({block: "center"});
-			};
-
-			$('input[type="text"]').focus(function(){
-				document.activeElement.scrollIntoView({block: "center"});
-			});
-
-			$('textarea').focus(function(){
-				document.activeElement.scrollIntoView({block: "center"});
-			});
 		</script>
 	</body>
 </html>

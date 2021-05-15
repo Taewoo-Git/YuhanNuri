@@ -106,7 +106,7 @@
                 <ol class="breadcrumb border-0 m-0">
                     <li class="breadcrumb-item">예약</li>
                     <li class="breadcrumb-item">양식 항목</li>
-                    <li class="breadcrumb-item active"><%=type[1]%></li>
+                    <li class="breadcrumb-item active">공지사항</li>
                 </ol>
             </div>
         </header>
@@ -116,6 +116,7 @@
                     <div class="fade-in">
                         <div class="card" id="tinyCard" style="display: none;">
                             <div class="card-body">
+								<input class="form-control" type="text" placeholder="제목" id="noticeTitle"/><br/>
 								<textarea class="tinymce" id="textEditor"></textarea>
                             </div>
                         </div>
@@ -130,6 +131,8 @@
     </div>
 	<script src="/js/coreui.bundle.min.js"></script>
 	<script>
+		let isEdit = false;
+		
 		function image_handler(blobInfo, success, failure, progress) {
 			var image_size = blobInfo.blob().size;
 			var max_size = 5 * 1024 * 1024; // 5MB
@@ -193,20 +196,26 @@
 			images_upload_handler: image_handler,
 			
 			init_instance_callback: function(editor) {
-    			editor.setContent(`<%-result%>`);
+				<% if(result !== null) { %>
+					editor.setContent(`<%-result[0].content%>`);
+					$('#noticeTitle').val(`<%-result[0].title%>`);
+					isEdit = true;
+				<% } %>
 				$('.loading').remove();
 				$('#tinyCard').show();
   			},
 			
 			save_onsavecallback: function() {
+				let title = $('#noticeTitle').val();
 				let content = tinymce.get("textEditor").getContent();
-				console.log(content);
+				let path = isEdit ? `../editBoard/<%=num%>` : `../saveBoard`;
+				
 				$.ajax({
 					type: "POST",
 					dataType: "json",
-					url: '../saveBoard/<%=type[0]%>',
+					url: path,
 					async: true,
-					data: { "sendAjax" : content },
+					data: {"title": title, "content": content},
 					success: function(data) {
 						if (data.state === 'ok') {
 							$('.c-body').prepend(`
@@ -221,6 +230,11 @@
 							$(window).scrollTop(0);
 
 							$('.successAlert').eq(0).fadeOut(3000);
+							
+							if(!isEdit) {
+								$('#noticeTitle').val('');
+								tinymce.get("textEditor").setContent('');
+							}
 						}
 						else {
 							$('.c-body').prepend(`

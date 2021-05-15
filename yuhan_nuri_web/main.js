@@ -107,11 +107,18 @@ app.get('/', function (req, res) {
 	if(req.signedCookies._uid !== undefined) req.session._uid = req.signedCookies._uid;
 	if(req.session._uid !== undefined) {
 		let selectHomeBoard = 'SELECT * FROM HomeBoard';
-		connection.execute(selectHomeBoard, (err, rows) => {
-			if(err) Logger.Error.info(`[${moment().format(logTimeFormat)}] ${err}`);
+		let selectUserToken = 'SELECT token FROM User WHERE stuno = ?';
+		connection.execute(selectHomeBoard, (err1, rows) => {
+			if(err1) Logger.Error.info(`[${moment().format(logTimeFormat)}] ${err1}`);
 			else {
-				res.render('main', {
-					data: rows
+				connection.execute(selectUserToken, [req.session._uid], (err2, row) => {
+					if(err2) Logger.Error.info(`[${moment().format(logTimeFormat)}] ${err2}`);
+					else {
+						res.render('home', {
+							data: rows,
+							token: row[0].token
+						});
+					}
 				});
 			}
 		});

@@ -244,7 +244,7 @@ class LoginState extends State<Login> {
     String strToken = await fcm.getToken();
 
     http.Response res = await http.Client().post(
-      Uri.parse(Domain.url + "user"),
+      Uri.parse(Domain.url + "user/set/login"),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
         'Accept': 'application/json; charset=utf-8',

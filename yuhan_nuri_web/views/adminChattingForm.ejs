@@ -329,10 +329,10 @@
 											${escapeHtml(log[i].split('：')[1].split('（')[0])}
 										</div>
 										<div class='msg_time'>
-											${log[i].split('（')[1].split('일')[1].split('시')[0].trim() + ":" + log[i].split('시')[1].split('분')[0].trim()}
+											${log[i].split('（')[1].split('일')[1].split('시')[0].trim() + ":" + log[i].split('（')[1].split('시')[1].split('분')[0].trim()}
 										</div>
 
-										<div class='stuInfo' style='display:none; position:absolute; height:140px; width:210px; background-color:#3c4b64;
+										<div class='stuInfo' style='display:none; position:absolute; height:140px; width:240px; background-color:#3c4b64;
 																	border-radius:5px; padding:7px; line-height:30px; z-index:999;'>
 											<div style='position:absolute; color:white'>
 												<table>
@@ -392,7 +392,7 @@
 								$("#bodyChat").append(`
 									<div class='d-flex justify-content-end mb-5 mt-2'>
 										<div class='msg_time_send'>
-											${log[i].split('（')[1].split('일')[1].split('시')[0].trim() + ":" + log[i].split('시')[1].split('분')[0].trim()}
+											${log[i].split('（')[1].split('일')[1].split('시')[0].trim() + ":" + log[i].split('（')[1].split('시')[1].split('분')[0].trim()}
 										</div>
 										<div class='msg_cotainer_send'>
 											<span class='msg_name_send'>나</span>
@@ -425,7 +425,7 @@
 							$("#bodyChat").append(
 								"<div class='d-flex justify-content-end mb-5 mt-2'>" +
 									"<div class='msg_time_send'>" +
-										new Date().getHours() + ":" + ("00" + new Date().getMinutes()).slice(-2) +
+										("00" + new Date().getHours()).slice(-2) + ":" + ("00" + new Date().getMinutes()).slice(-2) +
 									"</div>" +
 									"<div class='msg_cotainer_send'>" +
 										"<span class='msg_name_send'>나</span>" +
@@ -460,10 +460,10 @@
 								${escapeHtml(data.msg)}
 							</div>
 							<div class='msg_time'>
-								${new Date().getHours() + ":" + ("00" + new Date().getMinutes()).slice(-2)}
+								${("00" + new Date().getHours()).slice(-2) + ":" + ("00" + new Date().getMinutes()).slice(-2)}
 							</div>
 
-							<div class='stuInfo' style='display:none; position:absolute; height:140px; width:210px; background-color:#3c4b64;
+							<div class='stuInfo' style='display:none; position:absolute; height:140px; width:240px; background-color:#3c4b64;
 														border-radius:5px; padding:7px; line-height:30px; z-index:999;'>
 								<div style='position:absolute; color:white'>
 									<table>

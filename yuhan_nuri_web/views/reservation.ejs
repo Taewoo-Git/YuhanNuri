@@ -11,6 +11,12 @@
 			body{
 				width:100%;
 			}
+			input[readonly] {
+				background-color: #fff !important;
+			}
+			textarea[readonly] {
+				background-color: #fff !important;
+			}
 			.fade-text{
 				font-size:150%;
 				color:#494949;
@@ -215,20 +221,17 @@
 						<div style="margin-bottom:50px;">
 							<label style="margin:0px;"><b>학번</b></label>
 							<input type="text" class="form-control border-top-0 border-left-0 border-right-0 rounded-0"
-								   placeholder="학번을 입력하세요." id="userCode" value="<%= stuInfo.stuno %>">
+								   placeholder="학번을 입력하세요." id="userCode" value="<%= stuInfo.stuno %>" readonly>
 						</div>
 						<div style="margin-bottom:50px;">
 							<label style="margin:0px;"><b>이름</b></label>
 							<input type="text" class="form-control border-top-0 border-left-0 border-right-0 rounded-0"
-								   placeholder="이름을 입력하세요." id="userName" value="<%= stuInfo.stuname %>">
+								   placeholder="이름을 입력하세요." id="userName" value="<%= stuInfo.stuname %>" readonly>
 						</div>
-						<div style="margin-bottom:40px;">
-							<label><b>성별</b></label>
-							<br/>
-							<input type="radio" class="form-input" name="userGender" id="genderFemale" style="border:1px solid #ffff00; margin-left:10px;" value="여성">
-							<label for="genderFemale">여성</label>
-							<input type="radio" class="form-input" name="userGender" id="genderMale" style="border:1px solid #ffff00; margin-left:10px;" value="남성">
-							<label for="genderMale">남성</label>
+						<div style="margin-bottom:50px;">
+							<label style="margin:0px;"><b>성별</b></label>
+							<input type="text" class="form-control border-top-0 border-left-0 border-right-0 rounded-0"
+								   id="userGender" value="<%= stuInfo.gender %>" readonly>
 						</div>
 						<div style="margin-bottom:50px;">
 							<label style="margin:0px;"><b>생년월일</b></label>
@@ -246,18 +249,18 @@
 									fullBirth = "19" + userBirth.substring(0, 2) + "-" + userBirth.substring(2, 4) + "-" + userBirth.substring(4, 6);
 								}
 							%>
-							<input type="date" class="form-control border-top-0 border-left-0 border-right-0 rounded-0" id="userBirth"
-								   autocomplete="off" tabindex="0" value="<%= fullBirth %>">
+							<input type="text" class="form-control border-top-0 border-left-0 border-right-0 rounded-0" id="userBirth"
+								   value="<%= fullBirth %>" style="outline: none !important;" readonly>
 						</div>
 						<div id="phoneForm" style="margin-bottom:50px;">
 							<label style="margin:0px;"><b>휴대폰</b></label>
-							<input type="phone" class="form-control border-top-0 border-left-0 border-right-0 rounded-0"
-								   placeholder="010-XXXX-XXXX" id="userPhone" value="<%= stuInfo.phonenum %>">
+							<input type="text" class="form-control border-top-0 border-left-0 border-right-0 rounded-0"
+								   placeholder="010-XXXX-XXXX" id="userPhone" value="<%= stuInfo.phonenum %>" readonly>
 						</div>
 						<div id="emailForm" style="margin-bottom:50px;">
 							<label style="margin:0px;"><b>이메일</b></label>
-							<input type="email" class="form-control border-top-0 border-left-0 border-right-0 rounded-0"
-								   placeholder="email@example.com" id="userEmail" value="<%= stuInfo.email %>">
+							<input type="text" class="form-control border-top-0 border-left-0 border-right-0 rounded-0"
+								   placeholder="email@example.com" id="userEmail" value="<%= stuInfo.email %>" readonly>
 						</div>
 						<div style="display:none;" id="consultForm">
 							<% for(let i=0; i<consultAsk.length; i++){ %>
@@ -281,7 +284,7 @@
 								<% } %>
 								<% if(consultAsk[i].choicetypename === "Normal"){ %>
 									<textarea class="form-control" placeholder="자유롭게 작성해 주세요." name="consultAskAnswer<%=i%>"
-											  id="<%= 'consultAnswer'+i %>" style="resize:none;margin-bottom:50px!important;"></textarea>
+											  id="<%= 'consultAnswer'+i %>" style="resize:none;margin-bottom:50px!important;" readonly></textarea>
 								<% } %>
 								</div>
 							</div>
@@ -309,7 +312,7 @@
 								<% } %>
 								<% if(testAsk[i].choicetypename === "Normal"){ %>
 									<textarea class="form-control" placeholder="자유롭게 작성해 주세요." name="mentalAskAnswer<%=i%>"
-											  id="<%= 'mentalAnswer'+i %>" style="resize:none;margin-bottom:50px!important;"></textarea>
+											  id="<%= 'mentalAnswer'+i %>" style="resize:none;margin-bottom:50px!important;" readonly></textarea>
 								<% } %>
 								</div>
 							</div>
@@ -323,7 +326,7 @@
 											   value="<%= psyTestList[i].testno %>" name="psyTestList" style="margin-right:20px;">
 										<label for="<%= 'psyTestType'+i %>"><%= psyTestList[i].testname %></label>
 										<input type="button" class="btnMentalClass pull-right" id="<%= 'psyTestDes'+i%>"
-											   onclick="alert('<%= psyTestList[i].description %>');">
+											   onclick="window.flutter_inappwebview.callHandler('mobileHandler', 'alert', '<%= psyTestList[i].description %>');">
 									</div>
 									<br/>
 									<% } %>
@@ -505,6 +508,9 @@
 						
 					</div>
 					<div class="row">
+						<div class="col text-left">
+							<input type="button" class="btn btn-secondary mb-4" id="btnCancel" value="이 전">
+						</div>
 						<div class="col text-right">
 							<input type="button" class="btn btn-submit btn-primary mb-4" id="btnComplete" value="확 인">
 						</div>
@@ -515,9 +521,23 @@
 		</div>
 		<script src="/socket.io/socket.io.js"></script>
 		<script>
-			const initHeight = document.body.clientHeight;
+			$('input[readonly]').focus(function(e) {
+				$(this).blur();
+				window.flutter_inappwebview.callHandler('mobileHandler', 'alert', '개인 정보는 포털 사이트를 통해\n변경하실 수 있습니다.');
+			});
 			
-			const socket = io('/reservation');
+			$('textarea').focus(function(e) {
+				$(this).blur();
+				let textInfo = {
+					element: e.target.id,
+					title: $(this).parent('div').text().trim(),
+					hint: e.target.placeholder.trim(),
+					value: $(this).val().trim()
+				}
+				window.flutter_inappwebview.callHandler('mobileHandler', 'openInput', JSON.stringify(textInfo));
+			});
+			
+			const socket = io('/reservation', {transports: ['websocket']});
 			let sendData = {}
 
 			$('#appMental').click(function(e) {
@@ -531,9 +551,9 @@
 				document.getElementById("consultForm").style.display = "block";
 				document.getElementById("psyTestForm").style.display = "none";
 			});
-
-			$("#btnFirstNext").click(function(e) {
-				if($('#appMental').is(':checked') === true && applicationValidCheck()) {
+			
+			$("#btnCancel").click(function(e) {
+				if($('#appMental').is(':checked') === true && psyTestCheck()) {
 					let temp = getMentalAnswer();
 					
 					let selectPsyTestList= []
@@ -547,7 +567,7 @@
                             type: 2,
 							stuCode: $('#userCode').val(),
 							stuName: $('#userName').val(),
-							stuGender: $("input[name='userGender']:checked").val(),
+							stuGender: $('#userGender').val(),
 							stuBirth: $('#userBirth').val(),
 							stuEmail: $('#userEmail').val(),
 							stuAnswer: temp,
@@ -557,14 +577,57 @@
 						socket.emit('initPrivacy');
 					}
 				}
-				else if($('#appConsult').is(':checked') === true && applicationValidCheck()) {
+				else if($('#appConsult').is(':checked') === true && psyTestCheck()) {
 					let temp = getConsultAnswer();
 					if(temp != undefined && temp != null) {
 						sendData = {
                             type: 1,
 							stuCode: $('#userCode').val(),
 							stuName: $('#userName').val(),
-							stuGender: $("input[name='userGender']:checked").val(),
+							stuGender: $('#userGender').val(),
+							stuBirth: $('#userBirth').val(),
+							stuEmail: $('#userEmail').val(),
+							stuAnswer: temp
+						}
+						$("#btnFirstNext").attr("disabled", true);
+						socket.emit('initReservation');
+					}
+				}
+			});
+
+			$("#btnFirstNext").click(function(e) {
+				if($('#appMental').is(':checked') === true && psyTestCheck()) {
+					let temp = getMentalAnswer();
+					
+					let selectPsyTestList= []
+					$("input[name='psyTestList']:checked").each(function() {
+						selectPsyTestList.push($(this).val());
+					});
+
+					
+					if(temp != undefined && temp != null) {
+						sendData = {
+                            type: 2,
+							stuCode: $('#userCode').val(),
+							stuName: $('#userName').val(),
+							stuGender: $('#userGender').val(),
+							stuBirth: $('#userBirth').val(),
+							stuEmail: $('#userEmail').val(),
+							stuAnswer: temp,
+							psyTestList: selectPsyTestList.toString()
+						}
+						$("#btnFirstNext").attr("disabled", true); 
+						socket.emit('initPrivacy');
+					}
+				}
+				else if($('#appConsult').is(':checked') === true && psyTestCheck()) {
+					let temp = getConsultAnswer();
+					if(temp != undefined && temp != null) {
+						sendData = {
+                            type: 1,
+							stuCode: $('#userCode').val(),
+							stuName: $('#userName').val(),
+							stuGender: $('#userGender').val(),
 							stuBirth: $('#userBirth').val(),
 							stuEmail: $('#userEmail').val(),
 							stuAnswer: temp
@@ -615,7 +678,7 @@
 						socket.emit('initComplete', sendData);
 					}
 					else{
-						alert("개인정보동의서를 모두 동의해야 신청이 가능합니다.");
+						window.flutter_inappwebview.callHandler('mobileHandler', 'alert', '개인정보동의서를 모두 동의해야 신청이 가능합니다.');
 						document.getElementById("agreebox5").focus();
 					}
 				});
@@ -806,7 +869,7 @@
 					}
                     
                     if(count === 0) {
-                        alert("상담 유형을 선택해 주세요.");
+						window.flutter_inappwebview.callHandler('mobileHandler', 'alert', '상담 유형을 선택해 주세요.');
                         document.getElementsByClassName('btnType')[0].focus();
                     }
                     else {
@@ -917,46 +980,18 @@
 			});
 
 			socket.on('initComplete', function() {
-				alert("예약이 완료되었습니다, 감사합니다.");
-				window.flutter_inappwebview
-					.callHandler('PageHandler', 'replaceMain');  // Flutter Inappwebview 의 ReservationHandler를 호출  
+				window.flutter_inappwebview.callHandler('mobileHandler', 'alert', '예약이 완료되었습니다, 감사합니다.');
+				window.flutter_inappwebview.callHandler('mobileHandler', 'replaceHome');  // Flutter Inappwebview 의 ReservationHandler를 호출  
 			});
 
-			function applicationValidCheck() {
-				if($('#userCode').val() === "") {
-					document.getElementById("userCode").focus();
-					alert("학번을 입력하세요.");
+			function psyTestCheck() {
+				if($('#appMental').is(':checked') === true && $('input:checkbox[name=psyTestList]').is(':checked') == false) {
+					window.flutter_inappwebview.callHandler('mobileHandler', 'alert', '심리검사 유형을 1개 이상 선택하세요.');
+					document.getElementById("psyTestType0").focus();
 					return false;
-				}else {
-					if($('#userName').val() === "") {
-						document.getElementById("userName").focus();
-						alert("이름을 입력하세요.");
-						return false;
-					}else {
-						if($('input:radio[name=userGender]').is(':checked') === false) {
-							document.getElementById("genderFemale").focus();
-							alert("성별을 선택하세요.");
-							return false;
-						}else {
-							if($('#userEmail').val() === "") {
-								document.getElementById("userEmail").focus();
-								alert("이메일을 작성하세요.");
-								return false;
-							}else if(CheckEmail(document.getElementById("userEmail").value) === false) {
-								document.getElementById("userEmail").focus();
-								alert("이메일의 형식을 확인하세요.");
-								return false;
-							}else {
-								if($('#appMental').is(':checked') === true && $('input:checkbox[name=psyTestList]').is(':checked') == false) {
-									alert("심리검사 유형을 1개 이상 선택하세요.");
-									document.getElementById("psyTestType0").focus();
-									return false;
-								}else {
-									return true;
-								}
-							}
-						}
-					}
+				}
+				else {
+					return true;
 				}
 			} // 간단 신청서 부분 유효성 검사
 
@@ -977,7 +1012,7 @@
 						let checkAnswer = $('input[name=mentalAskAnswer'+i+']:checked').val();
 						if(checkAnswer != undefined) temp.answer = $('input[name=mentalAskAnswer'+i+']:checked').val();
 						else {
-							alert('답변하지 않은 질문이 있습니다.');
+							window.flutter_inappwebview.callHandler('mobileHandler', 'alert', '답변하지 않은 질문이 있습니다.');
 							$('input[name=mentalAskAnswer'+i+']').focus();
 							dynamic.length = 0;
 							return null;
@@ -991,7 +1026,7 @@
 
 						if(checkAnswer.length !== 0) temp.answer = checkAnswer.toString();
 						else {
-							alert('답변하지 않은 질문이 있습니다.');
+							window.flutter_inappwebview.callHandler('mobileHandler', 'alert', '답변하지 않은 질문이 있습니다.');
 							$('input:checkbox[name=mentalAskAnswer'+i+']').focus();
 							dynamic.length = 0;
 							return null;
@@ -1001,7 +1036,7 @@
 						let txt = $('[name=mentalAskAnswer'+i+']').val();
 						if(txt !== "") temp.answer = $('[name=mentalAskAnswer'+i+']').val();
 						else {
-							alert('답변하지 않은 질문이 있습니다.');
+							window.flutter_inappwebview.callHandler('mobileHandler', 'alert', '답변하지 않은 질문이 있습니다.');
 							$('[name=mentalAskAnswer'+i+']').focus();
 							dynamic.length = 0;
 							return null;
@@ -1024,7 +1059,7 @@
 						let checkAnswer = $('input[name=consultAskAnswer'+i+']:checked').val();
 						if(checkAnswer != undefined) temp.answer = $('input[name=consultAskAnswer'+i+']:checked').val();
 						else {
-							alert('답변하지 않은 질문이 있습니다.');
+							window.flutter_inappwebview.callHandler('mobileHandler', 'alert', '답변하지 않은 질문이 있습니다.');
 							$('input[name=consultAskAnswer'+i+']').focus();
 							dynamic.length = 0;
 							return null;
@@ -1038,7 +1073,7 @@
 
 						if(checkAnswer.length !== 0) temp.answer = checkAnswer.toString();
 						else {
-							alert('답변하지 않은 질문이 있습니다.');
+							window.flutter_inappwebview.callHandler('mobileHandler', 'alert', '답변하지 않은 질문이 있습니다.');
 							$('input:checkbox[name=consultAskAnswer'+i+']').focus();
 							dynamic.length = 0;
 							return null;
@@ -1048,7 +1083,7 @@
 						let txt = $('[name=consultAskAnswer'+i+']').val();
 						if(txt !== "") temp.answer = $('[name=consultAskAnswer'+i+']').val();
 						else {
-							alert('답변하지 않은 질문이 있습니다.');
+							window.flutter_inappwebview.callHandler('mobileHandler', 'alert', '답변하지 않은 질문이 있습니다.');
 							$('[name=consultAskAnswer'+i+']').focus();
 							dynamic.length = 0;
 							return null;
@@ -1059,19 +1094,6 @@
 				}
 				return dynamic;
 			}
-			
-			window.onresize = function(event) {
-				if(document.body.clientHeight === initHeight) document.activeElement.blur();
-				else document.activeElement.scrollIntoView({block: "center"});
-			};
-
-			$('input[type="text"]').focus(function(){
-				document.activeElement.scrollIntoView({block: "center"});
-			});
-
-			$('textarea').focus(function(){
-				document.activeElement.scrollIntoView({block: "center"});
-			});
 		</script>
 	</body>
 </html>

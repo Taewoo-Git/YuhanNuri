@@ -139,7 +139,7 @@
 	<script src="/js/coreui.bundle.min.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
 	<script>
-		const socket = io('/reaction', {transports:['websocket']});
+		const socket = io('/reaction', {transports: ['websocket']});
 		
 		socket.on('cancel', function(serialno) {
 			if($('.btn'+serialno)) $('.btn'+serialno).parents('.list-group-item').remove();

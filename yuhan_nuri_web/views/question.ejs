@@ -87,9 +87,8 @@
 				$("#btnNext").click(function(){
 					if(!$('#questionTitle').val() == ""){
 						if(!$('#questionText').val() == ""){
-							alert("문의 작성이 완료되었습니다.");
-							window.flutter_inappwebview
-								.callHandler('PageHandler', 'replaceMain');
+							window.flutter_inappwebview.callHandler('mobileHandler', 'alert', '문의 작성이 완료되었습니다.');
+							window.flutter_inappwebview.callHandler('mobileHandler', 'replaceHome');
 						}
 					}
 				});

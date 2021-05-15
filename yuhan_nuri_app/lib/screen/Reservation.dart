@@ -1,8 +1,17 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:vibration/vibration.dart';
 import 'package:grouped_buttons/grouped_buttons.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
+
+import 'Domain.dart';
 
 class Reservation {
+  Map<String, String> header;
+
   PageController pageController = PageController(
     initialPage: 0,
   );
@@ -14,8 +23,28 @@ class Reservation {
 
   List<Widget> pageList = [];
 
-  Widget getBuild() {
-    pageList = [inquiryPage()];
+  Map<int, String> tempSelectedAnswers = {};
+
+  List<int> tempSelectedPsyTest = [];
+
+  Map<String, dynamic> lastData = {};
+
+  int initCheckNum;
+
+  List<Widget> psychoTestList = [];
+
+  List<Widget> psychoInquiries = [];
+
+  List<Widget> consultInquiries = [];
+
+  BuildContext ctx;
+
+  var parentKey;
+
+  Future<Widget> getBuild(Map<String, String> _header, var key) async {
+    header = _header;
+    parentKey = key;
+    await getInit();
     return StatefulBuilder(
       builder: (context, StateSetter setState) {
         return PageView(
@@ -28,7 +57,9 @@ class Reservation {
   }
 
   Widget inquiryPage() {
+    lastData.clear();
     return StatefulBuilder(builder: (context, StateSetter setState) {
+      ctx = context;
       return SingleChildScrollView(
         child: Container(
           margin: EdgeInsets.fromLTRB(0, 30, 0, 13),
@@ -48,18 +79,16 @@ class Reservation {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       TextButton(
-                        onPressed: () {
+                        onPressed: () async {
+                          tempSelectedAnswers.clear();
+                          initCheckNum = psychoInquiries.length;
+                          lastData["type"] = 2;
+                          pageList.removeRange(1, pageList.length);
+                          pageList.add(await privacyPage());
                           setState(() {
                             btnPsycho = "assets/btnCheck-on.png";
                             btnConsult = "assets/btnCheck-off.png";
                             selectBuild = psychoBuild();
-
-                            if (pageList.length == 1) {
-                              pageList.add(privacyPage());
-                            } else if (pageList.length == 4) {
-                              pageList.removeRange(1, 4);
-                              pageList.add(privacyPage());
-                            }
                           });
                         },
                         child: Row(
@@ -86,23 +115,18 @@ class Reservation {
                         ),
                       ),
                       TextButton(
-                        onPressed: () {
+                        onPressed: () async {
+                          tempSelectedAnswers.clear();
+                          initCheckNum = consultInquiries.length;
+                          lastData["type"] = 1;
+                          pageList.removeRange(1, pageList.length);
+                          pageList.add(await schedulePage());
+                          pageList.add(await selfCheckPage());
+                          pageList.add(await privacyPage());
                           setState(() {
                             btnConsult = "assets/btnCheck-on.png";
                             btnPsycho = "assets/btnCheck-off.png";
                             selectBuild = consultBuild();
-
-                            if (pageList.length == 1) {
-                              pageList.add(schedulePage());
-                              pageList.add(selfCheckPage());
-                              pageList.add(privacyPage());
-                            } else if (pageList.length == 2) {
-                              pageList.removeLast();
-
-                              pageList.add(schedulePage());
-                              pageList.add(selfCheckPage());
-                              pageList.add(privacyPage());
-                            }
                           });
                         },
                         child: Row(
@@ -142,9 +166,26 @@ class Reservation {
     });
   }
 
-  Widget schedulePage() {
-    List<String> typeList = ["홍길동 선생님", "이몽룡 선생님"];
-    String selectedType = typeList[0];
+  Future<Widget> schedulePage() async {
+    List<Map> typeList = [
+      {"empid": "null", "empname": "선생님을 선택해 주세요."}
+    ];
+
+    http.Response res = await http.Client().get(
+      Uri.parse(Domain.url + "user/get/counselor"),
+      headers: header,
+    );
+
+    var recv = jsonDecode(res.body);
+
+    recv.forEach((obj) {
+      if (obj["empid"].toString() != "admin") {
+        typeList
+            .add({"empid": obj["empid"], "empname": "${obj["empname"]} 선생님"});
+      }
+    });
+
+    String selectedType = typeList[0]["empid"];
 
     Color btnChatConsultBgColor = Colors.white;
     Color btnVideoConsultBgColor = Colors.white;
@@ -158,6 +199,8 @@ class Reservation {
 
     DateTime dt = new DateTime.now();
 
+    List<DateTime> fullDateTime = [];
+
     List<String> btnConsultDate = List<String>.generate(10, (index) {
       String strDay;
 
@@ -169,11 +212,16 @@ class Reservation {
         dt = dt.add(Duration(days: 1));
       }
 
-      if (index != 0 && dt.day == 1) {
+      if (index != 0 &&
+          (dt.day == 1 ||
+              (dt.day == 2 && dt.weekday == DateTime.monday) ||
+              dt.day == 3 && dt.weekday == DateTime.monday)) {
         strDay = dt.month.toString() + "." + dt.day.toString();
       } else {
         strDay = dt.day.toString();
       }
+
+      fullDateTime.add(dt);
 
       return strDay;
     });
@@ -185,6 +233,12 @@ class Reservation {
     List<Color> btnConsultTimeBgColors = List<Color>.filled(8, Colors.white);
 
     List<Color> btnConsultTimeFontColors = List<Color>.filled(8, Colors.black);
+
+    // ignore: non_constant_identifier_names
+    var possible_days;
+
+    // ignore: non_constant_identifier_names
+    var possible_times;
 
     return StatefulBuilder(builder: (context, StateSetter setState) {
       return SingleChildScrollView(
@@ -208,12 +262,64 @@ class Reservation {
                   ),
                   isExpanded: true,
                   items: typeList.map((e) {
-                    return DropdownMenuItem(value: e, child: Text(e));
+                    return DropdownMenuItem(
+                        value: e["empid"], child: Text(e["empname"]));
                   }).toList(),
                   value: selectedType,
-                  onTap: () =>
-                      FocusScope.of(context).requestFocus(new FocusNode()),
-                  onChanged: (value) {
+                  onChanged: (value) async {
+                    lastData["empid"] = value.toString();
+                    lastData["reservationCode"] = null;
+                    lastData["date"] = null;
+                    lastData["time"] = null;
+
+                    btnChatConsultBgColor = Colors.white;
+                    btnVideoConsultBgColor = Colors.white;
+                    btnVoiceConsultBgColor = Colors.white;
+                    btnMeetConsultBgColor = Colors.white;
+
+                    btnChatConsultFontColor = Colors.black;
+                    btnVideoConsultFontColor = Colors.black;
+                    btnVoiceConsultFontColor = Colors.black;
+                    btnMeetConsultFontColor = Colors.black;
+
+                    btnConsultDateBgColors =
+                        List<Color>.filled(10, Colors.white);
+                    btnConsultDateFontColors =
+                        List<Color>.filled(10, Colors.black);
+
+                    btnConsultTimeBgColors =
+                        List<Color>.filled(8, Colors.white);
+                    btnConsultTimeFontColors =
+                        List<Color>.filled(8, Colors.black);
+
+                    http.Response res = await http.Client().post(
+                      Uri.parse(Domain.url + "user/get/schedule"),
+                      headers: header,
+                      body: {
+                        'empid': value.toString(),
+                      },
+                    );
+
+                    possible_days = jsonDecode(res.body);
+
+                    possible_days.forEach((obj) {
+                      // ignore: non_constant_identifier_names
+                      int possible_day =
+                          int.parse(obj["possible"].toString().split('-')[2]);
+                      btnConsultDate.asMap().forEach((index, value) {
+                        // ignore: non_constant_identifier_names
+                        int consult_day;
+                        if (value.contains('.'))
+                          consult_day = int.parse(value.split('.')[1]);
+                        else
+                          consult_day = int.parse(value);
+
+                        if (consult_day == possible_day) {
+                          btnConsultDateFontColors[index] = Color(0xFF0275D7);
+                        }
+                      });
+                    });
+
                     setState(() {
                       selectedType = value;
                     });
@@ -244,6 +350,7 @@ class Reservation {
                       children: [
                         ElevatedButton(
                           onPressed: () {
+                            lastData["reservationCode"] = "1";
                             setState(() {
                               btnChatConsultBgColor = Color(0xFF0275D7);
                               btnVideoConsultBgColor = Colors.white;
@@ -272,6 +379,7 @@ class Reservation {
                         ),
                         ElevatedButton(
                           onPressed: () {
+                            lastData["reservationCode"] = "2";
                             setState(() {
                               btnChatConsultBgColor = Colors.white;
                               btnVideoConsultBgColor = Color(0xFF0275D7);
@@ -300,6 +408,7 @@ class Reservation {
                         ),
                         ElevatedButton(
                           onPressed: () {
+                            lastData["reservationCode"] = "3";
                             setState(() {
                               btnChatConsultBgColor = Colors.white;
                               btnVideoConsultBgColor = Colors.white;
@@ -328,6 +437,7 @@ class Reservation {
                         ),
                         ElevatedButton(
                           onPressed: () {
+                            lastData["reservationCode"] = "4";
                             setState(() {
                               btnChatConsultBgColor = Colors.white;
                               btnVideoConsultBgColor = Colors.white;
@@ -390,16 +500,101 @@ class Reservation {
                     TableRow(
                       children: [
                         ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              btnConsultDateBgColors =
-                                  List<Color>.filled(10, Colors.white);
-                              btnConsultDateBgColors[0] = Color(0xFF0275D7);
+                          onPressed: () async {
+                            if (btnConsultDateFontColors[0] ==
+                                Color(0xFF0275D7)) {
+                              lastData["date"] =
+                                  fullDateTime[0].toString().split(' ')[0];
 
-                              btnConsultDateFontColors =
-                                  List<Color>.filled(10, Colors.black);
-                              btnConsultDateFontColors[0] = Colors.white;
-                            });
+                              http.Response res = await http.Client().post(
+                                Uri.parse(Domain.url + "user/get/times"),
+                                headers: header,
+                                body: {
+                                  'empid': selectedType,
+                                  'consultDate':
+                                      fullDateTime[0].toString().split(' ')[0]
+                                },
+                              );
+
+                              // ignore: non_constant_identifier_names
+                              possible_times = jsonDecode(res.body);
+
+                              setState(() {
+                                btnConsultDateBgColors =
+                                    List<Color>.filled(10, Colors.white);
+                                btnConsultDateBgColors[0] = Color(0xFF0275D7);
+
+                                possible_days.forEach((obj) {
+                                  // ignore: non_constant_identifier_names
+                                  int possible_day = int.parse(
+                                      obj["possible"].toString().split('-')[2]);
+                                  btnConsultDate
+                                      .asMap()
+                                      .forEach((index, value) {
+                                    // ignore: non_constant_identifier_names
+                                    int consult_day;
+                                    if (value.contains('.'))
+                                      consult_day =
+                                          int.parse(value.split('.')[1]);
+                                    else
+                                      consult_day = int.parse(value);
+
+                                    if (consult_day == possible_day) {
+                                      btnConsultDateFontColors[index] =
+                                          Color(0xFF0275D7);
+                                    }
+                                  });
+                                });
+
+                                btnConsultTimeBgColors =
+                                    List<Color>.filled(8, Colors.white);
+                                btnConsultTimeFontColors =
+                                    List<Color>.filled(8, Colors.black);
+
+                                possible_times.forEach((obj) {
+                                  int time = int.parse(obj.toString());
+
+                                  switch (time) {
+                                    case 9:
+                                      btnConsultTimeFontColors[0] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 10:
+                                      btnConsultTimeFontColors[1] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 11:
+                                      btnConsultTimeFontColors[2] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 13:
+                                      btnConsultTimeFontColors[3] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 14:
+                                      btnConsultTimeFontColors[4] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 15:
+                                      btnConsultTimeFontColors[5] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 16:
+                                      btnConsultTimeFontColors[6] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 17:
+                                      btnConsultTimeFontColors[7] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    default:
+                                      break;
+                                  }
+                                });
+
+                                btnConsultDateFontColors[0] = Colors.white;
+                              });
+                            }
                           },
                           child: Text(
                             btnConsultDate[0].toString(),
@@ -416,16 +611,101 @@ class Reservation {
                           ),
                         ),
                         ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              btnConsultDateBgColors =
-                                  List<Color>.filled(10, Colors.white);
-                              btnConsultDateBgColors[1] = Color(0xFF0275D7);
+                          onPressed: () async {
+                            if (btnConsultDateFontColors[1] ==
+                                Color(0xFF0275D7)) {
+                              lastData["date"] =
+                                  fullDateTime[1].toString().split(' ')[0];
 
-                              btnConsultDateFontColors =
-                                  List<Color>.filled(10, Colors.black);
-                              btnConsultDateFontColors[1] = Colors.white;
-                            });
+                              http.Response res = await http.Client().post(
+                                Uri.parse(Domain.url + "user/get/times"),
+                                headers: header,
+                                body: {
+                                  'empid': selectedType,
+                                  'consultDate':
+                                      fullDateTime[1].toString().split(' ')[0]
+                                },
+                              );
+
+                              // ignore: non_constant_identifier_names
+                              possible_times = jsonDecode(res.body);
+
+                              setState(() {
+                                btnConsultDateBgColors =
+                                    List<Color>.filled(10, Colors.white);
+                                btnConsultDateBgColors[1] = Color(0xFF0275D7);
+
+                                possible_days.forEach((obj) {
+                                  // ignore: non_constant_identifier_names
+                                  int possible_day = int.parse(
+                                      obj["possible"].toString().split('-')[2]);
+                                  btnConsultDate
+                                      .asMap()
+                                      .forEach((index, value) {
+                                    // ignore: non_constant_identifier_names
+                                    int consult_day;
+                                    if (value.contains('.'))
+                                      consult_day =
+                                          int.parse(value.split('.')[1]);
+                                    else
+                                      consult_day = int.parse(value);
+
+                                    if (consult_day == possible_day) {
+                                      btnConsultDateFontColors[index] =
+                                          Color(0xFF0275D7);
+                                    }
+                                  });
+                                });
+
+                                btnConsultTimeBgColors =
+                                    List<Color>.filled(8, Colors.white);
+                                btnConsultTimeFontColors =
+                                    List<Color>.filled(8, Colors.black);
+
+                                possible_times.forEach((obj) {
+                                  int time = int.parse(obj.toString());
+
+                                  switch (time) {
+                                    case 9:
+                                      btnConsultTimeFontColors[0] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 10:
+                                      btnConsultTimeFontColors[1] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 11:
+                                      btnConsultTimeFontColors[2] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 13:
+                                      btnConsultTimeFontColors[3] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 14:
+                                      btnConsultTimeFontColors[4] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 15:
+                                      btnConsultTimeFontColors[5] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 16:
+                                      btnConsultTimeFontColors[6] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 17:
+                                      btnConsultTimeFontColors[7] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    default:
+                                      break;
+                                  }
+                                });
+
+                                btnConsultDateFontColors[1] = Colors.white;
+                              });
+                            }
                           },
                           child: Text(
                             btnConsultDate[1].toString(),
@@ -442,16 +722,101 @@ class Reservation {
                           ),
                         ),
                         ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              btnConsultDateBgColors =
-                                  List<Color>.filled(10, Colors.white);
-                              btnConsultDateBgColors[2] = Color(0xFF0275D7);
+                          onPressed: () async {
+                            if (btnConsultDateFontColors[2] ==
+                                Color(0xFF0275D7)) {
+                              lastData["date"] =
+                                  fullDateTime[2].toString().split(' ')[0];
 
-                              btnConsultDateFontColors =
-                                  List<Color>.filled(10, Colors.black);
-                              btnConsultDateFontColors[2] = Colors.white;
-                            });
+                              http.Response res = await http.Client().post(
+                                Uri.parse(Domain.url + "user/get/times"),
+                                headers: header,
+                                body: {
+                                  'empid': selectedType,
+                                  'consultDate':
+                                      fullDateTime[2].toString().split(' ')[0]
+                                },
+                              );
+
+                              // ignore: non_constant_identifier_names
+                              possible_times = jsonDecode(res.body);
+
+                              setState(() {
+                                btnConsultDateBgColors =
+                                    List<Color>.filled(10, Colors.white);
+                                btnConsultDateBgColors[2] = Color(0xFF0275D7);
+
+                                possible_days.forEach((obj) {
+                                  // ignore: non_constant_identifier_names
+                                  int possible_day = int.parse(
+                                      obj["possible"].toString().split('-')[2]);
+                                  btnConsultDate
+                                      .asMap()
+                                      .forEach((index, value) {
+                                    // ignore: non_constant_identifier_names
+                                    int consult_day;
+                                    if (value.contains('.'))
+                                      consult_day =
+                                          int.parse(value.split('.')[1]);
+                                    else
+                                      consult_day = int.parse(value);
+
+                                    if (consult_day == possible_day) {
+                                      btnConsultDateFontColors[index] =
+                                          Color(0xFF0275D7);
+                                    }
+                                  });
+                                });
+
+                                btnConsultTimeBgColors =
+                                    List<Color>.filled(8, Colors.white);
+                                btnConsultTimeFontColors =
+                                    List<Color>.filled(8, Colors.black);
+
+                                possible_times.forEach((obj) {
+                                  int time = int.parse(obj.toString());
+
+                                  switch (time) {
+                                    case 9:
+                                      btnConsultTimeFontColors[0] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 10:
+                                      btnConsultTimeFontColors[1] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 11:
+                                      btnConsultTimeFontColors[2] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 13:
+                                      btnConsultTimeFontColors[3] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 14:
+                                      btnConsultTimeFontColors[4] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 15:
+                                      btnConsultTimeFontColors[5] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 16:
+                                      btnConsultTimeFontColors[6] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 17:
+                                      btnConsultTimeFontColors[7] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    default:
+                                      break;
+                                  }
+                                });
+
+                                btnConsultDateFontColors[2] = Colors.white;
+                              });
+                            }
                           },
                           child: Text(
                             btnConsultDate[2].toString(),
@@ -468,16 +833,101 @@ class Reservation {
                           ),
                         ),
                         ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              btnConsultDateBgColors =
-                                  List<Color>.filled(10, Colors.white);
-                              btnConsultDateBgColors[3] = Color(0xFF0275D7);
+                          onPressed: () async {
+                            if (btnConsultDateFontColors[3] ==
+                                Color(0xFF0275D7)) {
+                              lastData["date"] =
+                                  fullDateTime[3].toString().split(' ')[0];
 
-                              btnConsultDateFontColors =
-                                  List<Color>.filled(10, Colors.black);
-                              btnConsultDateFontColors[3] = Colors.white;
-                            });
+                              http.Response res = await http.Client().post(
+                                Uri.parse(Domain.url + "user/get/times"),
+                                headers: header,
+                                body: {
+                                  'empid': selectedType,
+                                  'consultDate':
+                                      fullDateTime[3].toString().split(' ')[0]
+                                },
+                              );
+
+                              // ignore: non_constant_identifier_names
+                              possible_times = jsonDecode(res.body);
+
+                              setState(() {
+                                btnConsultDateBgColors =
+                                    List<Color>.filled(10, Colors.white);
+                                btnConsultDateBgColors[3] = Color(0xFF0275D7);
+
+                                possible_days.forEach((obj) {
+                                  // ignore: non_constant_identifier_names
+                                  int possible_day = int.parse(
+                                      obj["possible"].toString().split('-')[2]);
+                                  btnConsultDate
+                                      .asMap()
+                                      .forEach((index, value) {
+                                    // ignore: non_constant_identifier_names
+                                    int consult_day;
+                                    if (value.contains('.'))
+                                      consult_day =
+                                          int.parse(value.split('.')[1]);
+                                    else
+                                      consult_day = int.parse(value);
+
+                                    if (consult_day == possible_day) {
+                                      btnConsultDateFontColors[index] =
+                                          Color(0xFF0275D7);
+                                    }
+                                  });
+                                });
+
+                                btnConsultTimeBgColors =
+                                    List<Color>.filled(8, Colors.white);
+                                btnConsultTimeFontColors =
+                                    List<Color>.filled(8, Colors.black);
+
+                                possible_times.forEach((obj) {
+                                  int time = int.parse(obj.toString());
+
+                                  switch (time) {
+                                    case 9:
+                                      btnConsultTimeFontColors[0] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 10:
+                                      btnConsultTimeFontColors[1] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 11:
+                                      btnConsultTimeFontColors[2] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 13:
+                                      btnConsultTimeFontColors[3] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 14:
+                                      btnConsultTimeFontColors[4] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 15:
+                                      btnConsultTimeFontColors[5] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 16:
+                                      btnConsultTimeFontColors[6] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 17:
+                                      btnConsultTimeFontColors[7] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    default:
+                                      break;
+                                  }
+                                });
+
+                                btnConsultDateFontColors[3] = Colors.white;
+                              });
+                            }
                           },
                           child: Text(
                             btnConsultDate[3].toString(),
@@ -494,16 +944,101 @@ class Reservation {
                           ),
                         ),
                         ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              btnConsultDateBgColors =
-                                  List<Color>.filled(10, Colors.white);
-                              btnConsultDateBgColors[4] = Color(0xFF0275D7);
+                          onPressed: () async {
+                            if (btnConsultDateFontColors[4] ==
+                                Color(0xFF0275D7)) {
+                              lastData["date"] =
+                                  fullDateTime[4].toString().split(' ')[0];
 
-                              btnConsultDateFontColors =
-                                  List<Color>.filled(10, Colors.black);
-                              btnConsultDateFontColors[4] = Colors.white;
-                            });
+                              http.Response res = await http.Client().post(
+                                Uri.parse(Domain.url + "user/get/times"),
+                                headers: header,
+                                body: {
+                                  'empid': selectedType,
+                                  'consultDate':
+                                      fullDateTime[4].toString().split(' ')[0]
+                                },
+                              );
+
+                              // ignore: non_constant_identifier_names
+                              possible_times = jsonDecode(res.body);
+
+                              setState(() {
+                                btnConsultDateBgColors =
+                                    List<Color>.filled(10, Colors.white);
+                                btnConsultDateBgColors[4] = Color(0xFF0275D7);
+
+                                possible_days.forEach((obj) {
+                                  // ignore: non_constant_identifier_names
+                                  int possible_day = int.parse(
+                                      obj["possible"].toString().split('-')[2]);
+                                  btnConsultDate
+                                      .asMap()
+                                      .forEach((index, value) {
+                                    // ignore: non_constant_identifier_names
+                                    int consult_day;
+                                    if (value.contains('.'))
+                                      consult_day =
+                                          int.parse(value.split('.')[1]);
+                                    else
+                                      consult_day = int.parse(value);
+
+                                    if (consult_day == possible_day) {
+                                      btnConsultDateFontColors[index] =
+                                          Color(0xFF0275D7);
+                                    }
+                                  });
+                                });
+
+                                btnConsultTimeBgColors =
+                                    List<Color>.filled(8, Colors.white);
+                                btnConsultTimeFontColors =
+                                    List<Color>.filled(8, Colors.black);
+
+                                possible_times.forEach((obj) {
+                                  int time = int.parse(obj.toString());
+
+                                  switch (time) {
+                                    case 9:
+                                      btnConsultTimeFontColors[0] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 10:
+                                      btnConsultTimeFontColors[1] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 11:
+                                      btnConsultTimeFontColors[2] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 13:
+                                      btnConsultTimeFontColors[3] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 14:
+                                      btnConsultTimeFontColors[4] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 15:
+                                      btnConsultTimeFontColors[5] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 16:
+                                      btnConsultTimeFontColors[6] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 17:
+                                      btnConsultTimeFontColors[7] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    default:
+                                      break;
+                                  }
+                                });
+
+                                btnConsultDateFontColors[4] = Colors.white;
+                              });
+                            }
                           },
                           child: Text(
                             btnConsultDate[4].toString(),
@@ -524,16 +1059,101 @@ class Reservation {
                     TableRow(
                       children: [
                         ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              btnConsultDateBgColors =
-                                  List<Color>.filled(10, Colors.white);
-                              btnConsultDateBgColors[5] = Color(0xFF0275D7);
+                          onPressed: () async {
+                            if (btnConsultDateFontColors[5] ==
+                                Color(0xFF0275D7)) {
+                              lastData["date"] =
+                                  fullDateTime[5].toString().split(' ')[0];
 
-                              btnConsultDateFontColors =
-                                  List<Color>.filled(10, Colors.black);
-                              btnConsultDateFontColors[5] = Colors.white;
-                            });
+                              http.Response res = await http.Client().post(
+                                Uri.parse(Domain.url + "user/get/times"),
+                                headers: header,
+                                body: {
+                                  'empid': selectedType,
+                                  'consultDate':
+                                      fullDateTime[5].toString().split(' ')[0]
+                                },
+                              );
+
+                              // ignore: non_constant_identifier_names
+                              possible_times = jsonDecode(res.body);
+
+                              setState(() {
+                                btnConsultDateBgColors =
+                                    List<Color>.filled(10, Colors.white);
+                                btnConsultDateBgColors[5] = Color(0xFF0275D7);
+
+                                possible_days.forEach((obj) {
+                                  // ignore: non_constant_identifier_names
+                                  int possible_day = int.parse(
+                                      obj["possible"].toString().split('-')[2]);
+                                  btnConsultDate
+                                      .asMap()
+                                      .forEach((index, value) {
+                                    // ignore: non_constant_identifier_names
+                                    int consult_day;
+                                    if (value.contains('.'))
+                                      consult_day =
+                                          int.parse(value.split('.')[1]);
+                                    else
+                                      consult_day = int.parse(value);
+
+                                    if (consult_day == possible_day) {
+                                      btnConsultDateFontColors[index] =
+                                          Color(0xFF0275D7);
+                                    }
+                                  });
+                                });
+
+                                btnConsultTimeBgColors =
+                                    List<Color>.filled(8, Colors.white);
+                                btnConsultTimeFontColors =
+                                    List<Color>.filled(8, Colors.black);
+
+                                possible_times.forEach((obj) {
+                                  int time = int.parse(obj.toString());
+
+                                  switch (time) {
+                                    case 9:
+                                      btnConsultTimeFontColors[0] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 10:
+                                      btnConsultTimeFontColors[1] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 11:
+                                      btnConsultTimeFontColors[2] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 13:
+                                      btnConsultTimeFontColors[3] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 14:
+                                      btnConsultTimeFontColors[4] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 15:
+                                      btnConsultTimeFontColors[5] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 16:
+                                      btnConsultTimeFontColors[6] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 17:
+                                      btnConsultTimeFontColors[7] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    default:
+                                      break;
+                                  }
+                                });
+
+                                btnConsultDateFontColors[5] = Colors.white;
+                              });
+                            }
                           },
                           child: Text(
                             btnConsultDate[5].toString(),
@@ -550,16 +1170,101 @@ class Reservation {
                           ),
                         ),
                         ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              btnConsultDateBgColors =
-                                  List<Color>.filled(10, Colors.white);
-                              btnConsultDateBgColors[6] = Color(0xFF0275D7);
+                          onPressed: () async {
+                            if (btnConsultDateFontColors[6] ==
+                                Color(0xFF0275D7)) {
+                              lastData["date"] =
+                                  fullDateTime[6].toString().split(' ')[0];
 
-                              btnConsultDateFontColors =
-                                  List<Color>.filled(10, Colors.black);
-                              btnConsultDateFontColors[6] = Colors.white;
-                            });
+                              http.Response res = await http.Client().post(
+                                Uri.parse(Domain.url + "user/get/times"),
+                                headers: header,
+                                body: {
+                                  'empid': selectedType,
+                                  'consultDate':
+                                      fullDateTime[6].toString().split(' ')[0]
+                                },
+                              );
+
+                              // ignore: non_constant_identifier_names
+                              possible_times = jsonDecode(res.body);
+
+                              setState(() {
+                                btnConsultDateBgColors =
+                                    List<Color>.filled(10, Colors.white);
+                                btnConsultDateBgColors[6] = Color(0xFF0275D7);
+
+                                possible_days.forEach((obj) {
+                                  // ignore: non_constant_identifier_names
+                                  int possible_day = int.parse(
+                                      obj["possible"].toString().split('-')[2]);
+                                  btnConsultDate
+                                      .asMap()
+                                      .forEach((index, value) {
+                                    // ignore: non_constant_identifier_names
+                                    int consult_day;
+                                    if (value.contains('.'))
+                                      consult_day =
+                                          int.parse(value.split('.')[1]);
+                                    else
+                                      consult_day = int.parse(value);
+
+                                    if (consult_day == possible_day) {
+                                      btnConsultDateFontColors[index] =
+                                          Color(0xFF0275D7);
+                                    }
+                                  });
+                                });
+
+                                btnConsultTimeBgColors =
+                                    List<Color>.filled(8, Colors.white);
+                                btnConsultTimeFontColors =
+                                    List<Color>.filled(8, Colors.black);
+
+                                possible_times.forEach((obj) {
+                                  int time = int.parse(obj.toString());
+
+                                  switch (time) {
+                                    case 9:
+                                      btnConsultTimeFontColors[0] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 10:
+                                      btnConsultTimeFontColors[1] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 11:
+                                      btnConsultTimeFontColors[2] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 13:
+                                      btnConsultTimeFontColors[3] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 14:
+                                      btnConsultTimeFontColors[4] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 15:
+                                      btnConsultTimeFontColors[5] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 16:
+                                      btnConsultTimeFontColors[6] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 17:
+                                      btnConsultTimeFontColors[7] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    default:
+                                      break;
+                                  }
+                                });
+
+                                btnConsultDateFontColors[6] = Colors.white;
+                              });
+                            }
                           },
                           child: Text(
                             btnConsultDate[6].toString(),
@@ -576,16 +1281,101 @@ class Reservation {
                           ),
                         ),
                         ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              btnConsultDateBgColors =
-                                  List<Color>.filled(10, Colors.white);
-                              btnConsultDateBgColors[7] = Color(0xFF0275D7);
+                          onPressed: () async {
+                            if (btnConsultDateFontColors[7] ==
+                                Color(0xFF0275D7)) {
+                              lastData["date"] =
+                                  fullDateTime[7].toString().split(' ')[0];
 
-                              btnConsultDateFontColors =
-                                  List<Color>.filled(10, Colors.black);
-                              btnConsultDateFontColors[7] = Colors.white;
-                            });
+                              http.Response res = await http.Client().post(
+                                Uri.parse(Domain.url + "user/get/times"),
+                                headers: header,
+                                body: {
+                                  'empid': selectedType,
+                                  'consultDate':
+                                      fullDateTime[7].toString().split(' ')[0]
+                                },
+                              );
+
+                              // ignore: non_constant_identifier_names
+                              possible_times = jsonDecode(res.body);
+
+                              setState(() {
+                                btnConsultDateBgColors =
+                                    List<Color>.filled(10, Colors.white);
+                                btnConsultDateBgColors[7] = Color(0xFF0275D7);
+
+                                possible_days.forEach((obj) {
+                                  // ignore: non_constant_identifier_names
+                                  int possible_day = int.parse(
+                                      obj["possible"].toString().split('-')[2]);
+                                  btnConsultDate
+                                      .asMap()
+                                      .forEach((index, value) {
+                                    // ignore: non_constant_identifier_names
+                                    int consult_day;
+                                    if (value.contains('.'))
+                                      consult_day =
+                                          int.parse(value.split('.')[1]);
+                                    else
+                                      consult_day = int.parse(value);
+
+                                    if (consult_day == possible_day) {
+                                      btnConsultDateFontColors[index] =
+                                          Color(0xFF0275D7);
+                                    }
+                                  });
+                                });
+
+                                btnConsultTimeBgColors =
+                                    List<Color>.filled(8, Colors.white);
+                                btnConsultTimeFontColors =
+                                    List<Color>.filled(8, Colors.black);
+
+                                possible_times.forEach((obj) {
+                                  int time = int.parse(obj.toString());
+
+                                  switch (time) {
+                                    case 9:
+                                      btnConsultTimeFontColors[0] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 10:
+                                      btnConsultTimeFontColors[1] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 11:
+                                      btnConsultTimeFontColors[2] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 13:
+                                      btnConsultTimeFontColors[3] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 14:
+                                      btnConsultTimeFontColors[4] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 15:
+                                      btnConsultTimeFontColors[5] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 16:
+                                      btnConsultTimeFontColors[6] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 17:
+                                      btnConsultTimeFontColors[7] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    default:
+                                      break;
+                                  }
+                                });
+
+                                btnConsultDateFontColors[7] = Colors.white;
+                              });
+                            }
                           },
                           child: Text(
                             btnConsultDate[7].toString(),
@@ -602,16 +1392,101 @@ class Reservation {
                           ),
                         ),
                         ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              btnConsultDateBgColors =
-                                  List<Color>.filled(10, Colors.white);
-                              btnConsultDateBgColors[8] = Color(0xFF0275D7);
+                          onPressed: () async {
+                            if (btnConsultDateFontColors[8] ==
+                                Color(0xFF0275D7)) {
+                              lastData["date"] =
+                                  fullDateTime[8].toString().split(' ')[0];
 
-                              btnConsultDateFontColors =
-                                  List<Color>.filled(10, Colors.black);
-                              btnConsultDateFontColors[8] = Colors.white;
-                            });
+                              http.Response res = await http.Client().post(
+                                Uri.parse(Domain.url + "user/get/times"),
+                                headers: header,
+                                body: {
+                                  'empid': selectedType,
+                                  'consultDate':
+                                      fullDateTime[8].toString().split(' ')[0]
+                                },
+                              );
+
+                              // ignore: non_constant_identifier_names
+                              possible_times = jsonDecode(res.body);
+
+                              setState(() {
+                                btnConsultDateBgColors =
+                                    List<Color>.filled(10, Colors.white);
+                                btnConsultDateBgColors[8] = Color(0xFF0275D7);
+
+                                possible_days.forEach((obj) {
+                                  // ignore: non_constant_identifier_names
+                                  int possible_day = int.parse(
+                                      obj["possible"].toString().split('-')[2]);
+                                  btnConsultDate
+                                      .asMap()
+                                      .forEach((index, value) {
+                                    // ignore: non_constant_identifier_names
+                                    int consult_day;
+                                    if (value.contains('.'))
+                                      consult_day =
+                                          int.parse(value.split('.')[1]);
+                                    else
+                                      consult_day = int.parse(value);
+
+                                    if (consult_day == possible_day) {
+                                      btnConsultDateFontColors[index] =
+                                          Color(0xFF0275D7);
+                                    }
+                                  });
+                                });
+
+                                btnConsultTimeBgColors =
+                                    List<Color>.filled(8, Colors.white);
+                                btnConsultTimeFontColors =
+                                    List<Color>.filled(8, Colors.black);
+
+                                possible_times.forEach((obj) {
+                                  int time = int.parse(obj.toString());
+
+                                  switch (time) {
+                                    case 9:
+                                      btnConsultTimeFontColors[0] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 10:
+                                      btnConsultTimeFontColors[1] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 11:
+                                      btnConsultTimeFontColors[2] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 13:
+                                      btnConsultTimeFontColors[3] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 14:
+                                      btnConsultTimeFontColors[4] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 15:
+                                      btnConsultTimeFontColors[5] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 16:
+                                      btnConsultTimeFontColors[6] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 17:
+                                      btnConsultTimeFontColors[7] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    default:
+                                      break;
+                                  }
+                                });
+
+                                btnConsultDateFontColors[8] = Colors.white;
+                              });
+                            }
                           },
                           child: Text(
                             btnConsultDate[8].toString(),
@@ -628,16 +1503,101 @@ class Reservation {
                           ),
                         ),
                         ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              btnConsultDateBgColors =
-                                  List<Color>.filled(10, Colors.white);
-                              btnConsultDateBgColors[9] = Color(0xFF0275D7);
+                          onPressed: () async {
+                            if (btnConsultDateFontColors[9] ==
+                                Color(0xFF0275D7)) {
+                              lastData["date"] =
+                                  fullDateTime[9].toString().split(' ')[0];
 
-                              btnConsultDateFontColors =
-                                  List<Color>.filled(10, Colors.black);
-                              btnConsultDateFontColors[9] = Colors.white;
-                            });
+                              http.Response res = await http.Client().post(
+                                Uri.parse(Domain.url + "user/get/times"),
+                                headers: header,
+                                body: {
+                                  'empid': selectedType,
+                                  'consultDate':
+                                      fullDateTime[9].toString().split(' ')[0]
+                                },
+                              );
+
+                              // ignore: non_constant_identifier_names
+                              possible_times = jsonDecode(res.body);
+
+                              setState(() {
+                                btnConsultDateBgColors =
+                                    List<Color>.filled(10, Colors.white);
+                                btnConsultDateBgColors[9] = Color(0xFF0275D7);
+
+                                possible_days.forEach((obj) {
+                                  // ignore: non_constant_identifier_names
+                                  int possible_day = int.parse(
+                                      obj["possible"].toString().split('-')[2]);
+                                  btnConsultDate
+                                      .asMap()
+                                      .forEach((index, value) {
+                                    // ignore: non_constant_identifier_names
+                                    int consult_day;
+                                    if (value.contains('.'))
+                                      consult_day =
+                                          int.parse(value.split('.')[1]);
+                                    else
+                                      consult_day = int.parse(value);
+
+                                    if (consult_day == possible_day) {
+                                      btnConsultDateFontColors[index] =
+                                          Color(0xFF0275D7);
+                                    }
+                                  });
+                                });
+
+                                btnConsultTimeBgColors =
+                                    List<Color>.filled(8, Colors.white);
+                                btnConsultTimeFontColors =
+                                    List<Color>.filled(8, Colors.black);
+
+                                possible_times.forEach((obj) {
+                                  int time = int.parse(obj.toString());
+
+                                  switch (time) {
+                                    case 9:
+                                      btnConsultTimeFontColors[0] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 10:
+                                      btnConsultTimeFontColors[1] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 11:
+                                      btnConsultTimeFontColors[2] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 13:
+                                      btnConsultTimeFontColors[3] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 14:
+                                      btnConsultTimeFontColors[4] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 15:
+                                      btnConsultTimeFontColors[5] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 16:
+                                      btnConsultTimeFontColors[6] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 17:
+                                      btnConsultTimeFontColors[7] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    default:
+                                      break;
+                                  }
+                                });
+
+                                btnConsultDateFontColors[9] = Colors.white;
+                              });
+                            }
                           },
                           child: Text(
                             btnConsultDate[9].toString(),
@@ -682,15 +1642,62 @@ class Reservation {
                       children: [
                         ElevatedButton(
                           onPressed: () {
-                            setState(() {
-                              btnConsultTimeBgColors =
-                                  List<Color>.filled(8, Colors.white);
-                              btnConsultTimeBgColors[0] = Color(0xFF0275D7);
+                            if (btnConsultTimeFontColors[0] ==
+                                Color(0xFF0275D7)) {
+                              lastData["time"] = "9";
 
-                              btnConsultTimeFontColors =
-                                  List<Color>.filled(8, Colors.black);
-                              btnConsultTimeFontColors[0] = Colors.white;
-                            });
+                              setState(() {
+                                btnConsultTimeBgColors =
+                                    List<Color>.filled(8, Colors.white);
+                                btnConsultTimeBgColors[0] = Color(0xFF0275D7);
+
+                                btnConsultTimeFontColors =
+                                    List<Color>.filled(8, Colors.black);
+
+                                possible_times.forEach((obj) {
+                                  int time = int.parse(obj.toString());
+
+                                  switch (time) {
+                                    case 9:
+                                      btnConsultTimeFontColors[0] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 10:
+                                      btnConsultTimeFontColors[1] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 11:
+                                      btnConsultTimeFontColors[2] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 13:
+                                      btnConsultTimeFontColors[3] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 14:
+                                      btnConsultTimeFontColors[4] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 15:
+                                      btnConsultTimeFontColors[5] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 16:
+                                      btnConsultTimeFontColors[6] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 17:
+                                      btnConsultTimeFontColors[7] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    default:
+                                      break;
+                                  }
+                                });
+
+                                btnConsultTimeFontColors[0] = Colors.white;
+                              });
+                            }
                           },
                           child: Text(
                             "9",
@@ -708,15 +1715,62 @@ class Reservation {
                         ),
                         ElevatedButton(
                           onPressed: () {
-                            setState(() {
-                              btnConsultTimeBgColors =
-                                  List<Color>.filled(8, Colors.white);
-                              btnConsultTimeBgColors[1] = Color(0xFF0275D7);
+                            if (btnConsultTimeFontColors[1] ==
+                                Color(0xFF0275D7)) {
+                              lastData["time"] = "10";
 
-                              btnConsultTimeFontColors =
-                                  List<Color>.filled(8, Colors.black);
-                              btnConsultTimeFontColors[1] = Colors.white;
-                            });
+                              setState(() {
+                                btnConsultTimeBgColors =
+                                    List<Color>.filled(8, Colors.white);
+                                btnConsultTimeBgColors[1] = Color(0xFF0275D7);
+
+                                btnConsultTimeFontColors =
+                                    List<Color>.filled(8, Colors.black);
+
+                                possible_times.forEach((obj) {
+                                  int time = int.parse(obj.toString());
+
+                                  switch (time) {
+                                    case 9:
+                                      btnConsultTimeFontColors[0] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 10:
+                                      btnConsultTimeFontColors[1] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 11:
+                                      btnConsultTimeFontColors[2] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 13:
+                                      btnConsultTimeFontColors[3] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 14:
+                                      btnConsultTimeFontColors[4] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 15:
+                                      btnConsultTimeFontColors[5] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 16:
+                                      btnConsultTimeFontColors[6] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 17:
+                                      btnConsultTimeFontColors[7] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    default:
+                                      break;
+                                  }
+                                });
+
+                                btnConsultTimeFontColors[1] = Colors.white;
+                              });
+                            }
                           },
                           child: Text(
                             "10",
@@ -734,15 +1788,62 @@ class Reservation {
                         ),
                         ElevatedButton(
                           onPressed: () {
-                            setState(() {
-                              btnConsultTimeBgColors =
-                                  List<Color>.filled(8, Colors.white);
-                              btnConsultTimeBgColors[2] = Color(0xFF0275D7);
+                            if (btnConsultTimeFontColors[2] ==
+                                Color(0xFF0275D7)) {
+                              lastData["time"] = "11";
 
-                              btnConsultTimeFontColors =
-                                  List<Color>.filled(8, Colors.black);
-                              btnConsultTimeFontColors[2] = Colors.white;
-                            });
+                              setState(() {
+                                btnConsultTimeBgColors =
+                                    List<Color>.filled(8, Colors.white);
+                                btnConsultTimeBgColors[2] = Color(0xFF0275D7);
+
+                                btnConsultTimeFontColors =
+                                    List<Color>.filled(8, Colors.black);
+
+                                possible_times.forEach((obj) {
+                                  int time = int.parse(obj.toString());
+
+                                  switch (time) {
+                                    case 9:
+                                      btnConsultTimeFontColors[0] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 10:
+                                      btnConsultTimeFontColors[1] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 11:
+                                      btnConsultTimeFontColors[2] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 13:
+                                      btnConsultTimeFontColors[3] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 14:
+                                      btnConsultTimeFontColors[4] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 15:
+                                      btnConsultTimeFontColors[5] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 16:
+                                      btnConsultTimeFontColors[6] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 17:
+                                      btnConsultTimeFontColors[7] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    default:
+                                      break;
+                                  }
+                                });
+
+                                btnConsultTimeFontColors[2] = Colors.white;
+                              });
+                            }
                           },
                           child: Text(
                             "11",
@@ -760,15 +1861,62 @@ class Reservation {
                         ),
                         ElevatedButton(
                           onPressed: () {
-                            setState(() {
-                              btnConsultTimeBgColors =
-                                  List<Color>.filled(8, Colors.white);
-                              btnConsultTimeBgColors[3] = Color(0xFF0275D7);
+                            if (btnConsultTimeFontColors[3] ==
+                                Color(0xFF0275D7)) {
+                              lastData["time"] = "13";
 
-                              btnConsultTimeFontColors =
-                                  List<Color>.filled(8, Colors.black);
-                              btnConsultTimeFontColors[3] = Colors.white;
-                            });
+                              setState(() {
+                                btnConsultTimeBgColors =
+                                    List<Color>.filled(8, Colors.white);
+                                btnConsultTimeBgColors[3] = Color(0xFF0275D7);
+
+                                btnConsultTimeFontColors =
+                                    List<Color>.filled(8, Colors.black);
+
+                                possible_times.forEach((obj) {
+                                  int time = int.parse(obj.toString());
+
+                                  switch (time) {
+                                    case 9:
+                                      btnConsultTimeFontColors[0] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 10:
+                                      btnConsultTimeFontColors[1] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 11:
+                                      btnConsultTimeFontColors[2] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 13:
+                                      btnConsultTimeFontColors[3] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 14:
+                                      btnConsultTimeFontColors[4] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 15:
+                                      btnConsultTimeFontColors[5] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 16:
+                                      btnConsultTimeFontColors[6] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 17:
+                                      btnConsultTimeFontColors[7] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    default:
+                                      break;
+                                  }
+                                });
+
+                                btnConsultTimeFontColors[3] = Colors.white;
+                              });
+                            }
                           },
                           child: Text(
                             "13",
@@ -790,15 +1938,62 @@ class Reservation {
                       children: [
                         ElevatedButton(
                           onPressed: () {
-                            setState(() {
-                              btnConsultTimeBgColors =
-                                  List<Color>.filled(8, Colors.white);
-                              btnConsultTimeBgColors[4] = Color(0xFF0275D7);
+                            if (btnConsultTimeFontColors[4] ==
+                                Color(0xFF0275D7)) {
+                              lastData["time"] = "14";
 
-                              btnConsultTimeFontColors =
-                                  List<Color>.filled(8, Colors.black);
-                              btnConsultTimeFontColors[4] = Colors.white;
-                            });
+                              setState(() {
+                                btnConsultTimeBgColors =
+                                    List<Color>.filled(8, Colors.white);
+                                btnConsultTimeBgColors[4] = Color(0xFF0275D7);
+
+                                btnConsultTimeFontColors =
+                                    List<Color>.filled(8, Colors.black);
+
+                                possible_times.forEach((obj) {
+                                  int time = int.parse(obj.toString());
+
+                                  switch (time) {
+                                    case 9:
+                                      btnConsultTimeFontColors[0] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 10:
+                                      btnConsultTimeFontColors[1] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 11:
+                                      btnConsultTimeFontColors[2] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 13:
+                                      btnConsultTimeFontColors[3] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 14:
+                                      btnConsultTimeFontColors[4] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 15:
+                                      btnConsultTimeFontColors[5] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 16:
+                                      btnConsultTimeFontColors[6] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 17:
+                                      btnConsultTimeFontColors[7] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    default:
+                                      break;
+                                  }
+                                });
+
+                                btnConsultTimeFontColors[4] = Colors.white;
+                              });
+                            }
                           },
                           child: Text(
                             "14",
@@ -816,15 +2011,62 @@ class Reservation {
                         ),
                         ElevatedButton(
                           onPressed: () {
-                            setState(() {
-                              btnConsultTimeBgColors =
-                                  List<Color>.filled(8, Colors.white);
-                              btnConsultTimeBgColors[5] = Color(0xFF0275D7);
+                            if (btnConsultTimeFontColors[5] ==
+                                Color(0xFF0275D7)) {
+                              lastData["time"] = "15";
 
-                              btnConsultTimeFontColors =
-                                  List<Color>.filled(8, Colors.black);
-                              btnConsultTimeFontColors[5] = Colors.white;
-                            });
+                              setState(() {
+                                btnConsultTimeBgColors =
+                                    List<Color>.filled(8, Colors.white);
+                                btnConsultTimeBgColors[5] = Color(0xFF0275D7);
+
+                                btnConsultTimeFontColors =
+                                    List<Color>.filled(8, Colors.black);
+
+                                possible_times.forEach((obj) {
+                                  int time = int.parse(obj.toString());
+
+                                  switch (time) {
+                                    case 9:
+                                      btnConsultTimeFontColors[0] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 10:
+                                      btnConsultTimeFontColors[1] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 11:
+                                      btnConsultTimeFontColors[2] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 13:
+                                      btnConsultTimeFontColors[3] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 14:
+                                      btnConsultTimeFontColors[4] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 15:
+                                      btnConsultTimeFontColors[5] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 16:
+                                      btnConsultTimeFontColors[6] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 17:
+                                      btnConsultTimeFontColors[7] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    default:
+                                      break;
+                                  }
+                                });
+
+                                btnConsultTimeFontColors[5] = Colors.white;
+                              });
+                            }
                           },
                           child: Text(
                             "15",
@@ -842,15 +2084,62 @@ class Reservation {
                         ),
                         ElevatedButton(
                           onPressed: () {
-                            setState(() {
-                              btnConsultTimeBgColors =
-                                  List<Color>.filled(8, Colors.white);
-                              btnConsultTimeBgColors[6] = Color(0xFF0275D7);
+                            if (btnConsultTimeFontColors[6] ==
+                                Color(0xFF0275D7)) {
+                              lastData["time"] = "16";
 
-                              btnConsultTimeFontColors =
-                                  List<Color>.filled(8, Colors.black);
-                              btnConsultTimeFontColors[6] = Colors.white;
-                            });
+                              setState(() {
+                                btnConsultTimeBgColors =
+                                    List<Color>.filled(8, Colors.white);
+                                btnConsultTimeBgColors[6] = Color(0xFF0275D7);
+
+                                btnConsultTimeFontColors =
+                                    List<Color>.filled(8, Colors.black);
+
+                                possible_times.forEach((obj) {
+                                  int time = int.parse(obj.toString());
+
+                                  switch (time) {
+                                    case 9:
+                                      btnConsultTimeFontColors[0] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 10:
+                                      btnConsultTimeFontColors[1] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 11:
+                                      btnConsultTimeFontColors[2] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 13:
+                                      btnConsultTimeFontColors[3] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 14:
+                                      btnConsultTimeFontColors[4] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 15:
+                                      btnConsultTimeFontColors[5] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 16:
+                                      btnConsultTimeFontColors[6] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 17:
+                                      btnConsultTimeFontColors[7] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    default:
+                                      break;
+                                  }
+                                });
+
+                                btnConsultTimeFontColors[6] = Colors.white;
+                              });
+                            }
                           },
                           child: Text(
                             "16",
@@ -868,15 +2157,62 @@ class Reservation {
                         ),
                         ElevatedButton(
                           onPressed: () {
-                            setState(() {
-                              btnConsultTimeBgColors =
-                                  List<Color>.filled(8, Colors.white);
-                              btnConsultTimeBgColors[7] = Color(0xFF0275D7);
+                            if (btnConsultTimeFontColors[7] ==
+                                Color(0xFF0275D7)) {
+                              lastData["time"] = "17";
 
-                              btnConsultTimeFontColors =
-                                  List<Color>.filled(8, Colors.black);
-                              btnConsultTimeFontColors[7] = Colors.white;
-                            });
+                              setState(() {
+                                btnConsultTimeBgColors =
+                                    List<Color>.filled(8, Colors.white);
+                                btnConsultTimeBgColors[7] = Color(0xFF0275D7);
+
+                                btnConsultTimeFontColors =
+                                    List<Color>.filled(8, Colors.black);
+
+                                possible_times.forEach((obj) {
+                                  int time = int.parse(obj.toString());
+
+                                  switch (time) {
+                                    case 9:
+                                      btnConsultTimeFontColors[0] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 10:
+                                      btnConsultTimeFontColors[1] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 11:
+                                      btnConsultTimeFontColors[2] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 13:
+                                      btnConsultTimeFontColors[3] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 14:
+                                      btnConsultTimeFontColors[4] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 15:
+                                      btnConsultTimeFontColors[5] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 16:
+                                      btnConsultTimeFontColors[6] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    case 17:
+                                      btnConsultTimeFontColors[7] =
+                                          Color(0xFF0275D7);
+                                      break;
+                                    default:
+                                      break;
+                                  }
+                                });
+
+                                btnConsultTimeFontColors[7] = Colors.white;
+                              });
+                            }
                           },
                           child: Text(
                             "17",
@@ -902,11 +2238,26 @@ class Reservation {
                 alignment: Alignment.centerRight,
                 child: ElevatedButton(
                   onPressed: () {
-                    setState(() {
-                      pageController.nextPage(
-                          duration: Duration(milliseconds: 1000),
-                          curve: Curves.fastLinearToSlowEaseIn);
-                    });
+                    if (lastData["empid"] == null ||
+                        lastData["empid"] == "null") {
+                      openDescription(
+                          context, "유한누리", "상담 선생님을 선택해 주세요.", false);
+                    } else if (lastData["reservationCode"] == null) {
+                      openDescription(
+                          context, "유한누리", "상담 유형을 선택해 주세요.", false);
+                    } else if (lastData["date"] == null) {
+                      openDescription(
+                          context, "유한누리", "상담 날짜를 선택해 주세요.", false);
+                    } else if (lastData["time"] == null) {
+                      openDescription(
+                          context, "유한누리", "상담 시간을 선택해 주세요.", false);
+                    } else {
+                      setState(() {
+                        pageController.nextPage(
+                            duration: Duration(milliseconds: 1000),
+                            curve: Curves.fastLinearToSlowEaseIn);
+                      });
+                    }
                   },
                   child: Text(
                     "다 음",
@@ -924,14 +2275,28 @@ class Reservation {
     });
   }
 
-  Widget selfCheckPage() {
-    List<Widget> selfcheckList = [
-      selfcheck("자가진단 질문 예시1"),
-      selfcheck("자가진단 질문 예시2"),
-      selfcheck("자가진단 질문 예시3"),
-      selfcheck("자가진단 질문 예시4"),
-      selfcheck("자가진단 질문 예시5"),
-    ];
+  Future<Widget> selfCheckPage() async {
+    http.Response res = await http.Client().get(
+      Uri.parse(Domain.url + "user/get/selfcheck"),
+      headers: header,
+    );
+
+    Map selfcheckAnswers = {};
+
+    List<Widget> selfcheckList = [];
+
+    lastData["selfcheckCode"] = [];
+    lastData["selfcheckNum"] = [];
+
+    jsonDecode(res.body).forEach((obj) {
+      lastData["selfcheckCode"].add(obj["checkno"].toString());
+      lastData["selfcheckNum"].add(0);
+
+      selfcheckList.add(
+          selfcheck(obj["checkno"].toString(), obj["checkname"].toString()));
+
+      selfcheckAnswers[obj["checkno"].toString()] = "";
+    });
 
     return StatefulBuilder(builder: (context, StateSetter setState) {
       return SingleChildScrollView(
@@ -959,12 +2324,17 @@ class Reservation {
                   alignment: Alignment.centerRight,
                   child: ElevatedButton(
                     onPressed: () {
-                      setState(() {
-                        pageController.nextPage(
-                          duration: Duration(milliseconds: 1000),
-                          curve: Curves.fastLinearToSlowEaseIn,
-                        );
-                      });
+                      if (lastData["selfcheckNum"].indexOf(0) == -1) {
+                        setState(() {
+                          pageController.nextPage(
+                            duration: Duration(milliseconds: 1000),
+                            curve: Curves.fastLinearToSlowEaseIn,
+                          );
+                        });
+                      } else {
+                        openDescription(
+                            context, "유한누리", "답변하지 않은 질문이 있습니다.", false);
+                      }
                     },
                     child: Text(
                       "다 음",
@@ -983,12 +2353,14 @@ class Reservation {
     });
   }
 
-  Widget privacyPage() {
+  Future<Widget> privacyPage() async {
     String agree1 = "assets/btnCheck-off.png";
     String agree2 = "assets/btnCheck-off.png";
     String agree3 = "assets/btnCheck-off.png";
     String agree4 = "assets/btnCheck-off.png";
     String agree5 = "assets/btnCheck-off.png";
+
+    List<int> privacySum = [0, 0, 0, 0];
 
     return StatefulBuilder(builder: (context, StateSetter setState) {
       return SingleChildScrollView(
@@ -999,10 +2371,18 @@ class Reservation {
               TextButton(
                 onPressed: () {
                   setState(() {
-                    if (agree1 == "assets/btnCheck-off.png")
+                    if (privacySum[0] == 0) {
                       agree1 = "assets/btnCheck-on.png";
-                    else
+                      privacySum[0] = 1;
+                    } else {
                       agree1 = "assets/btnCheck-off.png";
+                      privacySum[0] = 0;
+                    }
+
+                    if (privacySum.reduce((a, b) => a + b) == 4)
+                      agree5 = "assets/btnCheck-on.png";
+                    else
+                      agree5 = "assets/btnCheck-off.png";
                   });
                 },
                 child: Row(
@@ -1085,10 +2465,18 @@ class Reservation {
               TextButton(
                 onPressed: () {
                   setState(() {
-                    if (agree2 == "assets/btnCheck-off.png")
+                    if (privacySum[1] == 0) {
                       agree2 = "assets/btnCheck-on.png";
-                    else
+                      privacySum[1] = 1;
+                    } else {
                       agree2 = "assets/btnCheck-off.png";
+                      privacySum[1] = 0;
+                    }
+
+                    if (privacySum.reduce((a, b) => a + b) == 4)
+                      agree5 = "assets/btnCheck-on.png";
+                    else
+                      agree5 = "assets/btnCheck-off.png";
                   });
                 },
                 child: Row(
@@ -1158,10 +2546,18 @@ class Reservation {
               TextButton(
                 onPressed: () {
                   setState(() {
-                    if (agree3 == "assets/btnCheck-off.png")
+                    if (privacySum[2] == 0) {
                       agree3 = "assets/btnCheck-on.png";
-                    else
+                      privacySum[2] = 1;
+                    } else {
                       agree3 = "assets/btnCheck-off.png";
+                      privacySum[2] = 0;
+                    }
+
+                    if (privacySum.reduce((a, b) => a + b) == 4)
+                      agree5 = "assets/btnCheck-on.png";
+                    else
+                      agree5 = "assets/btnCheck-off.png";
                   });
                 },
                 child: Row(
@@ -1231,10 +2627,18 @@ class Reservation {
               TextButton(
                 onPressed: () {
                   setState(() {
-                    if (agree4 == "assets/btnCheck-off.png")
+                    if (privacySum[3] == 0) {
                       agree4 = "assets/btnCheck-on.png";
-                    else
+                      privacySum[3] = 1;
+                    } else {
                       agree4 = "assets/btnCheck-off.png";
+                      privacySum[3] = 0;
+                    }
+
+                    if (privacySum.reduce((a, b) => a + b) == 4)
+                      agree5 = "assets/btnCheck-on.png";
+                    else
+                      agree5 = "assets/btnCheck-off.png";
                   });
                 },
                 child: Row(
@@ -1305,18 +2709,26 @@ class Reservation {
               TextButton(
                 onPressed: () {
                   setState(() {
-                    if (agree5 == "assets/btnCheck-off.png") {
+                    if (privacySum.reduce((a, b) => a + b) != 4) {
                       agree1 = "assets/btnCheck-on.png";
                       agree2 = "assets/btnCheck-on.png";
                       agree3 = "assets/btnCheck-on.png";
                       agree4 = "assets/btnCheck-on.png";
                       agree5 = "assets/btnCheck-on.png";
+
+                      for (var i = 0; i < privacySum.length; i++) {
+                        privacySum[i] = 1;
+                      }
                     } else {
                       agree1 = "assets/btnCheck-off.png";
                       agree2 = "assets/btnCheck-off.png";
                       agree3 = "assets/btnCheck-off.png";
                       agree4 = "assets/btnCheck-off.png";
                       agree5 = "assets/btnCheck-off.png";
+
+                      for (var i = 0; i < privacySum.length; i++) {
+                        privacySum[i] = 0;
+                      }
                     }
                   });
                 },
@@ -1330,7 +2742,7 @@ class Reservation {
                       ),
                     ),
                     Text(
-                      "상위 유한누리 이용약간에 모두 동의합니다.",
+                      "상위 유한누리 이용 약관에 모두 동의합니다.",
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
@@ -1359,7 +2771,24 @@ class Reservation {
                 margin: EdgeInsets.fromLTRB(0, 15, 5, 0),
                 alignment: Alignment.centerRight,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    if (privacySum.reduce((a, b) => a + b) == 4) {
+                      header["Content-Type"] = "application/json";
+                      await http.Client().post(
+                        Uri.parse(Domain.url + "user/set/reservation"),
+                        headers: header,
+                        body: json.encode(lastData),
+                      );
+                      header["Content-Type"] =
+                          "application/x-www-form-urlencoded; charset=UTF-8";
+
+                      openDescription(
+                          context, "유한누리", "예약이 완료되었습니다, 감사합니다.", true);
+                    } else {
+                      openDescription(context, "유한누리",
+                          "이용 약관에 모두 동의해야 예약을\n완료할 수 있습니다.", false);
+                    }
+                  },
                   child: Text(
                     "확 인",
                     style: TextStyle(color: Colors.white, fontSize: 17),
@@ -1376,22 +2805,505 @@ class Reservation {
     });
   }
 
-  List<Widget> psychoTestList = [];
+  Widget unreservation(var data) {
+    return StatefulBuilder(builder: (context, StateSetter setState) {
+      if (data[0]["typeno"] == null) {
+        List<String> testList = [];
+        for (int i = 0; i < data.length; i++) {
+          testList.add(data[i]["testname"].toString());
+        }
+        Widget status;
+        Widget btnUnreserv;
+        if (int.parse(data[0]["status"].toString()) == 0 &&
+            int.parse(data[0]["finished"].toString()) == 0 &&
+            int.parse(data[0]["research"].toString()) == 0) {
+          status = Row(
+            children: [
+              Text(
+                "접수 중",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.normal,
+                  color: Colors.red,
+                ),
+              ),
+              Text(
+                " (확정 시 '완료'로 변경)",
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.normal,
+                  color: Colors.grey,
+                ),
+              )
+            ],
+          );
+          btnUnreserv = Container(
+            margin: EdgeInsets.only(top: 10, right: 10),
+            alignment: Alignment.centerRight,
+            child: ElevatedButton(
+              onPressed: () async {
+                http.Response res = await http.Client().post(
+                  Uri.parse(Domain.url + "user/set/cancel"),
+                  headers: header,
+                  body: {
+                    "serialno": data[0]["serialno"].toString(),
+                  },
+                );
+                var recv = jsonDecode(res.body);
+                if (recv["isComplete"]) {
+                  IO.Socket socket =
+                      IO.io(Domain.url + "reaction", <String, dynamic>{
+                    'transports': ['websocket'],
+                  });
+                  socket.onConnect((_) {
+                    socket.emit('cancel', data[0]["serialno"].toString());
+                  });
+                  socket.onDisconnect((_) => {});
+                  openDescription(context, "유한누리", "취소가 완료되었습니다.", true);
+                } else
+                  openDescription(context, "유한누리", "이미 완료되었거나 취소되었습니다.", true);
+              },
+              child: Text(
+                "취 소",
+                style: TextStyle(color: Colors.white, fontSize: 17),
+              ),
+              style: ElevatedButton.styleFrom(
+                primary: Colors.red[700],
+              ),
+            ),
+          );
+        } else if (int.parse(data[0]["status"].toString()) == 1 &&
+            int.parse(data[0]["finished"].toString()) == 0 &&
+            int.parse(data[0]["research"].toString()) == 0) {
+          status = Text(
+            "접수 완료",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.normal,
+              color: Colors.green,
+            ),
+          );
+        } else if (int.parse(data[0]["status"].toString()) == 1 &&
+            int.parse(data[0]["finished"].toString()) == 1 &&
+            int.parse(data[0]["research"].toString()) == 0) {
+          status = Text(
+            "검사 완료",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.normal,
+              color: Color(0xFF0275D7),
+            ),
+          );
 
-  List<Widget> inquiryList = [];
+          btnUnreserv = Container(
+            margin: EdgeInsets.only(top: 10, right: 10),
+            alignment: Alignment.centerRight,
+            child: ElevatedButton(
+              onPressed: () => satisfactionDialog(context),
+              child: Text(
+                "만족도조사",
+                style: TextStyle(color: Colors.white, fontSize: 17),
+              ),
+              style: ElevatedButton.styleFrom(
+                primary: Color(0xFF0275D7),
+              ),
+            ),
+          );
+        }
+        return Container(
+          padding: EdgeInsets.all(15),
+          color: Color(0xFFF0F0F0),
+          child: Column(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(15.0),
+                  ),
+                ),
+                child: Table(
+                  columnWidths: {0: FixedColumnWidth(100)},
+                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                  children: [
+                    TableRow(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.fromLTRB(20, 20, 0, 10),
+                          child: Text(
+                            "상담유형",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.fromLTRB(20, 20, 0, 10),
+                          child: Text(
+                            "심리검사",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    TableRow(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.fromLTRB(20, 10, 0, 10),
+                          child: Text(
+                            "검사목록",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.fromLTRB(20, 10, 0, 10),
+                          child: Text(
+                            testList.join(", "),
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    TableRow(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.fromLTRB(20, 10, 0, 20),
+                          child: Text(
+                            "접수현황",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.fromLTRB(20, 10, 0, 20),
+                          child: status,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              if (btnUnreserv != null) btnUnreserv,
+            ],
+          ),
+        );
+      } else {
+        List<String> strDate = data[0]["date"].toString().split('-');
+        String strTime;
+        if (int.parse(data[0]["starttime"].toString()) < 12) {
+          strTime = "오전 ${data[0]["starttime"].toString()}시";
+        } else {
+          strTime = "오후 ${int.parse(data[0]["starttime"].toString()) - 12}시";
+        }
+        Widget status;
+        Widget btnUnreserv;
+        if (int.parse(data[0]["status"].toString()) == 0 &&
+            int.parse(data[0]["finished"].toString()) == 0 &&
+            int.parse(data[0]["research"].toString()) == 0) {
+          status = Row(
+            children: [
+              Text(
+                "접수 중",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.normal,
+                  color: Colors.red,
+                ),
+              ),
+              Text(
+                " (확정 시 '완료'로 변경)",
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.normal,
+                  color: Colors.grey,
+                ),
+              )
+            ],
+          );
+
+          btnUnreserv = Container(
+            margin: EdgeInsets.only(top: 10, right: 10),
+            alignment: Alignment.centerRight,
+            child: ElevatedButton(
+              onPressed: () async {
+                http.Response res = await http.Client().post(
+                  Uri.parse(Domain.url + "user/set/cancel"),
+                  headers: header,
+                  body: {
+                    "serialno": data[0]["serialno"].toString(),
+                  },
+                );
+                var recv = jsonDecode(res.body);
+                if (recv["isComplete"]) {
+                  IO.Socket socket =
+                      IO.io(Domain.url + "reaction", <String, dynamic>{
+                    'transports': ['websocket'],
+                  });
+                  socket.onConnect((_) {
+                    socket.emit('cancel', data[0]["serialno"].toString());
+                  });
+                  socket.onDisconnect((_) => {});
+                  openDescription(context, "유한누리", "취소가 완료되었습니다.", true);
+                } else
+                  openDescription(context, "유한누리", "이미 완료되었거나 취소되었습니다.", true);
+              },
+              child: Text(
+                "취 소",
+                style: TextStyle(color: Colors.white, fontSize: 17),
+              ),
+              style: ElevatedButton.styleFrom(
+                primary: Colors.red[700],
+              ),
+            ),
+          );
+        } else if (int.parse(data[0]["status"].toString()) == 1 &&
+            int.parse(data[0]["finished"].toString()) == 0 &&
+            int.parse(data[0]["research"].toString()) == 0) {
+          status = Text(
+            "접수 완료",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.normal,
+              color: Colors.green,
+            ),
+          );
+        } else if (int.parse(data[0]["status"].toString()) == 1 &&
+            int.parse(data[0]["finished"].toString()) == 1 &&
+            int.parse(data[0]["research"].toString()) == 0) {
+          status = Text(
+            "상담 완료",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.normal,
+              color: Color(0xFF0275D7),
+            ),
+          );
+
+          btnUnreserv = Container(
+            margin: EdgeInsets.only(top: 10, right: 10),
+            alignment: Alignment.centerRight,
+            child: ElevatedButton(
+              onPressed: () => satisfactionDialog(context),
+              child: Text(
+                "만족도조사",
+                style: TextStyle(color: Colors.white, fontSize: 17),
+              ),
+              style: ElevatedButton.styleFrom(
+                primary: Color(0xFF0275D7),
+              ),
+            ),
+          );
+        }
+
+        return Container(
+          padding: EdgeInsets.all(15),
+          color: Color(0xFFF0F0F0),
+          child: Column(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(15.0),
+                  ),
+                ),
+                child: Table(
+                  columnWidths: {0: FixedColumnWidth(100)},
+                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                  children: [
+                    TableRow(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.fromLTRB(20, 20, 0, 10),
+                          child: Text(
+                            "상담유형",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.fromLTRB(20, 20, 0, 10),
+                          child: Text(
+                            data[0]["typename"],
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    TableRow(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.fromLTRB(20, 10, 0, 10),
+                          child: Text(
+                            "상담사명",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.fromLTRB(20, 10, 0, 10),
+                          child: Text(
+                            data[0]["empname"],
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    TableRow(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.fromLTRB(20, 10, 0, 10),
+                          child: Text(
+                            "예약날짜",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.fromLTRB(20, 10, 0, 10),
+                          child: Text(
+                            "${strDate[0]}년 ${strDate[1]}월 ${strDate[2]}일",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    TableRow(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.fromLTRB(20, 10, 0, 10),
+                          child: Text(
+                            "시작시간",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.fromLTRB(20, 10, 0, 10),
+                          child: Text(
+                            strTime,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    TableRow(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.fromLTRB(20, 10, 0, 20),
+                          child: Text(
+                            "접수현황",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.fromLTRB(20, 10, 0, 20),
+                          child: status,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              if (btnUnreserv != null) btnUnreserv,
+            ],
+          ),
+        );
+      }
+    });
+  }
+
+  Future<void> getInit() async {
+    consultInquiries.clear();
+    psychoInquiries.clear();
+    psychoTestList.clear();
+
+    http.Response res = await http.Client().get(
+      Uri.parse(Domain.url + "user/get/reservation"),
+      headers: header,
+    );
+
+    var recv = jsonDecode(res.body);
+
+    if (recv["isPossible"]) {
+      recv["consultAsk"].forEach((obj) {
+        if (obj["choices"].toString() == "null") {
+          consultInquiries.add(inquiry(int.parse(obj["askno"].toString()),
+              obj["choicetypename"].toString(), obj["ask"].toString(), null));
+        } else {
+          consultInquiries.add(inquiry(
+              int.parse(obj["askno"].toString()),
+              obj["choicetypename"].toString(),
+              obj["ask"].toString(),
+              obj["choices"].toString().split('|')));
+        }
+      });
+
+      recv["testAsk"].forEach((obj) {
+        if (obj["choices"].toString() == "null") {
+          psychoInquiries.add(inquiry(int.parse(obj["askno"].toString()),
+              obj["choicetypename"].toString(), obj["ask"].toString(), null));
+        } else {
+          psychoInquiries.add(inquiry(
+              int.parse(obj["askno"].toString()),
+              obj["choicetypename"].toString(),
+              obj["ask"].toString(),
+              obj["choices"].toString().split('|')));
+        }
+      });
+
+      recv["psyTestList"].forEach((obj) {
+        psychoTestList.add(psychoTest(int.parse(obj["testno"].toString()),
+            obj["testname"].toString(), obj["description"].toString()));
+      });
+
+      pageList.add(inquiryPage());
+    } else {
+      pageList.add(unreservation(recv["data"]));
+    }
+  }
 
   Widget psychoBuild() {
-    psychoTestList = [
-      psychoTest(),
-      psychoTest(),
-      psychoTest(),
-    ];
-    inquiryList = [inquiey("Radio"), inquiey("Check"), inquiey("Normal")];
     return StatefulBuilder(builder: (context, StateSetter setState) {
       return Column(
         children: [
           Column(
-            children: inquiryList,
+            children: psychoInquiries,
           ),
           Container(
             padding: EdgeInsets.fromLTRB(25, 15, 25, 10),
@@ -1422,12 +3334,27 @@ class Reservation {
             margin: EdgeInsets.only(top: 15, right: 15),
             alignment: Alignment.centerRight,
             child: ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  pageController.nextPage(
-                      duration: Duration(milliseconds: 1000),
-                      curve: Curves.fastLinearToSlowEaseIn);
-                });
+              onPressed: () async {
+                if (tempSelectedAnswers.length != initCheckNum) {
+                  openDescription(context, "유한누리", "답변하지 않은 질문이 있습니다.", false);
+                } else {
+                  if (tempSelectedPsyTest.length == 0) {
+                    openDescription(
+                        context, "유한누리", "심리검사를 하나 이상 선택하세요.", false);
+                  } else {
+                    lastData["stuAnswer"] = [];
+                    tempSelectedAnswers.forEach((key, value) {
+                      lastData["stuAnswer"]
+                          .add({"question": key, "answer": value});
+                    });
+                    lastData["psyTestList"] = tempSelectedPsyTest;
+                    setState(() {
+                      pageController.nextPage(
+                          duration: Duration(milliseconds: 1000),
+                          curve: Curves.fastLinearToSlowEaseIn);
+                    });
+                  }
+                }
               },
               child: Text(
                 "다 음",
@@ -1444,28 +3371,29 @@ class Reservation {
   }
 
   Widget consultBuild() {
-    psychoTestList = [
-      psychoTest(),
-      psychoTest(),
-      psychoTest(),
-    ];
-    inquiryList = [inquiey("Radio"), inquiey("Check"), inquiey("Normal")];
     return StatefulBuilder(builder: (context, StateSetter setState) {
       return Column(
         children: [
           Column(
-            children: inquiryList,
+            children: consultInquiries,
           ),
           Container(
             margin: EdgeInsets.only(right: 15),
             alignment: Alignment.centerRight,
             child: ElevatedButton(
-              onPressed: () {
-                setState(() {
+              onPressed: () async {
+                if (tempSelectedAnswers.length != initCheckNum) {
+                  openDescription(context, "유한누리", "답변하지 않은 질문이 있습니다.", false);
+                } else {
+                  lastData["stuAnswer"] = [];
+                  tempSelectedAnswers.forEach((key, value) {
+                    lastData["stuAnswer"]
+                        .add({"question": key, "answer": value});
+                  });
                   pageController.nextPage(
                       duration: Duration(milliseconds: 1000),
                       curve: Curves.fastLinearToSlowEaseIn);
-                });
+                }
               },
               child: Text(
                 "다 음",
@@ -1481,11 +3409,7 @@ class Reservation {
     });
   }
 
-  void setPsychoTestList() {
-    psychoTestList.add(psychoTest());
-  }
-
-  Widget psychoTest() {
+  Widget psychoTest(int no, String title, String description) {
     var _value = false;
     return StatefulBuilder(builder: (context, StateSetter setState) {
       return Row(
@@ -1496,19 +3420,23 @@ class Reservation {
               Checkbox(
                 value: _value,
                 onChanged: (bool value) {
+                  if (value)
+                    tempSelectedPsyTest.add(no);
+                  else
+                    tempSelectedPsyTest.remove(no);
+
                   setState(() {
                     _value = value;
                   });
                 },
               ),
-              Text("MBTI"),
+              Text(title),
             ],
           ),
           TextButton(
             onPressed: () {
               setState(() {
-                openDescription(
-                    context, "MBTI", "16가지 성격유형 중 자신의 성격유형에 대한 장단점 탐색");
+                openDescription(context, title, description, false);
               });
             },
             child: Image(
@@ -1525,11 +3453,7 @@ class Reservation {
     });
   }
 
-  void setInquiryList() {
-    inquiryList.add(psychoTest());
-  }
-
-  Widget inquiey(String type) {
+  Widget inquiry(int no, String type, String title, List<String> options) {
     Widget temp;
     switch (type) {
       case "Radio":
@@ -1551,14 +3475,15 @@ class Reservation {
                 Container(
                   padding: EdgeInsets.all(15),
                   child: Text(
-                    "라디오 질문1",
+                    title,
                     style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                   ),
                 ),
                 RadioButtonGroup(
-                  labels: ["라디오 답변1", "라디오 답변2", "라디오 답변3"],
+                  labels: options,
                   picked: _radio,
                   onSelected: (String selected) => setState(() {
+                    tempSelectedAnswers[no] = selected;
                     _radio = selected;
                   }),
                   itemBuilder: (radioButton, label, index) {
@@ -1594,14 +3519,17 @@ class Reservation {
                 Container(
                   padding: EdgeInsets.all(15),
                   child: Text(
-                    "체크박스 질문1",
+                    title,
                     style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                   ),
                 ),
                 CheckboxGroup(
-                  labels: ["체크박스 답변1", "체크박스 답변2", "체크박스 답변3"],
+                  labels: options,
                   checked: _check,
                   onSelected: (List selected) => setState(() {
+                    var str = selected.toString().replaceAll(', ', ',');
+                    var bracket = str.substring(1, str.length - 1);
+                    tempSelectedAnswers[no] = bracket;
                     _check = selected;
                   }),
                   itemBuilder: (checkBox, label, index) {
@@ -1619,7 +3547,10 @@ class Reservation {
         });
         break;
       case "Normal":
+        TextEditingController textEditingController = TextEditingController();
+        String txt = "";
         temp = StatefulBuilder(builder: (context, StateSetter setState) {
+          textEditingController.text = txt.trim().isEmpty ? "" : txt.trim();
           return Container(
             margin: EdgeInsets.all(10),
             padding: EdgeInsets.only(top: 5, bottom: 5),
@@ -1637,13 +3568,14 @@ class Reservation {
                   padding:
                       EdgeInsets.only(left: 15, top: 15, right: 15, bottom: 10),
                   child: Text(
-                    "서술형 질문1",
+                    title,
                     style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                   ),
                 ),
                 Container(
                   padding: EdgeInsets.only(left: 15, right: 15),
                   child: TextField(
+                    controller: textEditingController,
                     decoration: InputDecoration(
                       hintText: "자유롭게 작성해 주세요.",
                       border: InputBorder.none,
@@ -1652,6 +3584,10 @@ class Reservation {
                       errorBorder: InputBorder.none,
                       disabledBorder: InputBorder.none,
                     ),
+                    onChanged: (value) {
+                      txt = value;
+                      tempSelectedAnswers[no] = value;
+                    },
                   ),
                 )
               ],
@@ -1665,8 +3601,9 @@ class Reservation {
     return temp;
   }
 
-  Widget selfcheck(String title) {
+  Widget selfcheck(String checkno, String checkname) {
     String _radio;
+    List<String> options = ["매우 나쁨", "나쁨", "보통", "좋음", "매우 좋음"];
     return StatefulBuilder(builder: (context, StateSetter setState) {
       return Container(
         margin: EdgeInsets.only(top: 25),
@@ -1674,7 +3611,7 @@ class Reservation {
         child: Column(
           children: [
             Text(
-              title,
+              checkname,
               style: TextStyle(fontSize: 20),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -1685,9 +3622,12 @@ class Reservation {
                 activeColor: Color(0xFF0275D7),
                 labelStyle: TextStyle(color: Colors.black54),
                 orientation: GroupedButtonsOrientation.HORIZONTAL,
-                labels: ["매우 나쁨", "나쁨", "보통", "좋음", "매우 좋음"],
+                labels: options,
                 picked: _radio,
                 onSelected: (String selected) => setState(() {
+                  var idx = lastData["selfcheckCode"].indexOf(checkno);
+                  var score = options.indexOf(selected);
+                  lastData["selfcheckNum"][idx] = score + 1;
                   _radio = selected;
                 }),
                 itemBuilder: (radioButton, label, index) {
@@ -1709,7 +3649,8 @@ class Reservation {
     });
   }
 
-  void openDescription(BuildContext context, String title, String msg) {
+  void openDescription(
+      BuildContext context, String title, String msg, bool isRebuild) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -1726,8 +3667,9 @@ class Reservation {
             ElevatedButton(
               onPressed: () {
                 Navigator.pop(context, true);
+                if (isRebuild) parentKey.currentState.setPage(1);
               },
-              child: Text("확인"),
+              child: Text("확 인"),
               style: ElevatedButton.styleFrom(
                 primary: Color(0xFF0275D7),
               ),
@@ -1738,165 +3680,171 @@ class Reservation {
     );
   }
 
-  /*Widget userInfo(String name, String number, String major, String gender,
-      String birth, String phone, String email) {
-    return Column(
-      children: [
-        Container(
-          margin: EdgeInsets.only(left: 15, top: 35, right: 15),
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(color: Colors.black),
-            ),
-          ),
-          alignment: Alignment.centerLeft,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "이름",
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-              ),
-              Container(
-                padding: EdgeInsets.only(top: 15, bottom: 10),
-                child: Text(name),
-              ),
-            ],
-          ),
-        ),
-        Container(
-          margin: EdgeInsets.only(left: 15, top: 35, right: 15),
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(color: Colors.black),
-            ),
-          ),
-          alignment: Alignment.centerLeft,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "학번",
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-              ),
-              Container(
-                padding: EdgeInsets.only(top: 15, bottom: 10),
-                child: Text(number),
-              ),
-            ],
-          ),
-        ),
-        Container(
-          margin: EdgeInsets.only(left: 15, top: 35, right: 15),
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(color: Colors.black),
-            ),
-          ),
-          alignment: Alignment.centerLeft,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "학과",
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-              ),
-              Container(
-                padding: EdgeInsets.only(top: 15, bottom: 10),
-                child: Text(major),
-              ),
-            ],
-          ),
-        ),
-        Container(
-          margin: EdgeInsets.only(left: 15, top: 35, right: 15),
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(color: Colors.black),
-            ),
-          ),
-          alignment: Alignment.centerLeft,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "성별",
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-              ),
-              Container(
-                padding: EdgeInsets.only(top: 15, bottom: 10),
-                child: Text(gender),
-              ),
-            ],
-          ),
-        ),
-        Container(
-          margin: EdgeInsets.only(left: 15, top: 35, right: 15),
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(color: Colors.black),
-            ),
-          ),
-          alignment: Alignment.centerLeft,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "생년월일",
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-              ),
-              Container(
-                padding: EdgeInsets.only(top: 15, bottom: 10),
-                child: Text(birth),
-              ),
-            ],
-          ),
-        ),
-        Container(
-          margin: EdgeInsets.only(left: 15, top: 35, right: 15),
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(color: Colors.black),
-            ),
-          ),
-          alignment: Alignment.centerLeft,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "전화번호",
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-              ),
-              Container(
-                padding: EdgeInsets.only(top: 15, bottom: 10),
-                child: Text(phone),
-              ),
-            ],
-          ),
-        ),
-        Container(
-          margin: EdgeInsets.only(left: 15, top: 35, right: 15),
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(color: Colors.black),
-            ),
-          ),
-          alignment: Alignment.centerLeft,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "이메일",
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-              ),
-              Container(
-                padding: EdgeInsets.only(top: 15, bottom: 10),
-                child: Text(email),
-              ),
-            ],
-          ),
-        ),
-      ],
+  void satisfactionDialog(BuildContext _context) async {
+    tempSelectedAnswers.clear();
+
+    List<Widget> surveyList = [];
+
+    Map<String, dynamic> surveyData = {"serialno": null, "dataList": []};
+
+    http.Response res = await http.Client().get(
+      Uri.parse(Domain.url + "user/get/satisfaction"),
+      headers: header,
     );
-  }*/
+
+    var recv = jsonDecode(res.body);
+
+    surveyData["serialno"] = recv["serial"][0]["serialno"];
+
+    recv["testAsk"].forEach((obj) {
+      if (obj["choices"].toString() == "null") {
+        surveyList.add(inquiry(int.parse(obj["askno"].toString()),
+            obj["choicetypename"].toString(), obj["ask"].toString(), null));
+      } else {
+        surveyList.add(inquiry(
+          int.parse(obj["askno"].toString()),
+          obj["choicetypename"].toString(),
+          obj["ask"].toString(),
+          obj["choices"].toString().split('|'),
+        ));
+      }
+    });
+
+    showGeneralDialog(
+      transitionDuration: Duration(milliseconds: 350),
+      context: _context,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withOpacity(0),
+      pageBuilder: (context, animation1, animation2) {
+        return null;
+      },
+      transitionBuilder: (context, a1, a2, widget) {
+        ctx = context;
+        final curvedValue = Curves.easeInOutBack.transform(a1.value) - 1.0;
+        return Transform(
+          transform: Matrix4.translationValues(0.0, curvedValue * -200, 0.0),
+          child: Opacity(
+            opacity: a1.value,
+            child: StatefulBuilder(builder: (context, StateSetter _setState) {
+              return new WillPopScope(
+                onWillPop: () => closeSatisfaction(context),
+                child: Scaffold(
+                  appBar: AppBar(
+                    backgroundColor: Color(0xFF0073D7),
+                    toolbarHeight: 50,
+                    title: new Text("만족도조사",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 20)),
+                  ),
+                  body: Column(children: <Widget>[
+                    Expanded(
+                      child:
+                          NotificationListener<OverscrollIndicatorNotification>(
+                        onNotification:
+                            (OverscrollIndicatorNotification overscroll) {
+                          overscroll.disallowGlow();
+                          return;
+                        },
+                        child: SingleChildScrollView(
+                          padding: EdgeInsets.only(bottom: 15),
+                          child: Column(
+                            children: [
+                              Container(
+                                child: Column(
+                                  children: surveyList,
+                                ),
+                              ),
+                              Container(
+                                margin: EdgeInsets.only(right: 15),
+                                alignment: Alignment.centerRight,
+                                child: ElevatedButton(
+                                  onPressed: () async {
+                                    if (surveyList.length ==
+                                        tempSelectedAnswers.length) {
+                                      tempSelectedAnswers.forEach((key, value) {
+                                        surveyData["dataList"].add(
+                                            {"question": key, "answer": value});
+                                      });
+
+                                      header["Content-Type"] =
+                                          "application/json";
+                                      await http.Client().post(
+                                        Uri.parse(Domain.url +
+                                            "user/set/satisfaction"),
+                                        headers: header,
+                                        body: json.encode(surveyData),
+                                      );
+                                      header["Content-Type"] =
+                                          "application/x-www-form-urlencoded; charset=UTF-8";
+
+                                      FocusScope.of(context).unfocus();
+
+                                      Navigator.pop(context, true);
+
+                                      openDescription(context, "유한누리",
+                                          "조사에 참여해 주셔서 감사합니다.", true);
+                                    } else {
+                                      openDescription(_context, "유한누리",
+                                          "답변하지 않은 질문이 있습니다.", false);
+                                    }
+                                  },
+                                  child: Text(
+                                    "완 료",
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 17),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    primary: Color(0xFF0275D7),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ]),
+                ),
+              );
+            }),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<bool> closeSatisfaction(BuildContext _context) {
+    Vibration.vibrate();
+    return showDialog(
+      context: _context,
+      builder: (context) {
+        FocusScope.of(context).unfocus();
+        return AlertDialog(
+          title: Text("유한누리"),
+          content: Text('만족도조사를 종료하시겠습니까?'),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+              child: Text('예'),
+              style: ElevatedButton.styleFrom(
+                primary: Color(0xFF0275D7),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+              child: Text('아니오'),
+              style: ElevatedButton.styleFrom(
+                primary: Color(0xFFE6E6E6),
+                onPrimary: Colors.black,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }

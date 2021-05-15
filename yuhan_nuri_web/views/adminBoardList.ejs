@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>유한대학교 학생상담센터</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<script src="/js/jquery-latest.min.js"></script>
+    <link rel="stylesheet" href="/css/coreui.min.css">
+	<link rel="stylesheet" href="https://unpkg.com/@coreui/icons@2.0.0-beta.3/css/all.min.css">
+	<style>
+		.pr_10{
+			padding-right:10px;
+		}
+		.pr_30{
+			padding-right:30px;
+		}
+		.ques_btn{
+			position: relative;
+    		top: -40px;
+		}
+		.btnInput{
+			height:35px;
+			border: 1px solid #d8dbe0;
+		}
+		.btnInput:focus{
+			outline:none;
+		}
+		td{
+			vertical-align: middle !important;
+		}
+	</style>
+</head>
+<body class="c-app">
+    <div class="c-sidebar c-sidebar-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
+        <%- include ('adminNav'); -%>
+        <button class="c-sidebar-minimizer c-class-toggler" type="button" data-target="_parent"
+            data-class="c-sidebar-minimized"></button>
+    </div>
+    <div class="c-wrapper c-fixed-components">
+        <header class="c-header c-header-light c-header-fixed c-header-with-subheader">
+            <button class="c-header-toggler c-class-toggler d-lg-none mfe-auto" type="button" data-target="#sidebar"
+                data-class="c-sidebar-show">
+                <i class="cil-hamburger-menu"></i>
+            </button><a class="c-header-brand d-lg-none" href="#">
+                <i class="cil-hamburger-menu"></i></a>
+            <button class="c-header-toggler c-class-toggler mfs-3 d-md-down-none" type="button" data-target="#sidebar"
+                data-class="c-sidebar-lg-show" responsive="true">
+                <i class="cil-hamburger-menu"></i>
+            </button>
+			<ul class="c-header-nav ml-auto mr-4">
+            <%- include ('adminAccount'); -%>
+            </ul>
+            <div class="c-subheader px-3">
+                <ol class="breadcrumb border-0 m-0">
+					<li class="breadcrumb-item">예약</li>
+                    <li class="breadcrumb-item">양식 항목</li>
+                    <li class="breadcrumb-item active">공지사항</li>
+                </ol>
+            </div>
+        </header>
+        <div class="c-body">
+            <main class="c-main">
+                <div class="container-fluid">
+                    <div class="fade-in">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between" style="align-items: center;">
+                                    <h4 class="card-title" style="margin-bottom: 0 !important;">공지사항 목록</h4>
+									<button class="btn btn-primary" onclick="location.href='/admin/editBoard/0'">
+										<i class="cil-pencil"></i>&nbsp; 새 글 쓰기
+									</button>
+                                </div>
+							</div>
+                        </div>
+						<%if(parseInt(cnt) == 0) {%>
+                        <div class="jumbotron jumbotron-fluid">
+                            <div class="container" style="text-align: center;">
+                                <h1 class="display-4">작성된 공지사항이 없습니다.</h1>
+                            </div>
+                        </div>
+						<%}else{%>
+							<table class="table" style="background:white; border-radius:.25rem;">
+								<tr>
+									<th style="text-align:center;">번호</th>
+									<th>제목</th>
+									<th>작성자</th>
+									<th>날짜</th>
+									<th width="10%"></th>
+								</tr>
+								<% for(var i = 0; i < result.length; i++) { %>
+								<tr>
+									<td style="width:70px; text-align:center;"><%=result[i].no%></td>
+									<td><a href="/admin/editBoard/<%=result[i].no%>"><%=result[i].title%></a></td>
+									<td style="width:120px;"><%=result[i].empname%></td>
+									<td style="width:150px;"><%=result[i].date%></td>
+									<td><button class="btn btn-danger" onclick="deleteBoard('<%=result[i].no%>')">삭 제</button></td>
+								</tr>
+								<% } %>
+								<tr class="text-center">
+									<td colspan="5">
+										<div style="margin:auto;">
+											<select id="selectType" class="btnInput"
+													style="width:100px; border-radius:.25rem; padding-left:5px;">
+												<option value="1" selected>제목</option>
+												<option value="2">내용</option>
+												<option value="3">작성자</option>
+											</select>
+											<input type="text" id="btnSearchVal" class="btnInput" placeholder="검색어를 입력해 주세요."
+												   style="width:300px; border-radius: .25rem; padding-left:7px;"/>
+											<input type="button" class="btn btn-success align-self-top" id="btnSearch" value="검색" style="vertical-align:top;"/>
+										</div>
+										<br/>
+										<%
+											var block = Math.ceil(page/page_num);
+											var start_page = (block - 1)*page_num+1;
+											var end_page = block*page_num;
+										%>
+										<%if(check == 'yes'){%>
+											<%if(page > start_page || cnt > page_num && start_page > 1){%>
+												<a href="/admin/board/<%=parseInt(page) - 1%>/<%=type%>/<%=search%>" style="margin-right:10px;">이전</a>
+											<%}%>
+											<%for(var j = start_page-1; j < end_page; j++){%>
+												<%if(Math.ceil(cnt / page_num) < j+1) break;%>
+												<%if(j+1 == page){%>
+													[<%=j+1%>]
+												<%}else{%>
+												<a href="/admin/board/<%= j + 1 %>/<%=type%>/<%=search%>"><%= j + 1 %></a>
+												<%}%>
+											<%}%>
+											<%if(page < Math.ceil(cnt / page_num)){%>
+												<a href="/admin/board/<%=parseInt(page) + 1%>/<%=type%>/<%=search%>" style="margin-left:10px;">다음</a>
+											<%}%>
+										<%}else{%>
+											<%if(page > start_page || cnt > page_num && start_page > 1){%>
+												<a href="/admin/board/<%=parseInt(page) - 1%>"  style="margin-right:10px;">이전</a>
+											<%}%>
+											<%for(var j = start_page-1; j < end_page; j++){%>
+												<%if(Math.ceil(cnt / page_num) < j+1) break;%>
+												<%if(j+1 == page){%>
+													<b>[<%=j+1%>]</b>
+												<%}else{%>
+												<a href="/admin/board/<%= j + 1 %>"><%= j + 1 %></a>
+												<%}%>
+											<%}%>
+											<%if(page < Math.ceil(cnt / page_num)){%>
+												<a href="/admin/board/<%=parseInt(page) + 1%>" style="margin-left:10px;">다음</a>
+											<%}%>
+										<%}%>
+									</td>
+								</tr>
+							</table>
+						<%}%>
+                    </div>
+                </div>
+            </main>
+            <footer class="c-footer">
+                <div><a href="https://coreui.io">CoreUI</a> &copy; 2020 creativeLabs.</div>
+                <div class="ml-auto">Powered by&nbsp;<a href="https://coreui.io/">CoreUI</a></div>
+            </footer>
+        </div>
+    </div>
+	<script src="/js/coreui.bundle.min.js"></script>
+	<script>
+		if(location.href.includes("?reload")) {
+			$('.c-body').prepend(`
+				<div class="alert alert-success alert-dismissible fade show successAlert" style="margin-bottom: 0px;" role="alert">
+					<strong>삭제 완료!</strong> 게시물이 정상적으로 삭제되었습니다.
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+			`);
+			
+			$(window).scrollTop(0);
+
+			$('.successAlert').eq(0).fadeOut(3000);
+			
+			window.history.replaceState(null, null, window.location.pathname);
+		}
+		
+		function deleteBoard(boardId) {
+			let isDelete = confirm("해당 게시물을 정말 삭제하시겠습니까?");
+			
+			if(isDelete) {
+				$.ajax({
+					type: "POST",
+					dataType: "json",
+					url: `../deleteBoard/${boardId}`,
+					async: true,
+					success: function(data) {
+						if (data.state === 'ok') {
+							location.replace(location.href+"?reload");
+						}
+						else {
+							$('.c-body').prepend(`
+								<div class="alert alert-danger alert-dismissible fade show failAlert" style="margin-bottom: 0px;" role="alert">
+									<strong>삭제 실패!</strong> 다시 한번 확인해 주세요.
+									<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+										<span aria-hidden="true">&times;</span>
+									</button>
+								</div>
+							`);
+
+							$(window).scrollTop(0);
+
+							$('.failAlert').eq(0).fadeOut(3000);
+						}
+					}
+				});
+			}
+		}
+		
+		$('#btnSearch').click(function(e) {
+			if($('#btnSearchVal').val() == ''){
+				alert("검색어를 입력해주세요.");
+			}else{
+				let type = $('#selectType').val();
+				let search = $('#btnSearchVal').val();
+			}
+		});
+	</script>
+</body>
+</html>

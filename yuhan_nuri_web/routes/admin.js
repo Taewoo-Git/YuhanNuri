@@ -58,7 +58,7 @@ const upload = multer({
 	limits: {fileSize: 5 * 1024 * 1024}, // 5MB
 });
 
-router.get("/", isAdminLoggedIn, function(req, res, next) { //GET /admin
+router.get('/', isAdminLoggedIn, function(req, res, next) { //GET /admin
 	const getReservationData = "SELECT User.stuname as stuname, User.phonenum as phonenum, reserv.serialno as no, " +
 		  "reserv.stuno as stuno, consult.typename as typename, reserv.starttime as starttime, reserv.date as date " +  
 		  "FROM User JOIN Reservation reserv ON User.stuno = reserv.stuno LEFT JOIN ConsultType consult ON reserv.typeno = consult.typeno " +
@@ -805,53 +805,85 @@ router.post('/saveQuestion', isAdminLoggedIn, function(req, res, next) {
 	});
 });
 
-router.get("/board/:type", isAdminLoggedIn, function(req, res, next) {
-	const sql_findType = "select no from HomeBoard where no = ?";
-	const sql_readBoard = "select * from HomeBoard where no = ?";
-	const sql_findFormTypes = "select typename from AskType";
+router.get("/board/:page", isAdminLoggedIn, function(req, res, next) {
+	const page = parseInt(req.params.page);
+	const unit = 10;
 	
-	let type = decodeURIComponent(req.params.type);
-	let types = [];
+	const selectCountBoard = "SELECT count(no) as cnt FROM HomeBoard";
 	
-	connection.execute(sql_findFormTypes, (err1, rows1) => {
+	const selectBoard = "SELECT t1.no, t1.title, t1.content, t1.date, t2.empname FROM HomeBoard t1, Counselor t2 " +
+		  "WHERE t1.empid = t2.empid ORDER BY t1.no DESC LIMIT " + ((page - 1) * unit).toString() + ", " + unit.toString();
+	
+	connection.execute(selectCountBoard, [], (err1, result1) => {
 		if(err1) {
 			logger.error.info(`[${moment().format(logTimeFormat)}] ${err1}`);
 			next(err1);
 		}
 		else {
-			types = rows1;
-			connection.execute(sql_readBoard, [type], (err2, rows2) => {
-				if(err2){
+			connection.execute(selectBoard, [], (err2, result2) => {
+				if(err2) {
 					logger.error.info(`[${moment().format(logTimeFormat)}] ${err2}`);
 					next(err2);
 				}
 				else {
-					if(rows2.length == 0) next(err2);
-					else {
-						const typename = parseInt(type) === 1 ? '공지사항' : '이용안내';
-
-						if(rows2[0].content === '' || rows2[0].content == null) {
-							rows2[0].content = '';
-							res.render('adminEditForm', {result: rows2[0].content, type: [type, typename], types: types});
-						}
-						else res.render('adminEditForm', {result: rows2[0].content, type: [type, typename], types: types});
-					}
+					res.render('adminBoardList', {cnt: result1[0].cnt, result: result2, page: page, page_num: 10, check: 'no'});
 				}
 			});
 		}
 	});
 });
 
-router.post("/saveBoard/:type", isAdminLoggedIn, function(req, res, next) {
-	const sendAjax = req.body.sendAjax;
-	const type = decodeURIComponent(req.params.type);
-	const typename = parseInt(type) === 1 ? '공지사항' : '이용안내';
+router.get("/editBoard/:num", isAdminLoggedIn, function(req, res, next) {
+	const num = parseInt(req.params.num);
+	const selectBoard = "SELECT title, content FROM HomeBoard WHERE no = ?";
 	
-	const updateBoard = "update HomeBoard set empid = ?, date = CURDATE(), content = ? where no = ?";
+	if(num === 0) res.render('adminEditForm', {result: null, num: 0});
+	else {
+		connection.execute(selectBoard, [num], (err, result) => {
+			if(err) {
+				logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
+				next(err);
+			}
+			else {
+				res.render('adminEditForm', {result: result, num: num});
+			}
+		});
+	}
+});
+
+router.post("/editBoard/:num", isAdminLoggedIn, function(req, res, next) {
+	const num = parseInt(req.params.num);
+	const title = req.body.title;
+	const content = req.body.content;
+	
+	const updateBoard = "UPDATE HomeBoard SET empid = ?, title = ?, content = ? WHERE no = ?";
 	
 	const empId = req.session.adminInfo.empid;
 	
-	const secureXSSContent = sanitizeHtml(sendAjax, {
+	if(num === 0) res.render('adminEditForm');
+	else {
+		connection.execute(updateBoard, [empId, title, content, num], (err, result) => {
+			if(err) {
+				logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
+				next(err);
+			}
+			else {
+				res.json({state: 'ok'});
+				logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${num}번 공지사항 수정.`);
+			}
+		});
+	}
+});
+
+router.post("/saveBoard", isAdminLoggedIn, function(req, res, next) {
+	const title = req.body.title;
+	const content = req.body.content;
+	
+	const insertBoard = "INSERT INTO HomeBoard(empid, date, title, content) VALUES(?, CURDATE(), ?, ?)";
+	
+	const empId = req.session.adminInfo.empid;
+	
+	const secureXSSContent = sanitizeHtml(content, {
 		allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img']),
 		allowedAttributes: { // 기존 값 a: ['href'], img: ['src']
 			a: ['href'],
@@ -861,14 +893,31 @@ router.post("/saveBoard/:type", isAdminLoggedIn, function(req, res, next) {
 		}
 	});
 	
-	connection.execute(updateBoard, [empId, secureXSSContent, type], (err, rows) => {
+	connection.execute(insertBoard, [empId, title, secureXSSContent], (err, result) => {
 		if(err) {
 			logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 			next(err);
 		}
 		else {
 			res.json({state: 'ok'});
-			logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${typename} 수정.`);
+			logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 공지사항 작성.`);
+		}
+	});
+});
+
+router.post("/deleteBoard/:num", isAdminLoggedIn, function(req, res, next) {
+	const num = decodeURIComponent(req.params.num);
+	
+	const deleteBoard = "DELETE FROM HomeBoard WHERE no = ?";
+	
+	connection.execute(deleteBoard, [num], (err, result) => {
+		if(err) {
+			logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
+			next(err);
+		}
+		else {
+			res.json({state: 'ok'});
+			logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${num}번 공지사항 삭제.`);
 		}
 	});
 });
@@ -911,7 +960,9 @@ router.post('/saveForm/:type', isAdminLoggedIn, async function(req, res, next) {
 	
 	const type = parseInt(req.params.type);
 	
-	const insertAskList = "INSERT INTO AskList(typeno, choicetypeno, ask, AskList.use) VALUES(?, ?, ?, 'Y')";
+	const selectIndex = "SELECT (MAX(a.askno) - b.cnt) AS idx FROM AskList a, (SELECT COUNT(askno) AS cnt FROM AskList c WHERE c.use = 'Y') b";
+	
+	const insertAskList = "INSERT INTO AskList(askno, typeno, choicetypeno, ask, AskList.use) VALUES(?, ?, ?, ?, 'Y')";
 	
 	const deleteChoiceList = "DELETE FROM ChoiceList WHERE askno = ?";
 	
@@ -923,63 +974,72 @@ router.post('/saveForm/:type', isAdminLoggedIn, async function(req, res, next) {
 	else if(type === 2) typename = "심리검사";
 	else if(type === 3) typename = "만족도조사";
 	
-	saveData.forEach(async function(value, index) {
-		let values = [];
-		await saveFormIterator(parseInt(value.id.split('card_id_')[1]))
-		.then((result) => {
-			return new Promise(async function(resolve, reject) {
-				if(result.isNew) {
-					await connection.execute(insertAskList, [type, parseInt(value.type), value.question], (err, row) => {
-						if(err) {
-							logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
-							next(err);
+	connection.execute(selectIndex, (err, val) => {
+		if(err) {
+			logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
+			reject(err);
+		}
+		else {
+			let idx = val[0].idx ? val[0].idx + 1 : 1;
+			saveData.forEach(function(value, index) {
+				const values = [];
+				saveFormIterator(parseInt(value.id.split('card_id_')[1]))
+				.then((result) => {
+					return new Promise(function(resolve, reject) {
+						if(result.isNew) {
+							connection.execute(insertAskList, [idx + index, type, parseInt(value.type), value.question], (err) => {
+								if(err) {
+									logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
+									reject(err);
+								}
+								else resolve(idx + index);
+							});
 						}
-						else resolve(row.insertId);
-					});
-				}
-				else {
-					await connection.execute(deleteChoiceList, [result.id], (err) => {
-						if(err) {
-							logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
-							next(err);
+						else {
+							connection.execute(deleteChoiceList, [result.id], (err) => {
+								if(err) {
+									logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
+									reject(err);
+								}
+								else resolve(result.id);
+							});
 						}
-						else resolve(result.id);
 					});
-				}
-			});
-		})
-		.then((num) => {
-			if(parseInt(value.type) !== 3) {
-				value.choices.forEach(val => {
-					values.push([num, type, val]);
-				});
+				})
+				.then((num) => {
+					if(parseInt(value.type) !== 3) {
+						value.choices.forEach(val => {
+							values.push([num, type, val]);
+						});
 
-				connection.query(insertChoiceList, [values], (err) => {
-					if(err) {
-						logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
-						next(err);
+						connection.query(insertChoiceList, [values], (err) => {
+							if(err) {
+								logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
+								next(err);
+							}
+							else if(index === saveData.length - 1) {
+								res.json({state: 'ok'});
+								logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${typename} 질문 수정.`);
+							}
+						});
 					}
-					else if(index === saveData.length - 1) {
+					else if(parseInt(value.type) === 3 && index === saveData.length - 1) { // 서술형
 						res.json({state: 'ok'});
 						logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${typename} 질문 수정.`);
 					}
+				})
+				.catch((err) => {
+					next(err);
 				});
-			}
-			else if(parseInt(value.type) === 3 && index === saveData.length - 1) { // 서술형
-				res.json({state: 'ok'});
-				logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${typename} 질문 수정.`);
-			}
-		})
-		.catch((err) => {
-			next(err);
-		});
+			});
+		}
 	});
 });
 
 function saveFormIterator(asknum) {
 	const selectAskList = "SELECT askno FROM AskList WHERE askno = ?";
 	return new Promise(function(resolve, reject) {
-		connection.execute(selectAskList, [asknum], async (err, result) => {
+		connection.execute(selectAskList, [asknum], (err, result) => {
 			if(err) {
 				logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 				reject(err);

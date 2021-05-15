@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -11,7 +10,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:vibration/vibration.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
@@ -65,7 +63,7 @@ class YuhanNuriState extends State<YuhanNuri> {
 
   Map<String, String> header;
 
-  var keyboardVisibilityController = KeyboardVisibilityController();
+  bool isInit = true;
 
   YuhanNuriState(String cookie) {
     header = {
@@ -90,13 +88,34 @@ class YuhanNuriState extends State<YuhanNuri> {
     const iOS = IOSNotificationDetails();
     const platform = NotificationDetails(android: android, iOS: iOS);
 
+    var keyboardVisibilityController = KeyboardVisibilityController();
+
     fcm.configure(onMessage: (Map<String, dynamic> message) async {
       if (Platform.isIOS) {
         FlutterLocalNotificationsPlugin()
             .show(0, '유한누리', message['aps']['alert']['body'], platform);
+
+        if (message['page'] == "mypage" || message['page'] == "satisfaction") {
+          bodyReservation = Reservation();
+          bodyBuilder[bodyIndex] =
+              await bodyReservation.getBuild(header, globalKey);
+        } else if (message['page'] == "question") {
+          bodyMypage = Mypage();
+          bodyBuilder[bodyIndex] = await bodyMypage.getBuild(header, globalKey);
+        }
       } else if (Platform.isAndroid) {
         FlutterLocalNotificationsPlugin()
             .show(0, '유한누리', message['notification']['body'], platform);
+
+        if (message['data']['page'] == "mypage" ||
+            message['data']['page'] == "satisfaction") {
+          bodyReservation = Reservation();
+          bodyBuilder[bodyIndex] =
+              await bodyReservation.getBuild(header, globalKey);
+        } else if (message['data']['page'] == "question") {
+          bodyMypage = Mypage();
+          bodyBuilder[bodyIndex] = await bodyMypage.getBuild(header, globalKey);
+        }
       }
     }, onResume: (Map<String, dynamic> message) async {
       if (Platform.isIOS) {
@@ -116,30 +135,40 @@ class YuhanNuriState extends State<YuhanNuri> {
 
     fcm.requestNotificationPermissions(const IosNotificationSettings(
         sound: true, badge: true, alert: true, provisional: true));
+
+    keyboardVisibilityController.onChange.listen((bool visible) {
+      if (!visible && bodyIndex == 0 && bodyHome.ctx != null) {
+        FocusScope.of(bodyHome.ctx).unfocus();
+      }
+
+      if (!visible && bodyIndex == 1 && bodyReservation.ctx != null) {
+        FocusScope.of(bodyReservation.ctx).unfocus();
+      }
+
+      if (!visible && bodyIndex == 2 && bodyQuestion.ctx != null) {
+        FocusScope.of(bodyQuestion.ctx).unfocus();
+      }
+    });
+  }
+
+  Future<bool> setWidget() async {
+    if (isInit) {
+      isInit = false;
+      bodyBuilder = [
+        await bodyHome.getBuild(header),
+        await bodyReservation.getBuild(header, globalKey),
+        await bodyQuestion.getBuild(header),
+        await bodyMypage.getBuild(header, globalKey)
+      ];
+    }
+
+    return true;
   }
 
   @override
   Widget build(BuildContext context) {
-    //syncToken(context);
-    keyboardVisibilityController.onChange.listen((bool visible) {
-      if (visible && bodyMypage.isChatting) {
-        Timer(Duration(milliseconds: 500), () {
-          bodyMypage.scroll.animateTo(
-              bodyMypage.scroll.position.maxScrollExtent + 100,
-              duration: Duration(milliseconds: 500),
-              curve: Curves.ease);
-        });
-      } else if (!visible) {
-        FocusScope.of(context).unfocus();
-      }
-    });
-    keyboardVisibilityController.onChange.listen((bool visible) {});
-    bodyBuilder = [
-      bodyHome.getBuild(header),
-      bodyReservation.getBuild(),
-      bodyQuestion.getBuild(),
-      bodyMypage.getBuild()
-    ];
+    syncToken(context);
+
     return OKToast(
       position: ToastPosition.bottom,
       child: MaterialApp(
@@ -160,7 +189,22 @@ class YuhanNuriState extends State<YuhanNuri> {
                 )
               ],
             ),
-            body: bodyBuilder[bodyIndex],
+            body: FutureBuilder(
+              future: setWidget(),
+              builder: (BuildContext context, AsyncSnapshot snapshot) {
+                if (snapshot.hasData) {
+                  return bodyBuilder[bodyIndex];
+                } else {
+                  return Container(
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        backgroundColor: Colors.white,
+                      ),
+                    ),
+                  );
+                }
+              },
+            ),
             bottomNavigationBar: CurvedNavigationBar(
               key: globalKey,
               index: 0,
@@ -188,31 +232,43 @@ class YuhanNuriState extends State<YuhanNuri> {
                 ),
               ],
               animationDuration: const Duration(milliseconds: 300),
-              onTap: (int index) {
+              onTap: (int index) async {
                 switch (bodyIndex) {
                   case 0:
                     if (bodyIndex == index)
                       return;
                     else {
                       bodyHome = Home();
-                      bodyBuilder[bodyIndex] = bodyHome.getBuild(header);
+                      bodyBuilder[bodyIndex] = await bodyHome.getBuild(header);
                     }
                     break;
                   case 1:
                     bodyReservation = Reservation();
-                    bodyBuilder[bodyIndex] = bodyReservation.getBuild();
+                    bodyBuilder[bodyIndex] =
+                        await bodyReservation.getBuild(header, globalKey);
                     break;
                   case 2:
                     bodyQuestion = Question();
-                    bodyBuilder[bodyIndex] = bodyQuestion.getBuild();
+                    bodyBuilder[bodyIndex] =
+                        await bodyQuestion.getBuild(header);
                     break;
                   case 3:
-                    bodyMypage = Mypage();
-                    bodyBuilder[bodyIndex] = bodyMypage.getBuild();
+                    if (bodyIndex == index)
+                      return;
+                    else {
+                      if (bodyMypage.socket != null)
+                        bodyMypage.socket.disconnect();
+                      bodyMypage = Mypage();
+                      bodyBuilder[bodyIndex] =
+                          await bodyMypage.getBuild(header, globalKey);
+                    }
                     break;
                   default:
                     break;
                 }
+
+                if (index == 3) await bodyMypage.initData();
+
                 setState(() {
                   bodyIndex = index;
                   selected = page[index];
@@ -244,11 +300,16 @@ class YuhanNuriState extends State<YuhanNuri> {
     );
   }
 
-  void pushClick(String msg) {
+  void pushClick(String msg) async {
     if (msg == "mypage" || msg == "satisfaction") {
+      bodyReservation = Reservation();
+      bodyBuilder[bodyIndex] =
+          await bodyReservation.getBuild(header, globalKey);
       nav = globalKey.currentState;
       nav.setPage(1);
     } else if (msg == "question") {
+      bodyMypage = Mypage();
+      bodyBuilder[bodyIndex] = await bodyMypage.getBuild(header, globalKey);
       nav = globalKey.currentState;
       nav.setPage(3);
     }
@@ -277,7 +338,7 @@ class YuhanNuriState extends State<YuhanNuri> {
                 SharedPreferences prefs = await SharedPreferences.getInstance();
 
                 http.Client().post(
-                  Uri.parse(Domain.url + 'user/mobile'),
+                  Uri.parse(Domain.url + 'user/get/status'),
                   headers: header,
                   body: {
                     'command': 'logout',
@@ -345,7 +406,7 @@ class YuhanNuriState extends State<YuhanNuri> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     http.Response res = await http.Client().post(
-      Uri.parse(Domain.url + 'user/mobile'),
+      Uri.parse(Domain.url + 'user/get/status'),
       headers: header,
       body: {'command': 'login', 'userToken': prefs.getString('Token')},
     );
@@ -383,116 +444,6 @@ class YuhanNuriState extends State<YuhanNuri> {
           );
         },
       );
-    }
-  }
-
-  void webAlertDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("유한누리"),
-          content: Text(message),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context, true);
-              },
-              child: Text("확인"),
-              style: ElevatedButton.styleFrom(
-                primary: Color(0xFF0275D7),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void openInputDialog(String strTextInfo) {
-    Map<String, dynamic> objTextInfo = jsonDecode(strTextInfo);
-
-    String txtTitle = objTextInfo['title'].toString();
-    String txtHint = objTextInfo['value'].toString().isEmpty
-        ? objTextInfo['hint'].toString()
-        : objTextInfo['value'].toString();
-
-    //String txtElement = objTextInfo['element'].toString();
-
-    //String txtValue = "";
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("유한누리"),
-          content: new Row(
-            children: [
-              new Expanded(
-                  child: new TextField(
-                autofocus: true,
-                decoration:
-                    new InputDecoration(labelText: txtTitle, hintText: txtHint),
-                onChanged: (value) {
-                  //txtValue = value;
-                },
-              ))
-            ],
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context, true);
-              },
-              child: Text("완료"),
-              style: ElevatedButton.styleFrom(
-                primary: Color(0xFF0275D7),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context, true);
-              },
-              child: Text("취소"),
-              style: ElevatedButton.styleFrom(
-                primary: Color(0xFFE6E6E6),
-                onPrimary: Colors.black,
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void workCallByWeb(String command, List<dynamic> args) async {
-    switch (command) {
-      case "alert":
-        webAlertDialog(args[1].toString());
-        break;
-      case "replaceHome":
-        Future.delayed(Duration(milliseconds: 300), () {
-          nav = globalKey.currentState;
-          nav.setPage(0);
-        });
-        break;
-      case "replaceMypage":
-        nav = globalKey.currentState;
-        nav.setPage(3);
-        break;
-      case "openInput":
-        openInputDialog(args[1].toString());
-        break;
-      case "openChatting":
-        //chattingDialog();
-        break;
-      case "recvChatting":
-        // msgState(() {
-        //   msgList.add(recvMessage(args[1].toString(), args[2].toString()));
-        // });
-        break;
-      default:
-        break;
     }
   }
 

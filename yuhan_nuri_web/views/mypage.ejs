@@ -252,7 +252,7 @@
 										<h5>
 											<label style="margin:0px; font-weight:bold;">답 글</label>
 										</h5>
-										<p style="color:#5a5a5a;">
+										<p style="color:#5a5a5a; margin-bottom:0px!important;">
 											<%=v.answer%>
 										</p>
 									</div>
@@ -270,7 +270,7 @@
 										<h5 >
 											<label style="margin:0px; font-weight:bold;">내 용</label>
 										</h5>
-										<p style="color:#5a5a5a;">
+										<p style="color:#5a5a5a; margin-bottom:0px!important;">
 											<%= v.content%>
 										</p>
 									</div>
@@ -298,7 +298,7 @@
 				const initHeight = document.body.clientHeight;
 				
 				if($('#cancelSubmit')) {
-					let cancel = io('/reaction', {transports:['websocket']});
+					let cancel = io('/reaction', {transports: ['websocket']});
 					
 					$('#cancelSubmit').click(function(e) {
 						cancel.emit('cancel', $('#cancelSerialno').val());
@@ -308,6 +308,11 @@
 				if(location.search.includes("chatting")) {
 					$("#chatting").addClass("show active");
 					$("#chat").addClass("active");
+					window.history.replaceState(null, null, window.location.pathname);
+				}
+				else if(location.search.includes("question")) {
+					$("#question").addClass("show active");
+					$("#quest").addClass("active");
 					window.history.replaceState(null, null, window.location.pathname);
 				}
 				else {
@@ -337,7 +342,7 @@
 					location.replace(location.href+"?chatting");
 				});
 				<% }else if(isChatting === 1) { %>
-				const socket = io('/chat', {transports:['websocket']});
+				const socket = io('/chat', {transports: ['websocket']});
 
 				let isInit = 0;
 
@@ -454,10 +459,8 @@
 
 						socket.on("finish", function(data) {
 							socket.disconnect();
-
-							alert("상담사에 의해 채팅이 종료되었습니다.");
-
-							window.flutter_inappwebview.callHandler('PageHandler', 'replaceMain');
+							window.flutter_inappwebview.callHandler('mobileHandler', 'alert', '상담사에 의해 채팅이 종료되었습니다.');
+							window.flutter_inappwebview.callHandler('mobileHandler', 'replaceHome');
 						});
 					}
 					else socket.emit("join");

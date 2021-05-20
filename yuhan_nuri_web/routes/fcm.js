@@ -3,11 +3,11 @@ const connection = db.init();
 
 db.open(connection,'fcm');
 
-const sql_notify = "SELECT User.token FROM Reservation, User WHERE Reservation.date = ? AND User.stuno = Reservation.stuno AND Reservation.status = 1 AND Reservation.finished = 0";
-const sql_accept = "SELECT token FROM User WHERE stuno = (select stuno FROM Reservation WHERE serialno = ?)";
-const sql_cancel = "SELECT token FROM User WHERE stuno = ?";
-const sql_answer = "SELECT token FROM User WHERE stuno = (select stuno FROM QuestionBoard WHERE no = ?)";
-const sql_satisfaction = "SELECT token FROM User WHERE stuno = (select stuno FROM Reservation WHERE serialno = ?)";	
+const sql_notify = "SELECT User.token, User.push FROM Reservation, User WHERE Reservation.date = ? AND User.stuno = Reservation.stuno AND Reservation.status = 1 AND Reservation.finished = 0";
+const sql_accept = "SELECT token, push FROM User WHERE stuno = (select stuno FROM Reservation WHERE serialno = ?)";
+const sql_cancel = "SELECT token, push FROM User WHERE stuno = ?";
+const sql_answer = "SELECT token, push FROM User WHERE stuno = (select stuno FROM QuestionBoard WHERE no = ?)";
+const sql_satisfaction = "SELECT token, push FROM User WHERE stuno = (select stuno FROM Reservation WHERE serialno = ?)";	
 
 const fcm_admin = require('firebase-admin');
 
@@ -41,24 +41,26 @@ exports.ConsultTomorrowPush = () => {
 			if(err) logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 			else {
 				for(var i = 0; i < rows.length; i++) {	
-					const fcm_target_token = rows[i].token;
-					const fcm_message = {
-						token: fcm_target_token,
-						notification: {
-							title: '유한누리', 
-							body: '내일 상담 예약이 있습니다.',
-						},
-						data: {
-							click_action: 'FLUTTER_NOTIFICATION_CLICK',
-							page: 'mypage'
-						}
-					};
-					fcm_admin.messaging().send(fcm_message)
-						.then(function(response) {
-					})
-						.catch(function(error) {
-						logger.error.info(`[${moment().format(logTimeFormat)}] ${error}`);
-					});
+					if(rows[i].push === 'Y') {
+						const fcm_target_token = rows[i].token;
+						const fcm_message = {
+							token: fcm_target_token,
+							notification: {
+								title: '유한누리', 
+								body: '내일 상담 예약이 있습니다.',
+							},
+							data: {
+								click_action: 'FLUTTER_NOTIFICATION_CLICK',
+								page: 'reservation'
+							}
+						};
+						fcm_admin.messaging().send(fcm_message)
+							.then(function(response) {
+						})
+							.catch(function(error) {
+							logger.error.info(`[${moment().format(logTimeFormat)}] ${error}`);
+						});
+					}
 				}
 			}
 		});
@@ -70,25 +72,27 @@ exports.ConsultTodayPush = () => {
 		connection.execute(sql_notify, [moment().format("YYYY-MM-DD")], (err, rows) => {
 			if(err) logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 			else {
-				for(var i = 0; i < rows.length; i++) {	
-					const fcm_target_token = rows[i].token;
-					const fcm_message = {
-						token: fcm_target_token,
-						notification: {
-							title: '유한누리', 
-							body: '오늘 상담 예약이 있습니다.' ,
-						},
-						data: {
-							click_action: 'FLUTTER_NOTIFICATION_CLICK',
-							page: 'mypage'
-						}
-					};
-					fcm_admin.messaging().send(fcm_message)
-						.then(function(response) {
-					})
-						.catch(function(error) {
-						logger.error.info(`[${moment().format(logTimeFormat)}] ${error}`);
-					});
+				for(var i = 0; i < rows.length; i++) {
+					if(rows[i].push === 'Y') {
+						const fcm_target_token = rows[i].token;
+						const fcm_message = {
+							token: fcm_target_token,
+							notification: {
+								title: '유한누리', 
+								body: '오늘 상담 예약이 있습니다.' ,
+							},
+							data: {
+								click_action: 'FLUTTER_NOTIFICATION_CLICK',
+								page: 'reservation'
+							}
+						};
+						fcm_admin.messaging().send(fcm_message)
+							.then(function(response) {
+						})
+							.catch(function(error) {
+							logger.error.info(`[${moment().format(logTimeFormat)}] ${error}`);
+						});
+					}
 				}
 			}
 		});
@@ -99,24 +103,26 @@ exports.ReservationAcceptPush = (reservationNumber) => {
 	connection.execute(sql_accept, [reservationNumber], (err, rows) => {
 		if(err) logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 		else {
-			const fcm_target_token = rows[0].token;
-			const fcm_message = {
-				token: fcm_target_token,
-				notification: {
-					title: '유한누리', 
-					body: '요청하신 예약이 수락되었습니다.',
-				},
-				data: {
-					click_action: 'FLUTTER_NOTIFICATION_CLICK',
-					page: 'mypage'
-				}
-			};
-			fcm_admin.messaging().send(fcm_message)
-				.then(function(response) {
-			})
-				.catch(function(error) {
-				logger.error.info(`[${moment().format(logTimeFormat)}] ${error}`);
-			});
+			if(rows[0].push === 'Y') {
+				const fcm_target_token = rows[0].token;
+				const fcm_message = {
+					token: fcm_target_token,
+					notification: {
+						title: '유한누리', 
+						body: '요청하신 예약이 수락되었습니다.',
+					},
+					data: {
+						click_action: 'FLUTTER_NOTIFICATION_CLICK',
+						page: 'reservation'
+					}
+				};
+				fcm_admin.messaging().send(fcm_message)
+					.then(function(response) {
+				})
+					.catch(function(error) {
+					logger.error.info(`[${moment().format(logTimeFormat)}] ${error}`);
+				});
+			}
 		}
 	}); 
 }
@@ -125,27 +131,29 @@ exports.ReservationCancelPush = (stuno) => {
 	connection.execute(sql_cancel, [stuno], (err, rows) => {
 		if(err) logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 		else{
-			const fcm_target_token = rows[0].token;
-			const fcm_message = {
-				token : fcm_target_token,
-				notification : {
-					title : '유한누리',
-					body : '요청하신 예약이 취소되었습니다.',
-				},
-				data : {
-					click_action : 'FLUTTER_NOTIFICATION_CLICK',
-					page : 'mypage'
-					
-				}
-			};
-			
-			fcm_admin.messaging().send(fcm_message)
-				.then(function(response) {
-				
-			})
-				.catch(function(error){
-				logger.error.info(`[${moment().format(logTimeFormat)}] ${error}`);
-			});
+			if(rows[0].push === 'Y') {
+				const fcm_target_token = rows[0].token;
+				const fcm_message = {
+					token : fcm_target_token,
+					notification : {
+						title : '유한누리',
+						body : '요청하신 예약이 취소되었습니다.',
+					},
+					data : {
+						click_action : 'FLUTTER_NOTIFICATION_CLICK',
+						page : 'reservation'
+
+					}
+				};
+
+				fcm_admin.messaging().send(fcm_message)
+					.then(function(response) {
+
+				})
+					.catch(function(error){
+					logger.error.info(`[${moment().format(logTimeFormat)}] ${error}`);
+				});
+			}
 		}
 	});
 }
@@ -154,24 +162,26 @@ exports.AnswerPush = (tokenno) => {
 	connection.execute(sql_answer, [tokenno], (err, rows) => {	
 		if(err) logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 		else {
-			const fcm_target_token = rows[0].token;
-			const fcm_message = {
-				token: fcm_target_token,
-				notification: {
-		 			title: '유한누리', 
-					body: '문의하신 글에 답변이 작성되었습니다.',
-				},
-				data: {
-					click_action: 'FLUTTER_NOTIFICATION_CLICK',
-					page: 'question'
-				}
-			};
-			fcm_admin.messaging().send(fcm_message)
-				.then(function(response) {
-			})
-				.catch(function(error) {
-				logger.error.info(`[${moment().format(logTimeFormat)}] ${error}`);
-			});	
+			if(rows[0].push === 'Y') {
+				const fcm_target_token = rows[0].token;
+				const fcm_message = {
+					token: fcm_target_token,
+					notification: {
+						title: '유한누리', 
+						body: '문의하신 글에 답변이 작성되었습니다.',
+					},
+					data: {
+						click_action: 'FLUTTER_NOTIFICATION_CLICK',
+						page: 'mypage'
+					}
+				};
+				fcm_admin.messaging().send(fcm_message)
+					.then(function(response) {
+				})
+					.catch(function(error) {
+					logger.error.info(`[${moment().format(logTimeFormat)}] ${error}`);
+				});
+			}
 		}
 	});
 };
@@ -180,24 +190,26 @@ exports.SatisfactionPush = (satisfactionNo) => {
 	connection.execute(sql_satisfaction, [satisfactionNo], (err, rows) => {
 		if(err) logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 		else {
-			const fcm_target_token = rows[0].token;
-			const fcm_message = {
-				token: fcm_target_token,
-				notification: {
-		 			title: '유한누리', 
-					body: '만족도조사에 참여해 주세요.',
-				},
-				data: {
-					click_action: 'FLUTTER_NOTIFICATION_CLICK',
-					page: 'satisfaction'
-				}
-			};
-			fcm_admin.messaging().send(fcm_message)
-				.then(function(response) {
-			 })
-				.catch(function(error) {
-				logger.error.info(`[${moment().format(logTimeFormat)}] ${error}`);
-			});	
+			if(rows[0].push === 'Y') {
+				const fcm_target_token = rows[0].token;
+				const fcm_message = {
+					token: fcm_target_token,
+					notification: {
+						title: '유한누리', 
+						body: '만족도조사에 참여해 주세요.',
+					},
+					data: {
+						click_action: 'FLUTTER_NOTIFICATION_CLICK',
+						page: 'satisfaction'
+					}
+				};
+				fcm_admin.messaging().send(fcm_message)
+					.then(function(response) {
+				 })
+					.catch(function(error) {
+					logger.error.info(`[${moment().format(logTimeFormat)}] ${error}`);
+				});
+			}
 		}
 	});
 };

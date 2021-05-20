@@ -518,10 +518,10 @@ router.post("/cancelReservation", isAdminLoggedIn, function(req, res, next) { //
 
 router.post("/getMentalApplyForm", isAdminLoggedIn, function(req, res, next) { //POST /admin/getMentalApplyForm
 	const query = "SELECT a.serialno, a.stuno, a.stuname, a.gender, a.birth, a.email, a.date, " +
-				  "GROUP_CONCAT(b.ask SEPARATOR '|') AS 'asks', GROUP_CONCAT(c.choiceanswer SEPARATOR '|') AS 'answers', " +
+				  "GROUP_CONCAT(b.ask ORDER BY b.priority SEPARATOR '|') AS 'asks', GROUP_CONCAT(c.choiceanswer ORDER BY c.priority SEPARATOR '|') AS 'answers', " +
 				  "(SELECT GROUP_CONCAT(testname) FROM PsyTestList list, " +
 				  "(SELECT testno FROM PsyTest WHERE serialno = ?) psy WHERE psy.testno = list.testno) AS 'testnames' " +
-				  "FROM SimpleApplyForm a, AskList b, AnswerLog c " +
+				  "FROM SimpleApplyForm a, AskList b, (SELECT asl.serialno, asl.askno, asl.choiceanswer, al.priority FROM AnswerLog asl, AskList al WHERE asl.askno = al.askno ORDER BY al.priority) c " +
 				  "WHERE a.serialno = ? and a.serialno = c.serialno and c.askno = b.askno";
 	
 	let serialno = req.body.serialno;
@@ -537,10 +537,10 @@ router.post("/getMentalApplyForm", isAdminLoggedIn, function(req, res, next) { /
 
 router.post("/getConsultApplyForm", isAdminLoggedIn, function(req, res, next) { //POST /admin/getMentalApplyForm
 	const query = "SELECT a.serialno, a.stuno, a.stuname, a.gender, a.birth, a.email, a.date, " +
-				  "GROUP_CONCAT(b.ask SEPARATOR '|') AS 'asks', " +
-				  "GROUP_CONCAT(c.choiceanswer SEPARATOR '|') AS 'answers', " +
+				  "GROUP_CONCAT(b.ask ORDER BY b.priority SEPARATOR '|') AS 'asks', " +
+				  "GROUP_CONCAT(c.choiceanswer ORDER BY c.priority SEPARATOR '|') AS 'answers', " +
 				  "selfcheck.checknames, selfcheck.scores " +
-				  "FROM SimpleApplyForm a, AskList b, AnswerLog c, " +
+				  "FROM SimpleApplyForm a, AskList b, (SELECT asl.serialno, asl.askno, asl.choiceanswer, al.priority FROM AnswerLog asl, AskList al WHERE asl.askno = al.askno ORDER BY al.priority) c, " +
 				  "(SELECT GROUP_CONCAT(list.checkname SEPARATOR '|') AS 'checknames', " +
 				  "GROUP_CONCAT(self.score SEPARATOR '|') AS 'scores' " +
 				  "FROM SelfCheckList list, SelfCheck self " +
@@ -807,12 +807,11 @@ router.post('/saveQuestion', isAdminLoggedIn, function(req, res, next) {
 
 router.get("/board/:page", isAdminLoggedIn, function(req, res, next) {
 	const page = parseInt(req.params.page);
-	const unit = 10;
 	
 	const selectCountBoard = "SELECT count(no) as cnt FROM HomeBoard";
 	
 	const selectBoard = "SELECT t1.no, t1.title, t1.content, t1.date, t2.empname FROM HomeBoard t1, Counselor t2 " +
-		  "WHERE t1.empid = t2.empid ORDER BY t1.no DESC LIMIT " + ((page - 1) * unit).toString() + ", " + unit.toString();
+		  				"WHERE t1.empid = t2.empid ORDER BY t1.no DESC LIMIT " + ((page - 1) * 10).toString() + ", 10";
 	
 	connection.execute(selectCountBoard, [], (err1, result1) => {
 		if(err1) {
@@ -827,6 +826,43 @@ router.get("/board/:page", isAdminLoggedIn, function(req, res, next) {
 				}
 				else {
 					res.render('adminBoardList', {cnt: result1[0].cnt, result: result2, page: page, page_num: 10, check: 'no'});
+				}
+			});
+		}
+	});
+});
+
+router.get('/board/:page/:type/:search', isAdminLoggedIn, function(req, res, next) {
+	var answerSearchSql = '';
+	
+	const page = parseInt(req.params.page);
+	const type = parseInt(req.params.type);
+	let search = decodeURIComponent(req.params.search.toString());
+	
+	let sentence;
+	
+	if(type === 1) sentence = `t1.title LIKE '%${search}%'`;
+	else if(type === 2) sentence = `t1.content LIKE '%${search}%'`;
+	else if(type === 3) sentence = `t2.empname LIKE '%${search}%'`;
+	
+	const selectCountBoard = "SELECT count(no) as cnt FROM HomeBoard t1, Counselor t2 WHERE t1.empid = t2.empid AND " + sentence;
+	
+	const selectBoard = "SELECT t1.no, t1.title, t1.content, t1.date, t2.empname FROM HomeBoard t1, Counselor t2 " +
+		  				"WHERE t1.empid = t2.empid AND " + sentence + " ORDER BY t1.no DESC LIMIT " + ((page - 1) * 10).toString() + ", 10";
+	
+	connection.execute(selectCountBoard, [], (err1, result1) => {
+		if(err1) {
+			logger.error.info(`[${moment().format(logTimeFormat)}] ${err1}`);
+			next(err1);
+		}
+		else {
+			connection.execute(selectBoard, [], (err2, result2) => {
+				if(err2) {
+					logger.error.info(`[${moment().format(logTimeFormat)}] ${err2}`);
+					next(err2);
+				}
+				else {
+					res.render('adminBoardList', {cnt: result1[0].cnt, result: result2, page: page, page_num: 10, check: 'yes'});
 				}
 			});
 		}
@@ -925,7 +961,7 @@ router.post("/deleteBoard/:num", isAdminLoggedIn, function(req, res, next) {
 router.get("/form/:type", isAdminLoggedIn, function(req, res, next) {
     const selectAskType = "select * from AskType where typeno = ?";
 	
-    const selectAskList = "select *, (select GROUP_CONCAT(choice) from ChoiceList where askno = a.askno order by choiceno) as choice from AskList a where typeno = ? AND a.use = 'Y'";
+    const selectAskList = "select *, (select GROUP_CONCAT(choice) from ChoiceList where askno = a.askno order by choiceno) as choice from AskList a where typeno = ? AND a.use = 'Y' order by priority";
 	
 	const type = decodeURIComponent(req.params.type);
 	
@@ -960,9 +996,9 @@ router.post('/saveForm/:type', isAdminLoggedIn, async function(req, res, next) {
 	
 	const type = parseInt(req.params.type);
 	
-	const selectIndex = "SELECT (MAX(a.askno) - b.cnt) AS idx FROM AskList a, (SELECT COUNT(askno) AS cnt FROM AskList c WHERE c.use = 'Y') b";
+	const selectAskList = "SELECT MAX(priority) AS mx, b.cnt FROM AskList a, (SELECT COUNT(*) AS cnt FROM AskList WHERE AskList.use = 'Y' AND typeno = ?) b WHERE typeno = ?";
 	
-	const insertAskList = "INSERT INTO AskList(askno, typeno, choicetypeno, ask, AskList.use) VALUES(?, ?, ?, ?, 'Y')";
+	const insertAskList = "INSERT INTO AskList(typeno, choicetypeno, ask, AskList.use, priority) VALUES(?, ?, ?, 'Y', ?)";
 	
 	const deleteChoiceList = "DELETE FROM ChoiceList WHERE askno = ?";
 	
@@ -974,65 +1010,61 @@ router.post('/saveForm/:type', isAdminLoggedIn, async function(req, res, next) {
 	else if(type === 2) typename = "심리검사";
 	else if(type === 3) typename = "만족도조사";
 	
-	connection.execute(selectIndex, (err, val) => {
-		if(err) {
-			logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
-			reject(err);
-		}
-		else {
-			let idx = val[0].idx ? val[0].idx + 1 : 1;
-			saveData.forEach(function(value, index) {
-				const values = [];
-				saveFormIterator(parseInt(value.id.split('card_id_')[1]))
-				.then((result) => {
-					return new Promise(function(resolve, reject) {
-						if(result.isNew) {
-							connection.execute(insertAskList, [idx + index, type, parseInt(value.type), value.question], (err) => {
-								if(err) {
-									logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
-									reject(err);
-								}
-								else resolve(idx + index);
-							});
-						}
-						else {
-							connection.execute(deleteChoiceList, [result.id], (err) => {
-								if(err) {
-									logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
-									reject(err);
-								}
-								else resolve(result.id);
-							});
-						}
-					});
-				})
-				.then((num) => {
-					if(parseInt(value.type) !== 3) {
-						value.choices.forEach(val => {
-							values.push([num, type, val]);
-						});
-
-						connection.query(insertChoiceList, [values], (err) => {
+	connection.execute(selectAskList, [type, type], (err, nums) => {
+		const mx = nums[0].mx || 0;
+		const cnt = nums[0].cnt;
+		
+		saveData.forEach(function(value, index) {
+			const values = [];
+			saveFormIterator(parseInt(value.id.split('card_id_')[1]))
+			.then((result) => {
+				return new Promise(function(resolve, reject) {
+					if(result.isNew) {
+						connection.execute(insertAskList, [type, parseInt(value.type), value.question, (mx + (index - cnt)) + 1], (err, row) => {
 							if(err) {
 								logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
-								next(err);
+								reject(err);
 							}
-							else if(index === saveData.length - 1) {
-								res.json({state: 'ok'});
-								logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${typename} 질문 수정.`);
-							}
+							else resolve(row.insertId);
 						});
 					}
-					else if(parseInt(value.type) === 3 && index === saveData.length - 1) { // 서술형
-						res.json({state: 'ok'});
-						logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${typename} 질문 수정.`);
+					else {
+						connection.execute(deleteChoiceList, [result.id], (err) => {
+							if(err) {
+								logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
+								reject(err);
+							}
+							else resolve(result.id);
+						});
 					}
-				})
-				.catch((err) => {
-					next(err);
 				});
+			})
+			.then((num) => {
+				if(parseInt(value.type) !== 3) {
+					value.choices.forEach(val => {
+						values.push([num, type, val]);
+					});
+
+					connection.query(insertChoiceList, [values], (err) => {
+						if(err) {
+							logger.error.info(`[${moment().format(logTimeFormat)}] ${err}`);
+							next(err);
+						}
+						else if(index === saveData.length - 1) {
+							res.json({state: 'ok'});
+							logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${typename} 질문 수정.`);
+						}
+					});
+				}
+				else if(parseInt(value.type) === 3 && index === saveData.length - 1) { // 서술형
+					res.json({state: 'ok'});
+					logger.form.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 ${typename} 질문 수정.`);
+				}
+			})
+			.catch((err) => {
+				next(err);
 			});
-		}
+		});
 	});
 });
 
@@ -1118,13 +1150,11 @@ router.post('/signUp', isAccessDenied, (req, res, next) => {
                             }
                             else {
                                 res.redirect('/admin');
-
                                 logger.account.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 [${empId}] 계정 등록.`);
                             }
                         });
 					}
 				});
-				
 			}
 			else {
 				if(rows[0].isUse === 'Y') res.send("<script>alert('이미 존재하는 아이디입니다.'); window.location.href = '/admin/signUp';</script>");
@@ -1214,8 +1244,12 @@ router.post('/updateCounselor', isAccessDenied, (req, res, next) => {
 				next(err);
 			}
 			else {
-				res.send("<script>window.location.href = '/admin/settings';</script>");
 				logger.account.info(`[${moment().format(logTimeFormat)}] ${req.session.adminInfo.empname}(${req.session.adminInfo.empid})님이 [${updateId}] 계정 수정.`);
+				if(req.session.adminInfo.empid === updateId) {
+					req.session.destroy();
+    				res.redirect('/');
+				}
+				else res.send("<script>window.location.href = '/admin/settings';</script>");
 			}
 		});
 	}
@@ -1461,9 +1495,8 @@ router.get('/getSatisfactionResult', isAdminLoggedIn, (req, res, next) => {
 		  "Reservation.empid = Counselor.empid JOIN AnswerLog ON Reservation.serialno = AnswerLog.serialno JOIN AskList ON AnswerLog.askno = AskList.askno " + 
 		  "JOIN User ON Reservation.stuno = User.stuno " + 
 		  "WHERE AskList.typeno = 3 GROUP BY Reservation.stuno, Counselor.empname, SimpleApplyForm.stuname, SimpleApplyForm.birth, SimpleApplyForm.email, Reservation.date, " + 
-		  "ConsultType.typename, AnswerLog.serialno, AskList.ask ORDER BY Reservation.researchdatetime, Reservation.date, Reservation.starttime;";
+		  "ConsultType.typename, AnswerLog.serialno, AskList.ask ORDER BY Reservation.researchdatetime, Reservation.date, Reservation.starttime, AskList.priority";
 	
-
 	const fileName = `유한대학교 학생상담센터 만족도조사 내역.xlsx`;
 	satisfactionWorkSheet.columns = [
 		{header: '참여일자', key: "researchdatetime", width: 15},

@@ -184,14 +184,14 @@
 			
 			plugins: [
 				"autolink link lists charmap preview hr fullscreen",
-				"table emoticons paste textcolor image imagetools save"
+				"emoticons paste textcolor image imagetools save"
 			],
 			
 			fontsize_formats: "8pt 9pt 10pt 11pt 12pt 14pt 18pt 24pt 30pt 36pt 48pt 60pt 72pt 96pt",
 
 			/* toolbar */
-			toolbar: "undo redo | fontsizeselect | forecolor backcolor | bold italic Underline Strikethrough Superscript Subscript | alignleft aligncenter alignright alignjustify | " +
-					 "bullist numlist | hr link emoticons charmap image table insertdatetime | fullscreen preview save" ,
+			toolbar: "undo redo | fontsizeselect | forecolor backcolor bold italic | alignleft aligncenter alignright alignjustify | " +
+					 "bullist numlist | hr link emoticons charmap image | fullscreen preview save" ,
 			
 			images_upload_handler: image_handler,
 			
@@ -206,52 +206,60 @@
   			},
 			
 			save_onsavecallback: function() {
-				let title = $('#noticeTitle').val();
+				let title = $('#noticeTitle').val().trim();
 				let content = tinymce.get("textEditor").getContent();
 				let path = isEdit ? `../editBoard/<%=num%>` : `../saveBoard`;
 				
-				$.ajax({
-					type: "POST",
-					dataType: "json",
-					url: path,
-					async: true,
-					data: {"title": title, "content": content},
-					success: function(data) {
-						if (data.state === 'ok') {
-							$('.c-body').prepend(`
-								<div class="alert alert-success alert-dismissible fade show successAlert" style="margin-bottom: 0px;" role="alert">
-									<strong>저장 완료!</strong> 게시물이 정상적으로 저장되었습니다.
-									<button type="button" class="close" data-dismiss="alert" aria-label="Close">
-										<span aria-hidden="true">&times;</span>
-									</button>
-								</div>
-							`);
+				if(title.length === 0) {
+					alert("제목을 반드시 입력해 주세요.");
+				}
+				else if(content.trim().length === 0) {
+					alert("내용을 반드시 입력해 주세요.");
+				}
+				else {
+					$.ajax({
+						type: "POST",
+						dataType: "json",
+						url: path,
+						async: true,
+						data: {"title": title, "content": content},
+						success: function(data) {
+							if (data.state === 'ok') {
+								$('.c-body').prepend(`
+									<div class="alert alert-success alert-dismissible fade show successAlert" style="margin-bottom: 0px;" role="alert">
+										<strong>저장 완료!</strong> 게시물이 정상적으로 저장되었습니다.
+										<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+											<span aria-hidden="true">&times;</span>
+										</button>
+									</div>
+								`);
 
-							$(window).scrollTop(0);
+								$(window).scrollTop(0);
 
-							$('.successAlert').eq(0).fadeOut(3000);
-							
-							if(!isEdit) {
-								$('#noticeTitle').val('');
-								tinymce.get("textEditor").setContent('');
+								$('.successAlert').eq(0).fadeOut(3000);
+
+								if(!isEdit) {
+									$('#noticeTitle').val('');
+									tinymce.get("textEditor").setContent('');
+								}
+							}
+							else {
+								$('.c-body').prepend(`
+									<div class="alert alert-danger alert-dismissible fade show failAlert" style="margin-bottom: 0px;" role="alert">
+										<strong>저장 실패!</strong> 다시 한번 확인해 주세요.
+										<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+											<span aria-hidden="true">&times;</span>
+										</button>
+									</div>
+								`);
+
+								$(window).scrollTop(0);
+
+								$('.failAlert').eq(0).fadeOut(3000);
 							}
 						}
-						else {
-							$('.c-body').prepend(`
-								<div class="alert alert-danger alert-dismissible fade show failAlert" style="margin-bottom: 0px;" role="alert">
-									<strong>저장 실패!</strong> 다시 한번 확인해 주세요.
-									<button type="button" class="close" data-dismiss="alert" aria-label="Close">
-										<span aria-hidden="true">&times;</span>
-									</button>
-								</div>
-							`);
-
-							$(window).scrollTop(0);
-
-							$('.failAlert').eq(0).fadeOut(3000);
-						}
-					}
-				});
+					});
+				}
 			}
 		});
 	</script>

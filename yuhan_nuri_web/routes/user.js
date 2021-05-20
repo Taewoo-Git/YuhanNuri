@@ -154,7 +154,7 @@ router.post('/get/mypage', isUserLoggedIn, function(req, res) {
 			connection.execute(selectLastConsult, [req.session._uid], (err2, result2) => {
 				if(err2) Logger.Error.info(`[${moment().format(logTimeFormat)}] ${err2}`);
 				else {
-					result1[0]['last'] = result2[0] ? result2[0].date : "없음";
+					result1[0]['last'] = (result2[0] && result2[0].date) ? result2[0].date : "없음";
 					res.json(result1[0]);
 				}
 			});
@@ -165,9 +165,9 @@ router.post('/get/mypage', isUserLoggedIn, function(req, res) {
 router.post('/set/push', isUserLoggedIn, function(req, res) {
 	if(req.signedCookies._uid !== undefined) req.session._uid = req.signedCookies._uid;
 	
-	const updateUserToken = "UPDATE User SET token = ? WHERE stuno = ?";
+	const updateUserToken = "UPDATE User SET push = ? WHERE stuno = ?";
 	
-	connection.execute(updateUserToken, [req.body.token, req.session._uid], (err) => {
+	connection.execute(updateUserToken, [req.body.push, req.session._uid], (err) => {
 		if(err) Logger.Error.info(`[${moment().format(logTimeFormat)}] ${err}`);
 		else res.end();
 	});
@@ -205,10 +205,10 @@ router.get('/get/reservation', isUserLoggedIn, function (req, res) {
 	let selectReservation = "SELECT COUNT(*) AS cnt FROM Reservation WHERE stuno = ? AND research = 0 LIMIT 1";
 	
 	let selectConsultAsk = "SELECT DISTINCT a.askno, a.ask, t.choicetypename, (SELECT GROUP_CONCAT(choice SEPARATOR '|') FROM ChoiceList WHERE askno = a.askno) AS 'choices' " +
-						   "FROM AskList a, ChoiceType t WHERE a.typeno = 1 AND a.choicetypeno = t.choicetypeno AND a.use = 'Y' ORDER BY a.askno";
+						   "FROM AskList a, ChoiceType t WHERE a.typeno = 1 AND a.choicetypeno = t.choicetypeno AND a.use = 'Y' ORDER BY a.priority";
 	
-	let selectTestAsk = "SELECT DISTINCT a.askno, a.ask, t.choicetypename, (SELECT GROUP_CONCAT(choice SEPARATOR '|') FROM ChoiceList WHERE askno=a.askno) AS 'choices' " +
-						"FROM AskList a, ChoiceType t WHERE a.typeno = 2 AND a.choicetypeno = t.choicetypeno AND a.use = 'Y' ORDER BY a.askno";
+	let selectTestAsk = "SELECT DISTINCT a.askno, a.ask, t.choicetypename, (SELECT GROUP_CONCAT(choice SEPARATOR '|') FROM ChoiceList WHERE askno = a.askno) AS 'choices' " +
+						"FROM AskList a, ChoiceType t WHERE a.typeno = 2 AND a.choicetypeno = t.choicetypeno AND a.use = 'Y' ORDER BY a.priority";
 	
 	let selectPsyTestList = "SELECT * FROM PsyTestList p WHERE p.use = 'Y' ORDER BY p.testno";
 	
@@ -471,7 +471,7 @@ router.get('/get/satisfaction', isUserLoggedIn, function (req, res) {
 	if(req.signedCookies._uid !== undefined) req.session._uid = req.signedCookies._uid;
 	
 	let selectTestAsk = "SELECT DISTINCT a.askno, a.ask, t.choicetypename, (SELECT GROUP_CONCAT(choice SEPARATOR '|') FROM ChoiceList WHERE askno = a.askno) AS 'choices' " +
-						"FROM AskList a, ChoiceType t WHERE a.typeno = 3 AND a.choicetypeno = t.choicetypeno AND a.use = 'Y' ORDER BY a.askno";
+						"FROM AskList a, ChoiceType t WHERE a.typeno = 3 AND a.choicetypeno = t.choicetypeno AND a.use = 'Y' ORDER BY a.priority";
 	
 	let selectReservationNo = "SELECT serialno, typeno FROM Reservation WHERE stuno = ? AND research = 0 LIMIT 1";
 	

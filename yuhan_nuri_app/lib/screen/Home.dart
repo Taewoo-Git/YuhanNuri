@@ -11,7 +11,7 @@ import 'Domain.dart';
 class Home {
   Map<String, String> header;
   int countRequest;
-  List<Widget> noticeList;
+  List<Widget> noticeList = [];
 
   RefreshController _refreshController;
 
@@ -20,8 +20,6 @@ class Home {
   bool isSearch = false;
 
   StateSetter _setState;
-
-  BuildContext ctx;
 
   Future<bool> getDate() async {
     String page = countRequest.toString();
@@ -74,7 +72,7 @@ class Home {
   Future<Widget> getBuild(Map<String, String> _header) async {
     header = _header;
     countRequest = 1;
-    noticeList = [];
+    noticeList.clear();
 
     _refreshController = RefreshController();
 
@@ -82,7 +80,6 @@ class Home {
 
     return StatefulBuilder(
       builder: (context, StateSetter setState) {
-        ctx = context;
         return SmartRefresher(
           enablePullDown: false,
           enablePullUp: true,
@@ -212,8 +209,8 @@ class Home {
 
 Widget setNotice(String title, String content, String date) {
   if (content.contains("img")) {
-    String parseUrl = content.split("../../")[1].split('"')[0];
-    content = "<p><img src=\"${Domain.url + parseUrl}\"/></p>";
+    content = content.replaceAll("../../", Domain.url);
+    content = content.replaceAll(RegExp(' \\b(height=")\\b[0-9]{1,4}" '), "");
   }
 
   return StatefulBuilder(builder: (context, StateSetter setState) {

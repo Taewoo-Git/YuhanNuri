@@ -3605,45 +3605,48 @@ class Reservation {
     String _radio;
     List<String> options = ["매우 나쁨", "나쁨", "보통", "좋음", "매우 좋음"];
     return StatefulBuilder(builder: (context, StateSetter setState) {
-      return Container(
-        margin: EdgeInsets.only(top: 25),
-        padding: EdgeInsets.all(10),
-        child: Column(
-          children: [
-            Text(
-              checkname,
-              style: TextStyle(fontSize: 20),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            Container(
-              padding: EdgeInsets.only(top: 10),
-              child: RadioButtonGroup(
-                activeColor: Color(0xFF0275D7),
-                labelStyle: TextStyle(color: Colors.black54),
-                orientation: GroupedButtonsOrientation.HORIZONTAL,
-                labels: options,
-                picked: _radio,
-                onSelected: (String selected) => setState(() {
-                  var idx = lastData["selfcheckCode"].indexOf(checkno);
-                  var score = options.indexOf(selected);
-                  lastData["selfcheckNum"][idx] = score + 1;
-                  _radio = selected;
-                }),
-                itemBuilder: (radioButton, label, index) {
-                  return Column(
-                    children: [
-                      Container(
-                        margin: EdgeInsets.only(left: 10, right: 10),
-                        child: Transform.scale(scale: 2.0, child: radioButton),
-                      ),
-                      label,
-                    ],
-                  );
-                },
+      return Center(
+        child: Container(
+          margin: EdgeInsets.only(top: 25),
+          padding: EdgeInsets.all(10),
+          child: Column(
+            children: [
+              Text(
+                checkname,
+                style: TextStyle(fontSize: 20),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-            ),
-          ],
+              Container(
+                padding: EdgeInsets.only(top: 10),
+                child: RadioButtonGroup(
+                  activeColor: Color(0xFF0275D7),
+                  labelStyle: TextStyle(color: Colors.black54),
+                  orientation: GroupedButtonsOrientation.HORIZONTAL,
+                  labels: options,
+                  picked: _radio,
+                  onSelected: (String selected) => setState(() {
+                    var idx = lastData["selfcheckCode"].indexOf(checkno);
+                    var score = options.indexOf(selected);
+                    lastData["selfcheckNum"][idx] = score + 1;
+                    _radio = selected;
+                  }),
+                  itemBuilder: (radioButton, label, index) {
+                    return Column(
+                      children: [
+                        Container(
+                          margin: EdgeInsets.only(left: 10, right: 10),
+                          child:
+                              Transform.scale(scale: 2.0, child: radioButton),
+                        ),
+                        label,
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       );
     });

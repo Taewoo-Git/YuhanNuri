@@ -94,28 +94,11 @@ class YuhanNuriState extends State<YuhanNuri> {
       if (Platform.isIOS) {
         FlutterLocalNotificationsPlugin()
             .show(0, '유한누리', message['aps']['alert']['body'], platform);
-
-        if (message['page'] == "mypage" || message['page'] == "satisfaction") {
-          bodyReservation = Reservation();
-          bodyBuilder[bodyIndex] =
-              await bodyReservation.getBuild(header, globalKey);
-        } else if (message['page'] == "question") {
-          bodyMypage = Mypage();
-          bodyBuilder[bodyIndex] = await bodyMypage.getBuild(header, globalKey);
-        }
+        pushClick(message['page']);
       } else if (Platform.isAndroid) {
         FlutterLocalNotificationsPlugin()
             .show(0, '유한누리', message['notification']['body'], platform);
-
-        if (message['data']['page'] == "mypage" ||
-            message['data']['page'] == "satisfaction") {
-          bodyReservation = Reservation();
-          bodyBuilder[bodyIndex] =
-              await bodyReservation.getBuild(header, globalKey);
-        } else if (message['data']['page'] == "question") {
-          bodyMypage = Mypage();
-          bodyBuilder[bodyIndex] = await bodyMypage.getBuild(header, globalKey);
-        }
+        pushClick(message['data']['page']);
       }
     }, onResume: (Map<String, dynamic> message) async {
       if (Platform.isIOS) {
@@ -137,10 +120,6 @@ class YuhanNuriState extends State<YuhanNuri> {
         sound: true, badge: true, alert: true, provisional: true));
 
     keyboardVisibilityController.onChange.listen((bool visible) {
-      if (!visible && bodyIndex == 0 && bodyHome.ctx != null) {
-        FocusScope.of(bodyHome.ctx).unfocus();
-      }
-
       if (!visible && bodyIndex == 1 && bodyReservation.ctx != null) {
         FocusScope.of(bodyReservation.ctx).unfocus();
       }
@@ -301,15 +280,14 @@ class YuhanNuriState extends State<YuhanNuri> {
   }
 
   void pushClick(String msg) async {
-    if (msg == "mypage" || msg == "satisfaction") {
+    if (msg == "reservation" || msg == "satisfaction") {
       bodyReservation = Reservation();
-      bodyBuilder[bodyIndex] =
-          await bodyReservation.getBuild(header, globalKey);
+      bodyBuilder[1] = await bodyReservation.getBuild(header, globalKey);
       nav = globalKey.currentState;
       nav.setPage(1);
-    } else if (msg == "question") {
+    } else if (msg == "mypage") {
       bodyMypage = Mypage();
-      bodyBuilder[bodyIndex] = await bodyMypage.getBuild(header, globalKey);
+      bodyBuilder[3] = await bodyMypage.getBuild(header, globalKey);
       nav = globalKey.currentState;
       nav.setPage(3);
     }

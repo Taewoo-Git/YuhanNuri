@@ -105,7 +105,7 @@
 												<option value="2">내용</option>
 												<option value="3">작성자</option>
 											</select>
-											<input type="text" id="btnSearchVal" class="btnInput" placeholder="검색어를 입력해 주세요."
+											<input type="text" id="txtSearchVal" class="btnInput" placeholder="검색어를 입력해 주세요."
 												   style="width:300px; border-radius: .25rem; padding-left:7px;"/>
 											<input type="button" class="btn btn-success align-self-top" id="btnSearch" value="검색" style="vertical-align:top;"/>
 										</div>
@@ -215,7 +215,10 @@
 				alert("검색어를 입력해주세요.");
 			}else{
 				let type = $('#selectType').val();
-				let search = $('#btnSearchVal').val();
+				let search = encodeURIComponent($('#txtSearchVal').val());
+				
+				if(search.trim().length === 0) location.href = '/admin/board/1';
+				else location.href = `/admin/board/1/${type}/${search}`;
 			}
 		});
 	</script>

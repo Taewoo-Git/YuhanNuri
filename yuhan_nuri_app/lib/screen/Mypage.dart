@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:vibration/vibration.dart';
 import 'package:custom_switch/custom_switch.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 import 'Domain.dart';
@@ -52,10 +51,10 @@ class Mypage {
 
     stuInfo = jsonDecode(mypage.body);
 
-    if (stuInfo["token"].toString().contains("Deny"))
-      isPush = false;
-    else
+    if (stuInfo["push"].toString() == 'Y')
       isPush = true;
+    else
+      isPush = false;
 
     http.Response question = await http.Client().get(
       Uri.parse(Domain.url + "user/get/question"),
@@ -498,30 +497,15 @@ class Mypage {
                                           activeColor: Color(0xFF0073D7),
                                           value: isPush,
                                           onChanged: (value) async {
-                                            SharedPreferences prefs =
-                                                await SharedPreferences
-                                                    .getInstance();
                                             setState(() {
-                                              if (value) {
-                                                http.Client().post(
-                                                  Uri.parse(Domain.url +
-                                                      "user/set/push"),
-                                                  headers: header,
-                                                  body: {
-                                                    'token': prefs
-                                                        .getString('Token'),
-                                                  },
-                                                );
-                                              } else {
-                                                http.Client().post(
-                                                  Uri.parse(Domain.url +
-                                                      "user/set/push"),
-                                                  headers: header,
-                                                  body: {
-                                                    'token': "Deny",
-                                                  },
-                                                );
-                                              }
+                                              http.Client().post(
+                                                Uri.parse(Domain.url +
+                                                    "user/set/push"),
+                                                headers: header,
+                                                body: {
+                                                  'push': value ? 'Y' : 'N',
+                                                },
+                                              );
                                               isPush = value;
                                             });
                                           },

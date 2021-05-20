@@ -1,5 +1,5 @@
 -- --------------------------------------------------------
--- 호스트:                          3.35.3.80
+-- 호스트:                          3.36.66.62
 -- 서버 버전:                        10.1.44-MariaDB-0ubuntu0.18.04.1 - Ubuntu 18.04
 -- 서버 OS:                        debian-linux-gnu
 -- HeidiSQL 버전:                  10.2.0.5599
@@ -33,11 +33,12 @@ CREATE TABLE IF NOT EXISTS `AnswerLog` (
 
 -- 테이블 yuhan_nuri.AskList 구조 내보내기
 CREATE TABLE IF NOT EXISTS `AskList` (
-  `askno` int(11) NOT NULL,
+  `askno` int(11) NOT NULL AUTO_INCREMENT,
   `typeno` int(11) NOT NULL,
   `choicetypeno` int(11) NOT NULL,
   `ask` text NOT NULL,
   `use` char(1) NOT NULL DEFAULT 'Y',
+  `priority` int(11) unsigned NOT NULL,
   PRIMARY KEY (`askno`,`typeno`),
   KEY `FK_AskList_typeno_TO_AskType_typeno` (`typeno`),
   KEY `FK_AskList_choicetypeno_TO_ChoiceType` (`choicetypeno`),
@@ -137,7 +138,7 @@ CREATE TABLE IF NOT EXISTS `Counselor` (
   CONSTRAINT `FK_Counselor_positionno_To_PositionType_positionno` FOREIGN KEY (`positionno`) REFERENCES `PositionType` (`positionno`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 테이블 데이터 yuhan_nuri.Counselor:~0 rows (대략적) 내보내기
+-- 테이블 데이터 yuhan_nuri.Counselor:~2 rows (대략적) 내보내기
 /*!40000 ALTER TABLE `Counselor` DISABLE KEYS */;
 INSERT INTO `Counselor` (`empid`, `emppwd`, `empname`, `positionno`, `use`) VALUES
 	('admin', '$2b$12$Ef1K18PDf3bDkKEdnIc4LeiDkrY8iCOBgGfNS.UZe1IuiOoatZJou', '관리자', 1, 'Y');
@@ -170,7 +171,7 @@ CREATE TABLE IF NOT EXISTS `HomeBoard` (
   CONSTRAINT `FK_HomeBoard_empid_TO_Counselor_empid` FOREIGN KEY (`empid`) REFERENCES `Counselor` (`empid`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 테이블 데이터 yuhan_nuri.HomeBoard:~0 rows (대략적) 내보내기
+-- 테이블 데이터 yuhan_nuri.HomeBoard:~1 rows (대략적) 내보내기
 /*!40000 ALTER TABLE `HomeBoard` DISABLE KEYS */;
 /*!40000 ALTER TABLE `HomeBoard` ENABLE KEYS */;
 
@@ -227,7 +228,7 @@ INSERT INTO `PsyTestList` (`testno`, `testname`, `description`, `use`) VALUES
 	(11, '대인관계문제', '대인관계문제를 종합적으로 평가, 진단하는 검사', 'Y'),
 	(12, 'SLT 자기조절학습검사', '자기조절 학습전략, 학습 동기와 정서 상태를 측정', 'Y'),
 	(13, 'MST(학습동기유형검사)', '학습자의 학습동기 수준과 유형, 그에 영향을 주는 주보호자의 양육 방식을 탐색', 'Y'),
-	(14, 'MLST(학습전략검사)', '학업 성취도에 영향을 미치는 심리적 특성과 동기 수준 정도를 탐색', 'Y');
+	(14, 'MLST(학습전략검사)', '학업 성취도에 영향을 미치는 심리적 특성과 동기 수준 정도를 탐색합니다', 'Y');
 /*!40000 ALTER TABLE `PsyTestList` ENABLE KEYS */;
 
 -- 테이블 yuhan_nuri.QuestionBoard 구조 내보내기
@@ -246,7 +247,7 @@ CREATE TABLE IF NOT EXISTS `QuestionBoard` (
   CONSTRAINT `QuestionBoard_stuno_fk` FOREIGN KEY (`stuno`) REFERENCES `User` (`stuno`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 테이블 데이터 yuhan_nuri.QuestionBoard:~0 rows (대략적) 내보내기
+-- 테이블 데이터 yuhan_nuri.QuestionBoard:~1 rows (대략적) 내보내기
 /*!40000 ALTER TABLE `QuestionBoard` DISABLE KEYS */;
 /*!40000 ALTER TABLE `QuestionBoard` ENABLE KEYS */;
 
@@ -319,7 +320,7 @@ CREATE TABLE IF NOT EXISTS `SelfCheckList` (
   PRIMARY KEY (`checkno`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 테이블 데이터 yuhan_nuri.SelfCheckList:~0 rows (대략적) 내보내기
+-- 테이블 데이터 yuhan_nuri.SelfCheckList:~6 rows (대략적) 내보내기
 /*!40000 ALTER TABLE `SelfCheckList` DISABLE KEYS */;
 /*!40000 ALTER TABLE `SelfCheckList` ENABLE KEYS */;
 
@@ -335,7 +336,7 @@ CREATE TABLE IF NOT EXISTS `SimpleApplyForm` (
   PRIMARY KEY (`serialno`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 테이블 데이터 yuhan_nuri.SimpleApplyForm:~0 rows (대략적) 내보내기
+-- 테이블 데이터 yuhan_nuri.SimpleApplyForm:~8 rows (대략적) 내보내기
 /*!40000 ALTER TABLE `SimpleApplyForm` DISABLE KEYS */;
 /*!40000 ALTER TABLE `SimpleApplyForm` ENABLE KEYS */;
 
@@ -350,6 +351,7 @@ CREATE TABLE IF NOT EXISTS `User` (
   `email` varchar(30) NOT NULL,
   `gender` varchar(10) DEFAULT NULL,
   `token` mediumtext NOT NULL,
+  `push` char(1) NOT NULL DEFAULT 'Y',
   PRIMARY KEY (`stuno`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

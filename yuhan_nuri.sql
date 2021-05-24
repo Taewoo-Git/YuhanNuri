@@ -1,5 +1,5 @@
 -- --------------------------------------------------------
--- 호스트:                          3.36.66.62
+-- 호스트:                          15.165.19.88
 -- 서버 버전:                        10.1.44-MariaDB-0ubuntu0.18.04.1 - Ubuntu 18.04
 -- 서버 OS:                        debian-linux-gnu
 -- HeidiSQL 버전:                  10.2.0.5599
@@ -138,7 +138,7 @@ CREATE TABLE IF NOT EXISTS `Counselor` (
   CONSTRAINT `FK_Counselor_positionno_To_PositionType_positionno` FOREIGN KEY (`positionno`) REFERENCES `PositionType` (`positionno`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 테이블 데이터 yuhan_nuri.Counselor:~2 rows (대략적) 내보내기
+-- 테이블 데이터 yuhan_nuri.Counselor:~1 rows (대략적) 내보내기
 /*!40000 ALTER TABLE `Counselor` DISABLE KEYS */;
 INSERT INTO `Counselor` (`empid`, `emppwd`, `empname`, `positionno`, `use`) VALUES
 	('admin', '$2b$12$Ef1K18PDf3bDkKEdnIc4LeiDkrY8iCOBgGfNS.UZe1IuiOoatZJou', '관리자', 1, 'Y');
@@ -171,7 +171,7 @@ CREATE TABLE IF NOT EXISTS `HomeBoard` (
   CONSTRAINT `FK_HomeBoard_empid_TO_Counselor_empid` FOREIGN KEY (`empid`) REFERENCES `Counselor` (`empid`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 테이블 데이터 yuhan_nuri.HomeBoard:~1 rows (대략적) 내보내기
+-- 테이블 데이터 yuhan_nuri.HomeBoard:~0 rows (대략적) 내보내기
 /*!40000 ALTER TABLE `HomeBoard` DISABLE KEYS */;
 /*!40000 ALTER TABLE `HomeBoard` ENABLE KEYS */;
 
@@ -247,7 +247,7 @@ CREATE TABLE IF NOT EXISTS `QuestionBoard` (
   CONSTRAINT `QuestionBoard_stuno_fk` FOREIGN KEY (`stuno`) REFERENCES `User` (`stuno`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 테이블 데이터 yuhan_nuri.QuestionBoard:~1 rows (대략적) 내보내기
+-- 테이블 데이터 yuhan_nuri.QuestionBoard:~0 rows (대략적) 내보내기
 /*!40000 ALTER TABLE `QuestionBoard` DISABLE KEYS */;
 /*!40000 ALTER TABLE `QuestionBoard` ENABLE KEYS */;
 
@@ -320,7 +320,7 @@ CREATE TABLE IF NOT EXISTS `SelfCheckList` (
   PRIMARY KEY (`checkno`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 테이블 데이터 yuhan_nuri.SelfCheckList:~6 rows (대략적) 내보내기
+-- 테이블 데이터 yuhan_nuri.SelfCheckList:~0 rows (대략적) 내보내기
 /*!40000 ALTER TABLE `SelfCheckList` DISABLE KEYS */;
 /*!40000 ALTER TABLE `SelfCheckList` ENABLE KEYS */;
 
@@ -336,7 +336,7 @@ CREATE TABLE IF NOT EXISTS `SimpleApplyForm` (
   PRIMARY KEY (`serialno`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 테이블 데이터 yuhan_nuri.SimpleApplyForm:~8 rows (대략적) 내보내기
+-- 테이블 데이터 yuhan_nuri.SimpleApplyForm:~0 rows (대략적) 내보내기
 /*!40000 ALTER TABLE `SimpleApplyForm` DISABLE KEYS */;
 /*!40000 ALTER TABLE `SimpleApplyForm` ENABLE KEYS */;
 

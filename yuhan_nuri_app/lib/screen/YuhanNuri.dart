@@ -286,8 +286,10 @@ class YuhanNuriState extends State<YuhanNuri> {
       nav = globalKey.currentState;
       nav.setPage(1);
     } else if (msg == "mypage") {
+      if (bodyMypage.socket != null) bodyMypage.socket.disconnect();
       bodyMypage = Mypage();
       bodyBuilder[3] = await bodyMypage.getBuild(header, globalKey);
+      await bodyMypage.initData();
       nav = globalKey.currentState;
       nav.setPage(3);
     }

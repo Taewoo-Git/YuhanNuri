@@ -120,7 +120,7 @@ router.post('/get/status', function(req, res) {
 
 router.get('/get/home/:page', isUserLoggedIn, function(req, res) {
 	const page = parseInt(req.params.page);
-	const unit = 6;
+	const unit = 10;
 	
 	let selectHomeBoard = "SELECT * FROM HomeBoard LIMIT " + ((page - 1) * unit).toString() + ", " + unit.toString();
 	
@@ -133,7 +133,7 @@ router.get('/get/home/:page', isUserLoggedIn, function(req, res) {
 router.get('/get/search/:keyword', isUserLoggedIn, function(req, res) {
 	const keyword = req.params.keyword.toString();
 	
-	let selectSearchedHomeBoard = "SELECT * FROM HomeBoard WHERE title LIKE '%" + keyword + "%' OR content LIKE '%" + keyword + "%'"
+	let selectSearchedHomeBoard = "SELECT * FROM HomeBoard WHERE title LIKE '%" + keyword + "%' OR content LIKE '%" + keyword + "%' ORDER BY no ASC LIMIT 50"
 	
 	connection.execute(selectSearchedHomeBoard, (err, result) => {
 		if(err) Logger.Error.info(`[${moment().format(logTimeFormat)}] ${err}`);

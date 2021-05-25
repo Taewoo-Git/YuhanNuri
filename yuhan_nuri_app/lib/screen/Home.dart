@@ -162,6 +162,7 @@ class Home {
                             } else {
                               isSearch = true;
                               _searchController.clear();
+                              _refreshController.loadNoData();
                             }
                             setState(() {
                               noticeList.clear();

@@ -44,7 +44,9 @@ class Reservation {
   Future<Widget> getBuild(Map<String, String> _header, var key) async {
     header = _header;
     parentKey = key;
+
     await getInit();
+
     return StatefulBuilder(
       builder: (context, StateSetter setState) {
         return PageView(

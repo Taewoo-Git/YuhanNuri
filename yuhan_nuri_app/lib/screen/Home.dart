@@ -176,7 +176,16 @@ class Home {
                 FutureBuilder(
                   future: isSearch ? getSearch() : getDate(),
                   builder: (BuildContext context, AsyncSnapshot snapshot) {
-                    if (snapshot.hasData == false) {
+                    if (snapshot.hasData) {
+                      return StatefulBuilder(
+                        builder: (context, StateSetter setState) {
+                          _setState = setState;
+                          return Column(
+                            children: noticeList,
+                          );
+                        },
+                      );
+                    } else {
                       var verticalCenter =
                           MediaQuery.of(context).size.height / 3.5;
                       return Container(
@@ -186,15 +195,6 @@ class Home {
                             backgroundColor: Colors.white,
                           ),
                         ),
-                      );
-                    } else {
-                      return StatefulBuilder(
-                        builder: (context, StateSetter setState) {
-                          _setState = setState;
-                          return Column(
-                            children: noticeList,
-                          );
-                        },
                       );
                     }
                   },

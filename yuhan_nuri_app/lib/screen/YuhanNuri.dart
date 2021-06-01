@@ -49,12 +49,12 @@ class YuhanNuriState extends State<YuhanNuri> {
   String selected = page[0];
 
   int bodyIndex = 0;
-  List<Widget> bodyBuilder;
+  Widget bodyBuilder;
 
-  Home bodyHome = Home();
-  Reservation bodyReservation = Reservation();
-  Question bodyQuestion = Question();
-  Mypage bodyMypage = Mypage();
+  Home bodyHome;
+  Reservation bodyReservation;
+  Question bodyQuestion;
+  Mypage bodyMypage;
 
   bool isExit = false;
 
@@ -120,27 +120,46 @@ class YuhanNuriState extends State<YuhanNuri> {
         sound: true, badge: true, alert: true, provisional: true));
 
     keyboardVisibilityController.onChange.listen((bool visible) {
-      if (!visible && bodyIndex == 1 && bodyReservation.ctx != null) {
+      if (!visible &&
+          bodyIndex == 1 &&
+          bodyReservation != null &&
+          bodyReservation.ctx != null) {
         FocusScope.of(bodyReservation.ctx).unfocus();
       }
 
-      if (!visible && bodyIndex == 2 && bodyQuestion.ctx != null) {
+      if (!visible &&
+          bodyIndex == 2 &&
+          bodyQuestion != null &&
+          bodyQuestion.ctx != null) {
         FocusScope.of(bodyQuestion.ctx).unfocus();
       }
     });
   }
 
-  Future<bool> setWidget() async {
-    if (isInit) {
-      isInit = false;
-      bodyBuilder = [
-        await bodyHome.getBuild(header),
-        await bodyReservation.getBuild(header, globalKey),
-        await bodyQuestion.getBuild(header),
-        await bodyMypage.getBuild(header, globalKey)
-      ];
-    }
+  Future<bool> setWidget(int idx) async {
+    if (bodyMypage != null && bodyMypage.socket != null)
+      bodyMypage.socket.disconnect();
 
+    switch (idx) {
+      case 0:
+        bodyHome = new Home();
+        bodyBuilder = await bodyHome.getBuild(header);
+        break;
+      case 1:
+        bodyReservation = new Reservation();
+        bodyBuilder = await bodyReservation.getBuild(header, globalKey);
+        break;
+      case 2:
+        bodyQuestion = new Question();
+        bodyBuilder = await bodyQuestion.getBuild(header);
+        break;
+      case 3:
+        bodyMypage = new Mypage();
+        bodyBuilder = await bodyMypage.getBuild(header, globalKey);
+        break;
+      default:
+        break;
+    }
     return true;
   }
 
@@ -169,10 +188,10 @@ class YuhanNuriState extends State<YuhanNuri> {
               ],
             ),
             body: FutureBuilder(
-              future: setWidget(),
+              future: setWidget(bodyIndex),
               builder: (BuildContext context, AsyncSnapshot snapshot) {
                 if (snapshot.hasData) {
-                  return bodyBuilder[bodyIndex];
+                  return bodyBuilder;
                 } else {
                   return Container(
                     child: Center(
@@ -211,43 +230,8 @@ class YuhanNuriState extends State<YuhanNuri> {
                 ),
               ],
               animationDuration: const Duration(milliseconds: 300),
-              onTap: (int index) async {
-                switch (bodyIndex) {
-                  case 0:
-                    if (bodyIndex == index)
-                      return;
-                    else {
-                      bodyHome = Home();
-                      bodyBuilder[bodyIndex] = await bodyHome.getBuild(header);
-                    }
-                    break;
-                  case 1:
-                    bodyReservation = Reservation();
-                    bodyBuilder[bodyIndex] =
-                        await bodyReservation.getBuild(header, globalKey);
-                    break;
-                  case 2:
-                    bodyQuestion = Question();
-                    bodyBuilder[bodyIndex] =
-                        await bodyQuestion.getBuild(header);
-                    break;
-                  case 3:
-                    if (bodyIndex == index)
-                      return;
-                    else {
-                      if (bodyMypage.socket != null)
-                        bodyMypage.socket.disconnect();
-                      bodyMypage = Mypage();
-                      bodyBuilder[bodyIndex] =
-                          await bodyMypage.getBuild(header, globalKey);
-                    }
-                    break;
-                  default:
-                    break;
-                }
-
-                if (index == 3) await bodyMypage.initData();
-
+              onTap: (int index) {
+                if ((index == 0 || index == 3) && index == bodyIndex) return;
                 setState(() {
                   bodyIndex = index;
                   selected = page[index];
@@ -281,15 +265,9 @@ class YuhanNuriState extends State<YuhanNuri> {
 
   void pushClick(String msg) async {
     if (msg == "reservation" || msg == "satisfaction") {
-      bodyReservation = Reservation();
-      bodyBuilder[1] = await bodyReservation.getBuild(header, globalKey);
       nav = globalKey.currentState;
       nav.setPage(1);
     } else if (msg == "mypage") {
-      if (bodyMypage.socket != null) bodyMypage.socket.disconnect();
-      bodyMypage = Mypage();
-      bodyBuilder[3] = await bodyMypage.getBuild(header, globalKey);
-      await bodyMypage.initData();
       nav = globalKey.currentState;
       nav.setPage(3);
     }

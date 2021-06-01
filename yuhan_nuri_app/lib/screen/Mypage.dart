@@ -38,7 +38,7 @@ class Mypage {
 
   var ctx;
 
-  Future<void> initData() async {
+  Future<bool> initData() async {
     isInit = false;
 
     msgList.clear();
@@ -81,6 +81,8 @@ class Mypage {
 
     chatInfo = jsonDecode(chat.body);
     widgetChatting = getChatting(chatInfo);
+
+    return true;
   }
 
   Widget getChatting(dynamic info) {
@@ -185,373 +187,405 @@ class Mypage {
     header = _header;
     parentKey = key;
 
-    return StatefulBuilder(
-      builder: (context, StateSetter setState) {
-        if (socket != null) {
-          socket.on("okay", (logs) {
-            if (isInit) {
-              socket.emit("join");
-            } else {
-              isInit = true;
-              if (logs != null) {
-                logs.toString().split('\n').forEach((log) {
-                  if (log.trim().isNotEmpty) {
-                    if (log.split('：')[0].contains("학생")) {
-                      String hour =
-                          log.split('（')[1].split('일')[1].split('시')[0].trim();
-                      String minute =
-                          log.split('（')[1].split('시')[1].split('분')[0].trim();
-                      String msg = log.split('：')[1].split('（')[0];
-                      msgList.add(sendMessage(msg, hour, minute));
-                    } else {
-                      String hour =
-                          log.split('（')[1].split('일')[1].split('시')[0].trim();
-                      String minute =
-                          log.split('（')[1].split('시')[1].split('분')[0].trim();
-                      String name =
-                          log.split('：')[0].replaceAll("선생님", "").trim();
-                      String msg = log.split('：')[1].split('（')[0];
-                      msgList.add(recvMessage(name, msg, hour, minute));
+    return FutureBuilder(
+      future: initData(),
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        if (snapshot.hasData) {
+          return StatefulBuilder(
+            builder: (context, StateSetter setState) {
+              if (socket != null) {
+                socket.on("okay", (logs) {
+                  if (isInit) {
+                    socket.emit("join");
+                  } else {
+                    isInit = true;
+                    if (logs != null) {
+                      logs.toString().split('\n').forEach((log) {
+                        if (log.trim().isNotEmpty) {
+                          if (log.split('：')[0].contains("학생")) {
+                            String hour = log
+                                .split('（')[1]
+                                .split('일')[1]
+                                .split('시')[0]
+                                .trim();
+                            String minute = log
+                                .split('（')[1]
+                                .split('시')[1]
+                                .split('분')[0]
+                                .trim();
+                            String msg = log.split('：')[1].split('（')[0];
+                            msgList.add(sendMessage(msg, hour, minute));
+                          } else {
+                            String hour = log
+                                .split('（')[1]
+                                .split('일')[1]
+                                .split('시')[0]
+                                .trim();
+                            String minute = log
+                                .split('（')[1]
+                                .split('시')[1]
+                                .split('분')[0]
+                                .trim();
+                            String name =
+                                log.split('：')[0].replaceAll("선생님", "").trim();
+                            String msg = log.split('：')[1].split('（')[0];
+                            msgList.add(recvMessage(name, msg, hour, minute));
+                          }
+                        }
+                      });
                     }
+
+                    chattingDialog(context);
+
+                    Timer(Duration(milliseconds: 500), () {
+                      scroll.animateTo(scroll.position.maxScrollExtent + 100,
+                          duration: Duration(milliseconds: 500),
+                          curve: Curves.ease);
+                    });
+
+                    socket.emit("join");
                   }
+                });
+
+                socket.on("msg", (data) {
+                  msgState(() {
+                    msgList.add(recvMessage(data["name"].toString(),
+                        data["msg"].toString(), null, null));
+
+                    scroll.animateTo(scroll.position.maxScrollExtent + 100,
+                        duration: Duration(milliseconds: 500),
+                        curve: Curves.ease);
+                  });
+                });
+
+                socket.on("finish", (_) {
+                  socket.disconnect();
+                  finishChatting(context);
+                });
+
+                socket.onDisconnect((_) {
+                  if (ctx != null) Navigator.pop(ctx, true);
+                  parentKey.currentState.setPage(0);
                 });
               }
 
-              chattingDialog(context);
-
-              Timer(Duration(milliseconds: 500), () {
-                scroll.animateTo(scroll.position.maxScrollExtent + 100,
-                    duration: Duration(milliseconds: 500), curve: Curves.ease);
-              });
-
-              socket.emit("join");
-            }
-          });
-
-          socket.on("msg", (data) {
-            msgState(() {
-              msgList.add(recvMessage(
-                  data["name"].toString(), data["msg"].toString(), null, null));
-
-              scroll.animateTo(scroll.position.maxScrollExtent + 100,
-                  duration: Duration(milliseconds: 500), curve: Curves.ease);
-            });
-          });
-
-          socket.on("finish", (_) {
-            socket.disconnect();
-            finishChatting(context);
-          });
-
-          socket.onDisconnect((_) {
-            if (ctx != null) Navigator.pop(ctx, true);
-            parentKey.currentState.setPage(0);
-          });
-        }
-
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          home: DefaultTabController(
-            length: 3,
-            child: Scaffold(
-              appBar: TabBar(
-                indicatorColor: Color(0xFF0073D7),
-                labelColor: Color(0xFF0073D7),
-                labelStyle: TextStyle(fontSize: 18),
-                unselectedLabelColor: Colors.black,
-                tabs: [
-                  Container(
-                    padding: EdgeInsets.all(10),
-                    child: Text("내 정보"),
-                  ),
-                  Container(
-                    padding: EdgeInsets.all(10),
-                    child: Text("문의내역"),
-                  ),
-                  Container(
-                    padding: EdgeInsets.all(10),
-                    child: Text("채팅"),
-                  ),
-                ],
-              ),
-              body: TabBarView(
-                children: <Widget>[
-                  Container(
-                    padding: EdgeInsets.all(15),
-                    color: Color(0xFFF0F0F0),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(15.0),
-                              ),
-                            ),
-                            child: Table(
-                              columnWidths: {0: FixedColumnWidth(100)},
-                              defaultVerticalAlignment:
-                                  TableCellVerticalAlignment.middle,
+              return MaterialApp(
+                debugShowCheckedModeBanner: false,
+                home: DefaultTabController(
+                  length: 3,
+                  child: Scaffold(
+                    appBar: TabBar(
+                      indicatorColor: Color(0xFF0073D7),
+                      labelColor: Color(0xFF0073D7),
+                      labelStyle: TextStyle(fontSize: 18),
+                      unselectedLabelColor: Colors.black,
+                      tabs: [
+                        Container(
+                          padding: EdgeInsets.all(10),
+                          child: Text("내 정보"),
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(10),
+                          child: Text("문의내역"),
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(10),
+                          child: Text("채팅"),
+                        ),
+                      ],
+                    ),
+                    body: TabBarView(
+                      children: <Widget>[
+                        Container(
+                          padding: EdgeInsets.all(15),
+                          color: Color(0xFFF0F0F0),
+                          child: SingleChildScrollView(
+                            child: Column(
                               children: [
-                                TableRow(
-                                  children: [
-                                    Container(
-                                      padding:
-                                          EdgeInsets.fromLTRB(20, 20, 0, 10),
-                                      child: Text(
-                                        "이름",
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(15.0),
                                     ),
-                                    Container(
-                                      padding:
-                                          EdgeInsets.fromLTRB(20, 20, 0, 10),
-                                      child: Text(
-                                        stuInfo["stuname"],
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.normal,
-                                        ),
+                                  ),
+                                  child: Table(
+                                    columnWidths: {0: FixedColumnWidth(100)},
+                                    defaultVerticalAlignment:
+                                        TableCellVerticalAlignment.middle,
+                                    children: [
+                                      TableRow(
+                                        children: [
+                                          Container(
+                                            padding: EdgeInsets.fromLTRB(
+                                                20, 20, 0, 10),
+                                            child: Text(
+                                              "이름",
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                          Container(
+                                            padding: EdgeInsets.fromLTRB(
+                                                20, 20, 0, 10),
+                                            child: Text(
+                                              stuInfo["stuname"],
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.normal,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    ),
-                                  ],
+                                      TableRow(
+                                        children: [
+                                          Container(
+                                            padding: EdgeInsets.fromLTRB(
+                                                20, 10, 0, 10),
+                                            child: Text(
+                                              "학번",
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                          Container(
+                                            padding: EdgeInsets.fromLTRB(
+                                                20, 10, 0, 10),
+                                            child: Text(
+                                              stuInfo["stuno"],
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.normal,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      TableRow(
+                                        children: [
+                                          Container(
+                                            padding: EdgeInsets.fromLTRB(
+                                                20, 10, 0, 10),
+                                            child: Text(
+                                              "학과",
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                          Container(
+                                            padding: EdgeInsets.fromLTRB(
+                                                20, 10, 0, 10),
+                                            child: Text(
+                                              stuInfo["major"]
+                                                  .replaceAll(" ", "\n"),
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.normal,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      TableRow(
+                                        children: [
+                                          Container(
+                                            padding: EdgeInsets.fromLTRB(
+                                                20, 10, 0, 10),
+                                            child: Text(
+                                              "생년월일",
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                          Container(
+                                            padding: EdgeInsets.fromLTRB(
+                                                20, 10, 0, 10),
+                                            child: Text(
+                                              convertBirth(stuInfo["birth"]),
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.normal,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      TableRow(
+                                        children: [
+                                          Container(
+                                            padding: EdgeInsets.fromLTRB(
+                                                20, 10, 0, 10),
+                                            child: Text(
+                                              "전화번호",
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                          Container(
+                                            padding: EdgeInsets.fromLTRB(
+                                                20, 10, 0, 10),
+                                            child: Text(
+                                              stuInfo["phonenum"],
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.normal,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      TableRow(
+                                        children: [
+                                          Container(
+                                            padding: EdgeInsets.fromLTRB(
+                                                20, 10, 0, 20),
+                                            child: Text(
+                                              "이메일",
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                          Container(
+                                            padding: EdgeInsets.fromLTRB(
+                                                20, 10, 0, 20),
+                                            child: Text(
+                                              stuInfo["email"],
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.normal,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                TableRow(
-                                  children: [
-                                    Container(
-                                      padding:
-                                          EdgeInsets.fromLTRB(20, 10, 0, 10),
-                                      child: Text(
-                                        "학번",
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
+                                Container(
+                                  padding: EdgeInsets.fromLTRB(10, 35, 10, 0),
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              "마지막 상담 일자",
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            Container(
+                                              child: Text(
+                                                stuInfo["last"].toString(),
+                                                style: TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.normal,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                    ),
-                                    Container(
-                                      padding:
-                                          EdgeInsets.fromLTRB(20, 10, 0, 10),
-                                      child: Text(
-                                        stuInfo["stuno"],
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.normal,
+                                      Container(
+                                        margin: EdgeInsets.only(top: 30),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text("PUSH 알림 수신",
+                                                style: TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                )),
+                                            Container(
+                                              child: CustomSwitch(
+                                                activeColor: Color(0xFF0073D7),
+                                                value: isPush,
+                                                onChanged: (value) async {
+                                                  setState(() {
+                                                    http.Client().post(
+                                                      Uri.parse(Domain.url +
+                                                          "user/set/push"),
+                                                      headers: header,
+                                                      body: {
+                                                        'push':
+                                                            value ? 'Y' : 'N',
+                                                      },
+                                                    );
+                                                    isPush = value;
+                                                  });
+                                                },
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                TableRow(
-                                  children: [
-                                    Container(
-                                      padding:
-                                          EdgeInsets.fromLTRB(20, 10, 0, 10),
-                                      child: Text(
-                                        "학과",
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      padding:
-                                          EdgeInsets.fromLTRB(20, 10, 0, 10),
-                                      child: Text(
-                                        stuInfo["major"].replaceAll(" ", "\n"),
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.normal,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                TableRow(
-                                  children: [
-                                    Container(
-                                      padding:
-                                          EdgeInsets.fromLTRB(20, 10, 0, 10),
-                                      child: Text(
-                                        "생년월일",
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      padding:
-                                          EdgeInsets.fromLTRB(20, 10, 0, 10),
-                                      child: Text(
-                                        convertBirth(stuInfo["birth"]),
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.normal,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                TableRow(
-                                  children: [
-                                    Container(
-                                      padding:
-                                          EdgeInsets.fromLTRB(20, 10, 0, 10),
-                                      child: Text(
-                                        "전화번호",
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      padding:
-                                          EdgeInsets.fromLTRB(20, 10, 0, 10),
-                                      child: Text(
-                                        stuInfo["phonenum"],
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.normal,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                TableRow(
-                                  children: [
-                                    Container(
-                                      padding:
-                                          EdgeInsets.fromLTRB(20, 10, 0, 20),
-                                      child: Text(
-                                        "이메일",
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      padding:
-                                          EdgeInsets.fromLTRB(20, 10, 0, 20),
-                                      child: Text(
-                                        stuInfo["email"],
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.normal,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                    ],
+                                  ),
+                                )
                               ],
                             ),
                           ),
-                          Container(
-                            padding: EdgeInsets.fromLTRB(10, 35, 10, 0),
-                            child: Column(
-                              children: [
-                                Container(
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        "마지막 상담 일자",
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      Container(
-                                        child: Text(
-                                          stuInfo["last"].toString(),
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.normal,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                        ),
+                        Container(
+                          color: Color(0xFFF0F0F0),
+                          child: StatefulBuilder(
+                            builder: (context, StateSetter setState) {
+                              if (questionList.length > 0) {
+                                return SingleChildScrollView(
+                                  padding: EdgeInsets.only(top: 10, bottom: 10),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: questionList,
                                   ),
-                                ),
-                                Container(
-                                  margin: EdgeInsets.only(top: 30),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text("PUSH 알림 수신",
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          )),
-                                      Container(
-                                        child: CustomSwitch(
-                                          activeColor: Color(0xFF0073D7),
-                                          value: isPush,
-                                          onChanged: (value) async {
-                                            setState(() {
-                                              http.Client().post(
-                                                Uri.parse(Domain.url +
-                                                    "user/set/push"),
-                                                headers: header,
-                                                body: {
-                                                  'push': value ? 'Y' : 'N',
-                                                },
-                                              );
-                                              isPush = value;
-                                            });
-                                          },
-                                        ),
-                                      ),
-                                    ],
+                                );
+                              } else {
+                                return Container(
+                                  alignment: Alignment.topCenter,
+                                  margin: EdgeInsets.only(top: 200),
+                                  child: Text(
+                                    "등록된 문의가 없습니다.",
+                                    style: TextStyle(fontSize: 18),
                                   ),
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
+                                );
+                              }
+                            },
+                          ),
+                        ),
+                        widgetChatting,
+                      ],
                     ),
                   ),
-                  Container(
-                    color: Color(0xFFF0F0F0),
-                    child: StatefulBuilder(
-                      builder: (context, StateSetter setState) {
-                        if (questionList.length > 0) {
-                          return SingleChildScrollView(
-                            padding: EdgeInsets.only(top: 10, bottom: 10),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: questionList,
-                            ),
-                          );
-                        } else {
-                          return Container(
-                            alignment: Alignment.topCenter,
-                            margin: EdgeInsets.only(top: 200),
-                            child: Text(
-                              "등록된 문의가 없습니다.",
-                              style: TextStyle(fontSize: 18),
-                            ),
-                          );
-                        }
-                      },
-                    ),
-                  ),
-                  widgetChatting,
-                ],
+                ),
+              );
+            },
+          );
+        } else {
+          return Container(
+            child: Center(
+              child: CircularProgressIndicator(
+                backgroundColor: Colors.white,
               ),
             ),
-          ),
-        );
+          );
+        }
       },
     );
   }

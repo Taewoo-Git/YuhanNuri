@@ -281,15 +281,15 @@ class Mypage {
                       unselectedLabelColor: Colors.black,
                       tabs: [
                         Container(
-                          padding: EdgeInsets.all(10),
+                          padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
                           child: Text("내 정보"),
                         ),
                         Container(
-                          padding: EdgeInsets.all(10),
+                          padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
                           child: Text("문의내역"),
                         ),
                         Container(
-                          padding: EdgeInsets.all(10),
+                          padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
                           child: Text("채팅"),
                         ),
                       ],
@@ -912,7 +912,27 @@ Widget setQuestion(String t, String d, String q) {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "질문",
+                    "제목",
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 15.5),
+                  ),
+                  Divider(
+                    height: 10,
+                    color: Colors.transparent,
+                  ),
+                  Text(t),
+                ],
+              ),
+            ),
+            Container(
+              alignment: Alignment.centerLeft,
+              margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
+              padding: EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "내용",
                     style:
                         TextStyle(fontWeight: FontWeight.bold, fontSize: 15.5),
                   ),
@@ -973,7 +993,27 @@ Widget setAnswer(String t, String d, String q, String a) {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "질문",
+                    "제목",
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 15.5),
+                  ),
+                  Divider(
+                    height: 10,
+                    color: Colors.transparent,
+                  ),
+                  Text(t),
+                ],
+              ),
+            ),
+            Container(
+              alignment: Alignment.centerLeft,
+              margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
+              padding: EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "내용",
                     style:
                         TextStyle(fontWeight: FontWeight.bold, fontSize: 15.5),
                   ),

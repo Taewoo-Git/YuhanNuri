@@ -3616,7 +3616,7 @@ class Reservation {
               Text(
                 checkname,
                 style: TextStyle(fontSize: 20),
-                maxLines: 1,
+                maxLines: 5,
                 overflow: TextOverflow.ellipsis,
               ),
               Container(

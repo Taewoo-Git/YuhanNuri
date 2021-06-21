@@ -243,7 +243,7 @@ Widget setNotice(String title, String content, String date) {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Html(
-                    data: content,
+                    data: "<b>[$title]</b><br/><br/>" + content,
                     onLinkTap: (url) {
                       if (url.contains(
                           'action=com.google.firebase.dynamiclinks.VIEW_DYNAMIC_LINK;')) {
